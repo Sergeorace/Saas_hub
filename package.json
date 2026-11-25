@@ -1,0 +1,28 @@
+{
+  "name": "resto-hub",
+  "private": true,
+  "version": "0.1.0",
+  "description": "RESTO-HUB — plateforme SaaS multi-établissements de gestion pour restaurants et bars (Togo / Afrique de l'Ouest)",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @resto-hub/web",
+    "dev:web": "npm run dev -w @resto-hub/web",
+    "dev:client": "npm run dev -w @resto-hub/client",
+    "build": "npm run build -w @resto-hub/web && npm run build -w @resto-hub/client",
+    "build:web": "npm run build -w @resto-hub/web",
+    "build:client": "npm run build -w @resto-hub/client",
+    "preview": "npm run preview -w @resto-hub/web",
+    "preview:client": "npm run preview -w @resto-hub/client",
+    "typecheck": "npm run typecheck -w @resto-hub/web && npm run typecheck -w @resto-hub/client",
+    "build:services": "npm run build -w @resto-hub/service-kit && npm run build -w @resto-hub/identity-service && npm run build -w @resto-hub/tenant-service && npm run build -w @resto-hub/catalog-service && npm run build -w @resto-hub/floor-service && npm run build -w @resto-hub/order-service && npm run build -w @resto-hub/loyalty-marketing-service && npm run build -w @resto-hub/payment-service && npm run build -w @resto-hub/staff-service && npm run build -w @resto-hub/payroll-service && npm run build -w @resto-hub/inventory-service && npm run build -w @resto-hub/notification-service && npm run build -w @resto-hub/reporting-service && npm run build -w @resto-hub/platform-admin-service",
+    "test:services": "npm run build:services && npm run test -w @resto-hub/identity-service && npm run test -w @resto-hub/tenant-service && npm run test -w @resto-hub/catalog-service && npm run test -w @resto-hub/floor-service && npm run test -w @resto-hub/order-service && npm run test -w @resto-hub/loyalty-marketing-service && npm run test -w @resto-hub/payment-service && npm run test -w @resto-hub/staff-service && npm run test -w @resto-hub/payroll-service && npm run test -w @resto-hub/inventory-service && npm run test -w @resto-hub/notification-service && npm run test -w @resto-hub/reporting-service && npm run test -w @resto-hub/platform-admin-service",
+    "dev:services": "npm run build:services && node scripts/dev-services.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "RESTO-HUB — Côté client",
+  "short_name": "RESTO-HUB",
+  "description": "Commander, réserver et suivre votre commande dans les restaurants et bars partenaires.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf7f2",
+  "theme_color": "#c2410c",
+  "categories": ["food", "shopping", "travel"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Scanner une table", "url": "/#/scan" },
+    { "name": "Découvrir les établissements", "url": "/#/recherche" },
+    { "name": "Mes commandes", "url": "/#/commandes" }
+  ]
+}

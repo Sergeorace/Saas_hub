@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#C2410C"/>
+  <circle cx="256" cy="256" r="176" fill="none" stroke="#FDBA74" stroke-opacity="0.45" stroke-width="6"/>
+  <path d="M168 120v100a48 48 0 0 0 96 0V120M216 220v172" stroke="#FFF7ED" stroke-width="26" stroke-linecap="round"/>
+  <path d="M372 120c-34 30-44 66-44 100s16 48 44 48 44-14 44-48-10-70-44-100zM372 268v124" stroke="#FFF7ED" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="256" y="470" text-anchor="middle" fill="#FDBA74" font-family="Georgia, serif" font-size="54" letter-spacing="6">RESTO-HUB</text>
+</svg>

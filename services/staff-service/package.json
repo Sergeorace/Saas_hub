@@ -1,0 +1,23 @@
+{
+  "name": "@resto-hub/staff-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/main.js",
+  "exports": {
+    "./app": "./dist/app.js",
+    "./store": "./dist/store.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "test": "npm run build && node dist/tests/isolation.test.js"
+  },
+  "dependencies": {
+    "@resto-hub/service-kit": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.6.3"
+  }
+}
