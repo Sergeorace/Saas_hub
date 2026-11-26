@@ -1960,15 +1960,15 @@ refonte ne touche que la vitrine et n'introduit aucun contrat d'API nouveau.
 | --------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Feuille vitrine | `apps/web/src/styles/site-cravk.css` (~2 000 lignes) | préfixes `.chero/.cnav/.cstory/...` et variables locales `--lv-*` (canvas, panel, ink, muted, soft, line, accent, accent-soft, sand, tan, radius, font, ring) ; surchargées sous `[data-theme='dark']` |
 | Jetons de page  | `:root` de la feuille                                | `--lv-canvas:#ededeb`, `--lv-accent:#bb3618` en clair ; `--lv-canvas:#131211`, `--lv-accent:#ff8a4c` en sombre — sans modifier `tokens.css`                                                            |
-| Typographie     | `apps/web/index.html`                                | Plus Jakarta Sans (400–800, italique) chargée en complément des polices du design system, réservée aux sections vitrine                                                                                |
+| Typographie     | `apps/web/index.html`                                | Fraunces (titres, 400–800 + italique) et Inter (texte) : les polices du design system, réservées aux sections vitrine                                                                                  |
 | Média           | `apps/web/public/marketing/`                         | `hero-chicken.webp`, `hero-chicken-thumb.webp`, `dish-potatoes.webp`, `kitchen-chef.webp` (recadré en portrait pour l'arche)                                                                           |
 
 ### 26.2 Sections et navigation
 
-- Navigation flottante noire en pilule (`.cnav`) avec liens `#story`, `#product`, `#services`,
-  `#pricing`, CTA orange `#/connexion`/`#contact`, sélecteur FR/EN et bascule de thème ;
-  scroll-spy `IntersectionObserver` (`aria-current`), menu mobile `Échap`, outils (langue/thème/
-  connexion) dans le tiroir.
+- Barre de navigation noire pleine largeur et à angles droits (`.cnav`, 84 px + filet), contenu
+  aligné sur `.site-container` : liens `#story`, `#product`, `#services`, `#pricing`, CTA orange
+  `#/connexion`/`#contact`, sélecteur FR/EN et bascule de thème ; scroll-spy au défilement (rAF,
+  `aria-current`), menu mobile déroulant aligné sous la barre, fermeture par `Échap`.
 - Héros (`.chero`) : titre 3 lignes avec ligne intermédiaire atténuée et étoile SVG, deux CTA,
   trio d'arguments, aperçu téléphone du parcours client (`ClientPhone`, `aria-hidden`) avec carte
   « en cuisine » et ticket flottants.
@@ -2038,3 +2038,18 @@ Routes, i18n et comptes de sections inchangés ; vérifié au clic, au clavier e
 - Repli `prefers-reduced-motion` : aucune animation, doublons masqués, liste statique centrée et
   repliée ; vérifié par émulation CDP (clair, sombre, 390 px, mouvement réduit).
   Journal : `docs/GIT_WORKFLOW.md` §10.
+
+### 26.8 Typographie Fraunces/Inter et barre de navigation droite (`design/typo-navbar`)
+
+- La vitrine n'utilise plus Plus Jakarta Sans : `--lv-font` passe à Inter et un nouveau jeton
+  `--lv-font-display` pointe sur Fraunces, la police d'affichage du design system. Les titres
+  (`.chero__title`, `.cstory__title`, `.cvoice__title`, `.cdownload__title`, `.rh-display`) passent
+  en Fraunces 600 avec interlettrage resserré ; la citation client est en Fraunces italique. Les
+  chiffres, boutons et tableaux restent en Inter 500–700.
+- `.cnav` devient une barre collante pleine largeur à angles droits (fond `#100806`, filet bas) ;
+  `.cnav__inner` perd la pilule (rayon, ombre, bordure) et conserve 84 px de hauteur, contenu centré
+  sur `.site-container`. Le menu mobile s'ouvre bord à bord sous la barre (coins bas arrondis).
+- Le décalage d'ancre est recalé (`scroll-margin-top: -6px`, soit 92 − 6 px de `scroll-padding-top`)
+  pour que les sections s'arrêtent 1 px sous le filet ; vérifié à 1440, 1029 et 390 px.
+- Vérifications : `format:check`, `lint` (0 erreur), `typecheck`, `build` web ; captures clair,
+  sombre, mobile, menu ouvert et ancres. Journal : `docs/GIT_WORKFLOW.md` §11.

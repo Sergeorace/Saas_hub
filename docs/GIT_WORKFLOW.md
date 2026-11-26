@@ -79,12 +79,14 @@ Un tag annoté clôt chaque étape validée :
 | `v0.1.2-vitrine`         | incrément de design : refonte de la vitrine marketing selon la direction artistique Cravk            |
 | `v0.1.3-maquettes`       | incrément de design : navigation par ancres réparée et maquettes de téléphone réalistes et animées   |
 | `v0.1.4-bandeau`         | incrément de design : bandeau des établissements en défilement continu avec repli statique           |
+| `v0.1.5-typo-navbar`     | incrément de design : typographie Fraunces/Inter et navbar en barre droite pleine largeur            |
 
 `v0.9.0-platform-admin` clôt le commit d'amorçage. `v0.1.1-infra` étiquette le merge du socle dans
 `develop`; les étapes 1–8 n'ont pas d'étiquette individuelle (import consolidé, voir §1).
 `v0.1.2-vitrine` étiquette la refonte Cravk de la page marketing (voir §8).
 `v0.1.3-maquettes` étiquette le correctif de navigation et les maquettes de téléphone (voir §9).
 `v0.1.4-bandeau` étiquette le bandeau défilant des établissements (voir §10).
+`v0.1.5-typo-navbar` étiquette le changement de typographie et la barre de navigation droite (§11).
 
 ## 6. Hygiène
 
@@ -173,3 +175,20 @@ Le bandeau de confiance (« Plus de 1 000 établissements… ») défile désorm
   `prefers-reduced-motion` ; aucun débordement horizontal.
 - Vérifications : `format:check`, `lint` (0 erreur), `typecheck`, `build` web ; captures CDP 1029 px
   clair, 390 px clair/sombre et émulation mouvement réduit. Tag : `v0.1.4-bandeau`.
+
+## 11. Journal de l'étape « typographie et navbar droite »
+
+La vitrine abandonne Plus Jakarta Sans et la navbar flottante en pilule.
+
+| Branche              | Commits (message)                                                                          | Merge dans `develop` | Titre de PR préparé                                                |
+| -------------------- | ------------------------------------------------------------------------------------------ | -------------------- | ------------------------------------------------------------------ |
+| `design/typo-navbar` | `d568c7e` design(web): typographie-navbar - Fraunces et Inter, barre droite pleine largeur | `bfaff50`            | `design(web): typographie-navbar - polices et barre de navigation` |
+
+- Typographie : titres en Fraunces 600 (héros, histoire, témoignages, téléchargement, titres de
+  section) et texte en Inter ; citation client en Fraunces italique ; chiffres et boutons en Inter.
+- Navigation : barre collante pleine largeur à angles droits (84 px + filet bas), contenu aligné
+  sur la colonne ; menu mobile bord à bord sous la barre ; ancres recalées à 86 px du haut.
+- Accent mobile : le titre du héros est réduit sous 760 px pour garder l'étoile sur la dernière
+  ligne ; aucun débordement à 390 px.
+- Vérifications : `format:check`, `lint` (0 erreur), `typecheck`, `build` web ; captures CDP 1440 px
+  clair, 1029 px clair/sombre, 390 px, menu ouvert et ancres. Tag : `v0.1.5-typo-navbar`.
