@@ -24,7 +24,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test:packages && npm run test:coverage",
-    "test:packages": "npm run test -w @resto-hub/shared-contracts && npm run test -w @resto-hub/design-tokens",
+    "test:packages": "npm run test -w @resto-hub/shared-contracts && npm run test -w @resto-hub/design-tokens && npm run test:template",
     "test:tokens": "npm run test -w @resto-hub/design-tokens",
     "test:services": "npm run build:services && npm run test -w @resto-hub/identity-service && npm run test -w @resto-hub/tenant-service && npm run test -w @resto-hub/catalog-service && npm run test -w @resto-hub/floor-service && npm run test -w @resto-hub/order-service && npm run test -w @resto-hub/loyalty-marketing-service && npm run test -w @resto-hub/payment-service && npm run test -w @resto-hub/staff-service && npm run test -w @resto-hub/payroll-service && npm run test -w @resto-hub/inventory-service && npm run test -w @resto-hub/notification-service && npm run test -w @resto-hub/reporting-service && npm run test -w @resto-hub/platform-admin-service",
     "test:coverage": "c8 --reporter=text-summary --check-coverage --lines 70 --functions 70 --branches 60 --include \"services/*/dist/**/*.js\" --exclude \"services/*/dist/tests/**\" npm run test:services",
@@ -41,7 +41,9 @@
     "preview:client": "npm run preview -w @resto-hub/client",
     "tokens:check": "npm run check -w @resto-hub/design-tokens",
     "flutter:theme": "node packages/design-tokens/scripts/flutter.mjs",
-    "flutter:theme:check": "node packages/design-tokens/scripts/flutter.mjs --check"
+    "flutter:theme:check": "node packages/design-tokens/scripts/flutter.mjs --check",
+    "build:template": "npm run build -w @resto-hub/service-template",
+    "test:template": "npm run test -w @resto-hub/service-template"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.6.0",

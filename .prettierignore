@@ -8,3 +8,4 @@ docs/*.pdf
 apps/*/public/
 **/*.min.js
 **/*.min.css
+packages/service-template/openapi.json
