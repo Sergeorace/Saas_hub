@@ -43,13 +43,10 @@
   max-width: 1240px;
 }
 
-#main {
-  scroll-margin-top: 92px;
-}
-
-#main > .section,
-#main > section {
-  scroll-margin-top: 96px;
+/* L'offset de navigation vient de `scroll-padding-top` (base.css) : ne pas cumuler. */
+#main,
+.site [id] {
+  scroll-margin-top: 0;
 }
 
 /* ---- Navigation --------------------------------------------------------- */

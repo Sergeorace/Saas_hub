@@ -13,7 +13,7 @@ import { Payments } from './sections/Payments';
 import { DesignGallery } from './sections/DesignGallery';
 import { Pricing } from './sections/Pricing';
 import { FinalCta } from './sections/FinalCta';
-import { useRoute } from './lib/router';
+import { useRoute, scrollToSection } from './lib/router';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminPage } from './pages/AdminPage';
@@ -29,13 +29,38 @@ function LandingPage() {
     document.title = t('meta.title');
   }, [t]);
 
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      const anchor = (event.target as Element | null)?.closest?.('a[href^="#"]');
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+      const href = anchor.getAttribute('href') ?? '';
+      if (href === '#' || href.startsWith('#/')) return;
+      const id = decodeURIComponent(href.slice(1));
+      if (!document.getElementById(id)) return;
+      event.preventDefault();
+      scrollToSection(id);
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
+
   return (
     <div className="site" id="top">
       <a className="rh-skip-link" href="#main">
         {t('nav.skip')}
       </a>
       <SiteHeader />
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <Hero />
         <TrustStrip />
         <Story />
@@ -63,10 +88,11 @@ const TITLES: Record<string, string> = {
 
 export default function App() {
   const route = useRoute();
+  const pagePath = route.isAnchor ? '/' : route.path;
   const tableMatch = /^\/t\/([^/]+)\/([^/]+)$/.exec(route.path);
   const trackingMatch = /^\/suivi\/([^/]+)\/([^/]+)$/.exec(route.path);
   const title =
-    TITLES[route.path] ??
+    TITLES[pagePath] ??
     (tableMatch
       ? 'Carte de la table — RESTO-HUB'
       : trackingMatch
@@ -101,7 +127,7 @@ export default function App() {
     );
   }
 
-  switch (route.path) {
+  switch (pagePath) {
     case '/connexion':
       return <LoginPage />;
     case '/inscription':

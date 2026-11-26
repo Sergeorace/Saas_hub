@@ -33,22 +33,28 @@ export function SiteHeader() {
   }, []);
 
   useEffect(() => {
-    const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(
-      (section): section is HTMLElement => Boolean(section),
-    );
-    if (!('IntersectionObserver' in window) || sections.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActiveHref(`#${visible.target.id}`);
-      },
-      { rootMargin: '-35% 0px -55% 0px', threshold: [0.15, 0.4, 0.7] },
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const probe = window.innerHeight * 0.34;
+      let current: string | null = null;
+      for (const id of SECTION_IDS) {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top <= probe) current = id;
+      }
+      if (current) setActiveHref(`#${current}`);
+    };
+    const requestUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
   }, []);
 
   const links = [
