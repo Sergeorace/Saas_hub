@@ -6,6 +6,7 @@ import './styles/site.css';
 import './styles/console.css';
 import './styles/step2.css';
 import './styles/step3.css';
+import './styles/site-cravk.css';
 import { messages } from './i18n/messages';
 import { SessionProvider } from './lib/session';
 import App from './App';

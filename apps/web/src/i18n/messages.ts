@@ -9,6 +9,7 @@ import { enInventory, frInventory } from './inventory';
 import { enMarketing, frMarketing } from './marketing';
 import { enReports, frReports } from './reports';
 import { enPlatform, frPlatform } from './platform';
+import { enLanding, frLanding } from './landing';
 
 const fr: Messages = {
   meta: {
@@ -315,7 +316,7 @@ const fr: Messages = {
       ],
     },
   },
-  payments: {
+  paymentsShowcase: {
     eyebrow: 'Paiements',
     title: 'Tous les moyens de paiement de la région, un seul agrégateur.',
     lead: 'Routage intelligent, bascule automatique, webhooks signés et idempotents, réconciliation quotidienne et journal comptable en partie double.',
@@ -870,7 +871,7 @@ const en: Messages = {
       ],
     },
   },
-  payments: {
+  paymentsShowcase: {
     eyebrow: 'Payments',
     title: 'Every regional payment method, one aggregator.',
     lead: 'Smart routing, automatic failover, signed idempotent webhooks, daily reconciliation and a double-entry ledger.',
@@ -1139,6 +1140,7 @@ export const messages = {
     ...frMarketing,
     ...frReports,
     ...frPlatform,
+    ...frLanding,
   },
   en: {
     ...en,
@@ -1153,5 +1155,6 @@ export const messages = {
     ...enMarketing,
     ...enReports,
     ...enPlatform,
+    ...enLanding,
   },
 };

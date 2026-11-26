@@ -1,191 +1,81 @@
-import { useState } from 'react';
-import { Badge, Icon, TableStatusBadge, formatXof, useI18n } from '@resto-hub/design-system';
-import { eventFeed, kpis, tables } from '../data/demo';
-import { FloorPreview } from '../components/FloorPreview';
+import { Icon, useI18n } from '@resto-hub/design-system';
+import { ClientPhone } from '../components/ClientPhone';
 
-const bulletIcons = ['layers', 'wallet', 'wifi-off'] as const;
+const features = [
+  { key: 'featureQuick', icon: 'smartphone' },
+  { key: 'featureTracking', icon: 'clock' },
+  { key: 'featurePayment', icon: 'wallet' },
+] as const;
 
 export function Hero() {
-  const { t, tm, locale } = useI18n();
-  const [selectedId, setSelectedId] = useState('T03');
-  const bullets = tm<string[]>('hero.bullets');
-
-  const selected = tables.find((table) => table.id === selectedId) ?? tables[0];
-  const occupied = tables.filter((table) => table.status === 'occupied').length;
-  const openTickets = 3;
+  const { t } = useI18n();
 
   return (
-    <section className="hero" id="product">
-      <div className="site-container hero__grid">
-        <div className="hero__copy">
-          <p className="rh-eyebrow">
-            <span className="hero__pulse" aria-hidden="true" />
-            {t('hero.eyebrow')}
-          </p>
-          <h1 className="rh-display hero__title">
-            {t('hero.titleA')} <em>{t('hero.titleAccent')}</em> {t('hero.titleB')}
-          </h1>
-          <p className="hero__lead">{t('hero.lead')}</p>
-          <div className="hero__actions">
-            <a className="rh-btn rh-btn--primary rh-btn--lg" href="#/inscription">
-              {t('hero.primaryCta')}
-              <span className="rh-btn__icon">
-                <Icon name="arrow-right" />
-              </span>
-            </a>
-            <a className="rh-btn rh-btn--outline rh-btn--lg" href="#services">
-              {t('hero.secondaryCta')}
-            </a>
-          </div>
-          <p className="hero__note">
-            <Icon name="check-circle" size="sm" />
-            {t('hero.note')}
-          </p>
-          <ul className="hero__bullets">
-            {(bullets ?? []).map((bullet, index) => (
-              <li key={bullet}>
-                <Icon name={bulletIcons[index] ?? 'check'} size="sm" />
-                {bullet}
-              </li>
-            ))}
-          </ul>
-        </div>
+    <section className="chero" id="product">
+      <div className="site-container">
+        <div className="chero__panel">
+          <div className="chero__grid">
+            <div className="chero__copy">
+              <p className="chero__badge">
+                <span className="chero__badge-dot" aria-hidden="true" />
+                {t('landing.hero.eyebrow')}
+              </p>
 
-        <div className="hero__visual">
-          <div className="preview">
-            <div className="preview__chrome">
-              <span className="preview__dots" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-              <span className="preview__url">app.resto-hub.tg/le-baobab</span>
-              <Badge tone="success" live>
-                {t('hero.preview.live')}
-              </Badge>
-            </div>
-
-            <div className="preview__body">
-              <aside className="preview__rail" aria-hidden="true">
-                <span className="preview__rail-item is-active">
-                  <Icon name="grid" size="sm" />
+              <h1 className="chero__title">
+                <span>{t('landing.hero.titleA')}</span>
+                <span className="is-muted">{t('landing.hero.titleAccent')}</span>
+                <span>
+                  {t('landing.hero.titleB')}
+                  <svg
+                    className="chero__spark"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      d="M12 1.5l1.9 7.1 7.1-1.9-4.6 5.3 4.6 5.3-7.1-1.9L12 22.5l-1.9-7.1-7.1 1.9 4.6-5.3-4.6-5.3 7.1 1.9z"
+                      fill="currentColor"
+                    />
+                  </svg>
                 </span>
-                <span className="preview__rail-item">
-                  <Icon name="receipt" size="sm" />
-                  <span className="preview__rail-badge">4</span>
-                </span>
-                <span className="preview__rail-item">
-                  <Icon name="chef" size="sm" />
-                </span>
-                <span className="preview__rail-item">
-                  <Icon name="users" size="sm" />
-                </span>
-                <span className="preview__rail-item">
-                  <Icon name="chart" size="sm" />
-                </span>
-                <span className="preview__rail-avatar">AD</span>
-              </aside>
+              </h1>
 
-              <div className="preview__main">
-                <div className="preview__head">
-                  <div>
-                    <h2>{t('hero.preview.service')}</h2>
-                    <p>{t('hero.preview.tenant')}</p>
-                  </div>
-                  <Badge tone="primary" icon="clock">
-                    21:04
-                  </Badge>
-                </div>
+              <p className="chero__lead">{t('landing.hero.lead')}</p>
 
-                <div className="preview__stats">
-                  <div>
-                    <span>{t('hero.preview.revenue')}</span>
-                    <strong>{formatXof(kpis.revenue, locale)}</strong>
-                  </div>
-                  <div>
-                    <span>{t('hero.preview.tables')}</span>
-                    <strong>
-                      {occupied} / {tables.length}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>{t('hero.preview.tickets')}</span>
-                    <strong>{openTickets}</strong>
-                  </div>
-                </div>
-
-                <div className="preview__panel">
-                  <div className="preview__panel-head">
-                    <strong>{t('hero.preview.floor')}</strong>
-                    <span>{t('hero.preview.floorSub')}</span>
-                  </div>
-                  <FloorPreview tables={tables} selectedId={selectedId} onSelect={setSelectedId} />
-                </div>
-
-                <div className="preview__foot">
-                  <div className="preview__detail">
-                    <div className="preview__detail-head">
-                      <span>{t('hero.preview.table')}</span>
-                      <strong>{selected.id}</strong>
-                      <TableStatusBadge
-                        status={selected.status}
-                        label={selected.status === 'bill' ? t('hero.preview.bill') : undefined}
-                      />
-                    </div>
-                    <div className="preview__detail-meta">
-                      <span>
-                        {t('hero.preview.covers')} · {selected.guests ?? '—'} / {selected.seats}
-                      </span>
-                      <span>
-                        {t('hero.preview.waiter')} · {selected.waiter ?? '—'}
-                      </span>
-                    </div>
-                    {selected.total ? (
-                      <div className="preview__amount">
-                        <span>{t('hero.preview.bill')}</span>
-                        <strong>{formatXof(selected.total, locale)}</strong>
-                      </div>
-                    ) : (
-                      <p className="preview__hint">{t('hero.preview.selectHint')}</p>
-                    )}
-                  </div>
-
-                  <div className="preview__feed">
-                    <div className="preview__feed-head">
-                      <strong>{t('hero.preview.events')}</strong>
-                      <span className="preview__live-dot" aria-hidden="true" />
-                    </div>
-                    <ul>
-                      {eventFeed.slice(0, 3).map((event) => (
-                        <li key={event.id}>
-                          <span
-                            className={`preview__event-dot preview__event-dot--${event.tone}`}
-                          />
-                          <div>
-                            <span className="preview__event-name">{event.name}</span>
-                            <span className="preview__event-detail">{event.detail}</span>
-                          </div>
-                          <span className="preview__event-time">{event.time}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+              <div className="chero__actions">
+                <a className="chero__btn chero__btn--primary" href="#/inscription">
+                  {t('landing.hero.primaryCta')}
+                  <span className="chero__btn-icon">
+                    <Icon name="arrow-right" size="sm" />
+                  </span>
+                </a>
+                <a className="chero__btn chero__btn--ghost" href="#journeys">
+                  <Icon name="play" size="sm" />
+                  {t('landing.hero.secondaryCta')}
+                </a>
               </div>
-            </div>
-          </div>
 
-          <div className="hero__float">
-            <span className="hero__float-icon">
-              <Icon name="wallet" />
-            </span>
-            <div>
-              <strong>+ {formatXof(24500, locale)}</strong>
-              <span>OrderPaid · TMoney</span>
+              <ul className="chero__features">
+                {features.map((feature) => (
+                  <li key={feature.key}>
+                    <span className="chero__feature-icon">
+                      <Icon name={feature.icon} size="sm" />
+                    </span>
+                    {t(`landing.hero.${feature.key}`)}
+                  </li>
+                ))}
+              </ul>
+
+              <p className="chero__note">
+                <Icon name="check-circle" size="sm" />
+                {t('landing.hero.note')}
+              </p>
             </div>
-            <Badge tone="success" dot>
-              OK
-            </Badge>
+
+            <div className="chero__visual">
+              <span className="chero__ring" aria-hidden="true" />
+              <ClientPhone />
+            </div>
           </div>
         </div>
       </div>
