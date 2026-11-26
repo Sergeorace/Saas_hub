@@ -1,0 +1,33 @@
+{
+  "name": "@resto-hub/service-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gabarit NestJS des microservices RESTO-HUB : config, santé, OpenAPI, tenant_id + RLS, événements, audit, tests d'isolation.",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "openapi": "npm run build && node dist/src/export-openapi.js",
+    "start": "node dist/src/main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.0.0",
+    "pg": "^8.13.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.6.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.11.10",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
+    "typescript": "^5.6.3"
+  }
+}
