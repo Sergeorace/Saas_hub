@@ -2026,3 +2026,15 @@ Routes, i18n et comptes de sections inchangés ; vérifié au clic, au clavier e
 - Mobile : ≤ 760 px, inclinaison supprimée, overlays flottants masqués, taille d'écran ajustée ;
   aucun débordement à 390 px. Captures 1440 px clair/sombre, 390 px et section parcours.
   Journal : `docs/GIT_WORKFLOW.md` §9.
+
+### 26.7 Bandeau de confiance défilant (`design/landing-marquee`)
+
+- `TrustStrip` rend deux listes identiques (la seconde `aria-hidden`, les entrées dupliquées de la
+  première masquées aux lecteurs d'écran) dans `.ctrust__marquee` (largeur `max-content`) animé par
+  `ctrust-scroll` (translation de `-50 %` sur 42 s, boucle sans saut puisque les deux moitiés sont
+  égales et plus larges que le viewport).
+- `.ctrust__viewport` masque le débordement avec un fondu latéral (`mask-image`) ; le défilement
+  se met en pause au survol et au focus clavier (`:focus-within`).
+- Repli `prefers-reduced-motion` : aucune animation, doublons masqués, liste statique centrée et
+  repliée ; vérifié par émulation CDP (clair, sombre, 390 px, mouvement réduit).
+  Journal : `docs/GIT_WORKFLOW.md` §10.
