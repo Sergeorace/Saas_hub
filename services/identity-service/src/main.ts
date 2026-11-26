@@ -17,7 +17,9 @@ bus.on('TenantSuspended', async (envelope) => {
   const tenantId = String(envelope.payload.tenantId ?? envelope.tenantId ?? '');
   if (!tenantId) return;
   const revoked = store.revokeTenantSessions(tenantId, 'tenant-service', 'tenant_suspended');
-  console.log(`[identity-service] Établissement ${tenantId} suspendu : ${revoked} session(s) révoquée(s).`);
+  console.log(
+    `[identity-service] Établissement ${tenantId} suspendu : ${revoked} session(s) révoquée(s).`,
+  );
 });
 
 bus.on('TenantApproved', async (envelope) => {
@@ -43,5 +45,7 @@ const running = await startServer(
 
 console.log(`identity-service à l'écoute sur ${running.url}`);
 if (config.demoSeed) {
-  console.log("Comptes de démonstration : admin@resto-hub.tg / Admin#2026 · gerant@sahelgrill.tg / Gerant#2026 · serveur@sahelgrill.tg / Serveur#2026");
+  console.log(
+    'Comptes de démonstration : admin@resto-hub.tg / Admin#2026 · gerant@sahelgrill.tg / Gerant#2026 · serveur@sahelgrill.tg / Serveur#2026',
+  );
 }

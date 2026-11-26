@@ -15,15 +15,15 @@ Règles obligatoires du projet. Ce document est mis à jour à chaque étape.
 
 ## 2. Branches
 
-| Préfixe | Usage | Créée depuis |
-|---|---|---|
-| `main` | code stable, versionné | — |
-| `develop` | intégration continue | `main` |
-| `service/<nom>` | évolution d'un service (ex. `service/payment-service`) | `develop` |
-| `space/<super-admin\|gerant\|employe\|client>` | espace fonctionnel | `develop` |
-| `design/<nom>` | design system et thèmes | `develop` |
-| `feature/<service>/<fonctionnalité>` | fonctionnalité isolée | `develop` |
-| `fix/<service>/<description>` | correction ciblée | `develop` |
+| Préfixe                                        | Usage                                                  | Créée depuis |
+| ---------------------------------------------- | ------------------------------------------------------ | ------------ |
+| `main`                                         | code stable, versionné                                 | —            |
+| `develop`                                      | intégration continue                                   | `main`       |
+| `service/<nom>`                                | évolution d'un service (ex. `service/payment-service`) | `develop`    |
+| `space/<super-admin\|gerant\|employe\|client>` | espace fonctionnel                                     | `develop`    |
+| `design/<nom>`                                 | design system et thèmes                                | `develop`    |
+| `feature/<service>/<fonctionnalité>`           | fonctionnalité isolée                                  | `develop`    |
+| `fix/<service>/<description>`                  | correction ciblée                                      | `develop`    |
 
 - Jamais de commit direct sur `main` ni `develop` (hors amorçage initial).
 - Une branche = une seule fonctionnalité ; un commit = une unité logique.
@@ -56,18 +56,18 @@ Exemples :
 
 Un tag annoté clôt chaque étape validée :
 
-| Tag | Périmètre |
-|---|---|
-| `v0.1.0-socle` | architecture, design system, accueil de démonstration |
-| `v0.2.0-identity-tenant` | identity-service, tenant-service |
-| `v0.3.0-catalog-floor` | catalog-service, floor-service |
-| `v0.4.0-order` | order-service |
-| `v0.5.0-client-pwa` | application client |
-| `v0.6.0-payment` | payment-service |
-| `v0.7.0-staff-payroll` | staff-service, payroll-service |
-| `v0.8.0-operations` | inventory, loyalty-marketing, notification, reporting |
-| `v0.9.0-platform-admin` | platform-admin-service, sécurité et finition |
-| `v0.1.1-infra` | incrément technique (hors étape produit) : contrats partagés, jetons, infra locale, RLS, CI, OpenAPI |
+| Tag                      | Périmètre                                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `v0.1.0-socle`           | architecture, design system, accueil de démonstration                                                |
+| `v0.2.0-identity-tenant` | identity-service, tenant-service                                                                     |
+| `v0.3.0-catalog-floor`   | catalog-service, floor-service                                                                       |
+| `v0.4.0-order`           | order-service                                                                                        |
+| `v0.5.0-client-pwa`      | application client                                                                                   |
+| `v0.6.0-payment`         | payment-service                                                                                      |
+| `v0.7.0-staff-payroll`   | staff-service, payroll-service                                                                       |
+| `v0.8.0-operations`      | inventory, loyalty-marketing, notification, reporting                                                |
+| `v0.9.0-platform-admin`  | platform-admin-service, sécurité et finition                                                         |
+| `v0.1.1-infra`           | incrément technique (hors étape produit) : contrats partagés, jetons, infra locale, RLS, CI, OpenAPI |
 
 `v0.9.0-platform-admin` clôt le commit d'amorçage. `v0.1.1-infra` étiquette le merge du socle dans
 `develop`; les étapes 1–8 n'ont pas d'étiquette individuelle (import consolidé, voir §1).

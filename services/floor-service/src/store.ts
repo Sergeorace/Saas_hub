@@ -1,4 +1,10 @@
-import { buildAuditEntry, newId, nowIso, randomToken, type AuditEntry } from '@resto-hub/service-kit';
+import {
+  buildAuditEntry,
+  newId,
+  nowIso,
+  randomToken,
+  type AuditEntry,
+} from '@resto-hub/service-kit';
 import { TABLE_STATUSES, type TableStatus } from '@resto-hub/shared-contracts';
 
 export { TABLE_STATUSES, type TableStatus };
@@ -144,7 +150,13 @@ export function seedFloorDemo(store: FloorStore): void {
   const now = nowIso();
   store.settings.set(tenantId, { tenantId, establishmentCode: 'LOME01', updatedAt: now });
 
-  const zone = (id: string, name: string, kind: ZoneKind, code: string, position: number): FloorZone => ({
+  const zone = (
+    id: string,
+    name: string,
+    kind: ZoneKind,
+    code: string,
+    position: number,
+  ): FloorZone => ({
     id,
     tenantId,
     name,
@@ -195,18 +207,30 @@ export function seedFloorDemo(store: FloorStore): void {
   };
 
   const tables = [
-    table('tbl_sg_s1', 'zon_sg_salle', 1, 4, 'table', 'occupee', 12, 14, { orderId: 'ord_demo_1001' }),
+    table('tbl_sg_s1', 'zon_sg_salle', 1, 4, 'table', 'occupee', 12, 14, {
+      orderId: 'ord_demo_1001',
+    }),
     table('tbl_sg_s2', 'zon_sg_salle', 2, 2, 'table', 'libre', 38, 14),
-    table('tbl_sg_s3', 'zon_sg_salle', 3, 6, 'table', 'reservee', 64, 14, { reservationId: 'res_demo_2001' }),
-    table('tbl_sg_s4', 'zon_sg_salle', 4, 4, 'table', 'addition', 12, 52, { orderId: 'ord_demo_1002' }),
+    table('tbl_sg_s3', 'zon_sg_salle', 3, 6, 'table', 'reservee', 64, 14, {
+      reservationId: 'res_demo_2001',
+    }),
+    table('tbl_sg_s4', 'zon_sg_salle', 4, 4, 'table', 'addition', 12, 52, {
+      orderId: 'ord_demo_1002',
+    }),
     table('tbl_sg_s5', 'zon_sg_salle', 5, 4, 'table', 'nettoyage', 38, 52),
     table('tbl_sg_s6', 'zon_sg_salle', 6, 8, 'table', 'hors_service', 64, 52),
     table('tbl_sg_t1', 'zon_sg_terrasse', 1, 4, 'table', 'libre', 18, 22),
-    table('tbl_sg_t2', 'zon_sg_terrasse', 2, 4, 'table', 'occupee', 48, 22, { orderId: 'ord_demo_1003' }),
+    table('tbl_sg_t2', 'zon_sg_terrasse', 2, 4, 'table', 'occupee', 48, 22, {
+      orderId: 'ord_demo_1003',
+    }),
     table('tbl_sg_t3', 'zon_sg_terrasse', 3, 2, 'canape', 'libre', 78, 22),
-    table('tbl_sg_b1', 'zon_sg_bar', 1, 2, 'comptoir', 'occupee', 25, 30, { orderId: 'ord_demo_1004' }),
+    table('tbl_sg_b1', 'zon_sg_bar', 1, 2, 'comptoir', 'occupee', 25, 30, {
+      orderId: 'ord_demo_1004',
+    }),
     table('tbl_sg_b2', 'zon_sg_bar', 2, 2, 'comptoir', 'libre', 60, 30),
-    table('tbl_sg_v1', 'zon_sg_vip', 1, 8, 'loge', 'reservee', 30, 30, { reservationId: 'res_demo_2002' }),
+    table('tbl_sg_v1', 'zon_sg_vip', 1, 8, 'loge', 'reservee', 30, 30, {
+      reservationId: 'res_demo_2002',
+    }),
   ];
   // Jetons QR stables en démonstration : permettent de tester le parcours
   // scan → menu → commande sans imprimer un QR. Les tables créées ensuite
@@ -244,8 +268,26 @@ export function seedFloorDemo(store: FloorStore): void {
     updatedAt: now,
   });
   const reservations = [
-    reservation('res_demo_2001', 'RES-2026-0001', 'tbl_sg_s3', 6, '20:00', 'Famille Agbeko', '+22890223344', 'confirmee'),
-    reservation('res_demo_2002', 'RES-2026-0002', 'tbl_sg_v1', 8, '21:00', 'Groupe Adjo', '+22891556677', 'confirmee'),
+    reservation(
+      'res_demo_2001',
+      'RES-2026-0001',
+      'tbl_sg_s3',
+      6,
+      '20:00',
+      'Famille Agbeko',
+      '+22890223344',
+      'confirmee',
+    ),
+    reservation(
+      'res_demo_2002',
+      'RES-2026-0002',
+      'tbl_sg_v1',
+      8,
+      '21:00',
+      'Groupe Adjo',
+      '+22891556677',
+      'confirmee',
+    ),
   ];
   for (const entry of reservations) store.reservations.set(entry.id, entry);
   store.reservationCounter = reservations.length;
@@ -255,7 +297,13 @@ export function seedFloorDemo(store: FloorStore): void {
     code: string;
     prefix: string;
     zones: Array<{ key: string; name: string; kind: ZoneKind; code: string }>;
-    tables: Array<{ zone: string; number: number; capacity: number; type: TableType; status: TableStatus }>;
+    tables: Array<{
+      zone: string;
+      number: number;
+      capacity: number;
+      type: TableType;
+      status: TableStatus;
+    }>;
   }> = [
     {
       tenantId: 'tnt_baobab',
@@ -291,7 +339,11 @@ export function seedFloorDemo(store: FloorStore): void {
   ];
 
   for (const floor of extraFloors) {
-    store.settings.set(floor.tenantId, { tenantId: floor.tenantId, establishmentCode: floor.code, updatedAt: now });
+    store.settings.set(floor.tenantId, {
+      tenantId: floor.tenantId,
+      establishmentCode: floor.code,
+      updatedAt: now,
+    });
     const zoneByKey = new Map<string, FloorZone>();
     floor.zones.forEach((entry, index) => {
       const zone: FloorZone = {
@@ -358,7 +410,11 @@ export function reservationsOf(store: FloorStore, tenantId: string): FloorReserv
   return [...store.reservations.values()].filter((entry) => entry.tenantId === tenantId);
 }
 
-export function reservationsForDate(store: FloorStore, tenantId: string, date: string): FloorReservation[] {
+export function reservationsForDate(
+  store: FloorStore,
+  tenantId: string,
+  date: string,
+): FloorReservation[] {
   return reservationsOf(store, tenantId)
     .filter((entry) => entry.date === date)
     .sort((a, b) => a.time.localeCompare(b.time));

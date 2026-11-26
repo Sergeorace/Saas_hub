@@ -103,7 +103,11 @@ export function Modal({
               </p>
             )}
           </div>
-          <button type="button" className="rh-btn rh-btn--ghost rh-btn--icon rh-btn--sm" onClick={onClose}>
+          <button
+            type="button"
+            className="rh-btn rh-btn--ghost rh-btn--icon rh-btn--sm"
+            onClick={onClose}
+          >
             <Icon name="x" />
             <span className="rh-sr-only">{closeLabel}</span>
           </button>

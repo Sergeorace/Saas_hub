@@ -70,11 +70,24 @@ export interface ReportingAppOptions {
   readOrder: OrderFactReader;
   cogs: (tenantId: string, from: string, to: string) => Promise<number>;
   capacity: (tenantId: string) => Promise<{ seats: number; tables: number } | null>;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
-const REPORT_NAMES = ['dashboard', 'sales', 'products', 'occupancy', 'taxes', 'payroll', 'stock', 'reviews'] as const;
+const REPORT_NAMES = [
+  'dashboard',
+  'sales',
+  'products',
+  'occupancy',
+  'taxes',
+  'payroll',
+  'stock',
+  'reviews',
+] as const;
 type ReportName = (typeof REPORT_NAMES)[number];
 
 function nowIso(): string {
@@ -82,11 +95,15 @@ function nowIso(): string {
 }
 
 function formatXof(value: number): string {
-  return `${Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} F CFA`;
+  return `${Math.round(value)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} F CFA`;
 }
 
 function formatNumber(value: number): string {
-  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return Math.round(value)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 function today(): string {
@@ -100,7 +117,11 @@ function shiftDays(days: number): string {
 function dateParam(value: string | null, fallback: string, field: string): string {
   if (!value) return fallback;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    throw HttpError.unprocessable('validation_error', `Date ${field} attendue au format AAAA-MM-JJ.`, { field });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `Date ${field} attendue au format AAAA-MM-JJ.`,
+      { field },
+    );
   }
   return value;
 }
@@ -109,10 +130,15 @@ function filterOf(ctx: RequestContext, store: ReportingStore): DateFilter {
   const tenantId = ctx.params.tenantId ?? '';
   const from = dateParam(ctx.query.get('from'), shiftDays(29), 'from');
   const to = dateParam(ctx.query.get('to'), today(), 'to');
-  if (from > to) throw HttpError.unprocessable('validation_error', 'La période est inversée.', { field: 'from' });
+  if (from > to)
+    throw HttpError.unprocessable('validation_error', 'La période est inversée.', {
+      field: 'from',
+    });
   const siteId = ctx.query.get('siteId');
   if (siteId && !sitesOf(store, tenantId).some((site) => site.id === siteId)) {
-    throw HttpError.unprocessable('site_unknown', 'Site inconnu pour cet établissement.', { field: 'siteId' });
+    throw HttpError.unprocessable('site_unknown', 'Site inconnu pour cet établissement.', {
+      field: 'siteId',
+    });
   }
   return { tenantId, siteId: siteId || null, from, to };
 }
@@ -135,7 +161,11 @@ interface TableData {
   note?: string;
 }
 
-function salesRows(sales: SalesFact[], refunds: ReturnType<typeof refundsIn>, group: 'day' | 'month'): Array<Array<string | number>> {
+function salesRows(
+  sales: SalesFact[],
+  refunds: ReturnType<typeof refundsIn>,
+  group: 'day' | 'month',
+): Array<Array<string | number>> {
   if (group === 'month') {
     return monthlySeries(sales, refunds).map((bucket) => [
       bucket.month,
@@ -161,7 +191,15 @@ function salesRows(sales: SalesFact[], refunds: ReturnType<typeof refundsIn>, gr
 }
 
 function salesColumns(group: 'day' | 'month'): string[] {
-  return [group === 'month' ? 'Mois' : 'Date', 'Commandes', 'CA (XOF)', 'TVA (XOF)', 'Remboursements (XOF)', 'Net (XOF)', 'Panier moyen (XOF)'];
+  return [
+    group === 'month' ? 'Mois' : 'Date',
+    'Commandes',
+    'CA (XOF)',
+    'TVA (XOF)',
+    'Remboursements (XOF)',
+    'Net (XOF)',
+    'Panier moyen (XOF)',
+  ];
 }
 
 async function tableData(
@@ -199,7 +237,10 @@ async function tableData(
         { label: 'Panier moyen', value: formatXof(view.averageTicketXof) },
         { label: 'Commandes', value: formatNumber(view.orders) },
         { label: 'Taux d’occupation', value: `${view.occupancy.ratePct} %` },
-        { label: 'Marge brute', value: view.grossMarginXof === null ? 'n/d' : formatXof(view.grossMarginXof) },
+        {
+          label: 'Marge brute',
+          value: view.grossMarginXof === null ? 'n/d' : formatXof(view.grossMarginXof),
+        },
         { label: 'Note clients', value: `${view.reviews.average}/5` },
       ],
     };
@@ -227,7 +268,13 @@ async function tableData(
       title: 'Produits les plus vendus',
       subtitle: `Période ${periodLabel}`,
       columns: ['Produit', 'Poste', 'Quantité', 'CA (XOF)', 'Part (%)'],
-      rows: ranking.map((entry) => [entry.productName, entry.station, entry.quantity, entry.revenueXof, entry.sharePct]),
+      rows: ranking.map((entry) => [
+        entry.productName,
+        entry.station,
+        entry.quantity,
+        entry.revenueXof,
+        entry.sharePct,
+      ]),
       kpis: [
         { label: 'Références vendues', value: formatNumber(ranking.length) },
         { label: 'Meilleure vente', value: ranking[0]?.productName ?? '—' },
@@ -243,7 +290,8 @@ async function tableData(
       columns: ['Date', 'Site', 'Couverts', 'Places', 'Taux (%)', 'Réservations', 'No-shows'],
       rows: facts.map((fact) => [
         fact.date,
-        sitesOf(store, filter.tenantId).find((site) => site.id === fact.siteId)?.name ?? fact.siteId,
+        sitesOf(store, filter.tenantId).find((site) => site.id === fact.siteId)?.name ??
+          fact.siteId,
         fact.covers,
         fact.seatsCapacity,
         fact.seatsCapacity > 0 ? Math.round((fact.covers / fact.seatsCapacity) * 1000) / 10 : 0,
@@ -292,7 +340,12 @@ async function tableData(
       title: 'Valorisation du stock',
       subtitle: `Période ${periodLabel}`,
       columns: ['Date', 'Valeur du stock (XOF)', 'Pertes (XOF)', 'Articles sous seuil'],
-      rows: facts.map((fact) => [dateOnly(fact.at), fact.stockValueXof, fact.wasteXof, fact.lowStockCount]),
+      rows: facts.map((fact) => [
+        dateOnly(fact.at),
+        fact.stockValueXof,
+        fact.wasteXof,
+        fact.lowStockCount,
+      ]),
       kpis: [
         { label: 'Dernière valorisation', value: formatXof(latest?.stockValueXof ?? 0) },
         { label: 'Pertes cumulées', value: formatXof(sum(facts.map((fact) => fact.wasteXof))) },
@@ -333,7 +386,8 @@ export async function handleReportingEvent(
   const { store } = options;
   const payload = event.payload;
   const site = defaultSiteOf(store, tenantId);
-  const siteId = typeof payload.siteId === 'string' ? payload.siteId : site?.id ?? 'site_principal';
+  const siteId =
+    typeof payload.siteId === 'string' ? payload.siteId : (site?.id ?? 'site_principal');
   const keyOf = (suffix: string) => `${tenantId}:${event.type}:${suffix}`;
   if (!tenantId) return;
 
@@ -391,7 +445,9 @@ export async function handleReportingEvent(
       return;
     }
     case 'PaymentFailed': {
-      const transactionId = String(payload.transactionId ?? payload.paymentId ?? payload.orderId ?? '');
+      const transactionId = String(
+        payload.transactionId ?? payload.paymentId ?? payload.orderId ?? '',
+      );
       if (!transactionId || store.handledEvents.has(keyOf(transactionId))) return;
       store.handledEvents.add(keyOf(transactionId));
       const fact = {
@@ -517,7 +573,12 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
       handler: async (ctx) => {
         const { filter } = await report(ctx, 'dashboard');
         const cogs = await safeCogs(options, filter);
-        return { body: { dashboard: dashboardView(store, filter, cogs), sites: sitesOf(store, filter.tenantId) } };
+        return {
+          body: {
+            dashboard: dashboardView(store, filter, cogs),
+            sites: sitesOf(store, filter.tenantId),
+          },
+        };
       },
     },
     {
@@ -594,7 +655,10 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
         tenantOf(ctx, 'report:view');
         const filter = filterOf(ctx, store);
         const buckets = peakHours(salesIn(store, filter));
-        const peak = [...buckets].sort((a, b) => b.orders - a.orders).slice(0, 3).filter((bucket) => bucket.orders > 0);
+        const peak = [...buckets]
+          .sort((a, b) => b.orders - a.orders)
+          .slice(0, 3)
+          .filter((bucket) => bucket.orders > 0);
         return { body: { buckets, peak, generatedAt: nowIso() } };
       },
     },
@@ -610,7 +674,10 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
             summary: occupancySummary(facts),
             items: facts.map((fact) => ({
               ...fact,
-              ratePct: fact.seatsCapacity > 0 ? Math.round((fact.covers / fact.seatsCapacity) * 1000) / 10 : 0,
+              ratePct:
+                fact.seatsCapacity > 0
+                  ? Math.round((fact.covers / fact.seatsCapacity) * 1000) / 10
+                  : 0,
             })),
             generatedAt: nowIso(),
           },
@@ -645,7 +712,10 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
           body: {
             ratePct: 18,
             rows,
-            totals: { taxableBaseXof: sum(rows.map((row) => row.taxableBaseXof)), taxXof: sum(rows.map((row) => row.taxXof)) },
+            totals: {
+              taxableBaseXof: sum(rows.map((row) => row.taxableBaseXof)),
+              taxXof: sum(rows.map((row) => row.taxXof)),
+            },
             generatedAt: nowIso(),
           },
         };
@@ -659,7 +729,11 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
         const filter = filterOf(ctx, store);
         const facts = payrollIn(store, filter);
         return {
-          body: { items: facts, totals: { runs: facts.length, totalXof: sum(facts.map((fact) => fact.totalXof)) }, generatedAt: nowIso() },
+          body: {
+            items: facts,
+            totals: { runs: facts.length, totalXof: sum(facts.map((fact) => fact.totalXof)) },
+            generatedAt: nowIso(),
+          },
         };
       },
     },
@@ -703,7 +777,9 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
         }
         const format = ctx.query.get('format') ?? 'csv';
         if (format !== 'csv' && format !== 'xlsx' && format !== 'pdf') {
-          throw HttpError.unprocessable('format_unknown', 'Format attendu : csv, xlsx ou pdf.', { field: 'format' });
+          throw HttpError.unprocessable('format_unknown', 'Format attendu : csv, xlsx ou pdf.', {
+            field: 'format',
+          });
         }
         const filter = filterOf(ctx, store);
         const data = await tableData(options, filter, name as ReportName);
@@ -714,7 +790,13 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
           action: 'report.exported',
           targetType: 'report',
           targetId: name,
-          meta: { format, from: filter.from, to: filter.to, siteId: filter.siteId, rows: data.rows.length },
+          meta: {
+            format,
+            from: filter.from,
+            to: filter.to,
+            siteId: filter.siteId,
+            rows: data.rows.length,
+          },
         });
         await publish('ReportExported', tenantId, {
           tenantId,
@@ -765,7 +847,9 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
           generatedAt: nowIso(),
           kpis: data.kpis,
           columns: data.columns,
-          rows: data.rows.map((row) => row.map((cell) => (typeof cell === 'number' ? formatNumber(cell) : cell))),
+          rows: data.rows.map((row) =>
+            row.map((cell) => (typeof cell === 'number' ? formatNumber(cell) : cell)),
+          ),
           note: data.note,
         });
         return {
@@ -782,7 +866,10 @@ export function buildReportingApp(options: ReportingAppOptions): Route[] {
       path: '/api/v1/tenants/:tenantId/reports/audit',
       handler: (ctx) => {
         const { tenantId } = tenantOf(ctx, 'report:view');
-        const items = store.audit.filter((entry) => entry.tenantId === tenantId || entry.tenantId === null).slice(-100).reverse();
+        const items = store.audit
+          .filter((entry) => entry.tenantId === tenantId || entry.tenantId === null)
+          .slice(-100)
+          .reverse();
         return { body: { items, integrity: verifyAuditChain(store.audit) } };
       },
     },

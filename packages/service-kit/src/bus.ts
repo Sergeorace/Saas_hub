@@ -22,7 +22,11 @@ export interface EventBusOptions {
 }
 
 export interface EventBus {
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<OutboxRecord>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<OutboxRecord>;
   on: (type: string, handler: EventHandler) => void;
   deliver: (envelope: EventEnvelope) => Promise<void>;
   flush: () => Promise<void>;
@@ -112,7 +116,12 @@ export function createEventInboxRoute(bus: EventBus): Route {
     service: true,
     handler: async (ctx) => {
       if (!isDomainEventEnvelope(ctx.body)) {
-        return { status: 400, body: { error: { code: 'invalid_event', message: 'Événement invalide ou hors contrat.' } } };
+        return {
+          status: 400,
+          body: {
+            error: { code: 'invalid_event', message: 'Événement invalide ou hors contrat.' },
+          },
+        };
       }
       const envelope = ctx.body as EventEnvelope;
       await bus.deliver(envelope);

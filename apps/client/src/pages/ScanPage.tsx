@@ -14,9 +14,24 @@ interface BarcodeDetectorLike {
 type BarcodeDetectorCtor = new (options?: { formats?: string[] }) => BarcodeDetectorLike;
 
 const DEMO_TABLES: Array<{ slug: string; name: string; color: string; codes: string[] }> = [
-  { slug: 'sahel-grill', name: 'Sahel Grill', color: '#C2410C', codes: ['LOME01-SAL-001', 'LOME01-TER-001', 'LOME01-BAR-002'] },
-  { slug: 'le-baobab', name: 'Le Baobab', color: '#6D28D9', codes: ['BAOB01-SAL-001', 'BAOB01-TER-001'] },
-  { slug: 'lagune-beach-club', name: 'Lagune Beach Club', color: '#0E7490', codes: ['LAGN01-SAL-001', 'LAGN01-TER-001'] },
+  {
+    slug: 'sahel-grill',
+    name: 'Sahel Grill',
+    color: '#C2410C',
+    codes: ['LOME01-SAL-001', 'LOME01-TER-001', 'LOME01-BAR-002'],
+  },
+  {
+    slug: 'le-baobab',
+    name: 'Le Baobab',
+    color: '#6D28D9',
+    codes: ['BAOB01-SAL-001', 'BAOB01-TER-001'],
+  },
+  {
+    slug: 'lagune-beach-club',
+    name: 'Lagune Beach Club',
+    color: '#0E7490',
+    codes: ['LAGN01-SAL-001', 'LAGN01-TER-001'],
+  },
 ];
 
 function openTable(tenantKey: string, code: string, token: string) {
@@ -75,7 +90,8 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
 
   const startCamera = async () => {
     setCameraError(null);
-    const Detector = (window as unknown as { BarcodeDetector?: BarcodeDetectorCtor }).BarcodeDetector;
+    const Detector = (window as unknown as { BarcodeDetector?: BarcodeDetectorCtor })
+      .BarcodeDetector;
     if (!Detector) {
       setCameraError(t('scan.cameraError'));
       return;
@@ -85,7 +101,10 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false,
+      });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -138,11 +157,19 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
           </div>
           <div className="rh-scan-actions">
             {scanning ? (
-              <button type="button" className="rh-client-btn rh-client-btn--ghost rh-client-btn--block" onClick={stopCamera}>
+              <button
+                type="button"
+                className="rh-client-btn rh-client-btn--ghost rh-client-btn--block"
+                onClick={stopCamera}
+              >
                 <Icon name="x" size="sm" /> {t('scan.stop')}
               </button>
             ) : (
-              <button type="button" className="rh-client-btn rh-client-btn--primary rh-client-btn--block rh-client-btn--lg" onClick={startCamera}>
+              <button
+                type="button"
+                className="rh-client-btn rh-client-btn--primary rh-client-btn--block rh-client-btn--lg"
+                onClick={startCamera}
+              >
                 <Icon name="scan" size="sm" /> {t('scan.start')}
               </button>
             )}
@@ -159,7 +186,11 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
           <p>{t('scan.manualDesc')}</p>
           <label className="rh-client-field">
             <span>{t('scan.manualTenant')}</span>
-            <select className="rh-client-input" value={tenantKey} onChange={(event) => setTenantKey(event.target.value)}>
+            <select
+              className="rh-client-input"
+              value={tenantKey}
+              onChange={(event) => setTenantKey(event.target.value)}
+            >
               <option value="">{t('scan.chooseTenant')}</option>
               {establishments.loading && <option disabled>{t('common.loading')}</option>}
               {establishments.data?.items.map((establishment) => (
@@ -181,7 +212,12 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
               }}
             />
           </label>
-          <button type="button" className="rh-client-btn rh-client-btn--soft rh-client-btn--block" onClick={submitManual} disabled={!manual.trim()}>
+          <button
+            type="button"
+            className="rh-client-btn rh-client-btn--soft rh-client-btn--block"
+            onClick={submitManual}
+            disabled={!manual.trim()}
+          >
             <Icon name="arrow-right" size="sm" /> {t('scan.openTable')}
           </button>
         </section>
@@ -191,11 +227,19 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
           <p>{t('scan.demoDesc')}</p>
           {establishments.loading && <Skeleton height={90} />}
           {DEMO_TABLES.map((tenant) => (
-            <article key={tenant.slug} className="rh-scan-demo-card" style={{ '--demo-color': tenant.color } as CSSProperties}>
+            <article
+              key={tenant.slug}
+              className="rh-scan-demo-card"
+              style={{ '--demo-color': tenant.color } as CSSProperties}
+            >
               <header>
                 <span className="rh-scan-demo-dot" aria-hidden="true" />
                 <strong>{tenant.name}</strong>
-                <button type="button" className="rh-client-link-btn" onClick={() => navigate(`/e/${tenant.slug}`)}>
+                <button
+                  type="button"
+                  className="rh-client-link-btn"
+                  onClick={() => navigate(`/e/${tenant.slug}`)}
+                >
                   {t('common.seeAll')}
                 </button>
               </header>

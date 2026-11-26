@@ -18,22 +18,48 @@ const SAHEL = 'tnt_sahelgrill';
 const BAOBAB = 'tnt_baobab';
 const SMS_SECRET = 'test-sms-secret';
 
-function claims(sub: string, name: string, tenantPermissions: Record<string, string[]> = {}): AuthClaims {
-  return { sub, sid: `ses_${sub}`, name, mfa: true, platformRoles: [], platformPermissions: [], tenantPermissions };
+function claims(
+  sub: string,
+  name: string,
+  tenantPermissions: Record<string, string[]> = {},
+): AuthClaims {
+  return {
+    sub,
+    sid: `ses_${sub}`,
+    name,
+    mfa: true,
+    platformRoles: [],
+    platformPermissions: [],
+    tenantPermissions,
+  };
 }
 
 async function main() {
   const store: NotificationStore = createNotificationStore();
   seedNotificationDemo(store);
-  const bus = createEventBus({ name: 'notification-test', internalKey: INTERNAL_KEY, subscribers: [] });
+  const bus = createEventBus({
+    name: 'notification-test',
+    internalKey: INTERNAL_KEY,
+    subscribers: [],
+  });
   const published: string[] = [];
-  const publish = async (type: string, tenantId: string | null, payload: Record<string, unknown>) => {
+  const publish = async (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => {
     published.push(type);
     return bus.publish(type, tenantId, payload);
   };
 
-  const contacts = new Map<string, { name: string; email: string | null; phone: string | null; locale: 'fr' | 'en' }>([
-    ['usr_demo_visiteur', { name: 'Akouvi M.', email: 'akouvi@example.tg', phone: '+228 90 12 34 56', locale: 'fr' }],
+  const contacts = new Map<
+    string,
+    { name: string; email: string | null; phone: string | null; locale: 'fr' | 'en' }
+  >([
+    [
+      'usr_demo_visiteur',
+      { name: 'Akouvi M.', email: 'akouvi@example.tg', phone: '+228 90 12 34 56', locale: 'fr' },
+    ],
     ['usr_bad_phone', { name: 'Kossi', email: null, phone: '000 00 00', locale: 'fr' }],
   ]);
   const staff = new Set(['usr_gerant_sahel']);
@@ -43,16 +69,31 @@ async function main() {
     identities.set(token, authClaims);
     return token;
   };
-  const owner = register('token-owner', claims('usr_gerant_sahel', 'Gérant Sahel', {
-    [SAHEL]: ['notification:view', 'notification:manage', 'floor:view', 'order:view', 'pos:operate'],
-  }));
+  const owner = register(
+    'token-owner',
+    claims('usr_gerant_sahel', 'Gérant Sahel', {
+      [SAHEL]: [
+        'notification:view',
+        'notification:manage',
+        'floor:view',
+        'order:view',
+        'pos:operate',
+      ],
+    }),
+  );
   const visitor = register('token-visitor', claims('usr_demo_visiteur', 'Akouvi'));
-  const waiter = register('token-waiter', claims('usr_serveur', 'Serveur', {
-    [SAHEL]: ['floor:view', 'order:view', 'pos:operate'],
-  }));
-  const ownerBaobab = register('token-baobab', claims('usr_baobab', 'Gérant Baobab', {
-    [BAOBAB]: ['notification:view', 'notification:manage', 'floor:view'],
-  }));
+  const waiter = register(
+    'token-waiter',
+    claims('usr_serveur', 'Serveur', {
+      [SAHEL]: ['floor:view', 'order:view', 'pos:operate'],
+    }),
+  );
+  const ownerBaobab = register(
+    'token-baobab',
+    claims('usr_baobab', 'Gérant Baobab', {
+      [BAOBAB]: ['notification:view', 'notification:manage', 'floor:view'],
+    }),
+  );
 
   const options = {
     store,
@@ -80,12 +121,20 @@ async function main() {
     {
       name: 'Modèles : catalogue FR/EN, surcharge établissement et doublon',
       run: async () => {
-        const list = await api(base, 'GET', `${A}/notifications/templates`, undefined, { token: owner });
+        const list = await api(base, 'GET', `${A}/notifications/templates`, undefined, {
+          token: owner,
+        });
         assertStatus(list, 200, 'Catalogue accessible');
         assertEqual(list.body.items.length, 14, '14 modèles plateforme');
         const otp = list.body.items.filter((entry: { code: string }) => entry.code === 'AUTH_OTP');
-        assert(otp.some((entry: { locale: string }) => entry.locale === 'fr'), 'OTP français');
-        assert(otp.some((entry: { locale: string }) => entry.locale === 'en'), 'OTP anglais');
+        assert(
+          otp.some((entry: { locale: string }) => entry.locale === 'fr'),
+          'OTP français',
+        );
+        assert(
+          otp.some((entry: { locale: string }) => entry.locale === 'en'),
+          'OTP anglais',
+        );
 
         const created = await api(
           base,
@@ -142,9 +191,17 @@ async function main() {
           { internalKey: INTERNAL_KEY },
         );
         assertStatus(first, 201, 'Notification créée');
-        assertEqual(first.body.notification.body, 'CMD-42 : prête au comptoir.', 'Surcharge appliquée');
+        assertEqual(
+          first.body.notification.body,
+          'CMD-42 : prête au comptoir.',
+          'Surcharge appliquée',
+        );
         assertEqual(first.body.notification.status, 'sent', 'Remise simulée');
-        assertEqual(first.body.notification.recipient, 'tok_demo_client_visiteur', 'Jeton push du client');
+        assertEqual(
+          first.body.notification.recipient,
+          'tok_demo_client_visiteur',
+          'Jeton push du client',
+        );
 
         const again = await api(
           base,
@@ -177,12 +234,22 @@ async function main() {
         );
         assertStatus(failed, 201, 'Tentative enregistrée');
         assertEqual(failed.body.notification.status, 'failed', 'Échec fournisseur simulé');
-        assertEqual(failed.body.notification.attempts[0].error, 'destinataire_sms_invalide', 'Motif explicite');
+        assertEqual(
+          failed.body.notification.attempts[0].error,
+          'destinataire_sms_invalide',
+          'Motif explicite',
+        );
 
         const record = store.notifications.get(failed.body.notification.id);
         if (!record) throw new Error('notification absente');
         record.recipient = '+228 90 00 00 00';
-        const retried = await api(base, 'POST', `${A}/notifications/${record.id}/retry`, undefined, { token: owner });
+        const retried = await api(
+          base,
+          'POST',
+          `${A}/notifications/${record.id}/retry`,
+          undefined,
+          { token: owner },
+        );
         assertStatus(retried, 200, 'Nouvelle tentative');
         assertEqual(retried.body.notification.status, 'sent', 'Remise réussie au second essai');
         assertEqual(retried.body.notification.attempts.length, 2, 'Historique conservé');
@@ -206,31 +273,67 @@ async function main() {
     {
       name: 'Fil client : notifications, lecture et compteur',
       run: async () => {
-        const feed = await api(base, 'GET', `/api/v1/me/notifications?tenantId=${SAHEL}`, undefined, { token: visitor });
+        const feed = await api(
+          base,
+          'GET',
+          `/api/v1/me/notifications?tenantId=${SAHEL}`,
+          undefined,
+          { token: visitor },
+        );
         assertStatus(feed, 200, 'Fil accessible');
         assert(feed.body.total >= 2, 'Notifications du visiteur');
         assert(feed.body.unread >= 1, 'Au moins une non lue');
 
         const unread = feed.body.items.find((entry: { readAt: string | null }) => !entry.readAt);
-        const read = await api(base, 'POST', `/api/v1/me/notifications/${unread.id}/read`, undefined, { token: visitor });
+        const read = await api(
+          base,
+          'POST',
+          `/api/v1/me/notifications/${unread.id}/read`,
+          undefined,
+          { token: visitor },
+        );
         assertStatus(read, 200, 'Marquée lue');
         assert(read.body.notification.readAt !== null, 'Horodatage de lecture');
 
-        const readAll = await api(base, 'POST', `/api/v1/me/notifications/read-all`, { tenantId: SAHEL }, { token: visitor });
+        const readAll = await api(
+          base,
+          'POST',
+          `/api/v1/me/notifications/read-all`,
+          { tenantId: SAHEL },
+          { token: visitor },
+        );
         assertStatus(readAll, 200, 'Tout lire');
-        const after = await api(base, 'GET', `/api/v1/me/notifications?tenantId=${SAHEL}`, undefined, { token: visitor });
+        const after = await api(
+          base,
+          'GET',
+          `/api/v1/me/notifications?tenantId=${SAHEL}`,
+          undefined,
+          { token: visitor },
+        );
         assertEqual(after.body.unread, 0, 'Plus aucune non lue');
 
-        const foreign = await api(base, 'POST', `/api/v1/me/notifications/${unread.id}/read`, undefined, { token: owner });
+        const foreign = await api(
+          base,
+          'POST',
+          `/api/v1/me/notifications/${unread.id}/read`,
+          undefined,
+          { token: owner },
+        );
         assertStatus(foreign, 404, 'Notification d’un autre utilisateur masquée');
       },
     },
     {
       name: 'Préférences : désabonnement, heures calmes et appareils',
       run: async () => {
-        const initial = await api(base, 'GET', `/api/v1/me/notification-preferences?tenantId=${SAHEL}`, undefined, {
-          token: owner,
-        });
+        const initial = await api(
+          base,
+          'GET',
+          `/api/v1/me/notification-preferences?tenantId=${SAHEL}`,
+          undefined,
+          {
+            token: owner,
+          },
+        );
         assertStatus(initial, 200, 'Préférences lues');
         assertEqual(initial.body.preference.sms, false, 'SMS désactivés pour le gérant');
 
@@ -260,7 +363,11 @@ async function main() {
         );
         assertStatus(optedOut, 201, 'Envoi marketing enregistré');
         assertEqual(optedOut.body.notification.status, 'supprime', 'Push désactivé par préférence');
-        assertEqual(optedOut.body.notification.data.suppression, 'preference_desactivee', 'Motif de suppression');
+        assertEqual(
+          optedOut.body.notification.data.suppression,
+          'preference_desactivee',
+          'Motif de suppression',
+        );
 
         await api(
           base,
@@ -284,7 +391,11 @@ async function main() {
         );
         assertStatus(quiet, 201, 'Marketing SMS enregistré');
         assertEqual(quiet.body.notification.status, 'supprime', 'Heures calmes appliquées');
-        assertEqual(quiet.body.notification.data.suppression, 'heures_calmes', 'Motif heures calmes');
+        assertEqual(
+          quiet.body.notification.data.suppression,
+          'heures_calmes',
+          'Motif heures calmes',
+        );
 
         const transactional = await api(
           base,
@@ -317,9 +428,15 @@ async function main() {
           { token: visitor },
         );
         assertEqual(again.body.created, false, 'Jeton réutilisé');
-        const removed = await api(base, 'DELETE', `/api/v1/me/device-tokens/tok_visitor_browser`, undefined, {
-          token: visitor,
-        });
+        const removed = await api(
+          base,
+          'DELETE',
+          `/api/v1/me/device-tokens/tok_visitor_browser`,
+          undefined,
+          {
+            token: visitor,
+          },
+        );
         assertStatus(removed, 200, 'Appareil supprimé');
 
         await api(
@@ -334,11 +451,19 @@ async function main() {
     {
       name: 'Temps réel : salles isolées, droits et filtre temporel',
       run: async () => {
-        const floorFeed = await api(base, 'GET', `${A}/realtime/rooms/floor/messages`, undefined, { token: waiter });
+        const floorFeed = await api(base, 'GET', `${A}/realtime/rooms/floor/messages`, undefined, {
+          token: waiter,
+        });
         assertStatus(floorFeed, 200, 'Serveur lit la salle');
         assert(floorFeed.body.items.length >= 1, 'Messages historiques');
 
-        const adminDenied = await api(base, 'GET', `${A}/realtime/rooms/admin/messages`, undefined, { token: waiter });
+        const adminDenied = await api(
+          base,
+          'GET',
+          `${A}/realtime/rooms/admin/messages`,
+          undefined,
+          { token: waiter },
+        );
         assertStatus(adminDenied, 403, 'Salle admin refusée au serveur');
 
         const created = await api(
@@ -350,16 +475,27 @@ async function main() {
         );
         assertStatus(created, 201, 'Message temps réel publié');
         const since = new Date(Date.parse(created.body.message.at) - 5000).toISOString();
-        const fresh = await api(base, 'GET', `${A}/realtime/rooms/kds/messages?since=${encodeURIComponent(since)}`, undefined, {
-          token: owner,
-        });
+        const fresh = await api(
+          base,
+          'GET',
+          `${A}/realtime/rooms/kds/messages?since=${encodeURIComponent(since)}`,
+          undefined,
+          {
+            token: owner,
+          },
+        );
         assertEqual(fresh.body.items.length, 1, 'Un seul message postérieur');
 
-        const foreign = await api(base, 'POST', `/internal/tenants/${BAOBAB}/notifications/realtime`, {
-          room: 'floor',
-          title: 'x',
-          body: 'y',
-        });
+        const foreign = await api(
+          base,
+          'POST',
+          `/internal/tenants/${BAOBAB}/notifications/realtime`,
+          {
+            room: 'floor',
+            title: 'x',
+            body: 'y',
+          },
+        );
         assertStatus(foreign, 401, 'Interne protégé');
 
         const internal = await api(
@@ -370,9 +506,15 @@ async function main() {
           { internalKey: INTERNAL_KEY },
         );
         assertStatus(internal, 201, 'Message interne accepté');
-        const baobabFeed = await api(base, 'GET', `/api/v1/tenants/${BAOBAB}/realtime/rooms/floor/messages`, undefined, {
-          token: ownerBaobab,
-        });
+        const baobabFeed = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${BAOBAB}/realtime/rooms/floor/messages`,
+          undefined,
+          {
+            token: ownerBaobab,
+          },
+        );
         assertEqual(baobabFeed.body.items.length, 1, 'Aucun message Sahel visible');
       },
     },
@@ -382,11 +524,25 @@ async function main() {
         const before = store.rooms.length;
         await handleNotificationEvent(options, SAHEL, {
           type: 'OrderCreated',
-          payload: { tenantId: SAHEL, orderId: 'ord_evt_1', number: 'CMD-77', channel: 'dine_in', tableCode: 'T5', totalXof: 9000 },
+          payload: {
+            tenantId: SAHEL,
+            orderId: 'ord_evt_1',
+            number: 'CMD-77',
+            channel: 'dine_in',
+            tableCode: 'T5',
+            totalXof: 9000,
+          },
         });
         await handleNotificationEvent(options, SAHEL, {
           type: 'OrderCreated',
-          payload: { tenantId: SAHEL, orderId: 'ord_evt_1', number: 'CMD-77', channel: 'dine_in', tableCode: 'T5', totalXof: 9000 },
+          payload: {
+            tenantId: SAHEL,
+            orderId: 'ord_evt_1',
+            number: 'CMD-77',
+            channel: 'dine_in',
+            tableCode: 'T5',
+            totalXof: 9000,
+          },
         });
         assertEqual(store.rooms.length - before, 2, 'Salle et cuisine, sans doublon');
         const kds = store.rooms.at(-1);
@@ -396,7 +552,14 @@ async function main() {
 
         await handleNotificationEvent(options, SAHEL, {
           type: 'TableStatusChanged',
-          payload: { tenantId: SAHEL, tableId: 'tbl_5', code: 'T5', from: 'libre', to: 'occupee', orderId: 'ord_evt_1' },
+          payload: {
+            tenantId: SAHEL,
+            tableId: 'tbl_5',
+            code: 'T5',
+            from: 'libre',
+            to: 'occupee',
+            orderId: 'ord_evt_1',
+          },
         });
         assertEqual(store.rooms.at(-1)?.body, 'occupée', 'Statut de table traduit');
 
@@ -416,7 +579,13 @@ async function main() {
 
         await handleNotificationEvent(options, SAHEL, {
           type: 'OrderPaid',
-          payload: { tenantId: SAHEL, orderId: 'ord_evt_1', number: 'CMD-77', method: 'tmoney', amountXof: 9000 },
+          payload: {
+            tenantId: SAHEL,
+            orderId: 'ord_evt_1',
+            number: 'CMD-77',
+            method: 'tmoney',
+            amountXof: 9000,
+          },
         });
         const paid = store.rooms.at(-1);
         assertEqual(paid?.room, 'pos', 'Addition signalée en caisse');
@@ -424,14 +593,26 @@ async function main() {
 
         await handleNotificationEvent(options, SAHEL, {
           type: 'PaymentFailed',
-          payload: { tenantId: SAHEL, orderId: 'ord_evt_2', amountXof: 4500, reason: 'solde insuffisant' },
+          payload: {
+            tenantId: SAHEL,
+            orderId: 'ord_evt_2',
+            amountXof: 4500,
+            reason: 'solde insuffisant',
+          },
         });
         assertEqual(store.rooms.at(-1)?.room, 'admin', 'Échec remonté à la supervision');
 
         const stockBefore = store.notifications.size;
         await handleNotificationEvent(options, SAHEL, {
           type: 'StockBelowThreshold',
-          payload: { tenantId: SAHEL, itemId: 'itm_tomate', name: 'Tomates fraîches', quantity: 6.75, threshold: 8, unit: 'kg' },
+          payload: {
+            tenantId: SAHEL,
+            itemId: 'itm_tomate',
+            name: 'Tomates fraîches',
+            quantity: 6.75,
+            threshold: 8,
+            unit: 'kg',
+          },
         });
         const pushes = [...store.notifications.values()].slice(stockBefore);
         assertEqual(pushes.length, 1, 'Un seul appareil du personnel');
@@ -442,9 +623,19 @@ async function main() {
 
         await handleNotificationEvent(options, SAHEL, {
           type: 'PayrollPaid',
-          payload: { tenantId: SAHEL, runId: 'run_1', period: '2026-10', headcount: 8, totalXof: 1250000 },
+          payload: {
+            tenantId: SAHEL,
+            runId: 'run_1',
+            period: '2026-10',
+            headcount: 8,
+            totalXof: 1250000,
+          },
         });
-        assertEqual(store.rooms.at(-1)?.body, '2026-10 · 8 employés · 1 250 000 F CFA', 'Paie formatée');
+        assertEqual(
+          store.rooms.at(-1)?.body,
+          '2026-10 · 8 employés · 1 250 000 F CFA',
+          'Paie formatée',
+        );
       },
     },
     {
@@ -478,7 +669,9 @@ async function main() {
         );
 
         await handleNotificationEvent(options, SAHEL, { type: 'CampaignSent', payload });
-        const matches = [...store.notifications.values()].filter((entry) => entry.eventId === 'campaign:cmp_evt_1');
+        const matches = [...store.notifications.values()].filter(
+          (entry) => entry.eventId === 'campaign:cmp_evt_1',
+        );
         assertEqual(matches.length, 2, 'Rejeu de l’événement ignoré');
       },
     },
@@ -497,15 +690,23 @@ async function main() {
         assertStatus(unsigned, 401, 'Signature absente refusée');
 
         const body = { messageId, status: 'delivered' };
-        const signature = createHmac('sha256', SMS_SECRET).update(`${messageId}:delivered`).digest('hex');
+        const signature = createHmac('sha256', SMS_SECRET)
+          .update(`${messageId}:delivered`)
+          .digest('hex');
         const headerRequest = await fetch(`${base}/api/v1/public/notifications/sms/webhook`, {
           method: 'POST',
           headers: { 'content-type': 'application/json', 'x-sms-signature': signature },
           body: JSON.stringify(body),
         });
         assertEqual(headerRequest.status, 200, 'Signature valide acceptée');
-        const payload = (await headerRequest.json()) as { notification: { attempts: Array<{ status: string }> } };
-        assertEqual(payload.notification.attempts.at(-1)?.status, 'delivered', 'Accusé de remise enregistré');
+        const payload = (await headerRequest.json()) as {
+          notification: { attempts: Array<{ status: string }> };
+        };
+        assertEqual(
+          payload.notification.attempts.at(-1)?.status,
+          'delivered',
+          'Accusé de remise enregistré',
+        );
         assert(published.includes('SmsDeliveryReported'), 'Événement de remise publié');
 
         const unknownBody = { messageId: 'SMS-999999', status: 'delivered' };
@@ -523,10 +724,15 @@ async function main() {
     {
       name: 'Synthèse, journal d’audit et isolation inter-établissements',
       run: async () => {
-        const summary = await api(base, 'GET', `${A}/notifications/summary`, undefined, { token: owner });
+        const summary = await api(base, 'GET', `${A}/notifications/summary`, undefined, {
+          token: owner,
+        });
         assertStatus(summary, 200, 'Synthèse accessible');
         assert(summary.body.total > 0, 'Volumes présents');
-        assert(summary.body.byChannel.sms > 0 && summary.body.byChannel.push > 0, 'Répartition par canal');
+        assert(
+          summary.body.byChannel.sms > 0 && summary.body.byChannel.push > 0,
+          'Répartition par canal',
+        );
         assertEqual(summary.body.devices, 2, 'Deux appareils déclarés');
 
         const list = await api(base, 'GET', `${A}/notifications`, undefined, { token: owner });
@@ -535,7 +741,9 @@ async function main() {
           'Aucune notification étrangère',
         );
 
-        const denied = await api(base, 'GET', `${A}/notifications`, undefined, { token: ownerBaobab });
+        const denied = await api(base, 'GET', `${A}/notifications`, undefined, {
+          token: ownerBaobab,
+        });
         assertStatus(denied, 403, 'Établissement croisé refusé');
         const deniedWrite = await api(
           base,
@@ -546,7 +754,9 @@ async function main() {
         );
         assertStatus(deniedWrite, 403, 'Écriture croisée refusée');
 
-        const audit = await api(base, 'GET', `${A}/notifications/audit`, undefined, { token: owner });
+        const audit = await api(base, 'GET', `${A}/notifications/audit`, undefined, {
+          token: owner,
+        });
         assertStatus(audit, 200, 'Journal accessible');
         assertEqual(audit.body.integrity, true, 'Chaîne d’audit intègre');
         const actions = audit.body.items.map((entry: { action: string }) => entry.action);
@@ -554,7 +764,10 @@ async function main() {
         assert(actions.includes('notification.delivery.reported'), 'Remises auditées');
         assert(actions.includes('notification.retried'), 'Tentatives auditées');
         assert(
-          audit.body.items.every((entry: { tenantId: string | null }) => entry.tenantId === SAHEL || entry.tenantId === null),
+          audit.body.items.every(
+            (entry: { tenantId: string | null }) =>
+              entry.tenantId === SAHEL || entry.tenantId === null,
+          ),
           'Audit filtré par établissement',
         );
       },

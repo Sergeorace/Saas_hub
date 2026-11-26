@@ -65,7 +65,13 @@ export const frReports: Messages = {
     peakHourLabel: '{hour} h',
     paymentMixTitle: 'Répartition des paiements',
     channelMixTitle: 'Répartition des canaux',
-    method: { mobile_money: 'Mobile Money', tmoney: 'TMoney', moov: 'Moov Money', especes: 'Espèces', carte: 'Carte' },
+    method: {
+      mobile_money: 'Mobile Money',
+      tmoney: 'TMoney',
+      moov: 'Moov Money',
+      especes: 'Espèces',
+      carte: 'Carte',
+    },
     channel: {
       sur_place: 'Sur place',
       dine_in: 'Sur place',
@@ -196,7 +202,13 @@ export const enReports: Messages = {
     peakHourLabel: '{hour}:00',
     paymentMixTitle: 'Payment mix',
     channelMixTitle: 'Channel mix',
-    method: { mobile_money: 'Mobile Money', tmoney: 'TMoney', moov: 'Moov Money', especes: 'Cash', carte: 'Card' },
+    method: {
+      mobile_money: 'Mobile Money',
+      tmoney: 'TMoney',
+      moov: 'Moov Money',
+      especes: 'Cash',
+      carte: 'Card',
+    },
     channel: {
       sur_place: 'Dine-in',
       dine_in: 'Dine-in',

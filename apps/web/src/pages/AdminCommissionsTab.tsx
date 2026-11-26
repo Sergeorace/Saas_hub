@@ -17,7 +17,13 @@ import {
   type Column,
   type Locale,
 } from '@resto-hub/design-system';
-import { errorMessage, platformAdminApi, type PlatformCommissionView, type CommissionGroupRow, type CommissionEntryView } from '../lib/api';
+import {
+  errorMessage,
+  platformAdminApi,
+  type PlatformCommissionView,
+  type CommissionGroupRow,
+  type CommissionEntryView,
+} from '../lib/api';
 
 interface Props {
   locale: Locale;
@@ -60,7 +66,9 @@ export function AdminCommissionsTab({ locale }: Props) {
       header: t(labelKey),
       render: (row) => (
         <div className="console-cell">
-          <strong>{labelKey === 'adminCommissions.colMethod' ? methodLabel(row.key) : row.label}</strong>
+          <strong>
+            {labelKey === 'adminCommissions.colMethod' ? methodLabel(row.key) : row.label}
+          </strong>
           <span>{row.key}</span>
         </div>
       ),
@@ -155,7 +163,13 @@ export function AdminCommissionsTab({ locale }: Props) {
                   { value: '90', label: t('adminCommissions.range90') },
                 ]}
               />
-              <Button size="sm" variant="outline" iconLeft="refresh" onClick={() => void load()} loading={loading}>
+              <Button
+                size="sm"
+                variant="outline"
+                iconLeft="refresh"
+                onClick={() => void load()}
+                loading={loading}
+              >
                 {t('adminCommissions.refresh')}
               </Button>
             </div>
@@ -164,19 +178,45 @@ export function AdminCommissionsTab({ locale }: Props) {
         <CardBody>
           {error ? (
             <div className="console-stack">
-              <p className="auth-error" role="alert">{t('adminCommissions.errorTitle')} — {error}</p>
-              <Button size="sm" variant="outline" onClick={() => void load()}>{t('adminCommissions.refresh')}</Button>
+              <p className="auth-error" role="alert">
+                {t('adminCommissions.errorTitle')} — {error}
+              </p>
+              <Button size="sm" variant="outline" onClick={() => void load()}>
+                {t('adminCommissions.refresh')}
+              </Button>
             </div>
           ) : loading || !data ? (
             <SkeletonText lines={4} />
           ) : data.summary.transactions === 0 ? (
-            <EmptyState icon="banknote" title={t('adminCommissions.emptyTitle')} description={t('adminCommissions.emptyBody')} />
+            <EmptyState
+              icon="banknote"
+              title={t('adminCommissions.emptyTitle')}
+              description={t('adminCommissions.emptyBody')}
+            />
           ) : (
             <div className="console-stats">
-              <StatCard label={t('adminCommissions.kpiVolume')} value={formatXof(data.summary.volumeXof, locale)} icon="banknote" />
-              <StatCard label={t('adminCommissions.kpiCommission')} value={formatXof(data.summary.commissionXof, locale)} icon="wallet" meta={`${data.summary.averageRatePct} %`} />
-              <StatCard label={t('adminCommissions.kpiNet')} value={formatXof(data.summary.netXof, locale)} icon="trending-up" />
-              <StatCard label={t('adminCommissions.kpiAverage')} value={formatXof(data.summary.averageBasketXof, locale)} icon="receipt" meta={`${data.summary.transactions} ${t('adminCommissions.colTransactions').toLowerCase()}`} />
+              <StatCard
+                label={t('adminCommissions.kpiVolume')}
+                value={formatXof(data.summary.volumeXof, locale)}
+                icon="banknote"
+              />
+              <StatCard
+                label={t('adminCommissions.kpiCommission')}
+                value={formatXof(data.summary.commissionXof, locale)}
+                icon="wallet"
+                meta={`${data.summary.averageRatePct} %`}
+              />
+              <StatCard
+                label={t('adminCommissions.kpiNet')}
+                value={formatXof(data.summary.netXof, locale)}
+                icon="trending-up"
+              />
+              <StatCard
+                label={t('adminCommissions.kpiAverage')}
+                value={formatXof(data.summary.averageBasketXof, locale)}
+                icon="receipt"
+                meta={`${data.summary.transactions} ${t('adminCommissions.colTransactions').toLowerCase()}`}
+              />
             </div>
           )}
         </CardBody>
@@ -185,7 +225,10 @@ export function AdminCommissionsTab({ locale }: Props) {
       {data && data.summary.transactions > 0 && (
         <>
           <Card>
-            <CardHeader title={t('adminCommissions.chartTitle')} action={<Badge tone="accent">{formatXof(data.summary.commissionXof, locale)}</Badge>} />
+            <CardHeader
+              title={t('adminCommissions.chartTitle')}
+              action={<Badge tone="accent">{formatXof(data.summary.commissionXof, locale)}</Badge>}
+            />
             <CardBody>
               {points.length === 0 ? (
                 <p className="console-muted">{t('adminCommissions.chartEmpty')}</p>
@@ -193,21 +236,33 @@ export function AdminCommissionsTab({ locale }: Props) {
                 <figure className="chart">
                   <div
                     className="chart__plot"
-                    style={{ gridTemplateColumns: `repeat(${Math.min(points.length, 14)}, minmax(0, 1fr))` }}
+                    style={{
+                      gridTemplateColumns: `repeat(${Math.min(points.length, 14)}, minmax(0, 1fr))`,
+                    }}
                     role="img"
                     aria-label={`${t('adminCommissions.chartTitle')} — ${formatXof(data.summary.commissionXof, locale)}`}
                   >
                     {points.map((point, index) => (
                       <div className="chart__col" key={point.key}>
-                        <span className="chart__value">{formatXofCompact(point.commissionXof, locale)}</span>
+                        <span className="chart__value">
+                          {formatXofCompact(point.commissionXof, locale)}
+                        </span>
                         <span className="chart__bar-wrap">
                           <span
-                            className={index === points.length - 1 ? 'chart__bar chart__bar--today' : 'chart__bar'}
-                            style={{ height: `${Math.max(2, Math.round((point.commissionXof / maxCommission) * 100))}%` }}
+                            className={
+                              index === points.length - 1
+                                ? 'chart__bar chart__bar--today'
+                                : 'chart__bar'
+                            }
+                            style={{
+                              height: `${Math.max(2, Math.round((point.commissionXof / maxCommission) * 100))}%`,
+                            }}
                             title={`${formatDate(point.key, locale)} · ${formatXof(point.commissionXof, locale)}`}
                           />
                         </span>
-                        <span className="chart__day">{formatDate(point.key, locale, { day: '2-digit', month: '2-digit' })}</span>
+                        <span className="chart__day">
+                          {formatDate(point.key, locale, { day: '2-digit', month: '2-digit' })}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -225,14 +280,26 @@ export function AdminCommissionsTab({ locale }: Props) {
             <Card>
               <CardHeader title={t('adminCommissions.tenantTitle')} />
               <CardBody>
-                <DataTable columns={groupColumns} rows={data.groups.tenant} getRowId={(row) => row.key} caption={t('adminCommissions.tenantTitle')} />
+                <DataTable
+                  columns={groupColumns}
+                  rows={data.groups.tenant}
+                  getRowId={(row) => row.key}
+                  caption={t('adminCommissions.tenantTitle')}
+                />
               </CardBody>
             </Card>
             <Card>
               <CardHeader title={t('adminCommissions.providerTitle')} />
               <CardBody>
-                <DataTable columns={groupColumnsFor('adminCommissions.colProvider')} rows={data.groups.provider} getRowId={(row) => row.key} caption={t('adminCommissions.providerTitle')} />
-                <h3 className="reg-subtitle reg-subtitle--sm">{t('adminCommissions.methodTitle')}</h3>
+                <DataTable
+                  columns={groupColumnsFor('adminCommissions.colProvider')}
+                  rows={data.groups.provider}
+                  getRowId={(row) => row.key}
+                  caption={t('adminCommissions.providerTitle')}
+                />
+                <h3 className="reg-subtitle reg-subtitle--sm">
+                  {t('adminCommissions.methodTitle')}
+                </h3>
                 <DataTable
                   columns={groupColumnsFor('adminCommissions.colMethod')}
                   rows={data.groups.method}
@@ -244,7 +311,10 @@ export function AdminCommissionsTab({ locale }: Props) {
           </div>
 
           <Card>
-            <CardHeader title={t('adminCommissions.transactionsTitle')} subtitle={t('adminCommissions.transactionsSubtitle')} />
+            <CardHeader
+              title={t('adminCommissions.transactionsTitle')}
+              subtitle={t('adminCommissions.transactionsSubtitle')}
+            />
             <CardBody>
               <DataTable
                 columns={transactionColumns}

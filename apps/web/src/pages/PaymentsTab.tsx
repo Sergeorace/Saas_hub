@@ -117,7 +117,12 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
   const [refundForm, setRefundForm] = useState({ amount: '', reason: '' });
 
   const [settlePending, setSettlePending] = useState(false);
-  const [settleForm, setSettleForm] = useState<{ amount: string; mode: SettlementMode; destination: string; note: string }>({
+  const [settleForm, setSettleForm] = useState<{
+    amount: string;
+    mode: SettlementMode;
+    destination: string;
+    note: string;
+  }>({
     amount: '',
     mode: 'instant',
     destination: '',
@@ -132,16 +137,23 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
     async (activeFilters = filters) => {
       try {
         setError(null);
-        const [overviewResult, providerResult, walletResult, txResult, blockResult, reconResult, ledgerResult] =
-          await Promise.all([
-            paymentApi.overview(tenantId),
-            paymentApi.providers(tenantId),
-            paymentApi.wallet(tenantId),
-            paymentApi.transactions(tenantId, { ...activeFilters, limit: 100 }),
-            paymentApi.fraudBlocks(tenantId),
-            paymentApi.reconciliations(tenantId),
-            paymentApi.ledger(tenantId, 50),
-          ]);
+        const [
+          overviewResult,
+          providerResult,
+          walletResult,
+          txResult,
+          blockResult,
+          reconResult,
+          ledgerResult,
+        ] = await Promise.all([
+          paymentApi.overview(tenantId),
+          paymentApi.providers(tenantId),
+          paymentApi.wallet(tenantId),
+          paymentApi.transactions(tenantId, { ...activeFilters, limit: 100 }),
+          paymentApi.fraudBlocks(tenantId),
+          paymentApi.reconciliations(tenantId),
+          paymentApi.ledger(tenantId, 50),
+        ]);
         setOverview(overviewResult);
         setProviders(providerResult.items);
         setWallet(walletResult.wallet);
@@ -184,7 +196,11 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
     });
     try {
       const result = await orderApi.list(tenantId, { limit: 50 });
-      setOrders(result.items.filter((order) => order.paymentStatus !== 'payee' && order.status !== 'annulee'));
+      setOrders(
+        result.items.filter(
+          (order) => order.paymentStatus !== 'payee' && order.status !== 'annulee',
+        ),
+      );
     } catch {
       setOrders([]);
     }
@@ -211,9 +227,7 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
         note: payForm.note || undefined,
         tipXof: tipXof && tipXof > 0 ? tipXof : undefined,
         tipStaffIds: staffIds.length > 0 ? staffIds : undefined,
-        ...(payForm.orderId
-          ? { orderId: payForm.orderId }
-          : { amountXof: Number(payForm.amount) }),
+        ...(payForm.orderId ? { orderId: payForm.orderId } : { amountXof: Number(payForm.amount) }),
       };
       const result = await paymentApi.initiate(tenantId, input);
       toast.push({
@@ -230,7 +244,10 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
     }
   };
 
-  const runSandbox = async (transaction: PaymentTransaction, outcome: 'confirme' | 'echoue' | 'expire') => {
+  const runSandbox = async (
+    transaction: PaymentTransaction,
+    outcome: 'confirme' | 'echoue' | 'expire',
+  ) => {
     setBusyId(transaction.id);
     try {
       const result = await paymentApi.sandboxOutcome(tenantId, transaction.id, outcome);
@@ -324,7 +341,11 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
   const toggleProvider = async (provider: PaymentProviderView) => {
     setBusyId(provider.id);
     try {
-      await paymentApi.setProviderHealth(tenantId, provider.id, provider.health === 'up' ? 'down' : 'up');
+      await paymentApi.setProviderHealth(
+        tenantId,
+        provider.id,
+        provider.health === 'up' ? 'down' : 'up',
+      );
       await load();
     } catch (cause) {
       toast.push({ tone: 'error', title: errorMessage(cause) });
@@ -349,7 +370,10 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
   const runReconciliation = async (injectAnomalies: boolean) => {
     setReconPending(true);
     try {
-      const result = await paymentApi.runReconciliation(tenantId, { date: reconDate, injectAnomalies });
+      const result = await paymentApi.runReconciliation(tenantId, {
+        date: reconDate,
+        injectAnomalies,
+      });
       setReconciliation(result.run);
       toast.push({
         tone: result.run.balanced ? 'success' : 'warning',
@@ -379,7 +403,11 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
       render: (row) => (
         <div className="console-cell">
           <strong>{row.providerReference}</strong>
-          <span>{row.invoiceNumber ? `${t('payments.txColOrder')} ${row.invoiceNumber}` : row.orderNumber ?? row.id}</span>
+          <span>
+            {row.invoiceNumber
+              ? `${t('payments.txColOrder')} ${row.invoiceNumber}`
+              : (row.orderNumber ?? row.id)}
+          </span>
         </div>
       ),
     },
@@ -400,7 +428,9 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
       render: (row) => (
         <div className="console-cell" style={{ textAlign: 'right' }}>
           <strong>{formatXof(row.amountXof, locale)}</strong>
-          {row.tipXof > 0 && <span>{t('payments.txTipBadge', { amount: formatXof(row.tipXof, locale) })}</span>}
+          {row.tipXof > 0 && (
+            <span>{t('payments.txTipBadge', { amount: formatXof(row.tipXof, locale) })}</span>
+          )}
         </div>
       ),
     },
@@ -424,7 +454,9 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
             {t(`payments.status.${row.status}`)}
           </Badge>
           {row.refundedXof > 0 && (
-            <span>{t('payments.txRefundedBadge', { amount: formatXof(row.refundedXof, locale) })}</span>
+            <span>
+              {t('payments.txRefundedBadge', { amount: formatXof(row.refundedXof, locale) })}
+            </span>
           )}
         </div>
       ),
@@ -446,10 +478,19 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
         <div className="console-filters">
           {canManage && row.status === 'en_attente' && row.simulated && (
             <>
-              <Button size="sm" variant="primary" loading={busyId === row.id} onClick={() => void runSandbox(row, 'confirme')}>
+              <Button
+                size="sm"
+                variant="primary"
+                loading={busyId === row.id}
+                onClick={() => void runSandbox(row, 'confirme')}
+              >
                 {t('payments.txConfirmSandbox')}
               </Button>
-              <Button size="sm" variant="danger-soft" onClick={() => void runSandbox(row, 'echoue')}>
+              <Button
+                size="sm"
+                variant="danger-soft"
+                onClick={() => void runSandbox(row, 'echoue')}
+              >
                 {t('payments.txFailSandbox')}
               </Button>
               <Button size="sm" variant="outline" onClick={() => void runSandbox(row, 'expire')}>
@@ -467,11 +508,13 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
               {t('payments.txCancel')}
             </Button>
           )}
-          {canRefund && (row.status === 'confirmee' || row.status === 'remboursee_partielle') && row.refundableXof > 0 && (
-            <Button size="sm" variant="outline" onClick={() => openRefund(row)}>
-              {t('payments.txRefund')}
-            </Button>
-          )}
+          {canRefund &&
+            (row.status === 'confirmee' || row.status === 'remboursee_partielle') &&
+            row.refundableXof > 0 && (
+              <Button size="sm" variant="outline" onClick={() => openRefund(row)}>
+                {t('payments.txRefund')}
+              </Button>
+            )}
         </div>
       ),
     },
@@ -492,8 +535,12 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
       {error && (
         <Card className="console-alert">
           <CardBody>
-            <p className="auth-error" role="alert">{error}</p>
-            <Button size="sm" variant="outline" onClick={() => void load()}>{t('payments.refresh')}</Button>
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void load()}>
+              {t('payments.refresh')}
+            </Button>
           </CardBody>
         </Card>
       )}
@@ -524,7 +571,9 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
           label={t('payments.statAvailable')}
           value={formatXof(wallet?.availableXof ?? 0, locale)}
           icon="wallet"
-          meta={t('payments.statAvailableMeta', { settled: formatXof(wallet?.settledXof ?? 0, locale) })}
+          meta={t('payments.statAvailableMeta', {
+            settled: formatXof(wallet?.settledXof ?? 0, locale),
+          })}
         />
       </div>
 
@@ -532,12 +581,23 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
         <Card>
           <CardHeader
             title={t('payments.walletTitle')}
-            subtitle={wallet ? t('payments.walletUpdated', { date: formatDate(wallet.updatedAt, locale) }) : undefined}
-            action={<Badge tone={ledger?.integrity.ok ? 'success' : 'danger'} dot>{ledger?.integrity.ok ? t('payments.ledgerOk') : t('payments.ledgerBroken')}</Badge>}
+            subtitle={
+              wallet
+                ? t('payments.walletUpdated', { date: formatDate(wallet.updatedAt, locale) })
+                : undefined
+            }
+            action={
+              <Badge tone={ledger?.integrity.ok ? 'success' : 'danger'} dot>
+                {ledger?.integrity.ok ? t('payments.ledgerOk') : t('payments.ledgerBroken')}
+              </Badge>
+            }
           />
           <CardBody>
             <div className="console-stack">
-              <div className="console-stats" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+              <div
+                className="console-stats"
+                style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}
+              >
                 <div className="console-cell">
                   <span>{t('payments.walletAvailable')}</span>
                   <strong>{formatXof(wallet?.availableXof ?? 0, locale)}</strong>
@@ -561,7 +621,9 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                       type="number"
                       min={100}
                       value={settleForm.amount}
-                      onChange={(event) => setSettleForm({ ...settleForm, amount: event.target.value })}
+                      onChange={(event) =>
+                        setSettleForm({ ...settleForm, amount: event.target.value })
+                      }
                     />
                     <SegmentedControl<SettlementMode>
                       ariaLabel={t('payments.settlementMode')}
@@ -576,15 +638,21 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                       label={t('payments.settlementDestination')}
                       placeholder={t('payments.settlementDestinationPlaceholder')}
                       value={settleForm.destination}
-                      onChange={(event) => setSettleForm({ ...settleForm, destination: event.target.value })}
+                      onChange={(event) =>
+                        setSettleForm({ ...settleForm, destination: event.target.value })
+                      }
                     />
                     <Input
                       label={t('payments.settlementNote')}
                       value={settleForm.note}
-                      onChange={(event) => setSettleForm({ ...settleForm, note: event.target.value })}
+                      onChange={(event) =>
+                        setSettleForm({ ...settleForm, note: event.target.value })
+                      }
                     />
                     <Button
-                      disabled={!canManage || !settleForm.amount || settleForm.destination.trim().length < 3}
+                      disabled={
+                        !canManage || !settleForm.amount || settleForm.destination.trim().length < 3
+                      }
                       loading={settlePending}
                       onClick={() => void submitSettlement()}
                     >
@@ -601,13 +669,21 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                 ) : (
                   <div className="console-stack">
                     {settlements.map((settlement) => (
-                      <div key={settlement.id} className="console-toolbar" style={{ marginBottom: 0 }}>
+                      <div
+                        key={settlement.id}
+                        className="console-toolbar"
+                        style={{ marginBottom: 0 }}
+                      >
                         <div className="console-cell">
                           <strong>{formatXof(settlement.amountXof, locale)}</strong>
                           <span>{settlement.destination}</span>
                         </div>
                         <div className="console-filters">
-                          <Badge tone="neutral">{t(`payments.settlementMode${settlement.mode === 'instant' ? 'Instant' : 'Batch'}`)}</Badge>
+                          <Badge tone="neutral">
+                            {t(
+                              `payments.settlementMode${settlement.mode === 'instant' ? 'Instant' : 'Batch'}`,
+                            )}
+                          </Badge>
                           <Badge tone={SETTLEMENT_TONE[settlement.status]} dot>
                             {t(`payments.settlementStatus.${settlement.status}`)}
                           </Badge>
@@ -623,7 +699,10 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
 
         <div className="console-stack">
           <Card>
-            <CardHeader title={t('payments.providersTitle')} subtitle={t('payments.providersHint')} />
+            <CardHeader
+              title={t('payments.providersTitle')}
+              subtitle={t('payments.providersHint')}
+            />
             <CardBody>
               <div className="console-stack">
                 {providers.map((provider) => (
@@ -640,10 +719,14 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                     </div>
                     <div className="console-filters">
                       <Badge tone={provider.configured ? 'success' : 'neutral'}>
-                        {provider.configured ? t('payments.providerConfigured') : t('payments.providerNotConfigured')}
+                        {provider.configured
+                          ? t('payments.providerConfigured')
+                          : t('payments.providerNotConfigured')}
                       </Badge>
                       <Badge tone={provider.health === 'up' ? 'success' : 'danger'} dot>
-                        {provider.health === 'up' ? t('payments.providerUp') : t('payments.providerDown')}
+                        {provider.health === 'up'
+                          ? t('payments.providerUp')
+                          : t('payments.providerDown')}
                       </Badge>
                       <Button
                         size="sm"
@@ -680,7 +763,8 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                       <div className="console-cell">
                         <strong>{block.userId}</strong>
                         <span>
-                          {t('payments.fraudRule')} : {block.rule} · {t('payments.fraudExpiry', { date: formatDate(block.expiresAt, locale) })}
+                          {t('payments.fraudRule')} : {block.rule} ·{' '}
+                          {t('payments.fraudExpiry', { date: formatDate(block.expiresAt, locale) })}
                         </span>
                       </div>
                       <div className="console-filters">
@@ -688,7 +772,12 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                           {block.active ? t('payments.fraudActive') : t('payments.fraudLifted')}
                         </Badge>
                         {block.active && (
-                          <Button size="sm" variant="outline" disabled={!canManage} onClick={() => void liftBlock(block)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={!canManage}
+                            onClick={() => void liftBlock(block)}
+                          >
                             {t('payments.fraudLift')}
                           </Button>
                         )}
@@ -709,9 +798,15 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
             <div className="console-filters">
               {canExport && (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => void download('csv')}>{t('payments.exportCsv')}</Button>
-                  <Button size="sm" variant="outline" onClick={() => void download('xls')}>{t('payments.exportExcel')}</Button>
-                  <Button size="sm" variant="outline" onClick={() => void download('pdf')}>{t('payments.exportPdf')}</Button>
+                  <Button size="sm" variant="outline" onClick={() => void download('csv')}>
+                    {t('payments.exportCsv')}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => void download('xls')}>
+                    {t('payments.exportExcel')}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => void download('pdf')}>
+                    {t('payments.exportPdf')}
+                  </Button>
                 </>
               )}
               {canManage && (
@@ -738,9 +833,17 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                 onChange={(event) => setFilters({ ...filters, status: event.target.value })}
                 options={[
                   { value: '', label: t('payments.txAll') },
-                  ...(['en_attente', 'confirmee', 'echouee', 'expiree', 'annulee', 'remboursee_partielle', 'remboursee'] as PaymentStatus[]).map(
-                    (status) => ({ value: status, label: t(`payments.status.${status}`) }),
-                  ),
+                  ...(
+                    [
+                      'en_attente',
+                      'confirmee',
+                      'echouee',
+                      'expiree',
+                      'annulee',
+                      'remboursee_partielle',
+                      'remboursee',
+                    ] as PaymentStatus[]
+                  ).map((status) => ({ value: status, label: t(`payments.status.${status}`) })),
                 ]}
               />
               <Select
@@ -760,9 +863,18 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
             </Button>
           </div>
           {transactions.length === 0 ? (
-            <EmptyState icon="banknote" title={t('payments.txTitle')} description={t('payments.txEmpty')} />
+            <EmptyState
+              icon="banknote"
+              title={t('payments.txTitle')}
+              description={t('payments.txEmpty')}
+            />
           ) : (
-            <DataTable columns={columns} rows={transactions} getRowId={(row) => row.id} caption={t('payments.txTitle')} />
+            <DataTable
+              columns={columns}
+              rows={transactions}
+              getRowId={(row) => row.id}
+              caption={t('payments.txTitle')}
+            />
           )}
         </CardBody>
       </Card>
@@ -779,10 +891,19 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                   value={reconDate}
                   onChange={(event) => setReconDate(event.target.value)}
                 />
-                <Button loading={reconPending} disabled={!canManage} onClick={() => void runReconciliation(false)}>
+                <Button
+                  loading={reconPending}
+                  disabled={!canManage}
+                  onClick={() => void runReconciliation(false)}
+                >
                   {t('payments.reconRun')}
                 </Button>
-                <Button variant="outline" loading={reconPending} disabled={!canManage} onClick={() => void runReconciliation(true)}>
+                <Button
+                  variant="outline"
+                  loading={reconPending}
+                  disabled={!canManage}
+                  onClick={() => void runReconciliation(true)}
+                >
                   {t('payments.reconRunAnomalies')}
                 </Button>
               </div>
@@ -790,13 +911,17 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                 <div className="console-stack">
                   <div className="console-filters">
                     <Badge tone={reconciliation.balanced ? 'success' : 'danger'} dot>
-                      {reconciliation.balanced ? t('payments.reconBalanced') : t('payments.reconUnbalanced')}
+                      {reconciliation.balanced
+                        ? t('payments.reconBalanced')
+                        : t('payments.reconUnbalanced')}
                     </Badge>
                     <span className="console-muted">
                       {t('payments.reconLastRun')} · {formatDate(reconciliation.createdAt, locale)}
                     </span>
                   </div>
-                  <p className="console-muted">{t('payments.reconMatched', { count: reconciliation.matched })}</p>
+                  <p className="console-muted">
+                    {t('payments.reconMatched', { count: reconciliation.matched })}
+                  </p>
                   {reconciliation.missingInStatement.length > 0 && (
                     <div className="console-cell">
                       <strong>{t('payments.reconMissing')}</strong>
@@ -808,7 +933,8 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                       <strong>{t('payments.reconMismatch')}</strong>
                       {reconciliation.amountMismatches.map((mismatch) => (
                         <span key={mismatch.reference}>
-                          {mismatch.reference} : {formatXof(mismatch.platformXof, locale)} ≠ {formatXof(mismatch.statementXof, locale)}
+                          {mismatch.reference} : {formatXof(mismatch.platformXof, locale)} ≠{' '}
+                          {formatXof(mismatch.statementXof, locale)}
                         </span>
                       ))}
                     </div>
@@ -817,11 +943,15 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
                     <div className="console-cell">
                       <strong>{t('payments.reconOrphan')}</strong>
                       {reconciliation.orphanRows.map((row) => (
-                        <span key={row.reference}>{row.reference} · {formatXof(row.amountXof, locale)}</span>
+                        <span key={row.reference}>
+                          {row.reference} · {formatXof(row.amountXof, locale)}
+                        </span>
                       ))}
                     </div>
                   )}
-                  {reconciliation.balanced && <p className="console-muted">{t('payments.reconNone')}</p>}
+                  {reconciliation.balanced && (
+                    <p className="console-muted">{t('payments.reconNone')}</p>
+                  )}
                 </div>
               ) : (
                 <p className="console-muted">{t('payments.reconEmpty')}</p>
@@ -840,13 +970,16 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
             }
           />
           <CardBody>
-            <p className="console-muted">{t('payments.ledgerEntries', { count: ledger?.integrity.entries ?? 0 })}</p>
+            <p className="console-muted">
+              {t('payments.ledgerEntries', { count: ledger?.integrity.entries ?? 0 })}
+            </p>
             <div className="console-stack">
               {(ledger?.entries ?? []).slice(0, 6).map((entry) => (
                 <div key={entry.id} className="console-cell">
                   <strong>{entry.memo}</strong>
                   <span>
-                    {formatDate(entry.at, locale)} · {entry.lines.map((line) => line.account).join(' / ')}
+                    {formatDate(entry.at, locale)} ·{' '}
+                    {entry.lines.map((line) => line.account).join(' / ')}
                   </span>
                 </div>
               ))}
@@ -862,8 +995,12 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
         size="lg"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setPayOpen(false)}>{t('meta.close')}</Button>
-            <Button loading={payPending} onClick={() => void submitPayment()}>{t('payments.newSubmit')}</Button>
+            <Button variant="ghost" onClick={() => setPayOpen(false)}>
+              {t('meta.close')}
+            </Button>
+            <Button loading={payPending} onClick={() => void submitPayment()}>
+              {t('payments.newSubmit')}
+            </Button>
           </>
         }
       >
@@ -874,7 +1011,8 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
             onChange={(event) => {
               const orderId = event.target.value;
               const order = orders.find((candidate) => candidate.id === orderId);
-              const paid = order?.payments?.reduce((sum, payment) => sum + payment.amountXof, 0) ?? 0;
+              const paid =
+                order?.payments?.reduce((sum, payment) => sum + payment.amountXof, 0) ?? 0;
               setPayForm({
                 ...payForm,
                 orderId,
@@ -901,7 +1039,9 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
           <Select
             label={t('payments.newMethod')}
             value={payForm.method}
-            onChange={(event) => setPayForm({ ...payForm, method: event.target.value as 'mobile_money' | 'carte' })}
+            onChange={(event) =>
+              setPayForm({ ...payForm, method: event.target.value as 'mobile_money' | 'carte' })
+            }
             options={[
               { value: 'mobile_money', label: t('payments.methods.mobile_money') },
               { value: 'carte', label: t('payments.methods.carte') },
@@ -954,7 +1094,9 @@ export function PaymentsTab({ tenantId, locale, permissions }: Props) {
         title={t('payments.refundTitle')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setRefundTarget(null)}>{t('meta.close')}</Button>
+            <Button variant="ghost" onClick={() => setRefundTarget(null)}>
+              {t('meta.close')}
+            </Button>
             <Button
               variant="danger"
               loading={refundPending}

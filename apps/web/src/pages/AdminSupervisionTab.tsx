@@ -17,7 +17,13 @@ import {
   type Column,
   type Locale,
 } from '@resto-hub/design-system';
-import { errorMessage, platformAdminApi, type PlatformSupervision, type PlatformLogRow, type SupervisionServiceRow } from '../lib/api';
+import {
+  errorMessage,
+  platformAdminApi,
+  type PlatformSupervision,
+  type PlatformLogRow,
+  type SupervisionServiceRow,
+} from '../lib/api';
 import { useSession } from '../lib/session';
 
 interface Props {
@@ -76,7 +82,10 @@ export function AdminSupervisionTab({ locale }: Props) {
   useEffect(() => {
     void load();
     const timer = window.setInterval(() => {
-      void platformAdminApi.supervision().then(setData).catch(() => undefined);
+      void platformAdminApi
+        .supervision()
+        .then(setData)
+        .catch(() => undefined);
     }, 30_000);
     return () => window.clearInterval(timer);
   }, [load]);
@@ -88,7 +97,11 @@ export function AdminSupervisionTab({ locale }: Props) {
       toast.push({ title: t('adminSupervision.checked') });
       await load();
     } catch (cause) {
-      toast.push({ title: t('adminSupervision.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('adminSupervision.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setChecking(false);
     }
@@ -101,7 +114,11 @@ export function AdminSupervisionTab({ locale }: Props) {
       toast.push({ title: t('adminSupervision.alertUpdated') });
       await load();
     } catch (cause) {
-      toast.push({ title: t('adminSupervision.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('adminSupervision.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setAlertPending(null);
     }
@@ -156,7 +173,14 @@ export function AdminSupervisionTab({ locale }: Props) {
       align: 'right',
       render: (row) => (
         <span className="console-muted">
-          {row.lastCheckAt ? formatDate(row.lastCheckAt, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : t('adminSupervision.noChecks')}
+          {row.lastCheckAt
+            ? formatDate(row.lastCheckAt, locale, {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : t('adminSupervision.noChecks')}
         </span>
       ),
     },
@@ -167,7 +191,9 @@ export function AdminSupervisionTab({ locale }: Props) {
       key: 'level',
       header: t('adminSupervision.colLevel'),
       render: (row) => (
-        <Badge tone={LEVEL_TONE[row.level] ?? 'neutral'}>{t(`adminSupervision.level_${row.level}`)}</Badge>
+        <Badge tone={LEVEL_TONE[row.level] ?? 'neutral'}>
+          {t(`adminSupervision.level_${row.level}`)}
+        </Badge>
       ),
     },
     {
@@ -186,13 +212,20 @@ export function AdminSupervisionTab({ locale }: Props) {
       align: 'right',
       render: (row) => (
         <span className="console-muted">
-          {formatDate(row.at, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+          {formatDate(row.at, locale, {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </span>
       ),
     },
   ];
 
-  const logs = (data?.logs ?? []).filter((entry) => (level === 'all' ? true : entry.level === level));
+  const logs = (data?.logs ?? []).filter((entry) =>
+    level === 'all' ? true : entry.level === level,
+  );
   const openAlerts = data?.alerts.filter((alert) => alert.status !== 'resolved') ?? [];
 
   return (
@@ -203,11 +236,22 @@ export function AdminSupervisionTab({ locale }: Props) {
           subtitle={t('adminSupervision.subtitle')}
           action={
             <div className="console-toolbar" style={{ margin: 0 }}>
-              <Button size="sm" variant="outline" iconLeft="refresh" onClick={() => void load()} loading={loading}>
+              <Button
+                size="sm"
+                variant="outline"
+                iconLeft="refresh"
+                onClick={() => void load()}
+                loading={loading}
+              >
                 {t('adminSupervision.refresh')}
               </Button>
               {canOperate && (
-                <Button size="sm" iconLeft="play" onClick={() => void runCheck()} loading={checking}>
+                <Button
+                  size="sm"
+                  iconLeft="play"
+                  onClick={() => void runCheck()}
+                  loading={checking}
+                >
                   {checking ? t('adminSupervision.checking') : t('adminSupervision.check')}
                 </Button>
               )}
@@ -217,8 +261,12 @@ export function AdminSupervisionTab({ locale }: Props) {
         <CardBody>
           {error ? (
             <div className="console-stack">
-              <p className="auth-error" role="alert">{t('adminSupervision.errorTitle')} — {error}</p>
-              <Button size="sm" variant="outline" onClick={() => void load()}>{t('adminSupervision.refresh')}</Button>
+              <p className="auth-error" role="alert">
+                {t('adminSupervision.errorTitle')} — {error}
+              </p>
+              <Button size="sm" variant="outline" onClick={() => void load()}>
+                {t('adminSupervision.refresh')}
+              </Button>
             </div>
           ) : loading || !data ? (
             <SkeletonText lines={4} />
@@ -228,17 +276,31 @@ export function AdminSupervisionTab({ locale }: Props) {
                 label={t('adminSupervision.kpiServicesUp')}
                 value={`${data.services.filter((service) => service.status === 'up').length}/${data.services.length}`}
                 icon="layers"
-                meta={data.services.some((service) => service.status === 'unknown') ? t('adminSupervision.status_unknown') : undefined}
+                meta={
+                  data.services.some((service) => service.status === 'unknown')
+                    ? t('adminSupervision.status_unknown')
+                    : undefined
+                }
               />
-              <StatCard label={t('adminSupervision.kpiAlerts')} value={openAlerts.length} icon="alert" />
-              <StatCard label={t('adminSupervision.kpiEvents')} value={data.metrics.events24h} icon="zap" />
+              <StatCard
+                label={t('adminSupervision.kpiAlerts')}
+                value={openAlerts.length}
+                icon="alert"
+              />
+              <StatCard
+                label={t('adminSupervision.kpiEvents')}
+                value={data.metrics.events24h}
+                icon="zap"
+              />
               <StatCard
                 label={t('adminSupervision.kpiAudit')}
                 value={data.audit.length}
                 icon="shield"
                 meta={
                   <Badge tone={data.audit.valid ? 'success' : 'danger'} dot>
-                    {data.audit.valid ? t('adminSupervision.chainOk') : t('adminSupervision.chainBroken')}
+                    {data.audit.valid
+                      ? t('adminSupervision.chainOk')
+                      : t('adminSupervision.chainBroken')}
                   </Badge>
                 }
               />
@@ -251,7 +313,10 @@ export function AdminSupervisionTab({ locale }: Props) {
       {data && (
         <>
           <Card>
-            <CardHeader title={t('adminSupervision.servicesTitle')} subtitle={t('adminSupervision.servicesSubtitle')} />
+            <CardHeader
+              title={t('adminSupervision.servicesTitle')}
+              subtitle={t('adminSupervision.servicesSubtitle')}
+            />
             <CardBody>
               <DataTable
                 columns={serviceColumns}
@@ -264,10 +329,17 @@ export function AdminSupervisionTab({ locale }: Props) {
 
           <div className="console-2col">
             <Card>
-              <CardHeader title={t('adminSupervision.alertsTitle')} subtitle={t('adminSupervision.alertsSubtitle')} />
+              <CardHeader
+                title={t('adminSupervision.alertsTitle')}
+                subtitle={t('adminSupervision.alertsSubtitle')}
+              />
               <CardBody>
                 {data.alerts.length === 0 ? (
-                  <EmptyState icon="check-circle" title={t('adminSupervision.alertsEmptyTitle')} description={t('adminSupervision.alertsEmptyBody')} />
+                  <EmptyState
+                    icon="check-circle"
+                    title={t('adminSupervision.alertsEmptyTitle')}
+                    description={t('adminSupervision.alertsEmptyBody')}
+                  />
                 ) : (
                   <ul className="console-queue">
                     {data.alerts.map((alert) => (
@@ -275,13 +347,26 @@ export function AdminSupervisionTab({ locale }: Props) {
                         <div>
                           <strong>{alert.message}</strong>
                           <span>
-                            {alert.service} · {formatDate(alert.createdAt, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                            {alert.service} ·{' '}
+                            {formatDate(alert.createdAt, locale, {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </span>
                         </div>
-                        <Badge tone={SEVERITY_TONE[alert.severity] ?? 'neutral'} dot>{t(`adminSupervision.severity_${alert.severity}`)}</Badge>
-                        <Badge tone={ALERT_TONE[alert.status] ?? 'neutral'}>{t(`adminSupervision.alertStatus_${alert.status}`)}</Badge>
+                        <Badge tone={SEVERITY_TONE[alert.severity] ?? 'neutral'} dot>
+                          {t(`adminSupervision.severity_${alert.severity}`)}
+                        </Badge>
+                        <Badge tone={ALERT_TONE[alert.status] ?? 'neutral'}>
+                          {t(`adminSupervision.alertStatus_${alert.status}`)}
+                        </Badge>
                         {alert.status !== 'resolved' && canOperate ? (
-                          <div className="console-toolbar" style={{ margin: 0, gap: 'var(--space-2)' }}>
+                          <div
+                            className="console-toolbar"
+                            style={{ margin: 0, gap: 'var(--space-2)' }}
+                          >
                             {alert.status === 'open' && (
                               <Button
                                 size="sm"
@@ -320,7 +405,14 @@ export function AdminSupervisionTab({ locale }: Props) {
                       <li key={`${event.type}-${event.at}-${index}`}>
                         <div>
                           <strong>{event.type}</strong>
-                          <span>{formatDate(event.at, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                          <span>
+                            {formatDate(event.at, locale, {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
                         </div>
                         <Badge tone="neutral">{data.metrics.eventsByType[event.type] ?? 0}</Badge>
                       </li>
@@ -352,9 +444,18 @@ export function AdminSupervisionTab({ locale }: Props) {
             />
             <CardBody>
               {logs.length === 0 ? (
-                <EmptyState icon="monitor" title={t('adminSupervision.logsEmptyTitle')} description={t('adminSupervision.logsEmptyBody')} />
+                <EmptyState
+                  icon="monitor"
+                  title={t('adminSupervision.logsEmptyTitle')}
+                  description={t('adminSupervision.logsEmptyBody')}
+                />
               ) : (
-                <DataTable columns={logColumns} rows={logs} getRowId={(row) => row.id} caption={t('adminSupervision.logsTitle')} />
+                <DataTable
+                  columns={logColumns}
+                  rows={logs}
+                  getRowId={(row) => row.id}
+                  caption={t('adminSupervision.logsTitle')}
+                />
               )}
             </CardBody>
           </Card>

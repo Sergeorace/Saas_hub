@@ -39,7 +39,10 @@ export async function buildReceiptPdf(input: ReceiptInput): Promise<Uint8Array> 
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   const width = 226;
-  const lineCount = order.lines.reduce((sum, line) => sum + 1 + (line.options.length > 0 ? 1 : 0), 0);
+  const lineCount = order.lines.reduce(
+    (sum, line) => sum + 1 + (line.options.length > 0 ? 1 : 0),
+    0,
+  );
   const height = Math.max(420, 250 + lineCount * 14);
   const page = doc.addPage([width, height]);
   const ink = rgb(0.12, 0.1, 0.09);
@@ -47,11 +50,15 @@ export async function buildReceiptPdf(input: ReceiptInput): Promise<Uint8Array> 
   const accent = rgb(0.76, 0.25, 0.05);
   let y = height - 24;
 
-  const text = (value: string, size: number, options: { bold?: boolean; color?: typeof ink; align?: 'left' | 'right'; x?: number } = {}) => {
+  const text = (
+    value: string,
+    size: number,
+    options: { bold?: boolean; color?: typeof ink; align?: 'left' | 'right'; x?: number } = {},
+  ) => {
     const usedFont = options.bold ? bold : font;
     const usedSize = size;
     const usedWidth = usedFont.widthOfTextAtSize(value, usedSize);
-    const x = options.align === 'right' ? width - 16 - usedWidth : options.x ?? 16;
+    const x = options.align === 'right' ? width - 16 - usedWidth : (options.x ?? 16);
     page.drawText(value, { x, y, size: usedSize, font: usedFont, color: options.color ?? ink });
   };
 
@@ -72,7 +79,9 @@ export async function buildReceiptPdf(input: ReceiptInput): Promise<Uint8Array> 
   text(dateFr(printedAt), 7, { color: muted });
   y -= 11;
   text(
-    order.channel === 'sur_place' && order.tableCode ? `${CHANNEL_LABEL[order.channel]} · ${order.tableCode}` : CHANNEL_LABEL[order.channel],
+    order.channel === 'sur_place' && order.tableCode
+      ? `${CHANNEL_LABEL[order.channel]} · ${order.tableCode}`
+      : CHANNEL_LABEL[order.channel],
     7,
     { color: muted },
   );
@@ -82,11 +91,19 @@ export async function buildReceiptPdf(input: ReceiptInput): Promise<Uint8Array> 
   }
 
   y -= 14;
-  page.drawLine({ start: { x: 16, y }, end: { x: width - 16, y }, thickness: 0.5, color: rgb(0.82, 0.8, 0.78) });
+  page.drawLine({
+    start: { x: 16, y },
+    end: { x: width - 16, y },
+    thickness: 0.5,
+    color: rgb(0.82, 0.8, 0.78),
+  });
   y -= 12;
 
   for (const line of order.lines) {
-    text(`${line.quantity} × ${line.productName}${line.variantName ? ` (${line.variantName})` : ''}`, 8);
+    text(
+      `${line.quantity} × ${line.productName}${line.variantName ? ` (${line.variantName})` : ''}`,
+      8,
+    );
     text(xof(line.lineTotalXof), 8, { align: 'right' });
     y -= 11;
     if (line.options.length > 0) {
@@ -100,7 +117,12 @@ export async function buildReceiptPdf(input: ReceiptInput): Promise<Uint8Array> 
   }
 
   y -= 4;
-  page.drawLine({ start: { x: 16, y }, end: { x: width - 16, y }, thickness: 0.5, color: rgb(0.82, 0.8, 0.78) });
+  page.drawLine({
+    start: { x: 16, y },
+    end: { x: width - 16, y },
+    thickness: 0.5,
+    color: rgb(0.82, 0.8, 0.78),
+  });
   y -= 12;
 
   text('Sous-total', 7.5, { color: muted });
@@ -139,7 +161,12 @@ export async function buildReceiptPdf(input: ReceiptInput): Promise<Uint8Array> 
   }
 
   y -= 6;
-  page.drawLine({ start: { x: 16, y }, end: { x: width - 16, y }, thickness: 0.5, color: rgb(0.82, 0.8, 0.78) });
+  page.drawLine({
+    start: { x: 16, y },
+    end: { x: width - 16, y },
+    thickness: 0.5,
+    color: rgb(0.82, 0.8, 0.78),
+  });
   y -= 12;
   text('Merci de votre visite !', 7.5, { color: muted });
   y -= 9;

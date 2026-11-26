@@ -26,7 +26,14 @@ import {
   type ZoneKind,
 } from '../lib/api';
 
-const STATUS_ORDER: FloorStatus[] = ['libre', 'reservee', 'occupee', 'addition', 'nettoyage', 'hors_service'];
+const STATUS_ORDER: FloorStatus[] = [
+  'libre',
+  'reservee',
+  'occupee',
+  'addition',
+  'nettoyage',
+  'hors_service',
+];
 
 const STATUS_TO_DESIGN: Record<FloorStatus, TableStatus> = {
   libre: 'free',
@@ -74,25 +81,36 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
   const [zoneOpen, setZoneOpen] = useState(false);
   const [zoneForm, setZoneForm] = useState({ name: '', kind: 'salle' as ZoneKind, code: '' });
   const [tableOpen, setTableOpen] = useState(false);
-  const [tableForm, setTableForm] = useState({ number: '', capacity: '4', type: 'table' as TableType });
+  const [tableForm, setTableForm] = useState({
+    number: '',
+    capacity: '4',
+    type: 'table' as TableType,
+  });
   const [qrOpen, setQrOpen] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const qrUrlRef = useRef<string | null>(null);
 
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setError(null);
-    try {
-      const result = await floorApi.snapshot(tenantId);
-      setSnapshot(result);
-      setSettingsCode((current) => current || result.settings?.establishmentCode || '');
-      setActiveZone((current) => (current && result.zones.some((zone) => zone.id === current) ? current : result.zones[0]?.id ?? ''));
-      setError(null);
-    } catch (cause) {
-      if (!silent) setError(errorMessage(cause));
-    } finally {
-      setLoading(false);
-    }
-  }, [tenantId]);
+  const load = useCallback(
+    async (silent = false) => {
+      if (!silent) setError(null);
+      try {
+        const result = await floorApi.snapshot(tenantId);
+        setSnapshot(result);
+        setSettingsCode((current) => current || result.settings?.establishmentCode || '');
+        setActiveZone((current) =>
+          current && result.zones.some((zone) => zone.id === current)
+            ? current
+            : (result.zones[0]?.id ?? ''),
+        );
+        setError(null);
+      } catch (cause) {
+        if (!silent) setError(errorMessage(cause));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [tenantId],
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -119,13 +137,18 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
 
   const replaceSnapshot = (next: FloorSnapshot) => {
     setSnapshot(next);
-    setActiveZone((current) => (next.zones.some((entry) => entry.id === current) ? current : next.zones[0]?.id ?? ''));
+    setActiveZone((current) =>
+      next.zones.some((entry) => entry.id === current) ? current : (next.zones[0]?.id ?? ''),
+    );
   };
 
   const applyTable = (table: FloorTable) => {
     setSnapshot((current) =>
       current
-        ? { ...current, tables: current.tables.map((entry) => (entry.id === table.id ? table : entry)) }
+        ? {
+            ...current,
+            tables: current.tables.map((entry) => (entry.id === table.id ? table : entry)),
+          }
         : current,
     );
   };
@@ -135,7 +158,11 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
     try {
       await action();
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setBusy(null);
     }
@@ -153,7 +180,10 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
     run(`status-${table.id}`, async () => {
       const result = await floorApi.setStatus(tenantId, table.id, { status });
       applyTable(result.table);
-      toast.push({ title: t('floor.statusUpdated'), description: `${table.code} · ${t(`floor.statusLabel.${status}`)}` });
+      toast.push({
+        title: t('floor.statusUpdated'),
+        description: `${table.code} · ${t(`floor.statusLabel.${status}`)}`,
+      });
     });
 
   const createZone = () =>
@@ -188,7 +218,9 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
       });
       setTableOpen(false);
       setTableForm({ number: '', capacity: '4', type: 'table' });
-      setSnapshot((current) => (current ? { ...current, tables: [...current.tables, result.table] } : current));
+      setSnapshot((current) =>
+        current ? { ...current, tables: [...current.tables, result.table] } : current,
+      );
       setSelectedId(result.table.id);
       toast.push({ title: t('floor.tableCreated'), description: result.table.code });
       void load(true);
@@ -207,7 +239,9 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
   const toggleMergeSelection = (table: FloorTable) => {
     if (table.mergedIntoId) return;
     setMergeIds((current) =>
-      current.includes(table.id) ? current.filter((id) => id !== table.id) : [...current, table.id].slice(0, 6),
+      current.includes(table.id)
+        ? current.filter((id) => id !== table.id)
+        : [...current, table.id].slice(0, 6),
     );
   };
 
@@ -302,15 +336,25 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
   );
 
   if (loading) {
-    return <Card><CardBody><SkeletonText lines={8} /></CardBody></Card>;
+    return (
+      <Card>
+        <CardBody>
+          <SkeletonText lines={8} />
+        </CardBody>
+      </Card>
+    );
   }
 
   if (error || !snapshot) {
     return (
       <Card className="console-alert">
         <CardBody>
-          <p className="auth-error" role="alert">{error ?? t('floor.error')}</p>
-          <Button size="sm" variant="outline" onClick={() => void load()}>{t('workspace.retry')}</Button>
+          <p className="auth-error" role="alert">
+            {error ?? t('floor.error')}
+          </p>
+          <Button size="sm" variant="outline" onClick={() => void load()}>
+            {t('workspace.retry')}
+          </Button>
         </CardBody>
       </Card>
     );
@@ -323,35 +367,47 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
           <CardBody>
             <span className="console-muted">{t('floor.occupancy')}</span>
             <strong className="ws-sub-card__value">{summary?.occupancyRate ?? 0}%</strong>
-            <span>{t('floor.seated')} : {summary?.seatsOccupied ?? 0} / {summary?.seatsTotal ?? 0}</span>
+            <span>
+              {t('floor.seated')} : {summary?.seatsOccupied ?? 0} / {summary?.seatsTotal ?? 0}
+            </span>
           </CardBody>
         </Card>
         <Card className="ws-sub-card">
           <CardBody>
             <span className="console-muted">{t('floor.tablesCount')}</span>
             <strong className="ws-sub-card__value">{summary?.tables ?? 0}</strong>
-            <span>{t('floor.serviceable')} : {summary?.serviceable ?? 0}</span>
+            <span>
+              {t('floor.serviceable')} : {summary?.serviceable ?? 0}
+            </span>
           </CardBody>
         </Card>
         <Card className="ws-sub-card">
           <CardBody>
             <span className="console-muted">{t('floor.cleaning')}</span>
             <strong className="ws-sub-card__value">{summary?.byStatus.nettoyage ?? 0}</strong>
-            <Badge tone="warning" dot>{t('floor.statusLabel.nettoyage')}</Badge>
+            <Badge tone="warning" dot>
+              {t('floor.statusLabel.nettoyage')}
+            </Badge>
           </CardBody>
         </Card>
         <Card className="ws-sub-card">
           <CardBody>
             <span className="console-muted">{t('floor.outOfService')}</span>
             <strong className="ws-sub-card__value">{summary?.byStatus.hors_service ?? 0}</strong>
-            <Badge tone="danger" dot>{t('floor.statusLabel.hors_service')}</Badge>
+            <Badge tone="danger" dot>
+              {t('floor.statusLabel.hors_service')}
+            </Badge>
           </CardBody>
         </Card>
         <Card className="ws-sub-card">
           <CardBody>
             <span className="console-muted">{t('floor.settings')}</span>
-            <strong className="ws-sub-card__value">{snapshot.settings?.establishmentCode ?? '—'}</strong>
-            <Badge tone="success" live>{t('floor.live')}</Badge>
+            <strong className="ws-sub-card__value">
+              {snapshot.settings?.establishmentCode ?? '—'}
+            </strong>
+            <Badge tone="success" live>
+              {t('floor.live')}
+            </Badge>
           </CardBody>
         </Card>
       </div>
@@ -367,7 +423,13 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
               onChange={(event) => setSettingsCode(event.target.value.toUpperCase())}
               maxLength={12}
             />
-            <Button variant="outline" loading={busy === 'settings'} disabled={!canManage} onClick={() => void saveSettings()} iconLeft="check">
+            <Button
+              variant="outline"
+              loading={busy === 'settings'}
+              disabled={!canManage}
+              onClick={() => void saveSettings()}
+              iconLeft="check"
+            >
               {t('floor.save')}
             </Button>
             <div className="floor-legend" aria-label={t('floor.legend')}>
@@ -389,20 +451,42 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
             subtitle={t('floor.dragHint')}
             action={
               <div className="console-roles">
-                <Button size="sm" variant="ghost" iconLeft="refresh" onClick={() => void load(true)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  iconLeft="refresh"
+                  onClick={() => void load(true)}
+                >
                   {t('floor.refresh')}
                 </Button>
                 {canManage && (
                   <>
-                    <Button size="sm" variant="outline" iconLeft="plus" onClick={() => setZoneOpen(true)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      iconLeft="plus"
+                      onClick={() => setZoneOpen(true)}
+                    >
                       {t('floor.newZone')}
                     </Button>
-                    <Button size="sm" variant="ghost" iconLeft="layers" disabled={!activeZone} onClick={() => setTableOpen(true)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      iconLeft="layers"
+                      disabled={!activeZone}
+                      onClick={() => setTableOpen(true)}
+                    >
                       {t('floor.newTable')}
                     </Button>
                   </>
                 )}
-                <Button size="sm" variant="soft" iconLeft="download" loading={busy === 'pdf'} onClick={() => void downloadSheet()}>
+                <Button
+                  size="sm"
+                  variant="soft"
+                  iconLeft="download"
+                  loading={busy === 'pdf'}
+                  onClick={() => void downloadSheet()}
+                >
                   {t('floor.downloadPdf')}
                 </Button>
               </div>
@@ -416,7 +500,9 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                   type="button"
                   role="tab"
                   aria-selected={entry.id === activeZone}
-                  className={entry.id === activeZone ? 'floor-zone-tab is-active' : 'floor-zone-tab'}
+                  className={
+                    entry.id === activeZone ? 'floor-zone-tab is-active' : 'floor-zone-tab'
+                  }
                   onClick={() => {
                     setActiveZone(entry.id);
                     setSelectedId(null);
@@ -424,19 +510,38 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                   }}
                 >
                   {entry.name}
-                  <span>{tables.filter((table) => table.zoneId === entry.id && !table.mergedIntoId).length}</span>
+                  <span>
+                    {
+                      tables.filter((table) => table.zoneId === entry.id && !table.mergedIntoId)
+                        .length
+                    }
+                  </span>
                 </button>
               ))}
             </div>
 
             {mergeMode && (
               <div className="floor-banner" role="status">
-                <span>{t('floor.mergeMode')} · {t('floor.mergeSelection', { count: mergeIds.length })}</span>
+                <span>
+                  {t('floor.mergeMode')} · {t('floor.mergeSelection', { count: mergeIds.length })}
+                </span>
                 <div className="console-roles">
-                  <Button size="sm" variant="ghost" onClick={() => { setMergeMode(false); setMergeIds([]); }}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setMergeMode(false);
+                      setMergeIds([]);
+                    }}
+                  >
                     {t('catalog.cancel')}
                   </Button>
-                  <Button size="sm" loading={busy === 'merge'} disabled={mergeIds.length < 2} onClick={() => void confirmMerge()}>
+                  <Button
+                    size="sm"
+                    loading={busy === 'merge'}
+                    disabled={mergeIds.length < 2}
+                    onClick={() => void confirmMerge()}
+                  >
                     {t('floor.merge')}
                   </Button>
                 </div>
@@ -448,14 +553,26 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                 icon="grid"
                 title={t('floor.noZoneTitle')}
                 description={t('floor.noZoneBody')}
-                action={canManage ? <Button onClick={() => setZoneOpen(true)} iconLeft="plus">{t('floor.newZone')}</Button> : undefined}
+                action={
+                  canManage ? (
+                    <Button onClick={() => setZoneOpen(true)} iconLeft="plus">
+                      {t('floor.newZone')}
+                    </Button>
+                  ) : undefined
+                }
               />
             ) : primaries.length === 0 ? (
               <EmptyState
                 icon="grid"
                 title={t('floor.noTableTitle')}
                 description={t('floor.noTableBody')}
-                action={canManage ? <Button onClick={() => setTableOpen(true)} iconLeft="plus">{t('floor.newTable')}</Button> : undefined}
+                action={
+                  canManage ? (
+                    <Button onClick={() => setTableOpen(true)} iconLeft="plus">
+                      {t('floor.newTable')}
+                    </Button>
+                  ) : undefined
+                }
               />
             ) : (
               <div
@@ -471,7 +588,8 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                     ? tables.find((entry) => entry.id === table.mergedIntoId)
                     : undefined;
                   const isMergedChild = Boolean(table.mergedIntoId);
-                  const isSelected = table.id === selectedId || (isMergedChild && selectedId === table.mergedIntoId);
+                  const isSelected =
+                    table.id === selectedId || (isMergedChild && selectedId === table.mergedIntoId);
                   const mergeSelected = mergeIds.includes(table.id);
                   return (
                     <div
@@ -513,11 +631,28 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                       <span className="floor-table__code">{table.code}</span>
                       <span className="floor-table__meta">
                         {table.effectiveCapacity} pl.
-                        {table.mergedIds.length > 0 && <span className="floor-table__merge" aria-label={t('floor.mergedWith', { codes: table.mergedCodes.join(', ') })}>⊕{table.mergedIds.length}</span>}
+                        {table.mergedIds.length > 0 && (
+                          <span
+                            className="floor-table__merge"
+                            aria-label={t('floor.mergedWith', {
+                              codes: table.mergedCodes.join(', '),
+                            })}
+                          >
+                            ⊕{table.mergedIds.length}
+                          </span>
+                        )}
                       </span>
-                      {table.orderId && <span className="floor-table__order" aria-label={t('floor.openOrder')}>•</span>}
-                      <span className="floor-table__status">{t(`floor.statusLabel.${table.status}`)}</span>
-                      {isMergedChild && primary && <span className="floor-table__child-note">{primary.code}</span>}
+                      {table.orderId && (
+                        <span className="floor-table__order" aria-label={t('floor.openOrder')}>
+                          •
+                        </span>
+                      )}
+                      <span className="floor-table__status">
+                        {t(`floor.statusLabel.${table.status}`)}
+                      </span>
+                      {isMergedChild && primary && (
+                        <span className="floor-table__child-note">{primary.code}</span>
+                      )}
                     </div>
                   );
                 })}
@@ -526,11 +661,17 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
             <div className="floor-zone-foot">
               {zone && (
                 <span className="console-muted">
-                  {zone.name} · {zone.kind} · {t('floor.tablesCount')} : {zoneTables.filter((table) => !table.mergedIntoId).length}
+                  {zone.name} · {zone.kind} · {t('floor.tablesCount')} :{' '}
+                  {zoneTables.filter((table) => !table.mergedIntoId).length}
                 </span>
               )}
               {canManage && zone && (
-                <Button size="sm" variant="ghost" iconLeft="trash" onClick={() => void deleteZone(zone.id)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  iconLeft="trash"
+                  onClick={() => void deleteZone(zone.id)}
+                >
                   {t('floor.deleteZone')}
                 </Button>
               )}
@@ -544,18 +685,41 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
               <CardHeader
                 title={selected.code}
                 subtitle={`${selected.zoneName} · ${t(`floor.tableTypeLabel.${selected.type}`)}`}
-                action={<TableStatusBadge status={STATUS_TO_DESIGN[selected.status]} label={t(`floor.statusLabel.${selected.status}`)} />}
+                action={
+                  <TableStatusBadge
+                    status={STATUS_TO_DESIGN[selected.status]}
+                    label={t(`floor.statusLabel.${selected.status}`)}
+                  />
+                }
               />
               <CardBody>
                 <dl className="console-kv">
-                  <div><dt>{t('floor.capacity')}</dt><dd>{selected.capacity} · {selected.effectiveCapacity} {t('floor.seats').toLowerCase()}</dd></div>
-                  <div><dt>{t('floor.order')}</dt><dd>{selected.orderId ?? '—'}</dd></div>
-                  <div><dt>{t('floor.reservation')}</dt><dd>{selected.reservationId ?? '—'}</dd></div>
+                  <div>
+                    <dt>{t('floor.capacity')}</dt>
+                    <dd>
+                      {selected.capacity} · {selected.effectiveCapacity}{' '}
+                      {t('floor.seats').toLowerCase()}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t('floor.order')}</dt>
+                    <dd>{selected.orderId ?? '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('floor.reservation')}</dt>
+                    <dd>{selected.reservationId ?? '—'}</dd>
+                  </div>
                   {selected.mergedIntoCode && (
-                    <div><dt>{t('floor.merge')}</dt><dd>{t('floor.mergedInto', { code: selected.mergedIntoCode })}</dd></div>
+                    <div>
+                      <dt>{t('floor.merge')}</dt>
+                      <dd>{t('floor.mergedInto', { code: selected.mergedIntoCode })}</dd>
+                    </div>
                   )}
                   {selected.mergedCodes.length > 0 && (
-                    <div><dt>{t('floor.merge')}</dt><dd>{t('floor.mergedWith', { codes: selected.mergedCodes.join(', ') })}</dd></div>
+                    <div>
+                      <dt>{t('floor.merge')}</dt>
+                      <dd>{t('floor.mergedWith', { codes: selected.mergedCodes.join(', ') })}</dd>
+                    </div>
                   )}
                 </dl>
 
@@ -580,7 +744,9 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
 
                 {canManage && (
                   <div className="floor-actions">
-                    <span className="console-muted">{t('floor.merge')} / {t('floor.split')}</span>
+                    <span className="console-muted">
+                      {t('floor.merge')} / {t('floor.split')}
+                    </span>
                     <div className="console-roles">
                       <Button
                         size="sm"
@@ -594,11 +760,23 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                         {t('floor.merge')}
                       </Button>
                       {selected.mergedIds.length > 0 && (
-                        <Button size="sm" variant="ghost" iconLeft="minus" loading={busy === `split-${selected.id}`} onClick={() => void splitTable(selected)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          iconLeft="minus"
+                          loading={busy === `split-${selected.id}`}
+                          onClick={() => void splitTable(selected)}
+                        >
                           {t('floor.split')}
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" iconLeft="qr" loading={busy === `qr-${selected.id}`} onClick={() => void openQr(selected)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        iconLeft="qr"
+                        loading={busy === `qr-${selected.id}`}
+                        onClick={() => void openQr(selected)}
+                      >
                         {t('floor.qr')}
                       </Button>
                     </div>
@@ -618,10 +796,18 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                           onChange={(event) => setTransferTarget(event.target.value)}
                           options={[
                             { value: '', label: t('floor.transferTo') },
-                            ...targetsForTransfer.map((table) => ({ value: table.id, label: `${table.code} · ${t(`floor.statusLabel.${table.status}`)}` })),
+                            ...targetsForTransfer.map((table) => ({
+                              value: table.id,
+                              label: `${table.code} · ${t(`floor.statusLabel.${table.status}`)}`,
+                            })),
                           ]}
                         />
-                        <Button size="sm" loading={busy === `transfer-${selected.id}`} disabled={!transferTarget} onClick={() => void transfer(selected)}>
+                        <Button
+                          size="sm"
+                          loading={busy === `transfer-${selected.id}`}
+                          disabled={!transferTarget}
+                          onClick={() => void transfer(selected)}
+                        >
                           {t('floor.transfer')}
                         </Button>
                       </div>
@@ -633,17 +819,50 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
                   <div className="floor-actions">
                     <span className="console-muted">{t('floor.dragHint')}</span>
                     <div className="floor-nudge" role="group" aria-label={t('floor.dragHint')}>
-                      <Button size="sm" variant="ghost" iconOnly aria-label="Gauche" iconLeft="arrow-left" onClick={() => void moveTable(selected, -4, 0)} />
-                      <Button size="sm" variant="ghost" iconOnly aria-label="Haut" iconLeft="arrow-up" onClick={() => void moveTable(selected, 0, -4)} />
-                      <Button size="sm" variant="ghost" iconOnly aria-label="Bas" iconLeft="arrow-down" onClick={() => void moveTable(selected, 0, 4)} />
-                      <Button size="sm" variant="ghost" iconOnly aria-label="Droite" iconLeft="arrow-right" onClick={() => void moveTable(selected, 4, 0)} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        iconOnly
+                        aria-label="Gauche"
+                        iconLeft="arrow-left"
+                        onClick={() => void moveTable(selected, -4, 0)}
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        iconOnly
+                        aria-label="Haut"
+                        iconLeft="arrow-up"
+                        onClick={() => void moveTable(selected, 0, -4)}
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        iconOnly
+                        aria-label="Bas"
+                        iconLeft="arrow-down"
+                        onClick={() => void moveTable(selected, 0, 4)}
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        iconOnly
+                        aria-label="Droite"
+                        iconLeft="arrow-right"
+                        onClick={() => void moveTable(selected, 4, 0)}
+                      />
                     </div>
                   </div>
                 )}
 
                 {canManage && (
                   <div className="floor-actions">
-                    <Button variant="ghost" size="sm" iconLeft="trash" onClick={() => deleteTable(selected)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconLeft="trash"
+                      onClick={() => deleteTable(selected)}
+                    >
                       {t('floor.deleteTable')}
                     </Button>
                   </div>
@@ -653,7 +872,11 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
           ) : (
             <Card>
               <CardBody>
-                <EmptyState icon="grid" title={t('floor.selectTable')} description={t('floor.dragHint')} />
+                <EmptyState
+                  icon="grid"
+                  title={t('floor.selectTable')}
+                  description={t('floor.dragHint')}
+                />
               </CardBody>
             </Card>
           )}
@@ -671,8 +894,14 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
         title={t('floor.newZone')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setZoneOpen(false)}>{t('catalog.cancel')}</Button>
-            <Button loading={busy === 'zone'} onClick={() => void createZone()} disabled={zoneForm.name.trim().length < 2}>
+            <Button variant="ghost" onClick={() => setZoneOpen(false)}>
+              {t('catalog.cancel')}
+            </Button>
+            <Button
+              loading={busy === 'zone'}
+              onClick={() => void createZone()}
+              disabled={zoneForm.name.trim().length < 2}
+            >
               {t('catalog.create')}
             </Button>
           </>
@@ -694,7 +923,9 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
           <Input
             label={t('floor.zoneCode')}
             value={zoneForm.code}
-            onChange={(event) => setZoneForm({ ...zoneForm, code: event.target.value.toUpperCase() })}
+            onChange={(event) =>
+              setZoneForm({ ...zoneForm, code: event.target.value.toUpperCase() })
+            }
             maxLength={4}
             placeholder="TER"
             hint="2 à 4 caractères A-Z/0-9"
@@ -706,10 +937,14 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
         open={tableOpen}
         onClose={() => setTableOpen(false)}
         title={t('floor.newTable')}
-        description={zone ? `${zone.name} · ${snapshot.settings?.establishmentCode ?? ''}` : undefined}
+        description={
+          zone ? `${zone.name} · ${snapshot.settings?.establishmentCode ?? ''}` : undefined
+        }
         footer={
           <>
-            <Button variant="ghost" onClick={() => setTableOpen(false)}>{t('catalog.cancel')}</Button>
+            <Button variant="ghost" onClick={() => setTableOpen(false)}>
+              {t('catalog.cancel')}
+            </Button>
             <Button loading={busy === 'table'} onClick={() => void createTable()}>
               {t('catalog.create')}
             </Button>
@@ -739,8 +974,13 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
           <Select
             label={t('floor.tableType')}
             value={tableForm.type}
-            onChange={(event) => setTableForm({ ...tableForm, type: event.target.value as TableType })}
-            options={TABLE_TYPES.map((type) => ({ value: type, label: t(`floor.tableTypeLabel.${type}`) }))}
+            onChange={(event) =>
+              setTableForm({ ...tableForm, type: event.target.value as TableType })
+            }
+            options={TABLE_TYPES.map((type) => ({
+              value: type,
+              label: t(`floor.tableTypeLabel.${type}`),
+            }))}
           />
         </div>
       </Modal>
@@ -750,7 +990,11 @@ export function FloorTab({ tenantId, canManage, canStatus }: Props) {
         onClose={() => setQrOpen(false)}
         title={t('floor.qr')}
         description={selected ? `${selected.code} · ${selected.zoneName}` : undefined}
-        footer={<Button variant="ghost" onClick={() => setQrOpen(false)}>{t('catalog.cancel')}</Button>}
+        footer={
+          <Button variant="ghost" onClick={() => setQrOpen(false)}>
+            {t('catalog.cancel')}
+          </Button>
+        }
       >
         <div className="floor-qr">
           {qrUrl && <img src={qrUrl} alt={`QR ${selected?.code ?? ''}`} width={260} height={260} />}

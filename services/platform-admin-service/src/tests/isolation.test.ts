@@ -11,7 +11,12 @@ import {
   type TestCase,
 } from '@resto-hub/service-kit';
 import { buildPlatformAdminApp } from '../app.js';
-import { applyPlatformEvent, createPlatformAdminStore, seedPlatformDemo, type PlatformAdminStore } from '../store.js';
+import {
+  applyPlatformEvent,
+  createPlatformAdminStore,
+  seedPlatformDemo,
+  type PlatformAdminStore,
+} from '../store.js';
 import { applyHealthResult } from '../supervision.js';
 
 const INTERNAL_KEY = 'test-internal-key';
@@ -35,7 +40,12 @@ function claims(
   };
 }
 
-function envelope(id: string, type: string, tenantId: string | null, payload: Record<string, unknown>): EventEnvelope {
+function envelope(
+  id: string,
+  type: string,
+  tenantId: string | null,
+  payload: Record<string, unknown>,
+): EventEnvelope {
   return { id, type, tenantId, occurredAt: new Date().toISOString(), payload };
 }
 
@@ -50,7 +60,11 @@ async function main() {
 
   const bus = createEventBus({ name: 'platform-admin-test', internalKey: INTERNAL_KEY });
   const published: Array<{ type: string; payload: Record<string, unknown> }> = [];
-  const publish = async (type: string, _tenantId: string | null, payload: Record<string, unknown>) => {
+  const publish = async (
+    type: string,
+    _tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => {
     published.push({ type, payload });
     return bus.publish(type, _tenantId, payload);
   };
@@ -81,7 +95,14 @@ async function main() {
   const owner = register(
     'token-owner',
     claims('usr_gerant_sahel', 'Gérant Sahel', [], {
-      [SAHEL]: ['report:view', 'report:export', 'payment:view', 'payment:manage', 'audit:view', 'tenant:view'],
+      [SAHEL]: [
+        'report:view',
+        'report:export',
+        'payment:view',
+        'payment:manage',
+        'audit:view',
+        'tenant:view',
+      ],
     }),
   );
   const baobabOwner = register(
@@ -114,7 +135,9 @@ async function main() {
         assertEqual(health.body.service, 'platform-admin-service-test', 'Nom du service exposé');
         assertEqual(health.body.status, 'ok', 'Statut de santé');
 
-        const dashboard = await api(base, 'GET', '/api/v1/platform/dashboard', undefined, { token: admin });
+        const dashboard = await api(base, 'GET', '/api/v1/platform/dashboard', undefined, {
+          token: admin,
+        });
         assertStatus(dashboard, 200, 'Tableau de bord');
         assertEqual(dashboard.body.establishments.total, 3, 'Trois établissements annuaires');
         assertEqual(dashboard.body.establishments.suspended, 1, 'Un établissement suspendu');
@@ -144,11 +167,21 @@ async function main() {
         for (const route of routes) {
           const result = await api(base, 'GET', route, undefined, { token: owner });
           assertStatus(result, 403, `Accès gérant refusé sur ${route}`);
-          assertEqual(result.body.error.code, 'platform_scope_denied', 'Code d’erreur de périmètre');
+          assertEqual(
+            result.body.error.code,
+            'platform_scope_denied',
+            'Code d’erreur de périmètre',
+          );
         }
-        const crossTenant = await api(base, 'GET', `/api/v1/platform/establishments/${BAOBAB}`, undefined, {
-          token: baobabOwner,
-        });
+        const crossTenant = await api(
+          base,
+          'GET',
+          `/api/v1/platform/establishments/${BAOBAB}`,
+          undefined,
+          {
+            token: baobabOwner,
+          },
+        );
         assertStatus(crossTenant, 403, 'Lecture croisée d’un autre établissement refusée');
         const anonymous = await api(base, 'GET', '/api/v1/platform/dashboard');
         assertStatus(anonymous, 401, 'Accès anonyme refusé');
@@ -160,54 +193,96 @@ async function main() {
           { token: support },
         );
         assertStatus(supportWrite, 403, 'Le support ne peut pas lancer un contrôle');
-        const supportSettings = await api(base, 'GET', '/api/v1/platform/settings', undefined, { token: support });
+        const supportSettings = await api(base, 'GET', '/api/v1/platform/settings', undefined, {
+          token: support,
+        });
         assertStatus(supportSettings, 403, 'Le support ne lit pas les paramètres globaux');
       },
     },
     {
       name: 'Annuaire des établissements : filtres, recherche et agrégats financiers par tenant',
       run: async () => {
-        const active = await api(base, 'GET', '/api/v1/platform/establishments?status=active', undefined, {
-          token: admin,
-        });
+        const active = await api(
+          base,
+          'GET',
+          '/api/v1/platform/establishments?status=active',
+          undefined,
+          {
+            token: admin,
+          },
+        );
         assertStatus(active, 200, 'Annuaire actif');
         assertEqual(active.body.items.length, 2, 'Deux établissements actifs');
-        assert(active.body.items.every((item: { status: string }) => item.status === 'active'), 'Statut filtré');
-        const search = await api(base, 'GET', '/api/v1/platform/establishments?q=sahel', undefined, {
-          token: admin,
-        });
+        assert(
+          active.body.items.every((item: { status: string }) => item.status === 'active'),
+          'Statut filtré',
+        );
+        const search = await api(
+          base,
+          'GET',
+          '/api/v1/platform/establishments?q=sahel',
+          undefined,
+          {
+            token: admin,
+          },
+        );
         assertEqual(search.body.items.length, 1, 'Recherche Sahel');
         const sahel = search.body.items[0];
         assert(sahel.volume30dXof > 0, 'Volume Sahel sur 30 jours');
         assert(sahel.commission30dXof > 0, 'Commissions Sahel sur 30 jours');
-        const detail = await api(base, 'GET', `/api/v1/platform/establishments/${SAHEL}`, undefined, { token: admin });
+        const detail = await api(
+          base,
+          'GET',
+          `/api/v1/platform/establishments/${SAHEL}`,
+          undefined,
+          { token: admin },
+        );
         assertStatus(detail, 200, 'Fiche annuaire');
         assert(detail.body.transactions.length > 0, 'Transactions projetées présentes');
         assert(
-          detail.body.transactions.every((transaction: { tenantId: string }) => transaction.tenantId === SAHEL),
+          detail.body.transactions.every(
+            (transaction: { tenantId: string }) => transaction.tenantId === SAHEL,
+          ),
           'Aucune fuite de transaction inter-tenant',
         );
-        const unknown = await api(base, 'GET', '/api/v1/platform/establishments/tnt_inexistant', undefined, {
-          token: admin,
-        });
+        const unknown = await api(
+          base,
+          'GET',
+          '/api/v1/platform/establishments/tnt_inexistant',
+          undefined,
+          {
+            token: admin,
+          },
+        );
         assertStatus(unknown, 404, 'Établissement inconnu');
       },
     },
     {
       name: 'Commissions : agrégats cohérents, regroupements et période',
       run: async () => {
-        const result = await api(base, 'GET', '/api/v1/platform/commissions?days=30', undefined, { token: admin });
+        const result = await api(base, 'GET', '/api/v1/platform/commissions?days=30', undefined, {
+          token: admin,
+        });
         assertStatus(result, 200, 'Commissions 30 jours');
         const groups = result.body.groups;
-        const tenantSum = groups.tenant.reduce((sum: number, row: { volumeXof: number }) => sum + row.volumeXof, 0);
+        const tenantSum = groups.tenant.reduce(
+          (sum: number, row: { volumeXof: number }) => sum + row.volumeXof,
+          0,
+        );
         assertEqual(tenantSum, result.body.summary.volumeXof, 'Somme par tenant égale au total');
         const commissionSum = groups.provider.reduce(
           (sum: number, row: { commissionXof: number }) => sum + row.commissionXof,
           0,
         );
-        assertEqual(commissionSum, result.body.summary.commissionXof, 'Somme par fournisseur cohérente');
+        assertEqual(
+          commissionSum,
+          result.body.summary.commissionXof,
+          'Somme par fournisseur cohérente',
+        );
         assert(
-          groups.tenant.every((row: { key: string }) => ['tnt_sahelgrill', 'tnt_baobab', 'tnt_akwaba'].includes(row.key)),
+          groups.tenant.every((row: { key: string }) =>
+            ['tnt_sahelgrill', 'tnt_baobab', 'tnt_akwaba'].includes(row.key),
+          ),
           'Aucun établissement étranger',
         );
         const methodKeys = groups.method.map((row: { key: string }) => row.key);
@@ -220,9 +295,16 @@ async function main() {
           ),
           'Transactions cloisonnées',
         );
-        const week = await api(base, 'GET', '/api/v1/platform/commissions?days=7', undefined, { token: admin });
-        assert(week.body.summary.volumeXof <= result.body.summary.volumeXof, 'Période courte plus petite');
-        const forbidden = await api(base, 'GET', '/api/v1/platform/commissions', undefined, { token: owner });
+        const week = await api(base, 'GET', '/api/v1/platform/commissions?days=7', undefined, {
+          token: admin,
+        });
+        assert(
+          week.body.summary.volumeXof <= result.body.summary.volumeXof,
+          'Période courte plus petite',
+        );
+        const forbidden = await api(base, 'GET', '/api/v1/platform/commissions', undefined, {
+          token: owner,
+        });
         assertStatus(forbidden, 403, 'Commissions interdites au gérant');
       },
     },
@@ -238,7 +320,11 @@ async function main() {
             trial: false,
           }),
         );
-        assertEqual(store.directory.get('tnt_test')?.brandName, 'Test Kitchen', 'Annuaire enrichi par événement');
+        assertEqual(
+          store.directory.get('tnt_test')?.brandName,
+          'Test Kitchen',
+          'Annuaire enrichi par événement',
+        );
 
         const payment = envelope('evt_test_payment', 'PaymentConfirmed', 'tnt_test', {
           tenantId: 'tnt_test',
@@ -268,7 +354,9 @@ async function main() {
           }),
         );
         assert(
-          store.transactions.some((entry) => entry.tenantId === 'tnt_test' && entry.kind === 'failed'),
+          store.transactions.some(
+            (entry) => entry.tenantId === 'tnt_test' && entry.kind === 'failed',
+          ),
           'Échec de paiement projeté',
         );
 
@@ -291,12 +379,29 @@ async function main() {
           }),
         );
         assertEqual(store.disputes.get('dsp_test')?.status, 'resolved', 'Litige résolu');
-        const isolation = await api(base, 'GET', '/api/v1/platform/commissions?days=30', undefined, { token: admin });
-        const testRow = isolation.body.groups.tenant.find((row: { key: string }) => row.key === 'tnt_test');
-        assert(testRow && testRow.volumeXof === 10000, 'Nouvel établissement isolé dans son groupe');
-        const sahelOnly = await api(base, 'GET', `/api/v1/platform/transactions?tenantId=${SAHEL}&limit=200`, undefined, {
-          token: admin,
-        });
+        const isolation = await api(
+          base,
+          'GET',
+          '/api/v1/platform/commissions?days=30',
+          undefined,
+          { token: admin },
+        );
+        const testRow = isolation.body.groups.tenant.find(
+          (row: { key: string }) => row.key === 'tnt_test',
+        );
+        assert(
+          testRow && testRow.volumeXof === 10000,
+          'Nouvel établissement isolé dans son groupe',
+        );
+        const sahelOnly = await api(
+          base,
+          'GET',
+          `/api/v1/platform/transactions?tenantId=${SAHEL}&limit=200`,
+          undefined,
+          {
+            token: admin,
+          },
+        );
         assert(
           sahelOnly.body.items.every((entry: { tenantId: string }) => entry.tenantId === SAHEL),
           'Filtre tenant strict sur les transactions',
@@ -306,23 +411,48 @@ async function main() {
     {
       name: 'Supervision : contrôles, alertes et journal technique',
       run: async () => {
-        const supervision = await api(base, 'GET', '/api/v1/platform/supervision', undefined, { token: support });
+        const supervision = await api(base, 'GET', '/api/v1/platform/supervision', undefined, {
+          token: support,
+        });
         assertStatus(supervision, 200, 'Supervision accessible au support');
         assertEqual(supervision.body.services.length, 4, 'Quatre services supervisés');
         assert(
-          supervision.body.services.every((service: { status: string }) => service.status === 'unknown'),
+          supervision.body.services.every(
+            (service: { status: string }) => service.status === 'unknown',
+          ),
           'Statut initial inconnu',
         );
         assert(supervision.body.logs.length >= 3, 'Journaux de démonstration');
 
-        const check = await api(base, 'POST', '/api/v1/platform/supervision/check', {}, { token: admin });
+        const check = await api(
+          base,
+          'POST',
+          '/api/v1/platform/supervision/check',
+          {},
+          { token: admin },
+        );
         assertStatus(check, 200, 'Contrôle manuel');
-        assert(store.audit.some((entry) => entry.action === 'supervision.checked'), 'Contrôle audité');
+        assert(
+          store.audit.some((entry) => entry.action === 'supervision.checked'),
+          'Contrôle audité',
+        );
 
         const failing = store.services.get('payment-service');
         assert(failing, 'Service paiement enregistré');
-        applyHealthResult(store, { name: 'payment-service', ok: false, latencyMs: 120, status: null, error: 'timeout' });
-        applyHealthResult(store, { name: 'payment-service', ok: false, latencyMs: 90, status: null, error: 'timeout' });
+        applyHealthResult(store, {
+          name: 'payment-service',
+          ok: false,
+          latencyMs: 120,
+          status: null,
+          error: 'timeout',
+        });
+        applyHealthResult(store, {
+          name: 'payment-service',
+          ok: false,
+          latencyMs: 90,
+          status: null,
+          error: 'timeout',
+        });
         const alert = [...store.alerts.values()].find(
           (entry) => entry.service === 'payment-service' && entry.code === 'service_unreachable',
         );
@@ -354,35 +484,59 @@ async function main() {
           { token: admin },
         );
         assertStatus(double, 409, 'Alerte déjà close');
-        applyHealthResult(store, { name: 'payment-service', ok: true, latencyMs: 22, status: 200, error: null });
+        applyHealthResult(store, {
+          name: 'payment-service',
+          ok: true,
+          latencyMs: 22,
+          status: 200,
+          error: null,
+        });
         assertEqual(store.services.get('payment-service')?.status, 'up', 'Service rétabli');
 
-        const logs = await api(base, 'GET', '/api/v1/platform/supervision/logs?level=error', undefined, {
-          token: support,
-        });
+        const logs = await api(
+          base,
+          'GET',
+          '/api/v1/platform/supervision/logs?level=error',
+          undefined,
+          {
+            token: support,
+          },
+        );
         assertStatus(logs, 200, 'Journaux filtrés');
         assert(
           logs.body.items.every((entry: { level: string }) => entry.level === 'error'),
           'Filtre niveau respecté',
         );
-        const invalidLevel = await api(base, 'GET', '/api/v1/platform/supervision/logs?level=trace', undefined, {
-          token: support,
-        });
+        const invalidLevel = await api(
+          base,
+          'GET',
+          '/api/v1/platform/supervision/logs?level=trace',
+          undefined,
+          {
+            token: support,
+          },
+        );
         assertStatus(invalidLevel, 400, 'Niveau invalide rejeté');
       },
     },
     {
       name: 'Paramètres globaux : validation, audit immuable et événement publié',
       run: async () => {
-        const current = await api(base, 'GET', '/api/v1/platform/settings', undefined, { token: admin });
+        const current = await api(base, 'GET', '/api/v1/platform/settings', undefined, {
+          token: admin,
+        });
         assertStatus(current, 200, 'Lecture des paramètres');
         const settings = current.body.settings;
         assertEqual(settings.currency, 'XOF', 'Devise plateforme XOF');
-        assert(settings.languages.includes('fr') && settings.languages.includes('en'), 'FR et EN activés');
+        assert(
+          settings.languages.includes('fr') && settings.languages.includes('en'),
+          'FR et EN activés',
+        );
         assert(settings.providers.length >= 7, 'Fournisseurs configurés');
 
-        const nextProviders = settings.providers.map((provider: { code: string; enabled: boolean }) =>
-          provider.code === 'stripe' ? { ...provider, enabled: true } : provider,
+        const nextProviders = settings.providers.map(
+          (provider: { code: string; enabled: boolean }) =>
+            provider.code === 'stripe' ? { ...provider, enabled: true } : provider,
         );
         const nextTaxes = settings.taxes.map((tax: { code: string; ratePct: number }) =>
           tax.code === 'TG_TVA_18' ? { ...tax, ratePct: 18.5 } : tax,
@@ -397,27 +551,42 @@ async function main() {
           taxes: nextTaxes,
           providers: nextProviders,
         };
-        const updated = await api(base, 'PUT', '/api/v1/platform/settings', payload, { token: admin });
+        const updated = await api(base, 'PUT', '/api/v1/platform/settings', payload, {
+          token: admin,
+        });
         assertStatus(updated, 200, 'Mise à jour des paramètres');
-        assertEqual(updated.body.settings.supportEmail, 'assistance@resto-hub.tg', 'E-mail support mis à jour');
         assertEqual(
-          updated.body.settings.taxes.find((tax: { code: string }) => tax.code === 'TG_TVA_18').ratePct,
+          updated.body.settings.supportEmail,
+          'assistance@resto-hub.tg',
+          'E-mail support mis à jour',
+        );
+        assertEqual(
+          updated.body.settings.taxes.find((tax: { code: string }) => tax.code === 'TG_TVA_18')
+            .ratePct,
           18.5,
           'Taux TVA ajusté',
         );
         assertEqual(
-          updated.body.settings.providers.find((provider: { code: string }) => provider.code === 'stripe').enabled,
+          updated.body.settings.providers.find(
+            (provider: { code: string }) => provider.code === 'stripe',
+          ).enabled,
           true,
           'Fournisseur activé',
         );
         assertEqual(updated.body.audit.action, 'platform.settings.updated', 'Action auditée');
-        assert(published.some((entry) => entry.type === 'PlatformSettingsUpdated'), 'Événement publié');
+        assert(
+          published.some((entry) => entry.type === 'PlatformSettingsUpdated'),
+          'Événement publié',
+        );
         assert(
           store.audit.some((entry) => entry.action === 'platform.settings.updated'),
           'Journal d’audit mis à jour',
         );
 
-        const allDisabled = payload.providers.map((provider: { enabled: boolean }) => ({ ...provider, enabled: false }));
+        const allDisabled = payload.providers.map((provider: { enabled: boolean }) => ({
+          ...provider,
+          enabled: false,
+        }));
         const rejectedProviders = await api(
           base,
           'PUT',
@@ -447,17 +616,27 @@ async function main() {
           { token: admin },
         );
         assertStatus(rejectedTax, 422, 'Taxe inconnue refusée');
-        const forbidden = await api(base, 'PUT', '/api/v1/platform/settings', payload, { token: owner });
+        const forbidden = await api(base, 'PUT', '/api/v1/platform/settings', payload, {
+          token: owner,
+        });
         assertStatus(forbidden, 403, 'Écriture réservée au super-admin');
 
         const audit = await api(base, 'GET', '/api/v1/platform/audit', undefined, { token: admin });
         assertStatus(audit, 200, 'Journal d’audit lisible');
         assertEqual(audit.body.chain.valid, true, 'Chaîne d’audit valide');
         store.audit[0].meta = { tampered: true };
-        const tampered = await api(base, 'GET', '/api/v1/platform/audit', undefined, { token: admin });
-        assertEqual(tampered.body.chain.valid, false, 'Altération détectée par la chaîne de hachage');
+        const tampered = await api(base, 'GET', '/api/v1/platform/audit', undefined, {
+          token: admin,
+        });
+        assertEqual(
+          tampered.body.chain.valid,
+          false,
+          'Altération détectée par la chaîne de hachage',
+        );
         store.audit[0].meta = { demoSeed: true, services: 4 };
-        const restored = await api(base, 'GET', '/api/v1/platform/audit', undefined, { token: admin });
+        const restored = await api(base, 'GET', '/api/v1/platform/audit', undefined, {
+          token: admin,
+        });
         assertEqual(restored.body.chain.valid, true, 'Chaîne restaurée après contrôle');
       },
     },
@@ -482,13 +661,24 @@ async function main() {
           base,
           'POST',
           '/internal/logs',
-          { level: 'error', service: 'order-service', message: 'Échec de publication KDS', meta: { orderId: 'ord_1' } },
+          {
+            level: 'error',
+            service: 'order-service',
+            message: 'Échec de publication KDS',
+            meta: { orderId: 'ord_1' },
+          },
           { internalKey: INTERNAL_KEY },
         );
         assertStatus(created, 201, 'Journal ingéré');
-        const filtered = await api(base, 'GET', '/api/v1/platform/supervision/logs?service=order-service', undefined, {
-          token: admin,
-        });
+        const filtered = await api(
+          base,
+          'GET',
+          '/api/v1/platform/supervision/logs?service=order-service',
+          undefined,
+          {
+            token: admin,
+          },
+        );
         assert(filtered.body.items.length >= 1, 'Journal interrogeable par service');
       },
     },
@@ -498,7 +688,14 @@ async function main() {
         const limited = await startServer(
           {
             name: 'rate-limit-test',
-            routes: [{ method: 'GET', path: '/ping', auth: false, handler: () => ({ body: { ok: true } }) }],
+            routes: [
+              {
+                method: 'GET',
+                path: '/ping',
+                auth: false,
+                handler: () => ({ body: { ok: true } }),
+              },
+            ],
             rateLimit: { windowMs: 60_000, max: 3 },
           },
           0,

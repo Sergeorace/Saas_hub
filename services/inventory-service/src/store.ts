@@ -181,7 +181,13 @@ export function thresholdEvents(item: StockItem, before: number): InventoryEvent
   } else if (wasLow && !isLow) {
     events.push({
       type: 'StockReplenished',
-      payload: { tenantId: item.tenantId, itemId: item.id, name: item.name, quantity: after, unit: item.unit },
+      payload: {
+        tenantId: item.tenantId,
+        itemId: item.id,
+        name: item.name,
+        quantity: after,
+        unit: item.unit,
+      },
     });
   }
   return events;
@@ -206,8 +212,7 @@ export function applyMovement(
   const before = item.quantity;
   const now = nowIso();
   const signed = input.type === 'adjust' ? input.quantity : Math.abs(input.quantity);
-  const delta =
-    input.type === 'in' ? signed : input.type === 'adjust' ? signed : -signed;
+  const delta = input.type === 'in' ? signed : input.type === 'adjust' ? signed : -signed;
   const next = round3(Math.max(0, before + delta));
   let unitCost = item.costXof;
   if (input.type === 'in' && signed > 0) {
@@ -239,7 +244,14 @@ export function applyMovement(
   if (input.type === 'waste') {
     events.push({
       type: 'WasteRecorded',
-      payload: { tenantId: input.tenantId, itemId: item.id, name: item.name, quantity: Math.abs(applied), costXof: cost, reason: input.reason },
+      payload: {
+        tenantId: input.tenantId,
+        itemId: item.id,
+        name: item.name,
+        quantity: Math.abs(applied),
+        costXof: cost,
+        reason: input.reason,
+      },
     });
   }
   return { movement, events };
@@ -350,7 +362,13 @@ export function seedInventoryDemo(store: InventoryStore): void {
   if (store.items.size > 0) return;
   const tenantId = 'tnt_sahelgrill';
   const now = nowIso();
-  const supplier = (id: string, name: string, contact: string, phone: string, terms: number): Supplier => ({
+  const supplier = (
+    id: string,
+    name: string,
+    contact: string,
+    phone: string,
+    terms: number,
+  ): Supplier => ({
     id,
     tenantId,
     name,
@@ -397,21 +415,175 @@ export function seedInventoryDemo(store: InventoryStore): void {
     updatedAt: now,
   });
   const items = [
-    item('itm_poulet', 'Poulet fermier', 'VOL-POU-01', 'kg', 'viande', 18.5, 12, 2400, 'sup_agrisud', 'cuisine'),
-    item('itm_boeuf', 'Viande de bœuf', 'VOL-BOE-01', 'kg', 'viande', 9.2, 8, 3200, 'sup_agrisud', 'cuisine'),
-    item('itm_poisson', 'Poisson (tilapia)', 'MER-TIL-01', 'kg', 'poisson', 6.4, 6, 2800, 'sup_agrisud', 'cuisine'),
-    item('itm_attieke', 'Attiéké frais', 'FEC-ATT-01', 'kg', 'accompagnement', 14.0, 10, 900, 'sup_marche', 'cuisine'),
-    item('itm_riz', 'Riz parfumé', 'FEC-RIZ-01', 'kg', 'accompagnement', 42.0, 20, 650, 'sup_marche', 'reserve'),
-    item('itm_tomate', 'Tomates fraîches', 'LEG-TOM-01', 'kg', 'legume', 7.5, 8, 550, 'sup_marche', 'cuisine'),
-    item('itm_oignon', 'Oignons', 'LEG-OIG-01', 'kg', 'legume', 11.0, 8, 450, 'sup_marche', 'cuisine'),
-    item('itm_huile', 'Huile végétale', 'EPI-HUI-01', 'l', 'epicerie', 9.0, 6, 1200, 'sup_marche', 'reserve'),
-    item('itm_bissap', 'Hibiscus séché', 'EPI-BIS-01', 'kg', 'epicerie', 2.8, 3, 1800, 'sup_marche', 'bar'),
-    item('itm_biere', 'Bière locale 33cl', 'BOI-BIE-01', 'btl', 'boisson', 96, 48, 700, 'sup_golfe', 'bar'),
-    item('itm_sprite', 'Soda 33cl', 'BOI-SOD-01', 'btl', 'boisson', 60, 36, 450, 'sup_golfe', 'bar'),
-    item('itm_mangue', 'Mangues', 'FRU-MAN-01', 'kg', 'fruit', 13.0, 6, 800, 'sup_marche', 'cuisine'),
+    item(
+      'itm_poulet',
+      'Poulet fermier',
+      'VOL-POU-01',
+      'kg',
+      'viande',
+      18.5,
+      12,
+      2400,
+      'sup_agrisud',
+      'cuisine',
+    ),
+    item(
+      'itm_boeuf',
+      'Viande de bœuf',
+      'VOL-BOE-01',
+      'kg',
+      'viande',
+      9.2,
+      8,
+      3200,
+      'sup_agrisud',
+      'cuisine',
+    ),
+    item(
+      'itm_poisson',
+      'Poisson (tilapia)',
+      'MER-TIL-01',
+      'kg',
+      'poisson',
+      6.4,
+      6,
+      2800,
+      'sup_agrisud',
+      'cuisine',
+    ),
+    item(
+      'itm_attieke',
+      'Attiéké frais',
+      'FEC-ATT-01',
+      'kg',
+      'accompagnement',
+      14.0,
+      10,
+      900,
+      'sup_marche',
+      'cuisine',
+    ),
+    item(
+      'itm_riz',
+      'Riz parfumé',
+      'FEC-RIZ-01',
+      'kg',
+      'accompagnement',
+      42.0,
+      20,
+      650,
+      'sup_marche',
+      'reserve',
+    ),
+    item(
+      'itm_tomate',
+      'Tomates fraîches',
+      'LEG-TOM-01',
+      'kg',
+      'legume',
+      7.5,
+      8,
+      550,
+      'sup_marche',
+      'cuisine',
+    ),
+    item(
+      'itm_oignon',
+      'Oignons',
+      'LEG-OIG-01',
+      'kg',
+      'legume',
+      11.0,
+      8,
+      450,
+      'sup_marche',
+      'cuisine',
+    ),
+    item(
+      'itm_huile',
+      'Huile végétale',
+      'EPI-HUI-01',
+      'l',
+      'epicerie',
+      9.0,
+      6,
+      1200,
+      'sup_marche',
+      'reserve',
+    ),
+    item(
+      'itm_bissap',
+      'Hibiscus séché',
+      'EPI-BIS-01',
+      'kg',
+      'epicerie',
+      2.8,
+      3,
+      1800,
+      'sup_marche',
+      'bar',
+    ),
+    item(
+      'itm_biere',
+      'Bière locale 33cl',
+      'BOI-BIE-01',
+      'btl',
+      'boisson',
+      96,
+      48,
+      700,
+      'sup_golfe',
+      'bar',
+    ),
+    item(
+      'itm_sprite',
+      'Soda 33cl',
+      'BOI-SOD-01',
+      'btl',
+      'boisson',
+      60,
+      36,
+      450,
+      'sup_golfe',
+      'bar',
+    ),
+    item(
+      'itm_mangue',
+      'Mangues',
+      'FRU-MAN-01',
+      'kg',
+      'fruit',
+      13.0,
+      6,
+      800,
+      'sup_marche',
+      'cuisine',
+    ),
     item('itm_ananas', 'Ananas', 'FRU-ANA-01', 'pcs', 'fruit', 8, 5, 600, 'sup_marche', 'cuisine'),
-    item('itm_charbon', 'Charbon de bois', 'ENE-CHA-01', 'kg', 'energie', 25.0, 15, 300, 'sup_marche', 'reserve'),
-    item('itm_emballage', 'Emballage livraison', 'EMB-LIV-01', 'pcs', 'emballage', 140, 80, 120, 'sup_marche', 'reserve'),
+    item(
+      'itm_charbon',
+      'Charbon de bois',
+      'ENE-CHA-01',
+      'kg',
+      'energie',
+      25.0,
+      15,
+      300,
+      'sup_marche',
+      'reserve',
+    ),
+    item(
+      'itm_emballage',
+      'Emballage livraison',
+      'EMB-LIV-01',
+      'pcs',
+      'emballage',
+      140,
+      80,
+      120,
+      'sup_marche',
+      'reserve',
+    ),
   ];
   for (const entry of items) store.items.set(entry.id, entry);
 
@@ -453,7 +625,9 @@ export function seedInventoryDemo(store: InventoryStore): void {
       { itemId: 'itm_bissap', quantity: 0.03 },
       { itemId: 'itm_mangue', quantity: 0.05 },
     ]),
-    recipe('rec_biere', 'prd_sg_biere', 'Bière locale', 1500, [{ itemId: 'itm_biere', quantity: 1 }]),
+    recipe('rec_biere', 'prd_sg_biere', 'Bière locale', 1500, [
+      { itemId: 'itm_biere', quantity: 1 },
+    ]),
     recipe('rec_salade', 'prd_sg_salade', 'Salade de fruits', 2000, [
       { itemId: 'itm_mangue', quantity: 0.2 },
       { itemId: 'itm_ananas', quantity: 0.5 },
@@ -469,18 +643,45 @@ export function seedInventoryDemo(store: InventoryStore): void {
   };
   const historic: StockMovement[] = [
     {
-      id: 'mov_seed_1', tenantId, itemId: 'itm_poulet', itemName: 'Poulet fermier', type: 'in', quantity: 20,
-      costXof: 48000, reason: 'Livraison hebdomadaire', refType: 'purchase', refId: 'po_seed_1', actor: 'usr_demo_seed',
+      id: 'mov_seed_1',
+      tenantId,
+      itemId: 'itm_poulet',
+      itemName: 'Poulet fermier',
+      type: 'in',
+      quantity: 20,
+      costXof: 48000,
+      reason: 'Livraison hebdomadaire',
+      refType: 'purchase',
+      refId: 'po_seed_1',
+      actor: 'usr_demo_seed',
       at: daysAgo(6, 8),
     },
     {
-      id: 'mov_seed_2', tenantId, itemId: 'itm_poulet', itemName: 'Poulet fermier', type: 'waste', quantity: -1.5,
-      costXof: 3600, reason: 'Chaîne du froid rompue', refType: 'waste', refId: null, actor: 'usr_demo_seed',
+      id: 'mov_seed_2',
+      tenantId,
+      itemId: 'itm_poulet',
+      itemName: 'Poulet fermier',
+      type: 'waste',
+      quantity: -1.5,
+      costXof: 3600,
+      reason: 'Chaîne du froid rompue',
+      refType: 'waste',
+      refId: null,
+      actor: 'usr_demo_seed',
       at: daysAgo(2, 9),
     },
     {
-      id: 'mov_seed_3', tenantId, itemId: 'itm_tomate', itemName: 'Tomates fraîches', type: 'waste', quantity: -0.5,
-      costXof: 275, reason: 'Produit flétri', refType: 'waste', refId: null, actor: 'usr_demo_seed',
+      id: 'mov_seed_3',
+      tenantId,
+      itemId: 'itm_tomate',
+      itemName: 'Tomates fraîches',
+      type: 'waste',
+      quantity: -0.5,
+      costXof: 275,
+      reason: 'Produit flétri',
+      refType: 'waste',
+      refId: null,
+      actor: 'usr_demo_seed',
       at: daysAgo(1, 10),
     },
   ];

@@ -40,7 +40,11 @@ export function signToken(
   return `${header}.${body}.${sign(`${header}.${body}`, secret)}`;
 }
 
-export function verifyToken(token: string, secret: string, expectedKind?: TokenKind): TokenClaims | null {
+export function verifyToken(
+  token: string,
+  secret: string,
+  expectedKind?: TokenKind,
+): TokenClaims | null {
   const parts = token.split('.');
   if (parts.length !== 3) return null;
   const [header, body, signature] = parts;

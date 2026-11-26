@@ -36,7 +36,8 @@ export function themeContrast(themeName, foreground, background) {
   const colors = tokens[themeName].colors;
   const fg = colors[foreground];
   const bgRaw = colors[background];
-  if (!fg || !bgRaw) throw new Error(`Token manquant (${themeName}) : ${foreground} / ${background}`);
+  if (!fg || !bgRaw)
+    throw new Error(`Token manquant (${themeName}) : ${foreground} / ${background}`);
   const parsedBg = parseColor(bgRaw);
   const base = parsedBg.a < 1 ? composite(parsedBg, colors.bg) : parsedBg;
   return { ratio: contrast(fg, base), foreground: fg, background: bgRaw };
@@ -49,9 +50,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     for (const [fg, bg] of TEXT_PAIRS) {
       const { ratio } = themeContrast(themeName, fg, bg);
       const status = ratio >= 4.5 ? 'ok' : 'ÉCHEC';
-      console.log(`${themeName.padEnd(5)} | ${`${fg} → ${bg}`.padEnd(38)} | ${ratio.toFixed(2).padStart(5)} | 4.5 ${status}`);
+      console.log(
+        `${themeName.padEnd(5)} | ${`${fg} → ${bg}`.padEnd(38)} | ${ratio.toFixed(2).padStart(5)} | 4.5 ${status}`,
+      );
     }
     const focus = themeContrast(themeName, 'focus-ring', 'bg').ratio;
-    console.log(`${themeName.padEnd(5)} | ${'focus-ring → bg'.padEnd(38)} | ${focus.toFixed(2).padStart(5)} | 3.0 ${focus >= 3 ? 'ok' : 'ÉCHEC'}`);
+    console.log(
+      `${themeName.padEnd(5)} | ${'focus-ring → bg'.padEnd(38)} | ${focus.toFixed(2).padStart(5)} | 3.0 ${focus >= 3 ? 'ok' : 'ÉCHEC'}`,
+    );
   }
 }

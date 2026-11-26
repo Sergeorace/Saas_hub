@@ -39,7 +39,11 @@ import { buildQrSheetPdf, qrPng, qrSvg } from './qr.js';
 export interface FloorAppOptions {
   store: FloorStore;
   appPublicUrl: string;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 const ESTABLISHMENT_CODE = /^[A-Z0-9]{3,12}$/;
@@ -59,9 +63,13 @@ function requireInt(
   const min = opts.min ?? 0;
   const max = opts.max ?? 1_000_000;
   if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être un entier entre ${min} et ${max}.`, {
-      field,
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `« ${field} » doit être un entier entre ${min} et ${max}.`,
+      {
+        field,
+      },
+    );
   }
   return value;
 }
@@ -79,12 +87,19 @@ function optionalNumber(source: Record<string, unknown>, field: string): number 
   if (source[field] === undefined || source[field] === null) return undefined;
   const value = source[field];
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être un pourcentage 0–100.`, { field });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `« ${field} » doit être un pourcentage 0–100.`,
+      { field },
+    );
   }
   return Math.round(value * 100) / 100;
 }
 
-function tenantOf(ctx: RequestContext, permission: string): { tenantId: string; claims: AuthClaims } {
+function tenantOf(
+  ctx: RequestContext,
+  permission: string,
+): { tenantId: string; claims: AuthClaims } {
   const tenantId = ctx.params.tenantId ?? '';
   const claims = requireTenantPermission(ctx.auth, tenantId, permission);
   return { tenantId, claims };
@@ -115,7 +130,9 @@ function tablesOf(store: FloorStore, tenantId: string): FloorTable[] {
 }
 
 function zonesOf(store: FloorStore, tenantId: string): FloorZone[] {
-  return [...store.zones.values()].filter((zone) => zone.tenantId === tenantId).sort((a, b) => a.position - b.position);
+  return [...store.zones.values()]
+    .filter((zone) => zone.tenantId === tenantId)
+    .sort((a, b) => a.position - b.position);
 }
 
 function effectiveCapacity(store: FloorStore, table: FloorTable): number {
@@ -190,12 +207,18 @@ function serializeTable(store: FloorStore, table: FloorTable, appPublicUrl: stri
 }
 
 function ensureCodeFree(store: FloorStore, tenantId: string, code: string, exceptId: string) {
-  const existing = tablesOf(store, tenantId).find((table) => table.code === code && table.id !== exceptId);
+  const existing = tablesOf(store, tenantId).find(
+    (table) => table.code === code && table.id !== exceptId,
+  );
   if (existing) {
-    throw HttpError.conflict('table_code_conflict', `Le code « ${code} » est déjà attribué à une autre place.`, {
-      code,
-      tableId: existing.id,
-    });
+    throw HttpError.conflict(
+      'table_code_conflict',
+      `Le code « ${code} » est déjà attribué à une autre place.`,
+      {
+        code,
+        tableId: existing.id,
+      },
+    );
   }
 }
 
@@ -208,7 +231,11 @@ const MAX_DAYS_AHEAD = 60;
 function requireDate(source: Record<string, unknown>, field: string): string {
   const value = requireString(source, field, { min: 10, max: 10 });
   if (!DATE_RE.test(value) || Number.isNaN(Date.parse(`${value}T00:00:00Z`))) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une date AAAA-MM-JJ.`, { field });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `« ${field} » doit être une date AAAA-MM-JJ.`,
+      { field },
+    );
   }
   return value;
 }
@@ -216,13 +243,19 @@ function requireDate(source: Record<string, unknown>, field: string): string {
 function requireSlotTime(source: Record<string, unknown>, field: string): string {
   const value = requireString(source, field, { min: 5, max: 5 });
   if (!TIME_RE.test(value)) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une heure HH:MM.`, { field });
+    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une heure HH:MM.`, {
+      field,
+    });
   }
   const minutes = timeToMinutes(value);
   if (minutes < OPEN_MINUTES || minutes > LAST_SLOT_MINUTES) {
-    throw HttpError.unprocessable('validation_error', 'Les réservations sont possibles entre 11:00 et 22:30.', {
-      field,
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Les réservations sont possibles entre 11:00 et 22:30.',
+      {
+        field,
+      },
+    );
   }
   return value;
 }
@@ -236,11 +269,17 @@ function ensureBookableDate(date: string): void {
   if (date < today) {
     throw HttpError.unprocessable('reservation_date_past', 'Cette date est déjà passée.', { date });
   }
-  const limit = new Date(Date.now() + MAX_DAYS_AHEAD * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const limit = new Date(Date.now() + MAX_DAYS_AHEAD * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
   if (date > limit) {
-    throw HttpError.unprocessable('reservation_date_too_far', `Réservation limitée à ${MAX_DAYS_AHEAD} jours à l’avance.`, {
-      date,
-    });
+    throw HttpError.unprocessable(
+      'reservation_date_too_far',
+      `Réservation limitée à ${MAX_DAYS_AHEAD} jours à l’avance.`,
+      {
+        date,
+      },
+    );
   }
 }
 
@@ -289,11 +328,16 @@ function slotsFor(date: string, partySize: number, store: FloorStore, tenantId: 
 
 function requireReservation(store: FloorStore, tenantId: string, id: string): FloorReservation {
   const reservation = store.reservations.get(id);
-  if (!reservation || reservation.tenantId !== tenantId) throw HttpError.notFound('Réservation introuvable.');
+  if (!reservation || reservation.tenantId !== tenantId)
+    throw HttpError.notFound('Réservation introuvable.');
   return reservation;
 }
 
-function reservationView(store: FloorStore, reservation: FloorReservation, options: { staff: boolean }) {
+function reservationView(
+  store: FloorStore,
+  reservation: FloorReservation,
+  options: { staff: boolean },
+) {
   const table = reservation.tableId ? store.tables.get(reservation.tableId) : undefined;
   const zone = table ? store.zones.get(table.zoneId) : undefined;
   return {
@@ -334,20 +378,34 @@ function chooseTable(
 ): FloorTable | undefined {
   if (requestedTableId) {
     const table = requireTable(store, tenantId, requestedTableId);
-    const available = bookableTables(store, tenantId, date, time, partySize, excludeReservationId).some(
-      (entry) => entry.id === table.id,
-    );
+    const available = bookableTables(
+      store,
+      tenantId,
+      date,
+      time,
+      partySize,
+      excludeReservationId,
+    ).some((entry) => entry.id === table.id);
     if (!available) {
-      throw HttpError.conflict('table_unavailable', 'Cette table n’est pas disponible pour ce créneau.', {
-        tableId: table.id,
-      });
+      throw HttpError.conflict(
+        'table_unavailable',
+        'Cette table n’est pas disponible pour ce créneau.',
+        {
+          tableId: table.id,
+        },
+      );
     }
     return table;
   }
   return bookableTables(store, tenantId, date, time, partySize, excludeReservationId)[0];
 }
 
-function holdTable(store: FloorStore, table: FloorTable, reservation: FloorReservation, actorId: string): boolean {
+function holdTable(
+  store: FloorStore,
+  table: FloorTable,
+  reservation: FloorReservation,
+  actorId: string,
+): boolean {
   if (reservation.date !== todayIso()) return false;
   if (table.status !== 'libre') return false;
   table.status = 'reservee';
@@ -357,7 +415,11 @@ function holdTable(store: FloorStore, table: FloorTable, reservation: FloorReser
   return true;
 }
 
-function releaseTable(store: FloorStore, reservation: FloorReservation, actorId: string): FloorTable | undefined {
+function releaseTable(
+  store: FloorStore,
+  reservation: FloorReservation,
+  actorId: string,
+): FloorTable | undefined {
   if (!reservation.tableId) return undefined;
   const table = store.tables.get(reservation.tableId);
   if (!table) return undefined;
@@ -400,7 +462,9 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
       tenantId,
       live: true,
       generatedAt: nowIso(),
-      settings: settings ? { establishmentCode: settings.establishmentCode, updatedAt: settings.updatedAt } : null,
+      settings: settings
+        ? { establishmentCode: settings.establishmentCode, updatedAt: settings.updatedAt }
+        : null,
       zones: zonesOf(store, tenantId).map(({ tenantId: _tenantId, ...rest }) => rest),
       tables: tablesOf(store, tenantId)
         .sort((a, b) => a.code.localeCompare(b.code))
@@ -424,13 +488,17 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
       handler: (ctx) => {
         const { tenantId } = tenantOf(ctx, 'floor:view');
         const zones = zonesOf(store, tenantId).map((zone) => {
-          const tables = tablesOf(store, tenantId).filter((table) => table.zoneId === zone.id && !table.mergedIntoId);
+          const tables = tablesOf(store, tenantId).filter(
+            (table) => table.zoneId === zone.id && !table.mergedIntoId,
+          );
           return {
             id: zone.id,
             name: zone.name,
             kind: zone.kind,
             tables: tables.length,
-            occupied: tables.filter((table) => table.status === 'occupee' || table.status === 'addition').length,
+            occupied: tables.filter(
+              (table) => table.status === 'occupee' || table.status === 'addition',
+            ).length,
             seats: tables.reduce((sum, table) => sum + effectiveCapacity(store, table), 0),
           };
         });
@@ -451,7 +519,9 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
       handler: async (ctx) => {
         const { tenantId, claims } = tenantOf(ctx, 'floor:manage');
         const body = asObject(ctx.body);
-        const establishmentCode = requireString(body, 'establishmentCode', { max: 12 }).toUpperCase();
+        const establishmentCode = requireString(body, 'establishmentCode', {
+          max: 12,
+        }).toUpperCase();
         if (!ESTABLISHMENT_CODE.test(establishmentCode)) {
           throw HttpError.unprocessable(
             'validation_error',
@@ -465,12 +535,18 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           const zone = store.zones.get(table.zoneId);
           if (!zone) continue;
           const code = tableCode(establishmentCode, zone.code, table.number);
-          const clash = tables.find((other) => other.id !== table.id && nextCodes.get(other.id) === code);
+          const clash = tables.find(
+            (other) => other.id !== table.id && nextCodes.get(other.id) === code,
+          );
           if (clash) {
-            throw HttpError.conflict('table_code_conflict', `Le code « ${code} » serait dupliqué.`, {
-              code,
-              tableId: clash.id,
-            });
+            throw HttpError.conflict(
+              'table_code_conflict',
+              `Le code « ${code} » serait dupliqué.`,
+              {
+                code,
+                tableId: clash.id,
+              },
+            );
           }
           nextCodes.set(table.id, code);
         }
@@ -491,7 +567,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: tenantId,
           meta: { establishmentCode },
         });
-        await publish('FloorLayoutUpdated', tenantId, { tenantId, change: 'settings', establishmentCode });
+        await publish('FloorLayoutUpdated', tenantId, {
+          tenantId,
+          change: 'settings',
+          establishmentCode,
+        });
         return { body: snapshot(tenantId) };
       },
     },
@@ -504,19 +584,31 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const name = requireString(body, 'name', { min: 2, max: 60 });
         const kind = body.kind;
         if (typeof kind !== 'string' || !(ZONE_KINDS as readonly string[]).includes(kind)) {
-          throw HttpError.unprocessable('validation_error', 'Type de zone invalide.', { field: 'kind' });
+          throw HttpError.unprocessable('validation_error', 'Type de zone invalide.', {
+            field: 'kind',
+          });
         }
         const zoneKind = kind as ZoneKind;
-        const requestedCode = (optionalString(body, 'code', { max: 4 }) ?? DEFAULT_ZONE_CODES[zoneKind]).toUpperCase();
+        const requestedCode = (
+          optionalString(body, 'code', { max: 4 }) ?? DEFAULT_ZONE_CODES[zoneKind]
+        ).toUpperCase();
         if (!ZONE_CODE.test(requestedCode)) {
-          throw HttpError.unprocessable('validation_error', 'Code de zone : 2 à 4 caractères A-Z/0-9.', {
-            field: 'code',
-          });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Code de zone : 2 à 4 caractères A-Z/0-9.',
+            {
+              field: 'code',
+            },
+          );
         }
         if (zonesOf(store, tenantId).some((zone) => zone.code === requestedCode)) {
-          throw HttpError.conflict('zone_code_conflict', `Le code de zone « ${requestedCode} » existe déjà.`, {
-            code: requestedCode,
-          });
+          throw HttpError.conflict(
+            'zone_code_conflict',
+            `Le code de zone « ${requestedCode} » existe déjà.`,
+            {
+              code: requestedCode,
+            },
+          );
         }
         const now = nowIso();
         const zone: FloorZone = {
@@ -540,7 +632,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: zone.id,
           meta: { name, kind: zoneKind, code: requestedCode },
         });
-        await publish('FloorLayoutUpdated', tenantId, { tenantId, change: 'zone_created', zoneId: zone.id });
+        await publish('FloorLayoutUpdated', tenantId, {
+          tenantId,
+          change: 'zone_created',
+          zoneId: zone.id,
+        });
         return { status: 201, body: { zone } };
       },
     },
@@ -553,33 +649,56 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const body = asObject(ctx.body);
         if (body.name !== undefined) zone.name = requireString(body, 'name', { min: 2, max: 60 });
         if (body.kind !== undefined) {
-          if (typeof body.kind !== 'string' || !(ZONE_KINDS as readonly string[]).includes(body.kind)) {
-            throw HttpError.unprocessable('validation_error', 'Type de zone invalide.', { field: 'kind' });
+          if (
+            typeof body.kind !== 'string' ||
+            !(ZONE_KINDS as readonly string[]).includes(body.kind)
+          ) {
+            throw HttpError.unprocessable('validation_error', 'Type de zone invalide.', {
+              field: 'kind',
+            });
           }
           zone.kind = body.kind as ZoneKind;
         }
         if (body.code !== undefined) {
           const code = requireString(body, 'code', { max: 4 }).toUpperCase();
           if (!ZONE_CODE.test(code)) {
-            throw HttpError.unprocessable('validation_error', 'Code de zone : 2 à 4 caractères A-Z/0-9.', {
-              field: 'code',
-            });
+            throw HttpError.unprocessable(
+              'validation_error',
+              'Code de zone : 2 à 4 caractères A-Z/0-9.',
+              {
+                field: 'code',
+              },
+            );
           }
-          if (zonesOf(store, tenantId).some((other) => other.id !== zone.id && other.code === code)) {
-            throw HttpError.conflict('zone_code_conflict', `Le code de zone « ${code} » existe déjà.`, { code });
+          if (
+            zonesOf(store, tenantId).some((other) => other.id !== zone.id && other.code === code)
+          ) {
+            throw HttpError.conflict(
+              'zone_code_conflict',
+              `Le code de zone « ${code} » existe déjà.`,
+              { code },
+            );
           }
           const settings = settingsOf(store, tenantId);
-          if (!settings) throw HttpError.unprocessable('floor_settings_required', 'Configurez d’abord le code établissement.');
+          if (!settings)
+            throw HttpError.unprocessable(
+              'floor_settings_required',
+              'Configurez d’abord le code établissement.',
+            );
           const nextCodes = new Map<string, string>();
           const zoneTables = tablesOf(store, tenantId).filter((table) => table.zoneId === zone.id);
           for (const table of zoneTables) {
             const nextCode = tableCode(settings.establishmentCode, code, table.number);
             ensureCodeFree(store, tenantId, nextCode, table.id);
             if ([...nextCodes.values()].includes(nextCode)) {
-              throw HttpError.conflict('table_code_conflict', `Le code « ${nextCode} » serait dupliqué.`, {
-                code: nextCode,
-                tableId: table.id,
-              });
+              throw HttpError.conflict(
+                'table_code_conflict',
+                `Le code « ${nextCode} » serait dupliqué.`,
+                {
+                  code: nextCode,
+                  tableId: table.id,
+                },
+              );
             }
             nextCodes.set(table.id, nextCode);
           }
@@ -601,7 +720,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: zone.id,
           meta: { name: zone.name, code: zone.code },
         });
-        await publish('FloorLayoutUpdated', tenantId, { tenantId, change: 'zone_updated', zoneId: zone.id });
+        await publish('FloorLayoutUpdated', tenantId, {
+          tenantId,
+          change: 'zone_updated',
+          zoneId: zone.id,
+        });
         return { body: { zone } };
       },
     },
@@ -613,7 +736,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const zone = requireZone(store, tenantId, ctx.params.id);
         const count = tablesOf(store, tenantId).filter((table) => table.zoneId === zone.id).length;
         if (count > 0) {
-          throw HttpError.conflict('zone_not_empty', 'Déplacez ou supprimez d’abord les places de cette zone.', { tables: count });
+          throw HttpError.conflict(
+            'zone_not_empty',
+            'Déplacez ou supprimez d’abord les places de cette zone.',
+            { tables: count },
+          );
         }
         store.zones.delete(zone.id);
         store.recordAudit({
@@ -624,7 +751,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: zone.id,
           meta: { name: zone.name },
         });
-        await publish('FloorLayoutUpdated', tenantId, { tenantId, change: 'zone_deleted', zoneId: zone.id });
+        await publish('FloorLayoutUpdated', tenantId, {
+          tenantId,
+          change: 'zone_deleted',
+          zoneId: zone.id,
+        });
         return { body: { ok: true } };
       },
     },
@@ -635,7 +766,10 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'floor:manage');
         const settings = settingsOf(store, tenantId);
         if (!settings) {
-          throw HttpError.unprocessable('floor_settings_required', 'Renseignez le code établissement avant d’ajouter des places.');
+          throw HttpError.unprocessable(
+            'floor_settings_required',
+            'Renseignez le code établissement avant d’ajouter des places.',
+          );
         }
         const body = asObject(ctx.body);
         const zone = requireZone(store, tenantId, requireString(body, 'zoneId', { max: 64 }));
@@ -644,16 +778,22 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           optionalInt(body, 'number', { min: 1, max: 999 }) ??
           Math.max(0, ...zoneTables.map((table) => table.number)) + 1;
         if (zoneTables.some((table) => table.number === number)) {
-          throw HttpError.conflict('table_number_conflict', `Le numéro ${number} est déjà utilisé dans « ${zone.name} ».`, {
-            number,
-            zoneId: zone.id,
-          });
+          throw HttpError.conflict(
+            'table_number_conflict',
+            `Le numéro ${number} est déjà utilisé dans « ${zone.name} ».`,
+            {
+              number,
+              zoneId: zone.id,
+            },
+          );
         }
         const code = tableCode(settings.establishmentCode, zone.code, number);
         ensureCodeFree(store, tenantId, code, '');
         const type = body.type ?? 'table';
         if (typeof type !== 'string' || !(TABLE_TYPES as readonly string[]).includes(type)) {
-          throw HttpError.unprocessable('validation_error', 'Type de place invalide.', { field: 'type' });
+          throw HttpError.unprocessable('validation_error', 'Type de place invalide.', {
+            field: 'type',
+          });
         }
         const count = zoneTables.length;
         const now = nowIso();
@@ -683,7 +823,12 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: table.id,
           meta: { code: table.code, zoneId: zone.id, capacity: table.capacity },
         });
-        await publish('FloorLayoutUpdated', tenantId, { tenantId, change: 'table_created', tableId: table.id, code: table.code });
+        await publish('FloorLayoutUpdated', tenantId, {
+          tenantId,
+          change: 'table_created',
+          tableId: table.id,
+          code: table.code,
+        });
         return { status: 201, body: { table: serializeTable(store, table, appPublicUrl) } };
       },
     },
@@ -695,7 +840,8 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const table = requireTable(store, tenantId, ctx.params.id);
         const body = asObject(ctx.body);
         const settings = settingsOf(store, tenantId);
-        if (!settings) throw HttpError.unprocessable('floor_settings_required', 'Code établissement manquant.');
+        if (!settings)
+          throw HttpError.unprocessable('floor_settings_required', 'Code établissement manquant.');
         let nextZone = store.zones.get(table.zoneId);
         let nextNumber = table.number;
         let touchedCode = false;
@@ -710,13 +856,18 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         if (!nextZone) throw HttpError.notFound('Zone introuvable.');
         if (touchedCode) {
           const duplicate = tablesOf(store, tenantId).find(
-            (other) => other.id !== table.id && other.zoneId === nextZone!.id && other.number === nextNumber,
+            (other) =>
+              other.id !== table.id && other.zoneId === nextZone!.id && other.number === nextNumber,
           );
           if (duplicate) {
-            throw HttpError.conflict('table_number_conflict', `Le numéro ${nextNumber} est déjà utilisé dans cette zone.`, {
-              number: nextNumber,
-              zoneId: nextZone.id,
-            });
+            throw HttpError.conflict(
+              'table_number_conflict',
+              `Le numéro ${nextNumber} est déjà utilisé dans cette zone.`,
+              {
+                number: nextNumber,
+                zoneId: nextZone.id,
+              },
+            );
           }
           const code = tableCode(settings.establishmentCode, nextZone.code, nextNumber);
           ensureCodeFree(store, tenantId, code, table.id);
@@ -727,8 +878,13 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const capacity = optionalInt(body, 'capacity', { min: 1, max: 50 });
         if (capacity !== undefined) table.capacity = capacity;
         if (body.type !== undefined) {
-          if (typeof body.type !== 'string' || !(TABLE_TYPES as readonly string[]).includes(body.type)) {
-            throw HttpError.unprocessable('validation_error', 'Type de place invalide.', { field: 'type' });
+          if (
+            typeof body.type !== 'string' ||
+            !(TABLE_TYPES as readonly string[]).includes(body.type)
+          ) {
+            throw HttpError.unprocessable('validation_error', 'Type de place invalide.', {
+              field: 'type',
+            });
           }
           table.type = body.type as TableType;
         }
@@ -744,7 +900,13 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           action: 'floor.table.updated',
           targetType: 'table',
           targetId: table.id,
-          meta: { code: table.code, x: table.x, y: table.y, capacity: table.capacity, type: table.type },
+          meta: {
+            code: table.code,
+            x: table.x,
+            y: table.y,
+            capacity: table.capacity,
+            type: table.type,
+          },
         });
         await publish('FloorLayoutUpdated', tenantId, {
           tenantId,
@@ -762,7 +924,9 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'floor:manage');
         const table = requireTable(store, tenantId, ctx.params.id);
         if (table.orderId) {
-          throw HttpError.conflict('table_has_order', 'Cette place porte une commande en cours.', { orderId: table.orderId });
+          throw HttpError.conflict('table_has_order', 'Cette place porte une commande en cours.', {
+            orderId: table.orderId,
+          });
         }
         if (table.mergedIds.length > 0 || table.mergedIntoId) {
           throw HttpError.conflict('table_merged', 'Divisez la table avant de la supprimer.');
@@ -776,7 +940,12 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: table.id,
           meta: { code: table.code },
         });
-        await publish('FloorLayoutUpdated', tenantId, { tenantId, change: 'table_deleted', tableId: table.id, code: table.code });
+        await publish('FloorLayoutUpdated', tenantId, {
+          tenantId,
+          change: 'table_deleted',
+          tableId: table.id,
+          code: table.code,
+        });
         return { body: { ok: true } };
       },
     },
@@ -788,31 +957,51 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const claims = ctx.auth;
         if (!claims) throw HttpError.unauthorized();
         if (!canAny(claims, tenantId, ['floor:status', 'floor:manage'])) {
-          throw new HttpError(403, 'tenant_scope_denied', "Vous n'avez pas accès à cet établissement.");
+          throw new HttpError(
+            403,
+            'tenant_scope_denied',
+            "Vous n'avez pas accès à cet établissement.",
+          );
         }
         const table = requireTable(store, tenantId, ctx.params.id);
         const body = asObject(ctx.body);
-        if (typeof body.status !== 'string' || !(TABLE_STATUSES as readonly string[]).includes(body.status)) {
-          throw HttpError.unprocessable('validation_error', 'Statut de table inconnu.', { field: 'status' });
+        if (
+          typeof body.status !== 'string' ||
+          !(TABLE_STATUSES as readonly string[]).includes(body.status)
+        ) {
+          throw HttpError.unprocessable('validation_error', 'Statut de table inconnu.', {
+            field: 'status',
+          });
         }
         const status = body.status as TableStatus;
         if (table.mergedIntoId) {
-          throw HttpError.conflict('table_merged', 'Cette place est fusionnée : pilotez la table principale.');
+          throw HttpError.conflict(
+            'table_merged',
+            'Cette place est fusionnée : pilotez la table principale.',
+          );
         }
         if (status === table.status) {
-          throw HttpError.unprocessable('status_unchanged', 'La table est déjà dans ce statut.', { field: 'status' });
+          throw HttpError.unprocessable('status_unchanged', 'La table est déjà dans ce statut.', {
+            field: 'status',
+          });
         }
         if (!STATUS_TRANSITIONS[table.status].includes(status)) {
-          throw HttpError.conflict('status_transition_invalid', `Transition ${table.status} → ${status} interdite.`, {
-            from: table.status,
-            to: status,
-            allowed: STATUS_TRANSITIONS[table.status],
-          });
+          throw HttpError.conflict(
+            'status_transition_invalid',
+            `Transition ${table.status} → ${status} interdite.`,
+            {
+              from: table.status,
+              to: status,
+              allowed: STATUS_TRANSITIONS[table.status],
+            },
+          );
         }
         if (status === 'occupee' && body.orderId !== undefined) {
           const orderId = requireString(body, 'orderId', { max: 64 });
           if (!ORDER_ID.test(orderId)) {
-            throw HttpError.unprocessable('validation_error', 'Identifiant de commande invalide.', { field: 'orderId' });
+            throw HttpError.unprocessable('validation_error', 'Identifiant de commande invalide.', {
+              field: 'orderId',
+            });
           }
           table.orderId = orderId;
         }
@@ -847,24 +1036,43 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const body = asObject(ctx.body);
         const ids = body.tableIds;
         if (!Array.isArray(ids) || ids.length < 2 || ids.length > 6) {
-          throw HttpError.unprocessable('validation_error', 'Fusionnez 2 à 6 places à la fois.', { field: 'tableIds' });
+          throw HttpError.unprocessable('validation_error', 'Fusionnez 2 à 6 places à la fois.', {
+            field: 'tableIds',
+          });
         }
         const tables = ids.map((id) => requireTable(store, tenantId, String(id)));
         const primaryId = optionalString(body, 'primaryId', { max: 64 }) ?? tables[0].id;
         const primary = tables.find((table) => table.id === primaryId);
-        if (!primary) throw HttpError.unprocessable('validation_error', 'La table principale doit figurer dans la sélection.');
-        if (tables.some((table) => table.mergedIntoId || (table.id !== primary.id && table.mergedIds.length > 0))) {
+        if (!primary)
+          throw HttpError.unprocessable(
+            'validation_error',
+            'La table principale doit figurer dans la sélection.',
+          );
+        if (
+          tables.some(
+            (table) =>
+              table.mergedIntoId || (table.id !== primary.id && table.mergedIds.length > 0),
+          )
+        ) {
           throw HttpError.conflict('table_merged', 'Une des places est déjà fusionnée.');
         }
         if (tables.some((table) => table.zoneId !== primary.zoneId)) {
-          throw HttpError.unprocessable('validation_error', 'Les places à fusionner doivent être dans la même zone.');
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Les places à fusionner doivent être dans la même zone.',
+          );
         }
         if (tables.some((table) => table.status === 'hors_service')) {
-          throw HttpError.conflict('table_out_of_service', 'Impossible de fusionner une place hors service.');
+          throw HttpError.conflict(
+            'table_out_of_service',
+            'Impossible de fusionner une place hors service.',
+          );
         }
         const secondaries = tables.filter((table) => table.id !== primary.id);
         const now = nowIso();
-        primary.mergedIds = [...new Set([...primary.mergedIds, ...secondaries.map((table) => table.id)])];
+        primary.mergedIds = [
+          ...new Set([...primary.mergedIds, ...secondaries.map((table) => table.id)]),
+        ];
         primary.updatedAt = now;
         primary.updatedBy = claims.sub;
         for (const table of secondaries) {
@@ -890,7 +1098,12 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           actorId: claims.sub,
           at: now,
         });
-        return { body: { primary: serializeTable(store, primary, appPublicUrl), summary: occupancy(store, tenantId) } };
+        return {
+          body: {
+            primary: serializeTable(store, primary, appPublicUrl),
+            summary: occupancy(store, tenantId),
+          },
+        };
       },
     },
     {
@@ -900,7 +1113,10 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'floor:manage');
         const table = requireTable(store, tenantId, ctx.params.id);
         if (table.mergedIds.length === 0) {
-          throw HttpError.conflict('table_not_merged', 'Cette place n’est pas une table fusionnée.');
+          throw HttpError.conflict(
+            'table_not_merged',
+            'Cette place n’est pas une table fusionnée.',
+          );
         }
         const memberIds = [...table.mergedIds];
         const now = nowIso();
@@ -931,7 +1147,12 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           actorId: claims.sub,
           at: now,
         });
-        return { body: { primary: serializeTable(store, table, appPublicUrl), summary: occupancy(store, tenantId) } };
+        return {
+          body: {
+            primary: serializeTable(store, table, appPublicUrl),
+            summary: occupancy(store, tenantId),
+          },
+        };
       },
     },
     {
@@ -943,19 +1164,29 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const body = asObject(ctx.body);
         const target = requireTable(store, tenantId, requireString(body, 'toTableId', { max: 64 }));
         if (source.id === target.id) {
-          throw HttpError.unprocessable('validation_error', 'Choisissez une autre place.', { field: 'toTableId' });
+          throw HttpError.unprocessable('validation_error', 'Choisissez une autre place.', {
+            field: 'toTableId',
+          });
         }
         if (source.mergedIntoId) {
           throw HttpError.conflict('table_merged', 'Transférez depuis la table principale.');
         }
         if (!source.orderId || (source.status !== 'occupee' && source.status !== 'addition')) {
-          throw HttpError.conflict('no_active_order', 'Aucune commande active à transférer sur cette place.');
+          throw HttpError.conflict(
+            'no_active_order',
+            'Aucune commande active à transférer sur cette place.',
+          );
         }
         if (target.mergedIntoId) {
-          throw HttpError.conflict('table_merged', 'La place cible est fusionnée : choisissez sa table principale.');
+          throw HttpError.conflict(
+            'table_merged',
+            'La place cible est fusionnée : choisissez sa table principale.',
+          );
         }
         if (target.orderId || (target.status !== 'libre' && target.status !== 'reservee')) {
-          throw HttpError.conflict('target_busy', 'La place cible n’est pas disponible.', { status: target.status });
+          throw HttpError.conflict('target_busy', 'La place cible n’est pas disponible.', {
+            status: target.status,
+          });
         }
         const orderId = source.orderId;
         const now = nowIso();
@@ -979,8 +1210,16 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: target.id,
           meta: { orderId, fromCode: source.code, toCode: target.code },
         });
-        await publish('TableStatusChanged', tenantId, emitStatus(store, source, sourceFrom, claims.sub));
-        await publish('TableStatusChanged', tenantId, emitStatus(store, target, targetFrom, claims.sub));
+        await publish(
+          'TableStatusChanged',
+          tenantId,
+          emitStatus(store, source, sourceFrom, claims.sub),
+        );
+        await publish(
+          'TableStatusChanged',
+          tenantId,
+          emitStatus(store, target, targetFrom, claims.sub),
+        );
         await publish('FloorOrderTransferred', tenantId, {
           tenantId,
           orderId,
@@ -1007,7 +1246,8 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const { tenantId } = tenantOf(ctx, 'floor:view');
         const table = requireTable(store, tenantId, ctx.params.id);
         const format = ctx.query.get('format') === 'png' ? 'png' : 'svg';
-        const data = format === 'png' ? await qrPng(payloadFor(table)) : await qrSvg(payloadFor(table));
+        const data =
+          format === 'png' ? await qrPng(payloadFor(table)) : await qrSvg(payloadFor(table));
         return {
           raw: {
             data,
@@ -1023,7 +1263,8 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
       handler: async (ctx) => {
         const { tenantId } = tenantOf(ctx, 'floor:view');
         const settings = settingsOf(store, tenantId);
-        if (!settings) throw HttpError.unprocessable('floor_settings_required', 'Code établissement manquant.');
+        if (!settings)
+          throw HttpError.unprocessable('floor_settings_required', 'Code établissement manquant.');
         const zones = zonesOf(store, tenantId);
         const tables = tablesOf(store, tenantId).sort((a, b) => {
           const zoneA = zones.findIndex((zone) => zone.id === a.zoneId);
@@ -1118,7 +1359,10 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const requestedTableId = optionalString(body, 'tableId', { max: 64 });
         const table = chooseTable(store, tenantId, date, time, partySize, requestedTableId);
         if (!table) {
-          throw HttpError.conflict('no_table_available', 'Plus aucune table disponible pour ce créneau.');
+          throw HttpError.conflict(
+            'no_table_available',
+            'Plus aucune table disponible pour ce créneau.',
+          );
         }
         const now = nowIso();
         const reservation: FloorReservation = {
@@ -1141,7 +1385,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         };
         store.reservations.set(reservation.id, reservation);
         if (holdTable(store, table, reservation, 'client')) {
-          await publish('TableStatusChanged', tenantId, emitStatus(store, table, 'libre', 'client'));
+          await publish(
+            'TableStatusChanged',
+            tenantId,
+            emitStatus(store, table, 'libre', 'client'),
+          );
         }
         store.recordAudit({
           tenantId,
@@ -1187,7 +1435,10 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const table = reservation.tableId ? store.tables.get(reservation.tableId) : undefined;
         return {
           body: {
-            reservation: { ...reservationView(store, reservation, { staff: false }), status: reservation.status },
+            reservation: {
+              ...reservationView(store, reservation, { staff: false }),
+              status: reservation.status,
+            },
             tableStatus: table?.status ?? null,
             generatedAt: nowIso(),
           },
@@ -1205,9 +1456,13 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         if (body.k !== reservation.publicToken) {
           throw new HttpError(403, 'reservation_token_invalid', 'Accès à la réservation refusé.');
         }
-        if (reservation.status === 'annulee') return { body: { reservation: reservationView(store, reservation, { staff: false }) } };
+        if (reservation.status === 'annulee')
+          return { body: { reservation: reservationView(store, reservation, { staff: false }) } };
         if (reservation.status !== 'confirmee') {
-          throw HttpError.conflict('reservation_not_cancelable', 'Cette réservation ne peut plus être annulée en ligne.');
+          throw HttpError.conflict(
+            'reservation_not_cancelable',
+            'Cette réservation ne peut plus être annulée en ligne.',
+          );
         }
         const now = nowIso();
         const from = reservation.status;
@@ -1217,7 +1472,12 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         reservation.cancelReason = 'Annulée par le client';
         reservation.updatedAt = now;
         const table = releaseTable(store, reservation, 'client');
-        if (table) await publish('TableStatusChanged', tenantId, emitStatus(store, table, 'reservee', 'client'));
+        if (table)
+          await publish(
+            'TableStatusChanged',
+            tenantId,
+            emitStatus(store, table, 'reservee', 'client'),
+          );
         store.recordAudit({
           tenantId,
           actorId: 'client',
@@ -1269,7 +1529,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const claims = ctx.auth;
         if (!claims) throw HttpError.unauthorized();
         if (!canAny(claims, tenantId, ['floor:status', 'floor:manage'])) {
-          throw new HttpError(403, 'tenant_scope_denied', "Vous n'avez pas accès à cet établissement.");
+          throw new HttpError(
+            403,
+            'tenant_scope_denied',
+            "Vous n'avez pas accès à cet établissement.",
+          );
         }
         const body = asObject(ctx.body);
         const date = requireDate(body, 'date');
@@ -1302,7 +1566,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         };
         store.reservations.set(reservation.id, reservation);
         if (table && holdTable(store, table, reservation, claims.sub)) {
-          await publish('TableStatusChanged', tenantId, emitStatus(store, table, 'libre', claims.sub));
+          await publish(
+            'TableStatusChanged',
+            tenantId,
+            emitStatus(store, table, 'libre', claims.sub),
+          );
         }
         store.recordAudit({
           tenantId,
@@ -1310,7 +1578,13 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           action: 'floor.reservation.created',
           targetType: 'reservation',
           targetId: reservation.id,
-          meta: { reference: reservation.reference, date, time, partySize, tableCode: table?.code ?? null },
+          meta: {
+            reference: reservation.reference,
+            date,
+            time,
+            partySize,
+            tableCode: table?.code ?? null,
+          },
         });
         await publish('ReservationCreated', tenantId, {
           tenantId,
@@ -1324,7 +1598,10 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           source: 'staff',
           at: now,
         });
-        return { status: 201, body: { reservation: reservationView(store, reservation, { staff: true }) } };
+        return {
+          status: 201,
+          body: { reservation: reservationView(store, reservation, { staff: true }) },
+        };
       },
     },
     {
@@ -1335,33 +1612,57 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const claims = ctx.auth;
         if (!claims) throw HttpError.unauthorized();
         if (!canAny(claims, tenantId, ['floor:status', 'floor:manage'])) {
-          throw new HttpError(403, 'tenant_scope_denied', "Vous n'avez pas accès à cet établissement.");
+          throw new HttpError(
+            403,
+            'tenant_scope_denied',
+            "Vous n'avez pas accès à cet établissement.",
+          );
         }
         const reservation = requireReservation(store, tenantId, ctx.params.id ?? '');
         const body = asObject(ctx.body);
         const next = body.status;
-        if (typeof next !== 'string' || next === 'confirmee' || !['installee', 'annulee', 'no_show'].includes(next)) {
-          throw HttpError.unprocessable('validation_error', 'Statut de réservation invalide.', { field: 'status' });
+        if (
+          typeof next !== 'string' ||
+          next === 'confirmee' ||
+          !['installee', 'annulee', 'no_show'].includes(next)
+        ) {
+          throw HttpError.unprocessable('validation_error', 'Statut de réservation invalide.', {
+            field: 'status',
+          });
         }
         if (next === reservation.status) {
-          throw HttpError.unprocessable('status_unchanged', 'La réservation est déjà dans ce statut.', { field: 'status' });
+          throw HttpError.unprocessable(
+            'status_unchanged',
+            'La réservation est déjà dans ce statut.',
+            { field: 'status' },
+          );
         }
         if (!RESERVATION_TRANSITIONS[reservation.status].includes(next as ReservationStatus)) {
-          throw HttpError.conflict('reservation_transition_invalid', `Transition ${reservation.status} → ${next} interdite.`, {
-            from: reservation.status,
-            to: next,
-            allowed: RESERVATION_TRANSITIONS[reservation.status],
-          });
+          throw HttpError.conflict(
+            'reservation_transition_invalid',
+            `Transition ${reservation.status} → ${next} interdite.`,
+            {
+              from: reservation.status,
+              to: next,
+              allowed: RESERVATION_TRANSITIONS[reservation.status],
+            },
+          );
         }
         const now = nowIso();
         const from = reservation.status;
         const table = reservation.tableId ? store.tables.get(reservation.tableId) : undefined;
         if (next === 'installee') {
           if (!table) {
-            throw HttpError.unprocessable('reservation_table_required', 'Attribuez une table avant d’installer les clients.');
+            throw HttpError.unprocessable(
+              'reservation_table_required',
+              'Attribuez une table avant d’installer les clients.',
+            );
           }
           if (table.mergedIntoId) {
-            throw HttpError.conflict('table_merged', 'La table de cette réservation a été fusionnée.');
+            throw HttpError.conflict(
+              'table_merged',
+              'La table de cette réservation a été fusionnée.',
+            );
           }
           if (table.status === 'occupee' || table.status === 'addition') {
             throw HttpError.conflict('table_busy', 'Cette table est déjà occupée.');
@@ -1375,15 +1676,26 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
             table.reservationId = reservation.id;
             table.updatedAt = now;
             table.updatedBy = claims.sub;
-            await publish('TableStatusChanged', tenantId, emitStatus(store, table, statusFrom, claims.sub));
+            await publish(
+              'TableStatusChanged',
+              tenantId,
+              emitStatus(store, table, statusFrom, claims.sub),
+            );
           }
           reservation.seatedAt = now;
         } else {
           const released = releaseTable(store, reservation, claims.sub);
-          if (released) await publish('TableStatusChanged', tenantId, emitStatus(store, released, 'reservee', claims.sub));
+          if (released)
+            await publish(
+              'TableStatusChanged',
+              tenantId,
+              emitStatus(store, released, 'reservee', claims.sub),
+            );
           reservation.cancelledAt = now;
           reservation.cancelBy = claims.sub;
-          reservation.cancelReason = optionalString(body, 'reason', { max: 240 }) ?? (next === 'no_show' ? 'Client absent' : 'Annulée par l’établissement');
+          reservation.cancelReason =
+            optionalString(body, 'reason', { max: 240 }) ??
+            (next === 'no_show' ? 'Client absent' : 'Annulée par l’établissement');
         }
         reservation.status = next as ReservationStatus;
         reservation.updatedAt = now;
@@ -1475,9 +1787,13 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const table = tablesOf(store, tenantId).find((entry) => entry.code === code);
         if (!table) throw HttpError.notFound('Place introuvable.');
         if (table.mergedIntoId) {
-          throw HttpError.conflict('table_merged', 'Place fusionnée : attachez la commande à la table principale.', {
-            primaryCode: store.tables.get(table.mergedIntoId)?.code ?? null,
-          });
+          throw HttpError.conflict(
+            'table_merged',
+            'Place fusionnée : attachez la commande à la table principale.',
+            {
+              primaryCode: store.tables.get(table.mergedIntoId)?.code ?? null,
+            },
+          );
         }
         if (table.status === 'hors_service') {
           throw HttpError.conflict('table_out_of_service', 'Cette place est hors service.');
@@ -1498,7 +1814,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           meta: { orderId, from, to: table.status },
         });
         if (from !== table.status) {
-          void publish('TableStatusChanged', tenantId, emitStatus(store, table, from, 'order-service'));
+          void publish(
+            'TableStatusChanged',
+            tenantId,
+            emitStatus(store, table, from, 'order-service'),
+          );
         }
         return { body: { table: serializeTable(store, table, appPublicUrl) } };
       },
@@ -1515,7 +1835,10 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
         const body = asObject(ctx.body);
         const orderId = requireString(body, 'orderId', { max: 64 });
         if (table.orderId !== orderId) {
-          throw HttpError.conflict('order_mismatch', 'Cette place n’est pas liée à la commande indiquée.');
+          throw HttpError.conflict(
+            'order_mismatch',
+            'Cette place n’est pas liée à la commande indiquée.',
+          );
         }
         const to = body.to === 'nettoyage' ? 'nettoyage' : 'libre';
         const from = table.status;
@@ -1532,7 +1855,11 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
           targetId: table.id,
           meta: { orderId, from, to },
         });
-        void publish('TableStatusChanged', tenantId, emitStatus(store, table, from, 'order-service'));
+        void publish(
+          'TableStatusChanged',
+          tenantId,
+          emitStatus(store, table, from, 'order-service'),
+        );
         return { body: { table: serializeTable(store, table, appPublicUrl) } };
       },
     },
@@ -1554,7 +1881,9 @@ export function buildFloorApp(options: FloorAppOptions): Route[] {
               status: table.status,
               capacity: effectiveCapacity(store, table),
               orderId: table.orderId ?? null,
-              mergedIntoCode: table.mergedIntoId ? store.tables.get(table.mergedIntoId)?.code ?? null : null,
+              mergedIntoCode: table.mergedIntoId
+                ? (store.tables.get(table.mergedIntoId)?.code ?? null)
+                : null,
             },
           },
         };

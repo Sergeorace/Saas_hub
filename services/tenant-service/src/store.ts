@@ -215,7 +215,13 @@ export function createTenantStore(): TenantStore {
     sitesForTenant(tenantId) {
       return [...this.sites.values()]
         .filter((site) => site.tenantId === tenantId)
-        .sort((a, b) => (a.isPrimary === b.isPrimary ? a.createdAt.localeCompare(b.createdAt) : a.isPrimary ? -1 : 1));
+        .sort((a, b) =>
+          a.isPrimary === b.isPrimary
+            ? a.createdAt.localeCompare(b.createdAt)
+            : a.isPrimary
+              ? -1
+              : 1,
+        );
     },
     invoicesForTenant(tenantId) {
       return [...this.invoices.values()]
@@ -341,7 +347,12 @@ export function seedTenantDemo(store: TenantStore): void {
       nif: '1009876543',
       rccm: 'TG-LOM-2025-B-8842',
       description: 'Bar à cocktails et cuisine de rue, quartier Kodjoviakopé.',
-      address: { street: 'Rue des Palmiers 8', district: 'Kodjoviakopé', city: 'Lomé', country: 'Togo' },
+      address: {
+        street: 'Rue des Palmiers 8',
+        district: 'Kodjoviakopé',
+        city: 'Lomé',
+        country: 'Togo',
+      },
       contact: { phone: '+22892445566', email: 'hello@lebaobab.tg' },
       hours: [
         { day: 'lun', open: '17:00', close: '01:00' },
@@ -353,8 +364,16 @@ export function seedTenantDemo(store: TenantStore): void {
     currency: 'XOF',
     languages: ['fr', 'en'],
     documents: [
-      seedDocument('nif', 'NIF-Le-Baobab.txt', 'NIF 1009876543 — DGI Togo (document de démonstration)'),
-      seedDocument('rccm', 'RCCM-Le-Baobab.txt', 'RCCM TG-LOM-2025-B-8842 — CFE Lomé (document de démonstration)'),
+      seedDocument(
+        'nif',
+        'NIF-Le-Baobab.txt',
+        'NIF 1009876543 — DGI Togo (document de démonstration)',
+      ),
+      seedDocument(
+        'rccm',
+        'RCCM-Le-Baobab.txt',
+        'RCCM TG-LOM-2025-B-8842 — CFE Lomé (document de démonstration)',
+      ),
     ],
     acceptTerms: true,
     review: { notes: [] },
@@ -382,7 +401,13 @@ export function seedTenantDemo(store: TenantStore): void {
     },
     manager: { name: 'Sena Adjovi', email: 'sena@lagune.tg', phone: '+22893556677' },
     plan: 'starter',
-    documents: [seedDocument('nif', 'NIF-Lagune.txt', 'NIF 1007744112 — DGI Togo (document de démonstration)')],
+    documents: [
+      seedDocument(
+        'nif',
+        'NIF-Lagune.txt',
+        'NIF 1007744112 — DGI Togo (document de démonstration)',
+      ),
+    ],
     review: {
       notes: [
         {
@@ -411,7 +436,12 @@ export function seedTenantDemo(store: TenantStore): void {
         languages: ['fr', 'en'],
         currency: 'XOF',
         timezone: 'Africa/Lome',
-        address: { street: 'Rue des Palmiers 8', district: 'Kodjoviakopé', city: 'Lomé', country: 'Togo' },
+        address: {
+          street: 'Rue des Palmiers 8',
+          district: 'Kodjoviakopé',
+          city: 'Lomé',
+          country: 'Togo',
+        },
         contactPhone: '+22892445566',
         contactEmail: 'hello@lebaobab.tg',
         description: 'Cocktails signature, cuisine de rue et scène live le week-end.',
@@ -483,7 +513,11 @@ export function seedTenantDemo(store: TenantStore): void {
       id: newId('ste'),
       tenantId: record.id,
       name: `${record.brandName} — Lomé`,
-      address: `${record.settings.address?.street ?? ''}, ${record.settings.address?.district ?? ''}, Lomé`.replace(/^, /, ''),
+      address:
+        `${record.settings.address?.street ?? ''}, ${record.settings.address?.district ?? ''}, Lomé`.replace(
+          /^, /,
+          '',
+        ),
       phone: record.settings.contactPhone,
       isPrimary: true,
       status: 'active',

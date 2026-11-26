@@ -42,7 +42,11 @@ import {
 export interface LoyaltyAppOptions {
   store: LoyaltyStore;
   order: ServiceClient;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 interface OrderSnapshot {
@@ -65,7 +69,8 @@ function programView() {
     currency: 'XOF',
     tiers: LOYALTY_TIERS.map((tier) => ({ ...tier })),
     rewards: REWARDS.map((reward) => ({ ...reward })),
-    rules: 'Gagnez 1 point par tranche de 500 F CFA payée, hors promotions. 250 points = dessert offert.',
+    rules:
+      'Gagnez 1 point par tranche de 500 F CFA payée, hors promotions. 250 points = dessert offert.',
   };
 }
 
@@ -135,7 +140,9 @@ function optionalNumberField(source: Record<string, unknown>, field: string, fal
   const value = source[field];
   if (value === undefined || value === null) return fallback;
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
-    throw HttpError.unprocessable('validation_error', `Nombre positif attendu pour ${field}.`, { field });
+    throw HttpError.unprocessable('validation_error', `Nombre positif attendu pour ${field}.`, {
+      field,
+    });
   }
   return value;
 }
@@ -143,14 +150,22 @@ function optionalNumberField(source: Record<string, unknown>, field: string, fal
 function discountFields(source: Record<string, unknown>): { type: DiscountType; value: number } {
   const type = requireString(source, 'type', { max: 10 });
   if (type !== 'percent' && type !== 'amount') {
-    throw HttpError.unprocessable('validation_error', 'Type de remise attendu : percent ou amount.', { field: 'type' });
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Type de remise attendu : percent ou amount.',
+      { field: 'type' },
+    );
   }
   const raw = source.value;
   if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0) {
-    throw HttpError.unprocessable('validation_error', 'Valeur de remise positive attendue.', { field: 'value' });
+    throw HttpError.unprocessable('validation_error', 'Valeur de remise positive attendue.', {
+      field: 'value',
+    });
   }
   if (type === 'percent' && raw > 100) {
-    throw HttpError.unprocessable('validation_error', 'Un pourcentage ne peut dépasser 100.', { field: 'value' });
+    throw HttpError.unprocessable('validation_error', 'Un pourcentage ne peut dépasser 100.', {
+      field: 'value',
+    });
   }
   return { type, value: type === 'percent' ? raw : Math.round(raw) };
 }
@@ -163,30 +178,49 @@ function validatePromoAgainstOrder(
 ): { discountXof: number } {
   const status = promoStatus(code);
   if (status !== 'active') {
-    throw HttpError.unprocessable('promo_code_inactive', 'Ce code n’est pas actif sur la période en cours.', {
-      status,
-    });
+    throw HttpError.unprocessable(
+      'promo_code_inactive',
+      'Ce code n’est pas actif sur la période en cours.',
+      {
+        status,
+      },
+    );
   }
   if (code.maxUses !== null && code.uses >= code.maxUses) {
-    throw HttpError.unprocessable('promo_code_exhausted', 'Ce code a atteint sa limite d’utilisation.', {
-      uses: code.uses,
-      maxUses: code.maxUses,
-    });
+    throw HttpError.unprocessable(
+      'promo_code_exhausted',
+      'Ce code a atteint sa limite d’utilisation.',
+      {
+        uses: code.uses,
+        maxUses: code.maxUses,
+      },
+    );
   }
   const usedByUser = [...store.redemptions.values()].filter(
-    (redemption) => redemption.tenantId === code.tenantId && redemption.codeId === code.id && redemption.userId === userId,
+    (redemption) =>
+      redemption.tenantId === code.tenantId &&
+      redemption.codeId === code.id &&
+      redemption.userId === userId,
   ).length;
   if (usedByUser >= code.perUserLimit) {
-    throw HttpError.unprocessable('promo_code_user_limit', 'Limite d’utilisation atteinte pour ce client.', {
-      usedByUser,
-      perUserLimit: code.perUserLimit,
-    });
+    throw HttpError.unprocessable(
+      'promo_code_user_limit',
+      'Limite d’utilisation atteinte pour ce client.',
+      {
+        usedByUser,
+        perUserLimit: code.perUserLimit,
+      },
+    );
   }
   if (orderTotalXof < code.minOrderXof) {
-    throw HttpError.unprocessable('promo_code_min_order', 'Montant minimum non atteint pour ce code.', {
-      orderTotalXof,
-      minOrderXof: code.minOrderXof,
-    });
+    throw HttpError.unprocessable(
+      'promo_code_min_order',
+      'Montant minimum non atteint pour ce code.',
+      {
+        orderTotalXof,
+        minOrderXof: code.minOrderXof,
+      },
+    );
   }
   return { discountXof: discountFor(code.type, code.value, orderTotalXof) };
 }
@@ -194,7 +228,9 @@ function validatePromoAgainstOrder(
 function starRating(source: Record<string, unknown>): number {
   const value = source.rating;
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > 5) {
-    throw HttpError.unprocessable('validation_error', 'La note doit être un entier de 1 à 5.', { field: 'rating' });
+    throw HttpError.unprocessable('validation_error', 'La note doit être un entier de 1 à 5.', {
+      field: 'rating',
+    });
   }
   return value;
 }
@@ -213,7 +249,11 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
       path: '/api/v1/public/tenants/:tenantId/loyalty',
       auth: false,
       handler: (ctx) => ({
-        body: { tenantId: ctx.params.tenantId ?? '', program: programView(), generatedAt: nowIso() },
+        body: {
+          tenantId: ctx.params.tenantId ?? '',
+          program: programView(),
+          generatedAt: nowIso(),
+        },
       }),
     },
     {
@@ -229,7 +269,12 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           .slice(0, limit)
           .map(serializeReview);
         return {
-          body: { tenantId, aggregate: reviewAggregate(store, tenantId), items, generatedAt: nowIso() },
+          body: {
+            tenantId,
+            aggregate: reviewAggregate(store, tenantId),
+            items,
+            generatedAt: nowIso(),
+          },
         };
       },
     },
@@ -241,7 +286,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         requireTenantPermission(ctx.auth, tenantId, 'loyalty:view');
         const statusFilter = ctx.query.get('status');
         if (statusFilter && !['pending', 'approved', 'rejected'].includes(statusFilter)) {
-          throw HttpError.unprocessable('validation_error', 'Statut de modération inconnu.', { field: 'status' });
+          throw HttpError.unprocessable('validation_error', 'Statut de modération inconnu.', {
+            field: 'status',
+          });
         }
         const all = [...store.reviews.values()].filter((review) => review.tenantId === tenantId);
         const items = all
@@ -273,7 +320,11 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const body = asObject(ctx.body);
         const action = body.action;
         if (action !== 'approve' && action !== 'reject') {
-          throw HttpError.unprocessable('validation_error', 'Action attendue : approve ou reject.', { field: 'action' });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Action attendue : approve ou reject.',
+            { field: 'action' },
+          );
         }
         const status: ReviewStatus = action === 'approve' ? 'approved' : 'rejected';
         if (review.status === status) {
@@ -299,7 +350,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           actorId: claims.sub,
           at: review.updatedAt,
         });
-        return { body: { review: serializeReview(review), aggregate: reviewAggregate(store, tenantId) } };
+        return {
+          body: { review: serializeReview(review), aggregate: reviewAggregate(store, tenantId) },
+        };
       },
     },
     {
@@ -364,11 +417,15 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         );
         if (existing) {
           const account = getOrCreateAccount(store, claims.sub, tenantId);
-          return { body: { alreadyCredited: true, account: accountView(store, account), entry: existing } };
+          return {
+            body: { alreadyCredited: true, account: accountView(store, account), entry: existing },
+          };
         }
         let snapshot: OrderSnapshot;
         try {
-          snapshot = await order.get<OrderSnapshot>(`/internal/tenants/${tenantId}/orders/${orderId}`);
+          snapshot = await order.get<OrderSnapshot>(
+            `/internal/tenants/${tenantId}/orders/${orderId}`,
+          );
         } catch (error) {
           if (error instanceof HttpError && error.status === 404) {
             throw HttpError.notFound('Commande introuvable pour cet établissement.');
@@ -407,7 +464,10 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           balance: updated.points,
           at: entry.at,
         });
-        return { status: 201, body: { alreadyCredited: false, account: accountView(store, updated), entry } };
+        return {
+          status: 201,
+          body: { alreadyCredited: false, account: accountView(store, updated), entry },
+        };
       },
     },
     {
@@ -424,10 +484,14 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         }
         const account = getOrCreateAccount(store, claims.sub, tenantId);
         if (account.points < reward.costPoints) {
-          throw HttpError.unprocessable('loyalty_insufficient_points', 'Solde de points insuffisant.', {
-            balance: account.points,
-            required: reward.costPoints,
-          });
+          throw HttpError.unprocessable(
+            'loyalty_insufficient_points',
+            'Solde de points insuffisant.',
+            {
+              balance: account.points,
+              required: reward.costPoints,
+            },
+          );
         }
         const { account: updated, entry } = applyEntry(store, {
           tenantId,
@@ -481,11 +545,16 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const key = accountKey(claims.sub, tenantId);
         const existing = store.favorites.get(key);
         if (existing) {
-          return { body: { favorite: { tenantId, addedAt: existing.createdAt }, alreadySaved: true } };
+          return {
+            body: { favorite: { tenantId, addedAt: existing.createdAt }, alreadySaved: true },
+          };
         }
         const favorite = { userId: claims.sub, tenantId, createdAt: nowIso() };
         store.favorites.set(key, favorite);
-        return { status: 201, body: { favorite: { tenantId, addedAt: favorite.createdAt }, alreadySaved: false } };
+        return {
+          status: 201,
+          body: { favorite: { tenantId, addedAt: favorite.createdAt }, alreadySaved: false },
+        };
       },
     },
     {
@@ -505,7 +574,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const claims = requireUser(ctx);
         const tenantId = ctx.query.get('tenantId');
         const items = [...store.reviews.values()]
-          .filter((review) => review.userId === claims.sub && (!tenantId || review.tenantId === tenantId))
+          .filter(
+            (review) => review.userId === claims.sub && (!tenantId || review.tenantId === tenantId),
+          )
           .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
           .map(serializeReview);
         return { body: { items } };
@@ -592,7 +663,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           actorId: claims.sub,
           at: review.reply.at,
         });
-        return { body: { review: serializeReview(review), aggregate: reviewAggregate(store, tenantId) } };
+        return {
+          body: { review: serializeReview(review), aggregate: reviewAggregate(store, tenantId) },
+        };
       },
     },
     {
@@ -601,7 +674,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'loyalty:view');
-        const accounts = [...store.accounts.values()].filter((account) => account.tenantId === tenantId);
+        const accounts = [...store.accounts.values()].filter(
+          (account) => account.tenantId === tenantId,
+        );
         return {
           body: {
             tenantId,
@@ -622,8 +697,13 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'loyalty:view');
-        const entries = store.audit.filter((entry) => entry.tenantId === tenantId).slice(-100).reverse();
-        return { body: { entries, integrity: verifyAuditChain(store.audit), generatedAt: nowIso() } };
+        const entries = store.audit
+          .filter((entry) => entry.tenantId === tenantId)
+          .slice(-100)
+          .reverse();
+        return {
+          body: { entries, integrity: verifyAuditChain(store.audit), generatedAt: nowIso() },
+        };
       },
     },
     {
@@ -632,17 +712,27 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'loyalty:view');
-        const accounts = [...store.accounts.values()].filter((account) => account.tenantId === tenantId);
+        const accounts = [...store.accounts.values()].filter(
+          (account) => account.tenantId === tenantId,
+        );
         const tierCounts = Object.fromEntries(
           LOYALTY_TIERS.map((tier) => [
             tier.code,
             accounts.filter((account) => tierFor(account.lifetimePoints).code === tier.code).length,
           ]),
         );
-        const promotions = [...store.promotions.values()].filter((entry) => entry.tenantId === tenantId);
-        const promoCodes = [...store.promoCodes.values()].filter((entry) => entry.tenantId === tenantId);
-        const campaigns = [...store.campaigns.values()].filter((entry) => entry.tenantId === tenantId);
-        const redemptions = [...store.redemptions.values()].filter((entry) => entry.tenantId === tenantId);
+        const promotions = [...store.promotions.values()].filter(
+          (entry) => entry.tenantId === tenantId,
+        );
+        const promoCodes = [...store.promoCodes.values()].filter(
+          (entry) => entry.tenantId === tenantId,
+        );
+        const campaigns = [...store.campaigns.values()].filter(
+          (entry) => entry.tenantId === tenantId,
+        );
+        const redemptions = [...store.redemptions.values()].filter(
+          (entry) => entry.tenantId === tenantId,
+        );
         const reviews = [...store.reviews.values()].filter((entry) => entry.tenantId === tenantId);
         return {
           body: {
@@ -724,12 +814,16 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const discount = discountFields(body);
         const appliesToRaw = optionalString(body, 'appliesTo', { max: 20 }) ?? 'all';
         if (!['all', 'dine_in', 'delivery', 'takeaway'].includes(appliesToRaw)) {
-          throw HttpError.unprocessable('validation_error', 'Canal de promotion inconnu.', { field: 'appliesTo' });
+          throw HttpError.unprocessable('validation_error', 'Canal de promotion inconnu.', {
+            field: 'appliesTo',
+          });
         }
         const startAt = isoDateField(body, 'startAt');
         const endAt = isoDateField(body, 'endAt');
         if (endAt <= startAt) {
-          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', { field: 'endAt' });
+          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', {
+            field: 'endAt',
+          });
         }
         const now = nowIso();
         const promotion: Promotion = {
@@ -776,20 +870,29 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'loyalty:manage');
         const promotion = store.promotions.get(ctx.params.id ?? '');
-        if (!promotion || promotion.tenantId !== tenantId) throw HttpError.notFound('Promotion introuvable.');
+        if (!promotion || promotion.tenantId !== tenantId)
+          throw HttpError.notFound('Promotion introuvable.');
         const body = asObject(ctx.body);
-        if (body.name !== undefined) promotion.name = requireString(body, 'name', { min: 2, max: 80 });
-        if (body.description !== undefined) promotion.description = optionalString(body, 'description', { max: 300 }) ?? '';
+        if (body.name !== undefined)
+          promotion.name = requireString(body, 'name', { min: 2, max: 80 });
+        if (body.description !== undefined)
+          promotion.description = optionalString(body, 'description', { max: 300 }) ?? '';
         if (body.type !== undefined || body.value !== undefined) {
-          const discount = discountFields({ type: body.type ?? promotion.type, value: body.value ?? promotion.value });
+          const discount = discountFields({
+            type: body.type ?? promotion.type,
+            value: body.value ?? promotion.value,
+          });
           promotion.type = discount.type;
           promotion.value = discount.value;
         }
-        if (body.minOrderXof !== undefined) promotion.minOrderXof = optionalNumberField(body, 'minOrderXof', 0);
+        if (body.minOrderXof !== undefined)
+          promotion.minOrderXof = optionalNumberField(body, 'minOrderXof', 0);
         if (body.startAt !== undefined) promotion.startAt = isoDateField(body, 'startAt');
         if (body.endAt !== undefined) promotion.endAt = isoDateField(body, 'endAt');
         if (promotion.endAt <= promotion.startAt) {
-          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', { field: 'endAt' });
+          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', {
+            field: 'endAt',
+          });
         }
         if (body.active !== undefined) promotion.active = body.active !== false;
         promotion.updatedAt = nowIso();
@@ -815,7 +918,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           .filter((entry) => entry.tenantId === tenantId)
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map(serializePromoCode);
-        const redemptions = [...store.redemptions.values()].filter((entry) => entry.tenantId === tenantId);
+        const redemptions = [...store.redemptions.values()].filter(
+          (entry) => entry.tenantId === tenantId,
+        );
         return {
           body: {
             tenantId,
@@ -841,16 +946,25 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const body = asObject(ctx.body);
         const code = requireString(body, 'code', { min: 3, max: 24 }).trim().toUpperCase();
         if (!/^[A-Z0-9_-]+$/.test(code)) {
-          throw HttpError.unprocessable('validation_error', 'Code attendu : lettres, chiffres, - et _.', { field: 'code' });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Code attendu : lettres, chiffres, - et _.',
+            { field: 'code' },
+          );
         }
         if (findPromoCode(store, tenantId, code)) {
-          throw HttpError.conflict('promo_code_exists', 'Ce code existe déjà pour cet établissement.');
+          throw HttpError.conflict(
+            'promo_code_exists',
+            'Ce code existe déjà pour cet établissement.',
+          );
         }
         const discount = discountFields(body);
         const startAt = isoDateField(body, 'startAt');
         const endAt = isoDateField(body, 'endAt');
         if (endAt <= startAt) {
-          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', { field: 'endAt' });
+          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', {
+            field: 'endAt',
+          });
         }
         const maxUses = optionalNumberField(body, 'maxUses', 0);
         const now = nowIso();
@@ -890,25 +1004,35 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'loyalty:manage');
         const promoCode = store.promoCodes.get(ctx.params.id ?? '');
-        if (!promoCode || promoCode.tenantId !== tenantId) throw HttpError.notFound('Code promo introuvable.');
+        if (!promoCode || promoCode.tenantId !== tenantId)
+          throw HttpError.notFound('Code promo introuvable.');
         const body = asObject(ctx.body);
         if (body.type !== undefined || body.value !== undefined) {
-          const discount = discountFields({ type: body.type ?? promoCode.type, value: body.value ?? promoCode.value });
+          const discount = discountFields({
+            type: body.type ?? promoCode.type,
+            value: body.value ?? promoCode.value,
+          });
           promoCode.type = discount.type;
           promoCode.value = discount.value;
         }
-        if (body.minOrderXof !== undefined) promoCode.minOrderXof = optionalNumberField(body, 'minOrderXof', 0);
+        if (body.minOrderXof !== undefined)
+          promoCode.minOrderXof = optionalNumberField(body, 'minOrderXof', 0);
         if (body.maxUses !== undefined) {
           const maxUses = optionalNumberField(body, 'maxUses', 0);
           promoCode.maxUses = maxUses > 0 ? Math.round(maxUses) : null;
         }
         if (body.perUserLimit !== undefined) {
-          promoCode.perUserLimit = Math.max(1, Math.round(optionalNumberField(body, 'perUserLimit', 1)));
+          promoCode.perUserLimit = Math.max(
+            1,
+            Math.round(optionalNumberField(body, 'perUserLimit', 1)),
+          );
         }
         if (body.startAt !== undefined) promoCode.startAt = isoDateField(body, 'startAt');
         if (body.endAt !== undefined) promoCode.endAt = isoDateField(body, 'endAt');
         if (promoCode.endAt <= promoCode.startAt) {
-          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', { field: 'endAt' });
+          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', {
+            field: 'endAt',
+          });
         }
         if (body.active !== undefined) promoCode.active = body.active !== false;
         promoCode.updatedAt = nowIso();
@@ -931,16 +1055,35 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const promoCode = findPromoCode(store, tenantId, ctx.params.code ?? '');
         if (!promoCode) {
-          return { body: { valid: false, reason: 'promo_code_unknown', message: 'Code inconnu pour cet établissement.' } };
+          return {
+            body: {
+              valid: false,
+              reason: 'promo_code_unknown',
+              message: 'Code inconnu pour cet établissement.',
+            },
+          };
         }
         const body = asObject(ctx.body ?? {});
         const orderTotalXof = optionalNumberField(body, 'orderTotalXof', 0);
         const status = promoStatus(promoCode);
         if (status !== 'active') {
-          return { body: { valid: false, reason: 'promo_code_inactive', status, message: 'Code inactif sur la période en cours.' } };
+          return {
+            body: {
+              valid: false,
+              reason: 'promo_code_inactive',
+              status,
+              message: 'Code inactif sur la période en cours.',
+            },
+          };
         }
         if (promoCode.maxUses !== null && promoCode.uses >= promoCode.maxUses) {
-          return { body: { valid: false, reason: 'promo_code_exhausted', message: 'Ce code a atteint sa limite d’utilisation.' } };
+          return {
+            body: {
+              valid: false,
+              reason: 'promo_code_exhausted',
+              message: 'Ce code a atteint sa limite d’utilisation.',
+            },
+          };
         }
         if (orderTotalXof < promoCode.minOrderXof) {
           return {
@@ -976,10 +1119,19 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         if (!promoCode) throw HttpError.notFound('Code promo introuvable pour cet établissement.');
         const existing = [...store.redemptions.values()].find(
           (entry) =>
-            entry.tenantId === tenantId && entry.userId === claims.sub && entry.orderId === orderId && entry.codeId === promoCode.id,
+            entry.tenantId === tenantId &&
+            entry.userId === claims.sub &&
+            entry.orderId === orderId &&
+            entry.codeId === promoCode.id,
         );
         if (existing) {
-          return { body: { alreadyRedeemed: true, redemption: existing, promoCode: serializePromoCode(promoCode) } };
+          return {
+            body: {
+              alreadyRedeemed: true,
+              redemption: existing,
+              promoCode: serializePromoCode(promoCode),
+            },
+          };
         }
         let orderTotalXof: number;
         try {
@@ -993,7 +1145,12 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           }
           throw error;
         }
-        const { discountXof } = validatePromoAgainstOrder(store, promoCode, claims.sub, orderTotalXof);
+        const { discountXof } = validatePromoAgainstOrder(
+          store,
+          promoCode,
+          claims.sub,
+          orderTotalXof,
+        );
         promoCode.uses += 1;
         promoCode.updatedAt = nowIso();
         const redemption: PromoRedemption = {
@@ -1048,10 +1205,9 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
             segments: ['all', ...LOYALTY_TIERS.map((tier) => tier.code), 'inactifs'],
             channels: ['sms', 'email', 'push'],
             audience: Object.fromEntries(
-              (['all', ...LOYALTY_TIERS.map((tier) => tier.code), 'inactifs'] as CampaignSegment[]).map((segment) => [
-                segment,
-                campaignRecipients(store, tenantId, segment).length,
-              ]),
+              (
+                ['all', ...LOYALTY_TIERS.map((tier) => tier.code), 'inactifs'] as CampaignSegment[]
+              ).map((segment) => [segment, campaignRecipients(store, tenantId, segment).length]),
             ),
           },
         };
@@ -1066,18 +1222,25 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const body = asObject(ctx.body);
         const channel = requireString(body, 'channel', { max: 10 });
         if (!['sms', 'email', 'push'].includes(channel)) {
-          throw HttpError.unprocessable('validation_error', 'Canal attendu : sms, email ou push.', { field: 'channel' });
+          throw HttpError.unprocessable('validation_error', 'Canal attendu : sms, email ou push.', {
+            field: 'channel',
+          });
         }
         const segment = optionalString(body, 'segment', { max: 20 }) ?? 'all';
         const segments = ['all', ...LOYALTY_TIERS.map((tier) => tier.code), 'inactifs'];
         if (!segments.includes(segment)) {
-          throw HttpError.unprocessable('validation_error', 'Segment inconnu.', { field: 'segment' });
+          throw HttpError.unprocessable('validation_error', 'Segment inconnu.', {
+            field: 'segment',
+          });
         }
-        const scheduledAt = body.scheduledAt === undefined || body.scheduledAt === null
-          ? null
-          : isoDateField(body, 'scheduledAt');
+        const scheduledAt =
+          body.scheduledAt === undefined || body.scheduledAt === null
+            ? null
+            : isoDateField(body, 'scheduledAt');
         if (scheduledAt && Date.parse(scheduledAt) <= Date.now()) {
-          throw HttpError.unprocessable('validation_error', 'La planification doit être future.', { field: 'scheduledAt' });
+          throw HttpError.unprocessable('validation_error', 'La planification doit être future.', {
+            field: 'scheduledAt',
+          });
         }
         const now = nowIso();
         const campaign: Campaign = {
@@ -1114,9 +1277,12 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'loyalty:manage');
         const campaign = store.campaigns.get(ctx.params.id ?? '');
-        if (!campaign || campaign.tenantId !== tenantId) throw HttpError.notFound('Campagne introuvable.');
-        if (campaign.status === 'envoyee') throw HttpError.conflict('campaign_already_sent', 'Cette campagne a déjà été envoyée.');
-        if (campaign.status === 'annulee') throw HttpError.conflict('campaign_cancelled', 'Cette campagne a été annulée.');
+        if (!campaign || campaign.tenantId !== tenantId)
+          throw HttpError.notFound('Campagne introuvable.');
+        if (campaign.status === 'envoyee')
+          throw HttpError.conflict('campaign_already_sent', 'Cette campagne a déjà été envoyée.');
+        if (campaign.status === 'annulee')
+          throw HttpError.conflict('campaign_cancelled', 'Cette campagne a été annulée.');
         const audience = campaignRecipients(store, tenantId, campaign.segment);
         campaign.status = 'envoyee';
         campaign.recipients = audience.length;
@@ -1128,7 +1294,11 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
           action: 'marketing.campaign.sent',
           targetType: 'campaign',
           targetId: campaign.id,
-          meta: { channel: campaign.channel, segment: campaign.segment, recipients: audience.length },
+          meta: {
+            channel: campaign.channel,
+            segment: campaign.segment,
+            recipients: audience.length,
+          },
         });
         await publish('CampaignSent', tenantId, {
           tenantId,
@@ -1151,9 +1321,12 @@ export function buildLoyaltyApp(options: LoyaltyAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'loyalty:manage');
         const campaign = store.campaigns.get(ctx.params.id ?? '');
-        if (!campaign || campaign.tenantId !== tenantId) throw HttpError.notFound('Campagne introuvable.');
-        if (campaign.status === 'envoyee') throw HttpError.conflict('campaign_already_sent', 'Campagne déjà envoyée.');
-        if (campaign.status === 'annulee') throw HttpError.unprocessable('campaign_cancelled', 'Campagne déjà annulée.');
+        if (!campaign || campaign.tenantId !== tenantId)
+          throw HttpError.notFound('Campagne introuvable.');
+        if (campaign.status === 'envoyee')
+          throw HttpError.conflict('campaign_already_sent', 'Campagne déjà envoyée.');
+        if (campaign.status === 'annulee')
+          throw HttpError.unprocessable('campaign_cancelled', 'Campagne déjà annulée.');
         campaign.status = 'annulee';
         campaign.updatedAt = nowIso();
         store.recordAudit({
@@ -1179,7 +1352,8 @@ export function handleLoyaltyEvent(
   const userId = envelope.payload.customerUserId;
   const orderId = envelope.payload.orderId;
   const amount = envelope.payload.totalXof ?? envelope.payload.amountXof;
-  if (typeof tenantId !== 'string' || typeof userId !== 'string' || typeof orderId !== 'string') return;
+  if (typeof tenantId !== 'string' || typeof userId !== 'string' || typeof orderId !== 'string')
+    return;
   if (typeof amount !== 'number' || amount <= 0) return;
   const already = entriesFor(store, userId, tenantId).some(
     (entry) => entry.type === 'gain' && entry.orderId === orderId,

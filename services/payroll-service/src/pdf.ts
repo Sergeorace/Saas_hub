@@ -50,15 +50,31 @@ export async function payslipPdf(
   text(page, 'Bulletin de paie', { x: margin, y: y - 22, size: 13, font: bold, color: INK });
   text(page, meta.tenantName, { x: margin, y: y - 40, size: 10, font, color: MUTED });
   text(page, `Période : ${periodLabel(meta.period)}`, { x: 380, y, size: 10, font, color: INK });
-  text(page, `Édité le ${stamp(meta.generatedAt)}`, { x: 380, y: y - 16, size: 9, font, color: MUTED });
-  text(page, `Réf. archive : ${meta.archivedReference}`, { x: 380, y: y - 30, size: 8, font, color: MUTED });
+  text(page, `Édité le ${stamp(meta.generatedAt)}`, {
+    x: 380,
+    y: y - 16,
+    size: 9,
+    font,
+    color: MUTED,
+  });
+  text(page, `Réf. archive : ${meta.archivedReference}`, {
+    x: 380,
+    y: y - 30,
+    size: 8,
+    font,
+    color: MUTED,
+  });
   y -= 64;
   page.drawLine({ start: { x: margin, y }, end: { x: 549, y }, thickness: 1, color: LINE });
 
   y -= 26;
   text(page, payslip.name, { x: margin, y, size: 14, font: bold, color: INK });
   text(page, `${payslip.jobTitle} — contrat ${payslip.contractType.toUpperCase()}`, {
-    x: margin, y: y - 15, size: 9, font, color: MUTED,
+    x: margin,
+    y: y - 15,
+    size: 9,
+    font,
+    color: MUTED,
   });
   const payment =
     payslip.paymentMethod === 'bank'
@@ -67,7 +83,13 @@ export async function payslipPdf(
         ? 'Paiement en espèces (caisse)'
         : `Mobile Money : ${payslip.paymentDestination}`;
   text(page, payment, { x: 300, y, size: 9, font, color: MUTED });
-  text(page, `Salaire de base : ${xof(payslip.baseSalaryXof)}`, { x: 300, y: y - 15, size: 9, font, color: MUTED });
+  text(page, `Salaire de base : ${xof(payslip.baseSalaryXof)}`, {
+    x: 300,
+    y: y - 15,
+    size: 9,
+    font,
+    color: MUTED,
+  });
 
   y -= 42;
   text(page, 'Éléments de rémunération', { x: margin, y, size: 11, font: bold, color: INK });
@@ -81,14 +103,29 @@ export async function payslipPdf(
   y -= 14;
 
   for (const component of payslip.components) {
-    if (component.amountXof === 0 && component.type !== 'prime' && component.type !== 'indemnite') continue;
+    if (component.amountXof === 0 && component.type !== 'prime' && component.type !== 'indemnite')
+      continue;
     const label = `${component.label}`.slice(0, 46);
     text(page, label, { x: margin, y, size: 8.5, font, color: INK });
-    text(page, TYPE_LABEL[component.type] ?? component.type, { x: 300, y, size: 8, font, color: MUTED });
-    text(page, component.operation.slice(0, 30), { x: 350, y, size: 8, font, color: MUTED });
-    text(page, `${component.type === 'prime' || component.type === 'indemnite' ? '+' : '-'} ${xof(component.amountXof)}`, {
-      x: 480, y, size: 8.5, font, color: INK,
+    text(page, TYPE_LABEL[component.type] ?? component.type, {
+      x: 300,
+      y,
+      size: 8,
+      font,
+      color: MUTED,
     });
+    text(page, component.operation.slice(0, 30), { x: 350, y, size: 8, font, color: MUTED });
+    text(
+      page,
+      `${component.type === 'prime' || component.type === 'indemnite' ? '+' : '-'} ${xof(component.amountXof)}`,
+      {
+        x: 480,
+        y,
+        size: 8.5,
+        font,
+        color: INK,
+      },
+    );
     y -= 15;
     if (y < 240) break;
   }
@@ -112,9 +149,17 @@ export async function payslipPdf(
   ];
   for (const [label, value] of summary) {
     text(page, label, { x: 330, y, size: 9.5, font, color: INK });
-    text(page, value === summary[0][1] || value >= 0 ? xof(Math.abs(value)) : `- ${xof(Math.abs(value))}`, {
-      x: 470, y, size: 9.5, font, color: value < 0 ? rgb(0.65, 0.22, 0.15) : INK,
-    });
+    text(
+      page,
+      value === summary[0][1] || value >= 0 ? xof(Math.abs(value)) : `- ${xof(Math.abs(value))}`,
+      {
+        x: 470,
+        y,
+        size: 9.5,
+        font,
+        color: value < 0 ? rgb(0.65, 0.22, 0.15) : INK,
+      },
+    );
     y -= 15;
   }
   y -= 6;
@@ -122,11 +167,13 @@ export async function payslipPdf(
   text(page, 'NET À PAYER', { x: 330, y, size: 10, font: bold, color: INK });
   text(page, xof(payslip.netXof), { x: 450, y, size: 11, font: bold, color: ACCENT });
 
-  text(page, 
+  text(
+    page,
     'Document généré automatiquement par RESTO-HUB et archivé. Les règles de calcul sont paramétrables et consultables dans le module Paie.',
     { x: margin, y: 60, size: 7.5, font, color: MUTED, maxWidth: 500 },
   );
-  text(page, 
+  text(
+    page,
     `Pointage : ${payslip.daysPresent} jours — Heures : ${payslip.hoursWorked} h — Heures sup. : ${payslip.overtimeHours} h — Absences non payées : ${payslip.unpaidLeaveDays} j`,
     { x: margin, y: 80, size: 8, font, color: MUTED, maxWidth: 500 },
   );
@@ -145,9 +192,21 @@ export async function payrollJournalPdf(
   let y = 545;
 
   text(page, 'RESTO-HUB', { x: margin, y, size: 18, font: bold, color: ACCENT });
-  text(page, `Journal de paie — ${periodLabel(run.period)}`, { x: margin, y: y - 20, size: 12, font: bold, color: INK });
+  text(page, `Journal de paie — ${periodLabel(run.period)}`, {
+    x: margin,
+    y: y - 20,
+    size: 12,
+    font: bold,
+    color: INK,
+  });
   text(page, meta.tenantName, { x: margin, y: y - 36, size: 9, font, color: MUTED });
-  text(page, `Statut : ${run.status} — Édité le ${stamp(meta.generatedAt)}`, { x: 560, y, size: 9, font, color: MUTED });
+  text(page, `Statut : ${run.status} — Édité le ${stamp(meta.generatedAt)}`, {
+    x: 560,
+    y,
+    size: 9,
+    font,
+    color: MUTED,
+  });
 
   y -= 64;
   const columns: Array<[string, number]> = [
@@ -160,7 +219,8 @@ export async function payrollJournalPdf(
     ['Net', 640],
     ['Moyen', 720],
   ];
-  for (const [label, x] of columns) text(page, label, { x, y, size: 8.5, font: bold, color: MUTED });
+  for (const [label, x] of columns)
+    text(page, label, { x, y, size: 8.5, font: bold, color: MUTED });
   y -= 6;
   page.drawLine({ start: { x: margin, y }, end: { x: 802, y }, thickness: 0.7, color: LINE });
   y -= 14;
@@ -173,9 +233,21 @@ export async function payrollJournalPdf(
     text(page, xof(line.retenuesXof + line.avancesXof), { x: 485, y, size: 8.5, font, color: INK });
     text(page, xof(line.impotsXof), { x: 560, y, size: 8.5, font, color: INK });
     text(page, xof(line.netXof), { x: 640, y, size: 8.5, font: bold, color: INK });
-    text(page, line.paymentMethod === 'bank' ? 'Virement' : line.paymentMethod === 'cash' ? 'Espèces' : 'Mobile', {
-      x: 720, y, size: 8, font, color: MUTED,
-    });
+    text(
+      page,
+      line.paymentMethod === 'bank'
+        ? 'Virement'
+        : line.paymentMethod === 'cash'
+          ? 'Espèces'
+          : 'Mobile',
+      {
+        x: 720,
+        y,
+        size: 8,
+        font,
+        color: MUTED,
+      },
+    );
     y -= 14;
     if (y < 80) break;
   }
@@ -185,8 +257,20 @@ export async function payrollJournalPdf(
   y -= 16;
   text(page, `Effectif : ${run.totals.headcount}`, { x: 40, y, size: 9, font: bold, color: INK });
   text(page, `Brut : ${xof(run.totals.brutXof)}`, { x: 180, y, size: 9, font, color: INK });
-  text(page, `Cotisations : ${xof(run.totals.cotisationsXof)}`, { x: 340, y, size: 9, font, color: INK });
+  text(page, `Cotisations : ${xof(run.totals.cotisationsXof)}`, {
+    x: 340,
+    y,
+    size: 9,
+    font,
+    color: INK,
+  });
   text(page, `Impôts : ${xof(run.totals.impotsXof)}`, { x: 500, y, size: 9, font, color: INK });
-  text(page, `Net total : ${xof(run.totals.netXof)}`, { x: 640, y, size: 9, font: bold, color: ACCENT });
+  text(page, `Net total : ${xof(run.totals.netXof)}`, {
+    x: 640,
+    y,
+    size: 9,
+    font: bold,
+    color: ACCENT,
+  });
   return doc.save();
 }

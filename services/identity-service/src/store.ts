@@ -233,7 +233,9 @@ export function createIdentityStore(): IdentityStore {
       return [...this.assignments.values()].filter((assignment) => assignment.userId === userId);
     },
     assignmentsForTenant(tenantId) {
-      return [...this.assignments.values()].filter((assignment) => assignment.tenantId === tenantId);
+      return [...this.assignments.values()].filter(
+        (assignment) => assignment.tenantId === tenantId,
+      );
     },
     tenantPermissionsFor(userId) {
       const result: Record<string, string[]> = {};
@@ -269,7 +271,9 @@ export function createIdentityStore(): IdentityStore {
       return session;
     },
     revokeTenantSessions(tenantId, actorId, reason) {
-      const userIds = new Set(this.assignmentsForTenant(tenantId).map((assignment) => assignment.userId));
+      const userIds = new Set(
+        this.assignmentsForTenant(tenantId).map((assignment) => assignment.userId),
+      );
       let revoked = 0;
       for (const session of this.sessions.values()) {
         if (!userIds.has(session.userId) || session.revokedAt) continue;

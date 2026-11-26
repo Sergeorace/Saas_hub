@@ -90,7 +90,13 @@ test('familles typographiques et métadonnées produit', () => {
 });
 
 test('les thèmes sombres couvrent toutes les dimensions du thème clair', () => {
-  assert.deepEqual(Object.keys(tokens.dark.dimensions).sort(), Object.keys(tokens.light.dimensions).sort());
-  assert.deepEqual(Object.keys(tokens.dark.fontFamilies).sort(), Object.keys(tokens.light.fontFamilies).sort());
+  assert.deepEqual(
+    Object.keys(tokens.dark.dimensions).sort(),
+    Object.keys(tokens.light.dimensions).sort(),
+  );
+  assert.deepEqual(
+    Object.keys(tokens.dark.fontFamilies).sort(),
+    Object.keys(tokens.light.fontFamilies).sort(),
+  );
   assert.deepEqual(tokens.dark.motion, tokens.light.motion);
 });

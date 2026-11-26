@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  Badge,
-  Icon,
-  TableStatusBadge,
-  formatXof,
-  useI18n,
-} from '@resto-hub/design-system';
+import { Badge, Icon, TableStatusBadge, formatXof, useI18n } from '@resto-hub/design-system';
 import { eventFeed, kpis, tables } from '../data/demo';
 import { FloorPreview } from '../components/FloorPreview';
 
@@ -135,9 +129,7 @@ export function Hero() {
                       <strong>{selected.id}</strong>
                       <TableStatusBadge
                         status={selected.status}
-                        label={
-                          selected.status === 'bill' ? t('hero.preview.bill') : undefined
-                        }
+                        label={selected.status === 'bill' ? t('hero.preview.bill') : undefined}
                       />
                     </div>
                     <div className="preview__detail-meta">
@@ -166,7 +158,9 @@ export function Hero() {
                     <ul>
                       {eventFeed.slice(0, 3).map((event) => (
                         <li key={event.id}>
-                          <span className={`preview__event-dot preview__event-dot--${event.tone}`} />
+                          <span
+                            className={`preview__event-dot preview__event-dot--${event.tone}`}
+                          />
                           <div>
                             <span className="preview__event-name">{event.name}</span>
                             <span className="preview__event-detail">{event.detail}</span>

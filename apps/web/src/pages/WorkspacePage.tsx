@@ -192,7 +192,12 @@ export function WorkspacePage() {
         currency: detail.tenant.settings.currency ?? 'XOF',
         hours: detail.tenant.settings.hours?.length
           ? detail.tenant.settings.hours
-          : DAYS.map((day) => ({ day: day.key, open: '11:00', close: '23:00', closed: day.key === 'dim' })),
+          : DAYS.map((day) => ({
+              day: day.key,
+              open: '11:00',
+              close: '23:00',
+              closed: day.key === 'dim',
+            })),
       });
     } catch (cause) {
       setError(errorMessage(cause));
@@ -219,11 +224,19 @@ export function WorkspacePage() {
         currency: brandForm.currency,
         hours: brandForm.hours,
       });
-      setTenant((current) => (current ? { ...current, brandName: result.tenant.brandName, settings: result.tenant.settings } : current));
+      setTenant((current) =>
+        current
+          ? { ...current, brandName: result.tenant.brandName, settings: result.tenant.settings }
+          : current,
+      );
       toast.push({ title: t('workspace.brandingSaved') });
       await refreshOnboarding(tenant.id);
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setBrandPending(false);
     }
@@ -246,7 +259,11 @@ export function WorkspacePage() {
       setSiteForm({ name: '', address: '', phone: '' });
       toast.push({ title: t('workspace.siteAdded') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setSitePending(false);
     }
@@ -259,7 +276,11 @@ export function WorkspacePage() {
       setSites((current) => current.filter((entry) => entry.id !== site.id));
       toast.push({ title: t('workspace.siteDeleted') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     }
   };
 
@@ -271,7 +292,11 @@ export function WorkspacePage() {
       setInvoices((current) => [result.invoice, ...current]);
       toast.push({ title: t('workspace.invoiceCreated'), description: result.invoice.number });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setCheckoutPlan(null);
     }
@@ -282,12 +307,18 @@ export function WorkspacePage() {
     setPayingInvoice(invoice.id);
     try {
       const result = await tenantApi.payInvoiceDemo(tenant.id, invoice.id);
-      setInvoices((current) => current.map((entry) => (entry.id === invoice.id ? result.invoice : entry)));
+      setInvoices((current) =>
+        current.map((entry) => (entry.id === invoice.id ? result.invoice : entry)),
+      );
       setSubscription((current) => (current ? { ...current, status: 'active' } : current));
       toast.push({ title: t('workspace.invoicePaid'), description: result.invoice.number });
       await refreshOnboarding(tenant.id);
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setPayingInvoice(null);
     }
@@ -310,13 +341,34 @@ export function WorkspacePage() {
   }, [brandForm?.primaryColor, brandForm?.secondaryColor]);
 
   const invoiceColumns: Array<Column<Invoice>> = [
-    { key: 'number', header: t('workspace.colInvoice'), render: (row) => <strong>{row.number}</strong> },
-    { key: 'period', header: t('workspace.colPeriod'), render: (row) => <span>{formatDate(row.periodStart, locale)} — {formatDate(row.periodEnd, locale)}</span> },
-    { key: 'amount', header: t('workspace.colAmount'), align: 'right', render: (row) => formatXof(row.amountXof, locale) },
+    {
+      key: 'number',
+      header: t('workspace.colInvoice'),
+      render: (row) => <strong>{row.number}</strong>,
+    },
+    {
+      key: 'period',
+      header: t('workspace.colPeriod'),
+      render: (row) => (
+        <span>
+          {formatDate(row.periodStart, locale)} — {formatDate(row.periodEnd, locale)}
+        </span>
+      ),
+    },
+    {
+      key: 'amount',
+      header: t('workspace.colAmount'),
+      align: 'right',
+      render: (row) => formatXof(row.amountXof, locale),
+    },
     {
       key: 'status',
       header: t('workspace.colStatus'),
-      render: (row) => <Badge tone={INVOICE_TONE[row.status] ?? 'neutral'} dot>{t(`workspace.invoiceStatus.${row.status}`)}</Badge>,
+      render: (row) => (
+        <Badge tone={INVOICE_TONE[row.status] ?? 'neutral'} dot>
+          {t(`workspace.invoiceStatus.${row.status}`)}
+        </Badge>
+      ),
     },
     {
       key: 'actions',
@@ -324,7 +376,12 @@ export function WorkspacePage() {
       align: 'right',
       render: (row) =>
         row.status === 'pending' || row.status === 'overdue' ? (
-          <Button size="sm" variant="soft" loading={payingInvoice === row.id} onClick={() => void payDemo(row)}>
+          <Button
+            size="sm"
+            variant="soft"
+            loading={payingInvoice === row.id}
+            onClick={() => void payDemo(row)}
+          >
             {t('workspace.payDemo')}
           </Button>
         ) : row.status === 'paid' ? (
@@ -334,25 +391,47 @@ export function WorkspacePage() {
   ];
 
   const teamColumns: Array<Column<TeamMember>> = [
-    { key: 'name', header: t('workspace.colMember'), render: (row) => (
-      <div className="console-cell">
-        <strong>{row.name}</strong>
-        <span>{row.email ?? row.phone ?? '—'}</span>
-      </div>
-    ) },
-    { key: 'roles', header: t('workspace.colRoles'), render: (row) => (
-      <div className="console-roles">
-        {(row.roles ?? []).map((role) => <Badge key={role} tone="neutral">{t(`workspace.role.${role}`) === `workspace.role.${role}` ? role : t(`workspace.role.${role}`)}</Badge>)}
-      </div>
-    ) },
-    { key: 'mfa', header: 'MFA', render: (row) => (
-      <Badge tone={row.mfaEnabled ? 'success' : 'warning'} dot>{row.mfaEnabled ? t('workspace.mfaOn') : t('workspace.mfaOff')}</Badge>
-    ) },
+    {
+      key: 'name',
+      header: t('workspace.colMember'),
+      render: (row) => (
+        <div className="console-cell">
+          <strong>{row.name}</strong>
+          <span>{row.email ?? row.phone ?? '—'}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'roles',
+      header: t('workspace.colRoles'),
+      render: (row) => (
+        <div className="console-roles">
+          {(row.roles ?? []).map((role) => (
+            <Badge key={role} tone="neutral">
+              {t(`workspace.role.${role}`) === `workspace.role.${role}`
+                ? role
+                : t(`workspace.role.${role}`)}
+            </Badge>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: 'mfa',
+      header: 'MFA',
+      render: (row) => (
+        <Badge tone={row.mfaEnabled ? 'success' : 'warning'} dot>
+          {row.mfaEnabled ? t('workspace.mfaOn') : t('workspace.mfaOff')}
+        </Badge>
+      ),
+    },
   ];
 
   if (status === 'loading') {
     return (
-      <div className="console-gate"><SkeletonText lines={4} /></div>
+      <div className="console-gate">
+        <SkeletonText lines={4} />
+      </div>
     );
   }
 
@@ -365,7 +444,11 @@ export function WorkspacePage() {
               icon="lock"
               title={t('workspace.authTitle')}
               description={t('workspace.authBody')}
-              action={<Button onClick={() => navigate('/connexion')} iconRight="arrow-right">{t('workspace.authCta')}</Button>}
+              action={
+                <Button onClick={() => navigate('/connexion')} iconRight="arrow-right">
+                  {t('workspace.authCta')}
+                </Button>
+              }
             />
           </CardBody>
         </Card>
@@ -384,8 +467,12 @@ export function WorkspacePage() {
               description={t('workspace.noTenantBody')}
               action={
                 <div className="console-gate__actions">
-                  <Button onClick={() => navigate('/inscription')}>{t('workspace.noTenantCta')}</Button>
-                  <Button variant="outline" onClick={() => navigate('/admin')}>{t('workspace.noTenantAdmin')}</Button>
+                  <Button onClick={() => navigate('/inscription')}>
+                    {t('workspace.noTenantCta')}
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/admin')}>
+                    {t('workspace.noTenantAdmin')}
+                  </Button>
                 </div>
               }
             />
@@ -412,26 +499,81 @@ export function WorkspacePage() {
     {
       label: t('workspace.navConfigure'),
       items: [
-        { id: 'onboarding', label: t('workspace.tabOnboarding'), icon: 'check-circle', active: tab === 'onboarding', onClick: () => setTab('onboarding') },
-        { id: 'branding', label: t('workspace.tabBranding'), icon: 'sparkles', active: tab === 'branding', onClick: () => setTab('branding') },
-        { id: 'sites', label: t('workspace.tabSites'), icon: 'home', active: tab === 'sites', badge: sites.length, onClick: () => setTab('sites') },
+        {
+          id: 'onboarding',
+          label: t('workspace.tabOnboarding'),
+          icon: 'check-circle',
+          active: tab === 'onboarding',
+          onClick: () => setTab('onboarding'),
+        },
+        {
+          id: 'branding',
+          label: t('workspace.tabBranding'),
+          icon: 'sparkles',
+          active: tab === 'branding',
+          onClick: () => setTab('branding'),
+        },
+        {
+          id: 'sites',
+          label: t('workspace.tabSites'),
+          icon: 'home',
+          active: tab === 'sites',
+          badge: sites.length,
+          onClick: () => setTab('sites'),
+        },
       ],
     },
     {
       label: t('workspace.navOperations'),
       items: [
-        { id: 'catalog', label: t('workspace.tabCatalog'), icon: 'utensils', active: tab === 'catalog', onClick: () => setTab('catalog') },
-        { id: 'floor', label: t('workspace.tabFloor'), icon: 'grid', active: tab === 'floor', onClick: () => setTab('floor') },
+        {
+          id: 'catalog',
+          label: t('workspace.tabCatalog'),
+          icon: 'utensils',
+          active: tab === 'catalog',
+          onClick: () => setTab('catalog'),
+        },
+        {
+          id: 'floor',
+          label: t('workspace.tabFloor'),
+          icon: 'grid',
+          active: tab === 'floor',
+          onClick: () => setTab('floor'),
+        },
         ...(canSeeOrders
           ? [
-              { id: 'orders', label: t('orders.nav'), icon: 'receipt' as const, active: tab === 'orders', onClick: () => setTab('orders') },
-              { id: 'kds', label: t('kds.nav'), icon: 'chef' as const, active: tab === 'kds', onClick: () => setTab('kds') },
+              {
+                id: 'orders',
+                label: t('orders.nav'),
+                icon: 'receipt' as const,
+                active: tab === 'orders',
+                onClick: () => setTab('orders'),
+              },
+              {
+                id: 'kds',
+                label: t('kds.nav'),
+                icon: 'chef' as const,
+                active: tab === 'kds',
+                onClick: () => setTab('kds'),
+              },
             ]
           : []),
         ...(canSeeRegister
           ? [
-              { id: 'pos', label: t('pos.nav'), icon: 'banknote' as const, active: tab === 'pos', onClick: () => setTab('pos') },
-              { id: 'payments', label: t('payments.nav'), icon: 'card' as const, active: tab === 'payments', onClick: () => setTab('payments') },
+              {
+                id: 'pos',
+                label: t('pos.nav'),
+                icon: 'banknote' as const,
+                active: tab === 'pos',
+                onClick: () => setTab('pos'),
+              },
+              {
+                id: 'payments',
+                label: t('payments.nav'),
+                icon: 'card' as const,
+                active: tab === 'payments',
+                onClick: () => setTab('payments'),
+              },
             ]
           : []),
       ],
@@ -439,50 +581,127 @@ export function WorkspacePage() {
     {
       label: t('workspace.navBusiness'),
       items: [
-        { id: 'subscription', label: t('workspace.tabSubscription'), icon: 'wallet', active: tab === 'subscription', onClick: () => setTab('subscription') },
-        { id: 'team', label: t('workspace.tabTeam'), icon: 'users', active: tab === 'team', onClick: () => setTab('team') },
+        {
+          id: 'subscription',
+          label: t('workspace.tabSubscription'),
+          icon: 'wallet',
+          active: tab === 'subscription',
+          onClick: () => setTab('subscription'),
+        },
+        {
+          id: 'team',
+          label: t('workspace.tabTeam'),
+          icon: 'users',
+          active: tab === 'team',
+          onClick: () => setTab('team'),
+        },
         ...(canSeeStaff
-          ? [{ id: 'staff', label: t('staff.title'), icon: 'users' as const, active: tab === 'staff', onClick: () => setTab('staff') }]
+          ? [
+              {
+                id: 'staff',
+                label: t('staff.title'),
+                icon: 'users' as const,
+                active: tab === 'staff',
+                onClick: () => setTab('staff'),
+              },
+            ]
           : []),
         ...(canSeePayroll
-          ? [{ id: 'payroll', label: t('payroll.title'), icon: 'banknote' as const, active: tab === 'payroll', onClick: () => setTab('payroll') }]
+          ? [
+              {
+                id: 'payroll',
+                label: t('payroll.title'),
+                icon: 'banknote' as const,
+                active: tab === 'payroll',
+                onClick: () => setTab('payroll'),
+              },
+            ]
           : []),
         ...(canSeeStocks
-          ? [{ id: 'stocks', label: t('stocks.nav'), icon: 'box' as const, active: tab === 'stocks', onClick: () => setTab('stocks') }]
+          ? [
+              {
+                id: 'stocks',
+                label: t('stocks.nav'),
+                icon: 'box' as const,
+                active: tab === 'stocks',
+                onClick: () => setTab('stocks'),
+              },
+            ]
           : []),
         ...(canSeeMarketing
-          ? [{ id: 'marketing', label: t('marketing.nav'), icon: 'gift' as const, active: tab === 'marketing', onClick: () => setTab('marketing') }]
+          ? [
+              {
+                id: 'marketing',
+                label: t('marketing.nav'),
+                icon: 'gift' as const,
+                active: tab === 'marketing',
+                onClick: () => setTab('marketing'),
+              },
+            ]
           : []),
         ...(canSeeReports
-          ? [{ id: 'reports', label: t('reports.nav'), icon: 'chart' as const, active: tab === 'reports', onClick: () => setTab('reports') }]
+          ? [
+              {
+                id: 'reports',
+                label: t('reports.nav'),
+                icon: 'chart' as const,
+                active: tab === 'reports',
+                onClick: () => setTab('reports'),
+              },
+            ]
           : []),
       ],
     },
     {
       label: t('workspace.navAccount'),
       items: [
-        { id: 'site', label: t('workspace.backSite'), icon: 'arrow-left', onClick: () => navigate('/') },
-        { id: 'logout', label: t('workspace.logout'), icon: 'logout', onClick: () => void signOut().then(() => navigate('/connexion')) },
+        {
+          id: 'site',
+          label: t('workspace.backSite'),
+          icon: 'arrow-left',
+          onClick: () => navigate('/'),
+        },
+        {
+          id: 'logout',
+          label: t('workspace.logout'),
+          icon: 'logout',
+          onClick: () => void signOut().then(() => navigate('/connexion')),
+        },
       ],
     },
   ];
 
   const tabTitle =
-    tab === 'onboarding' ? t('workspace.onboardingTitle')
-      : tab === 'branding' ? t('workspace.brandingTitle')
-        : tab === 'sites' ? t('workspace.sitesTitle')
-          : tab === 'catalog' ? t('catalog.title')
-            : tab === 'floor' ? t('floor.title')
-              : tab === 'orders' ? t('orders.title')
-                : tab === 'kds' ? t('kds.title')
-                  : tab === 'pos' ? t('pos.title')
-                    : tab === 'payments' ? t('payments.title')
-                      : tab === 'staff' ? t('staff.title')
-                        : tab === 'payroll' ? t('payroll.title')
-                          : tab === 'stocks' ? t('stocks.title')
-                            : tab === 'marketing' ? t('marketing.title')
-                              : tab === 'reports' ? t('reports.title')
-                                : tab === 'subscription' ? t('workspace.subscriptionTitle')
+    tab === 'onboarding'
+      ? t('workspace.onboardingTitle')
+      : tab === 'branding'
+        ? t('workspace.brandingTitle')
+        : tab === 'sites'
+          ? t('workspace.sitesTitle')
+          : tab === 'catalog'
+            ? t('catalog.title')
+            : tab === 'floor'
+              ? t('floor.title')
+              : tab === 'orders'
+                ? t('orders.title')
+                : tab === 'kds'
+                  ? t('kds.title')
+                  : tab === 'pos'
+                    ? t('pos.title')
+                    : tab === 'payments'
+                      ? t('payments.title')
+                      : tab === 'staff'
+                        ? t('staff.title')
+                        : tab === 'payroll'
+                          ? t('payroll.title')
+                          : tab === 'stocks'
+                            ? t('stocks.title')
+                            : tab === 'marketing'
+                              ? t('marketing.title')
+                              : tab === 'reports'
+                                ? t('reports.title')
+                                : tab === 'subscription'
+                                  ? t('workspace.subscriptionTitle')
                                   : t('workspace.teamTitle');
 
   return (
@@ -490,7 +709,12 @@ export function WorkspacePage() {
       <Sidebar
         brand={
           <a href="#/" className="console-brand" aria-label="RESTO-HUB">
-            <span className="console-brand__mark" style={{ background: tenant?.settings.primaryColor }}>RH</span>
+            <span
+              className="console-brand__mark"
+              style={{ background: tenant?.settings.primaryColor }}
+            >
+              RH
+            </span>
             <span className="console-brand__text">
               RESTO-HUB
               <small>{tenant?.brandName ?? t('workspace.titleFallback')}</small>
@@ -501,7 +725,9 @@ export function WorkspacePage() {
         groups={navGroups}
         footer={
           <div className="console-user">
-            <span className="console-user__avatar">{(user?.name ?? '?').slice(0, 2).toUpperCase()}</span>
+            <span className="console-user__avatar">
+              {(user?.name ?? '?').slice(0, 2).toUpperCase()}
+            </span>
             <div>
               <div className="console-user__name">{user?.name}</div>
               <div className="console-user__role">{t('workspace.role.owner')}</div>
@@ -515,7 +741,9 @@ export function WorkspacePage() {
         <header className="rh-topbar">
           <div>
             <div className="rh-topbar__title">{tabTitle}</div>
-            <div className="rh-topbar__subtitle">{tenant ? `${tenant.brandName} · ${tenant.subdomain}` : t('workspace.subtitle')}</div>
+            <div className="rh-topbar__subtitle">
+              {tenant ? `${tenant.brandName} · ${tenant.subdomain}` : t('workspace.subtitle')}
+            </div>
           </div>
           <div className="rh-topbar__actions console-topbar-actions">
             {tenants.length > 1 && (
@@ -529,7 +757,9 @@ export function WorkspacePage() {
                 }}
               >
                 {tenants.map((entry) => (
-                  <option key={entry.id} value={entry.id}>{entry.brandName}</option>
+                  <option key={entry.id} value={entry.id}>
+                    {entry.brandName}
+                  </option>
                 ))}
               </select>
             )}
@@ -549,46 +779,159 @@ export function WorkspacePage() {
               iconLeft={theme === 'light' ? 'moon' : 'sun'}
               onClick={toggleTheme}
             />
-            <Button variant="ghost" iconOnly aria-label={t('workspace.logout')} iconLeft="logout" onClick={() => void signOut().then(() => navigate('/connexion'))} />
+            <Button
+              variant="ghost"
+              iconOnly
+              aria-label={t('workspace.logout')}
+              iconLeft="logout"
+              onClick={() => void signOut().then(() => navigate('/connexion'))}
+            />
           </div>
         </header>
 
         <MobileTabs
           label={t('workspace.navLabel')}
           items={[
-            { id: 'onboarding', label: t('workspace.tabOnboarding'), icon: 'check-circle', active: tab === 'onboarding', onClick: () => setTab('onboarding') },
-            { id: 'branding', label: t('workspace.tabBranding'), icon: 'sparkles', active: tab === 'branding', onClick: () => setTab('branding') },
-            { id: 'sites', label: t('workspace.tabSites'), icon: 'home', active: tab === 'sites', badge: sites.length, onClick: () => setTab('sites') },
-            { id: 'catalog', label: t('workspace.tabCatalog'), icon: 'utensils', active: tab === 'catalog', onClick: () => setTab('catalog') },
-            { id: 'floor', label: t('workspace.tabFloor'), icon: 'grid', active: tab === 'floor', onClick: () => setTab('floor') },
+            {
+              id: 'onboarding',
+              label: t('workspace.tabOnboarding'),
+              icon: 'check-circle',
+              active: tab === 'onboarding',
+              onClick: () => setTab('onboarding'),
+            },
+            {
+              id: 'branding',
+              label: t('workspace.tabBranding'),
+              icon: 'sparkles',
+              active: tab === 'branding',
+              onClick: () => setTab('branding'),
+            },
+            {
+              id: 'sites',
+              label: t('workspace.tabSites'),
+              icon: 'home',
+              active: tab === 'sites',
+              badge: sites.length,
+              onClick: () => setTab('sites'),
+            },
+            {
+              id: 'catalog',
+              label: t('workspace.tabCatalog'),
+              icon: 'utensils',
+              active: tab === 'catalog',
+              onClick: () => setTab('catalog'),
+            },
+            {
+              id: 'floor',
+              label: t('workspace.tabFloor'),
+              icon: 'grid',
+              active: tab === 'floor',
+              onClick: () => setTab('floor'),
+            },
             ...(canSeeOrders
               ? [
-                  { id: 'orders', label: t('orders.nav'), icon: 'receipt' as const, active: tab === 'orders', onClick: () => setTab('orders') },
-                  { id: 'kds', label: t('kds.nav'), icon: 'chef' as const, active: tab === 'kds', onClick: () => setTab('kds') },
+                  {
+                    id: 'orders',
+                    label: t('orders.nav'),
+                    icon: 'receipt' as const,
+                    active: tab === 'orders',
+                    onClick: () => setTab('orders'),
+                  },
+                  {
+                    id: 'kds',
+                    label: t('kds.nav'),
+                    icon: 'chef' as const,
+                    active: tab === 'kds',
+                    onClick: () => setTab('kds'),
+                  },
                 ]
               : []),
             ...(canSeeRegister
               ? [
-                  { id: 'pos', label: t('pos.nav'), icon: 'banknote' as const, active: tab === 'pos', onClick: () => setTab('pos') },
-                  { id: 'payments', label: t('payments.nav'), icon: 'card' as const, active: tab === 'payments', onClick: () => setTab('payments') },
+                  {
+                    id: 'pos',
+                    label: t('pos.nav'),
+                    icon: 'banknote' as const,
+                    active: tab === 'pos',
+                    onClick: () => setTab('pos'),
+                  },
+                  {
+                    id: 'payments',
+                    label: t('payments.nav'),
+                    icon: 'card' as const,
+                    active: tab === 'payments',
+                    onClick: () => setTab('payments'),
+                  },
                 ]
               : []),
-            { id: 'subscription', label: t('workspace.tabSubscription'), icon: 'wallet', active: tab === 'subscription', onClick: () => setTab('subscription') },
-            { id: 'team', label: t('workspace.tabTeam'), icon: 'users', active: tab === 'team', onClick: () => setTab('team') },
+            {
+              id: 'subscription',
+              label: t('workspace.tabSubscription'),
+              icon: 'wallet',
+              active: tab === 'subscription',
+              onClick: () => setTab('subscription'),
+            },
+            {
+              id: 'team',
+              label: t('workspace.tabTeam'),
+              icon: 'users',
+              active: tab === 'team',
+              onClick: () => setTab('team'),
+            },
             ...(canSeeStaff
-              ? [{ id: 'staff', label: t('staff.title'), icon: 'users' as const, active: tab === 'staff', onClick: () => setTab('staff') }]
+              ? [
+                  {
+                    id: 'staff',
+                    label: t('staff.title'),
+                    icon: 'users' as const,
+                    active: tab === 'staff',
+                    onClick: () => setTab('staff'),
+                  },
+                ]
               : []),
             ...(canSeePayroll
-              ? [{ id: 'payroll', label: t('payroll.title'), icon: 'banknote' as const, active: tab === 'payroll', onClick: () => setTab('payroll') }]
+              ? [
+                  {
+                    id: 'payroll',
+                    label: t('payroll.title'),
+                    icon: 'banknote' as const,
+                    active: tab === 'payroll',
+                    onClick: () => setTab('payroll'),
+                  },
+                ]
               : []),
             ...(canSeeStocks
-              ? [{ id: 'stocks', label: t('stocks.nav'), icon: 'box' as const, active: tab === 'stocks', onClick: () => setTab('stocks') }]
+              ? [
+                  {
+                    id: 'stocks',
+                    label: t('stocks.nav'),
+                    icon: 'box' as const,
+                    active: tab === 'stocks',
+                    onClick: () => setTab('stocks'),
+                  },
+                ]
               : []),
             ...(canSeeMarketing
-              ? [{ id: 'marketing', label: t('marketing.nav'), icon: 'gift' as const, active: tab === 'marketing', onClick: () => setTab('marketing') }]
+              ? [
+                  {
+                    id: 'marketing',
+                    label: t('marketing.nav'),
+                    icon: 'gift' as const,
+                    active: tab === 'marketing',
+                    onClick: () => setTab('marketing'),
+                  },
+                ]
               : []),
             ...(canSeeReports
-              ? [{ id: 'reports', label: t('reports.nav'), icon: 'chart' as const, active: tab === 'reports', onClick: () => setTab('reports') }]
+              ? [
+                  {
+                    id: 'reports',
+                    label: t('reports.nav'),
+                    icon: 'chart' as const,
+                    active: tab === 'reports',
+                    onClick: () => setTab('reports'),
+                  },
+                ]
               : []),
           ]}
         />
@@ -597,14 +940,26 @@ export function WorkspacePage() {
           {error && (
             <Card className="console-alert">
               <CardBody>
-                <p className="auth-error" role="alert">{error}</p>
-                <Button size="sm" variant="outline" onClick={() => currentId && void loadTenant(currentId)}>{t('workspace.retry')}</Button>
+                <p className="auth-error" role="alert">
+                  {error}
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => currentId && void loadTenant(currentId)}
+                >
+                  {t('workspace.retry')}
+                </Button>
               </CardBody>
             </Card>
           )}
 
           {loading || !tenant || !brandForm ? (
-            <Card><CardBody><SkeletonText lines={8} /></CardBody></Card>
+            <Card>
+              <CardBody>
+                <SkeletonText lines={8} />
+              </CardBody>
+            </Card>
           ) : (
             <>
               {tab === 'onboarding' && onboarding && (
@@ -613,38 +968,69 @@ export function WorkspacePage() {
                     <CardHeader
                       title={t('workspace.onboardingTitle')}
                       subtitle={t('workspace.onboardingSubtitle')}
-                      action={<Badge tone={onboarding.progress === 100 ? 'success' : 'warning'}>{onboarding.progress}%</Badge>}
+                      action={
+                        <Badge tone={onboarding.progress === 100 ? 'success' : 'warning'}>
+                          {onboarding.progress}%
+                        </Badge>
+                      }
                     />
                     <CardBody>
-                      <div className="ws-progress" role="progressbar" aria-valuenow={onboarding.progress} aria-valuemin={0} aria-valuemax={100} aria-label={t('workspace.progressLabel')}>
+                      <div
+                        className="ws-progress"
+                        role="progressbar"
+                        aria-valuenow={onboarding.progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={t('workspace.progressLabel')}
+                      >
                         <span style={{ width: `${onboarding.progress}%` }} />
                       </div>
                       <p className="console-muted">
-                        {t('workspace.progressDetail', { completed: onboarding.completed, total: onboarding.total })}
+                        {t('workspace.progressDetail', {
+                          completed: onboarding.completed,
+                          total: onboarding.total,
+                        })}
                       </p>
                       <ul className="ws-checklist">
                         {onboarding.items.map((item) => (
                           <li key={item.key} className={item.done ? 'is-done' : undefined}>
-                            <span className="ws-checklist__icon" aria-hidden="true">{item.done ? '✓' : '○'}</span>
+                            <span className="ws-checklist__icon" aria-hidden="true">
+                              {item.done ? '✓' : '○'}
+                            </span>
                             <div className="ws-checklist__body">
                               <strong>{item.label}</strong>
                               <span>{item.description}</span>
                               {item.detail && <em>{item.detail}</em>}
                             </div>
-                            {!item.done && ['branding', 'hours', 'payments', 'subscription'].includes(item.key) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setTab(item.key === 'subscription' ? 'subscription' : item.key === 'payments' ? 'payments' : 'branding')}
-                              >
+                            {!item.done &&
+                              ['branding', 'hours', 'payments', 'subscription'].includes(
+                                item.key,
+                              ) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setTab(
+                                      item.key === 'subscription'
+                                        ? 'subscription'
+                                        : item.key === 'payments'
+                                          ? 'payments'
+                                          : 'branding',
+                                    )
+                                  }
+                                >
+                                  {t('workspace.configure')}
+                                </Button>
+                              )}
+                            {!item.done && item.key === 'team' && (
+                              <Button size="sm" variant="outline" onClick={() => setTab('team')}>
                                 {t('workspace.configure')}
                               </Button>
                             )}
-                            {!item.done && item.key === 'team' && (
-                              <Button size="sm" variant="outline" onClick={() => setTab('team')}>{t('workspace.configure')}</Button>
-                            )}
                             {item.key === 'catalog' && (
-                              <Button size="sm" variant="outline" onClick={() => setTab('catalog')}>{t('workspace.configure')}</Button>
+                              <Button size="sm" variant="outline" onClick={() => setTab('catalog')}>
+                                {t('workspace.configure')}
+                              </Button>
                             )}
                           </li>
                         ))}
@@ -654,13 +1040,38 @@ export function WorkspacePage() {
 
                   <div className="console-stack">
                     <Card>
-                      <CardHeader title={t('workspace.spaceTitle')} subtitle={t('workspace.spaceSubtitle')} />
+                      <CardHeader
+                        title={t('workspace.spaceTitle')}
+                        subtitle={t('workspace.spaceSubtitle')}
+                      />
                       <CardBody>
                         <dl className="console-kv">
-                          <div><dt>{t('workspace.slug')}</dt><dd><code>{tenant.slug}</code></dd></div>
-                          <div><dt>{t('workspace.subdomain')}</dt><dd><code>{tenant.subdomain}</code></dd></div>
-                          <div><dt>{t('workspace.plan')}</dt><dd>{plan?.name ?? tenant.plan}</dd></div>
-                          <div><dt>{t('workspace.status')}</dt><dd><Badge tone={tenant.status === 'active' ? 'success' : 'danger'} dot>{tenant.status === 'active' ? t('workspace.tenantActive') : t('workspace.tenantSuspended')}</Badge></dd></div>
+                          <div>
+                            <dt>{t('workspace.slug')}</dt>
+                            <dd>
+                              <code>{tenant.slug}</code>
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>{t('workspace.subdomain')}</dt>
+                            <dd>
+                              <code>{tenant.subdomain}</code>
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>{t('workspace.plan')}</dt>
+                            <dd>{plan?.name ?? tenant.plan}</dd>
+                          </div>
+                          <div>
+                            <dt>{t('workspace.status')}</dt>
+                            <dd>
+                              <Badge tone={tenant.status === 'active' ? 'success' : 'danger'} dot>
+                                {tenant.status === 'active'
+                                  ? t('workspace.tenantActive')
+                                  : t('workspace.tenantSuspended')}
+                              </Badge>
+                            </dd>
+                          </div>
                         </dl>
                         <Button variant="outline" size="sm" iconLeft="qr" onClick={copySubdomain}>
                           {t('workspace.copySpace')}
@@ -671,10 +1082,26 @@ export function WorkspacePage() {
                       <CardHeader title={t('workspace.nextStepsTitle')} />
                       <CardBody>
                         <ul className="ws-next">
-                          <li><button type="button" onClick={() => setTab('branding')}>{t('workspace.nextBranding')}</button></li>
-                          <li><button type="button" onClick={() => setTab('sites')}>{t('workspace.nextSite')}</button></li>
-                          <li><button type="button" onClick={() => setTab('team')}>{t('workspace.nextTeam')}</button></li>
-                          <li><button type="button" onClick={() => setTab('subscription')}>{t('workspace.nextBilling')}</button></li>
+                          <li>
+                            <button type="button" onClick={() => setTab('branding')}>
+                              {t('workspace.nextBranding')}
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" onClick={() => setTab('sites')}>
+                              {t('workspace.nextSite')}
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" onClick={() => setTab('team')}>
+                              {t('workspace.nextTeam')}
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" onClick={() => setTab('subscription')}>
+                              {t('workspace.nextBilling')}
+                            </button>
+                          </li>
                         </ul>
                       </CardBody>
                     </Card>
@@ -685,18 +1112,25 @@ export function WorkspacePage() {
               {tab === 'branding' && (
                 <div className="console-2col console-2col--wide">
                   <Card>
-                    <CardHeader title={t('workspace.brandingTitle')} subtitle={t('workspace.brandingSubtitle')} />
+                    <CardHeader
+                      title={t('workspace.brandingTitle')}
+                      subtitle={t('workspace.brandingSubtitle')}
+                    />
                     <CardBody>
                       <div className="reg-grid">
                         <Input
                           label={t('workspace.brandName')}
                           value={brandForm.brandName}
-                          onChange={(event) => setBrandForm({ ...brandForm, brandName: event.target.value })}
+                          onChange={(event) =>
+                            setBrandForm({ ...brandForm, brandName: event.target.value })
+                          }
                         />
                         <Input
                           label={t('workspace.logoUrl')}
                           value={brandForm.logoUrl}
-                          onChange={(event) => setBrandForm({ ...brandForm, logoUrl: event.target.value })}
+                          onChange={(event) =>
+                            setBrandForm({ ...brandForm, logoUrl: event.target.value })
+                          }
                           placeholder="https://…/logo.png"
                           hint={t('workspace.logoHint')}
                         />
@@ -708,7 +1142,12 @@ export function WorkspacePage() {
                             <input
                               type="color"
                               value={brandForm.primaryColor}
-                              onChange={(event) => setBrandForm({ ...brandForm, primaryColor: event.target.value.toUpperCase() })}
+                              onChange={(event) =>
+                                setBrandForm({
+                                  ...brandForm,
+                                  primaryColor: event.target.value.toUpperCase(),
+                                })
+                              }
                               aria-label={t('workspace.primaryColor')}
                             />
                             <code>{brandForm.primaryColor}</code>
@@ -720,7 +1159,12 @@ export function WorkspacePage() {
                             <input
                               type="color"
                               value={brandForm.secondaryColor}
-                              onChange={(event) => setBrandForm({ ...brandForm, secondaryColor: event.target.value.toUpperCase() })}
+                              onChange={(event) =>
+                                setBrandForm({
+                                  ...brandForm,
+                                  secondaryColor: event.target.value.toUpperCase(),
+                                })
+                              }
                               aria-label={t('workspace.secondaryColor')}
                             />
                             <code>{brandForm.secondaryColor}</code>
@@ -766,7 +1210,9 @@ export function WorkspacePage() {
                           <select
                             className="rh-select"
                             value={brandForm.currency}
-                            onChange={(event) => setBrandForm({ ...brandForm, currency: event.target.value })}
+                            onChange={(event) =>
+                              setBrandForm({ ...brandForm, currency: event.target.value })
+                            }
                           >
                             <option value="XOF">XOF — Franc CFA</option>
                             <option value="EUR">EUR — Euro</option>
@@ -778,10 +1224,22 @@ export function WorkspacePage() {
                       <h3 className="reg-subtitle reg-subtitle--sm">{t('workspace.hours')}</h3>
                       <div className="reg-hours">
                         {DAYS.map((day, index) => {
-                          const slot = brandForm.hours[index] ?? { day: day.key, open: '11:00', close: '23:00', closed: false };
+                          const slot = brandForm.hours[index] ?? {
+                            day: day.key,
+                            open: '11:00',
+                            close: '23:00',
+                            closed: false,
+                          };
                           return (
-                            <div className={slot.closed ? 'reg-hours__row is-closed' : 'reg-hours__row'} key={day.key}>
-                              <span className="reg-hours__day">{locale === 'en' ? day.en : day.fr}</span>
+                            <div
+                              className={
+                                slot.closed ? 'reg-hours__row is-closed' : 'reg-hours__row'
+                              }
+                              key={day.key}
+                            >
+                              <span className="reg-hours__day">
+                                {locale === 'en' ? day.en : day.fr}
+                              </span>
                               <input
                                 type="time"
                                 aria-label={`${day.fr} — ${t('register.open')}`}
@@ -790,7 +1248,15 @@ export function WorkspacePage() {
                                 onChange={(event) =>
                                   setBrandForm({
                                     ...brandForm,
-                                    hours: DAYS.map((entry, i) => (i === index ? { ...slot, open: event.target.value } : brandForm.hours[i] ?? { day: entry.key, open: '11:00', close: '23:00' })),
+                                    hours: DAYS.map((entry, i) =>
+                                      i === index
+                                        ? { ...slot, open: event.target.value }
+                                        : (brandForm.hours[i] ?? {
+                                            day: entry.key,
+                                            open: '11:00',
+                                            close: '23:00',
+                                          }),
+                                    ),
                                   })
                                 }
                               />
@@ -803,7 +1269,15 @@ export function WorkspacePage() {
                                 onChange={(event) =>
                                   setBrandForm({
                                     ...brandForm,
-                                    hours: DAYS.map((entry, i) => (i === index ? { ...slot, close: event.target.value } : brandForm.hours[i] ?? { day: entry.key, open: '11:00', close: '23:00' })),
+                                    hours: DAYS.map((entry, i) =>
+                                      i === index
+                                        ? { ...slot, close: event.target.value }
+                                        : (brandForm.hours[i] ?? {
+                                            day: entry.key,
+                                            open: '11:00',
+                                            close: '23:00',
+                                          }),
+                                    ),
                                   })
                                 }
                               />
@@ -814,7 +1288,15 @@ export function WorkspacePage() {
                                   onChange={(event) =>
                                     setBrandForm({
                                       ...brandForm,
-                                      hours: DAYS.map((entry, i) => (i === index ? { ...slot, closed: event.target.checked } : brandForm.hours[i] ?? { day: entry.key, open: '11:00', close: '23:00' })),
+                                      hours: DAYS.map((entry, i) =>
+                                        i === index
+                                          ? { ...slot, closed: event.target.checked }
+                                          : (brandForm.hours[i] ?? {
+                                              day: entry.key,
+                                              open: '11:00',
+                                              close: '23:00',
+                                            }),
+                                      ),
                                     })
                                   }
                                 />
@@ -826,7 +1308,11 @@ export function WorkspacePage() {
                       </div>
 
                       <div className="reg-actions">
-                        <Button onClick={() => void saveBranding()} loading={brandPending} iconLeft="check">
+                        <Button
+                          onClick={() => void saveBranding()}
+                          loading={brandPending}
+                          iconLeft="check"
+                        >
                           {t('workspace.save')}
                         </Button>
                       </div>
@@ -835,12 +1321,19 @@ export function WorkspacePage() {
 
                   <aside className="console-stack">
                     <Card>
-                      <CardHeader title={t('workspace.previewTitle')} subtitle={t('workspace.previewSubtitle')} />
+                      <CardHeader
+                        title={t('workspace.previewTitle')}
+                        subtitle={t('workspace.previewSubtitle')}
+                      />
                       <CardBody>
                         <div className="ws-preview" style={previewStyle}>
                           <div className="ws-preview__top">
                             <span className="ws-preview__logo">
-                              {brandForm.logoUrl ? <img src={brandForm.logoUrl} alt="" /> : brandForm.brandName.slice(0, 2).toUpperCase()}
+                              {brandForm.logoUrl ? (
+                                <img src={brandForm.logoUrl} alt="" />
+                              ) : (
+                                brandForm.brandName.slice(0, 2).toUpperCase()
+                              )}
                             </span>
                             <div>
                               <strong>{brandForm.brandName || tenant.brandName}</strong>
@@ -852,7 +1345,9 @@ export function WorkspacePage() {
                             <h4>{t('workspace.previewHeading')}</h4>
                             <div className="ws-preview__buttons">
                               <span className="ws-preview__btn">{t('workspace.previewMenu')}</span>
-                              <span className="ws-preview__btn is-ghost">{t('workspace.previewOrder')}</span>
+                              <span className="ws-preview__btn is-ghost">
+                                {t('workspace.previewOrder')}
+                              </span>
                             </div>
                           </div>
                           <div className="ws-preview__row">
@@ -876,7 +1371,14 @@ export function WorkspacePage() {
                   <Card>
                     <CardHeader
                       title={t('workspace.sitesTitle')}
-                      subtitle={plan ? t('workspace.sitesSubtitle', { used: sites.length, max: plan.maxSites ?? '∞' }) : undefined}
+                      subtitle={
+                        plan
+                          ? t('workspace.sitesSubtitle', {
+                              used: sites.length,
+                              max: plan.maxSites ?? '∞',
+                            })
+                          : undefined
+                      }
                     />
                     <CardBody>
                       <ul className="ws-sites">
@@ -888,12 +1390,21 @@ export function WorkspacePage() {
                               {site.phone && <span>{site.phone}</span>}
                             </div>
                             <div className="console-roles">
-                              {site.isPrimary && <Badge tone="primary">{t('workspace.primarySite')}</Badge>}
+                              {site.isPrimary && (
+                                <Badge tone="primary">{t('workspace.primarySite')}</Badge>
+                              )}
                               <Badge tone={site.status === 'active' ? 'success' : 'neutral'} dot>
-                                {site.status === 'active' ? t('workspace.siteActive') : t('workspace.siteClosed')}
+                                {site.status === 'active'
+                                  ? t('workspace.siteActive')
+                                  : t('workspace.siteClosed')}
                               </Badge>
                               {!site.isPrimary && (
-                                <Button size="sm" variant="ghost" iconLeft="trash" onClick={() => void removeSite(site)}>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  iconLeft="trash"
+                                  onClick={() => void removeSite(site)}
+                                >
                                   {t('workspace.delete')}
                                 </Button>
                               )}
@@ -904,32 +1415,50 @@ export function WorkspacePage() {
                     </CardBody>
                   </Card>
                   <Card>
-                    <CardHeader title={t('workspace.addSiteTitle')} subtitle={t('workspace.addSiteSubtitle')} />
+                    <CardHeader
+                      title={t('workspace.addSiteTitle')}
+                      subtitle={t('workspace.addSiteSubtitle')}
+                    />
                     <CardBody>
                       <div className="console-stack">
                         <Input
                           label={t('workspace.siteName')}
                           value={siteForm.name}
-                          onChange={(event) => setSiteForm({ ...siteForm, name: event.target.value })}
+                          onChange={(event) =>
+                            setSiteForm({ ...siteForm, name: event.target.value })
+                          }
                           placeholder="Le Baobab — Kégué"
                         />
                         <Input
                           label={t('workspace.siteAddress')}
                           value={siteForm.address}
-                          onChange={(event) => setSiteForm({ ...siteForm, address: event.target.value })}
+                          onChange={(event) =>
+                            setSiteForm({ ...siteForm, address: event.target.value })
+                          }
                           placeholder="Rue de la paix, Kégué, Lomé"
                         />
                         <Input
                           label={t('workspace.sitePhone')}
                           value={siteForm.phone}
-                          onChange={(event) => setSiteForm({ ...siteForm, phone: event.target.value })}
+                          onChange={(event) =>
+                            setSiteForm({ ...siteForm, phone: event.target.value })
+                          }
                           placeholder="+228 90 00 00 00"
                         />
-                        <Button onClick={() => void addSite()} loading={sitePending} iconLeft="plus" disabled={Boolean(plan && plan.maxSites !== null && sites.length >= plan.maxSites)}>
+                        <Button
+                          onClick={() => void addSite()}
+                          loading={sitePending}
+                          iconLeft="plus"
+                          disabled={Boolean(
+                            plan && plan.maxSites !== null && sites.length >= plan.maxSites,
+                          )}
+                        >
                           {t('workspace.addSite')}
                         </Button>
                         {plan && plan.maxSites !== null && sites.length >= plan.maxSites && (
-                          <p className="reg-note">{t('workspace.siteLimit', { max: plan.maxSites })}</p>
+                          <p className="reg-note">
+                            {t('workspace.siteLimit', { max: plan.maxSites })}
+                          </p>
                         )}
                       </div>
                     </CardBody>
@@ -937,16 +1466,16 @@ export function WorkspacePage() {
                 </div>
               )}
 
-              {tab === 'catalog' && (
-                <CatalogTab tenantId={tenant.id} locale={locale} />
-              )}
+              {tab === 'catalog' && <CatalogTab tenantId={tenant.id} locale={locale} />}
 
               {tab === 'floor' && (
                 <FloorTab
                   tenantId={tenant.id}
                   locale={locale}
                   canManage={permissions.includes('floor:manage')}
-                  canStatus={permissions.includes('floor:status') || permissions.includes('floor:manage')}
+                  canStatus={
+                    permissions.includes('floor:status') || permissions.includes('floor:manage')
+                  }
                 />
               )}
 
@@ -975,7 +1504,12 @@ export function WorkspacePage() {
               )}
 
               {tab === 'payroll' && canSeePayroll && (
-                <PayrollTab tenantId={tenant.id} locale={locale} permissions={permissions} actorId={actorId} />
+                <PayrollTab
+                  tenantId={tenant.id}
+                  locale={locale}
+                  permissions={permissions}
+                  actorId={actorId}
+                />
               )}
 
               {tab === 'stocks' && canSeeStocks && (
@@ -997,45 +1531,76 @@ export function WorkspacePage() {
                       <CardBody>
                         <span className="console-muted">{t('workspace.currentPlan')}</span>
                         <strong className="ws-sub-card__value">{plan?.name ?? tenant.plan}</strong>
-                        <span>{plan ? `${formatXof(plan.priceXof, locale)} ${t('register.perMonth')}` : '—'}</span>
+                        <span>
+                          {plan
+                            ? `${formatXof(plan.priceXof, locale)} ${t('register.perMonth')}`
+                            : '—'}
+                        </span>
                       </CardBody>
                     </Card>
                     <Card className="ws-sub-card">
                       <CardBody>
                         <span className="console-muted">{t('workspace.subscriptionStatus')}</span>
-                        <Badge tone={SUBSCRIPTION_TONE[subscription?.status ?? ''] ?? 'neutral'} dot>
+                        <Badge
+                          tone={SUBSCRIPTION_TONE[subscription?.status ?? ''] ?? 'neutral'}
+                          dot
+                        >
                           {t(`workspace.subStatus.${subscription?.status ?? 'canceled'}`)}
                         </Badge>
                         {subscription?.trialEndsAt && subscription.status === 'trialing' && (
-                          <span>{t('workspace.trialEnds', { date: formatDate(subscription.trialEndsAt, locale) })}</span>
+                          <span>
+                            {t('workspace.trialEnds', {
+                              date: formatDate(subscription.trialEndsAt, locale),
+                            })}
+                          </span>
                         )}
                       </CardBody>
                     </Card>
                     <Card className="ws-sub-card">
                       <CardBody>
                         <span className="console-muted">{t('workspace.nextRenewal')}</span>
-                        <strong className="ws-sub-card__value">{subscription ? formatDate(subscription.currentPeriodEnd, locale) : '—'}</strong>
+                        <strong className="ws-sub-card__value">
+                          {subscription ? formatDate(subscription.currentPeriodEnd, locale) : '—'}
+                        </strong>
                         <span>{t('workspace.paymentMethods')}</span>
                       </CardBody>
                     </Card>
                   </div>
 
                   <Card>
-                    <CardHeader title={t('workspace.plansTitle')} subtitle={t('workspace.plansSubtitle')} />
+                    <CardHeader
+                      title={t('workspace.plansTitle')}
+                      subtitle={t('workspace.plansSubtitle')}
+                    />
                     <CardBody>
                       <div className="ws-plans">
                         {plans.map((entry) => (
-                          <div key={entry.code} className={entry.code === tenant.plan ? 'ws-plan is-current' : 'ws-plan'}>
+                          <div
+                            key={entry.code}
+                            className={
+                              entry.code === tenant.plan ? 'ws-plan is-current' : 'ws-plan'
+                            }
+                          >
                             <div className="ws-plan__head">
                               <strong>{entry.name}</strong>
-                              {entry.code === tenant.plan && <Badge tone="success">{t('workspace.currentBadge')}</Badge>}
-                              {entry.highlight && entry.code !== tenant.plan && <Badge tone="accent">{t('register.recommended')}</Badge>}
+                              {entry.code === tenant.plan && (
+                                <Badge tone="success">{t('workspace.currentBadge')}</Badge>
+                              )}
+                              {entry.highlight && entry.code !== tenant.plan && (
+                                <Badge tone="accent">{t('register.recommended')}</Badge>
+                              )}
                             </div>
-                            <span className="ws-plan__price">{formatXof(entry.priceXof, locale)}<small>{t('register.perMonth')}</small></span>
+                            <span className="ws-plan__price">
+                              {formatXof(entry.priceXof, locale)}
+                              <small>{t('register.perMonth')}</small>
+                            </span>
                             <span className="console-muted">
                               {entry.maxSites === null || entry.maxEmployees === null
                                 ? t('workspace.planUnlimited')
-                                : t('workspace.planLimits', { sites: entry.maxSites, employees: entry.maxEmployees })}
+                                : t('workspace.planLimits', {
+                                    sites: entry.maxSites,
+                                    employees: entry.maxEmployees,
+                                  })}
                             </span>
                             <Button
                               variant={entry.code === tenant.plan ? 'ghost' : 'outline'}
@@ -1044,7 +1609,9 @@ export function WorkspacePage() {
                               loading={checkoutPlan === entry.code}
                               onClick={() => void checkout(entry.code)}
                             >
-                              {entry.code === tenant.plan ? t('workspace.currentBadge') : t('workspace.choose')}
+                              {entry.code === tenant.plan
+                                ? t('workspace.currentBadge')
+                                : t('workspace.choose')}
                             </Button>
                           </div>
                         ))}
@@ -1056,13 +1623,26 @@ export function WorkspacePage() {
                     <CardHeader
                       title={t('workspace.invoicesTitle')}
                       subtitle={t('workspace.invoicesSubtitle')}
-                      action={<Badge tone="info" icon="wallet">{t('workspace.demoBilling')}</Badge>}
+                      action={
+                        <Badge tone="info" icon="wallet">
+                          {t('workspace.demoBilling')}
+                        </Badge>
+                      }
                     />
                     <CardBody>
                       {invoices.length === 0 ? (
-                        <EmptyState icon="receipt" title={t('workspace.invoicesEmptyTitle')} description={t('workspace.invoicesEmptyBody')} />
+                        <EmptyState
+                          icon="receipt"
+                          title={t('workspace.invoicesEmptyTitle')}
+                          description={t('workspace.invoicesEmptyBody')}
+                        />
                       ) : (
-                        <DataTable columns={invoiceColumns} rows={invoices} getRowId={(row) => row.id} caption={t('workspace.invoicesTitle')} />
+                        <DataTable
+                          columns={invoiceColumns}
+                          rows={invoices}
+                          getRowId={(row) => row.id}
+                          caption={t('workspace.invoicesTitle')}
+                        />
                       )}
                     </CardBody>
                   </Card>
@@ -1078,9 +1658,18 @@ export function WorkspacePage() {
                   />
                   <CardBody>
                     {team.length === 0 ? (
-                      <EmptyState icon="users" title={t('workspace.teamEmptyTitle')} description={t('workspace.teamEmptyBody')} />
+                      <EmptyState
+                        icon="users"
+                        title={t('workspace.teamEmptyTitle')}
+                        description={t('workspace.teamEmptyBody')}
+                      />
                     ) : (
-                      <DataTable columns={teamColumns} rows={team} getRowId={(row) => row.userId} caption={t('workspace.teamTitle')} />
+                      <DataTable
+                        columns={teamColumns}
+                        rows={team}
+                        getRowId={(row) => row.userId}
+                        caption={t('workspace.teamTitle')}
+                      />
                     )}
                     <p className="reg-note">{t('workspace.teamNote')}</p>
                   </CardBody>

@@ -73,7 +73,9 @@ function persistRefreshedTokens(bundle: TokenBundle) {
   } catch {
     /* stockage indisponible */
   }
-  window.dispatchEvent(new CustomEvent<TokenBundle>('restohub:tokens-refreshed', { detail: bundle }));
+  window.dispatchEvent(
+    new CustomEvent<TokenBundle>('restohub:tokens-refreshed', { detail: bundle }),
+  );
 }
 
 let refreshPromise: Promise<TokenBundle | null> | null = null;
@@ -531,13 +533,19 @@ export const identityApi = {
   mfaEnroll: (ticket?: string) =>
     identity<MfaEnrollment>('POST', '/api/v1/auth/mfa/enroll', ticket ? { ticket } : {}),
   mfaConfirm: (code: string, ticket?: string) =>
-    identity<MfaConfirmation>('POST', '/api/v1/auth/mfa/confirm', ticket ? { ticket, code } : { code }),
-  mfaVerify: (ticket: string, code: string) =>
-    identity<{ accessToken: string; refreshToken: string; expiresIn: number; sessionId: string; user: User }>(
+    identity<MfaConfirmation>(
       'POST',
-      '/api/v1/auth/mfa/verify',
-      { ticket, code },
+      '/api/v1/auth/mfa/confirm',
+      ticket ? { ticket, code } : { code },
     ),
+  mfaVerify: (ticket: string, code: string) =>
+    identity<{
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+      sessionId: string;
+      user: User;
+    }>('POST', '/api/v1/auth/mfa/verify', { ticket, code }),
   sessions: () => identity<{ items: unknown[] }>('GET', '/api/v1/sessions'),
 };
 
@@ -577,12 +585,10 @@ export const tenantApi = {
     applicationToken: string,
     doc: { type: string; fileName: string; mimeType: string; dataBase64: string },
   ) =>
-    tenant<{ document: ApplicationDocument }>(
-      'POST',
-      `/api/v1/applications/${id}/documents`,
-      doc,
-      { headers: { 'x-application-token': applicationToken }, token: null },
-    ),
+    tenant<{ document: ApplicationDocument }>('POST', `/api/v1/applications/${id}/documents`, doc, {
+      headers: { 'x-application-token': applicationToken },
+      token: null,
+    }),
   submitApplication: (id: string, applicationToken: string) =>
     tenant<{ application: Application }>('POST', `/api/v1/applications/${id}/submit`, undefined, {
       headers: { 'x-application-token': applicationToken },
@@ -594,10 +600,11 @@ export const tenantApi = {
     if (params?.status) query.set('status', params.status);
     if (params?.q) query.set('q', params.q);
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    return tenant<{ items: ApplicationListItem[]; counts: Record<string, number>; reviewer: string }>(
-      'GET',
-      `/api/v1/admin/applications${suffix}`,
-    );
+    return tenant<{
+      items: ApplicationListItem[];
+      counts: Record<string, number>;
+      reviewer: string;
+    }>('GET', `/api/v1/admin/applications${suffix}`);
   },
   adminApplication: (id: string) =>
     tenant<{ application: ApplicationDetail }>('GET', `/api/v1/admin/applications/${id}`),
@@ -606,14 +613,19 @@ export const tenantApi = {
       `${TENANT_URL}/api/v1/admin/applications/${applicationId}/documents/${documentId}`,
       { headers: accessToken ? { authorization: `Bearer ${accessToken}` } : {} },
     );
-    if (!response.ok) throw new ApiError(response.status, 'document_unavailable', 'Document indisponible.');
+    if (!response.ok)
+      throw new ApiError(response.status, 'document_unavailable', 'Document indisponible.');
     return response.blob();
   },
   reviewApplication: (
     id: string,
     action: 'approve' | 'reject' | 'request_documents',
     payload: { reason?: string; note?: string },
-  ) => tenant<Record<string, unknown>>('POST', `/api/v1/admin/applications/${id}/review`, { action, ...payload }),
+  ) =>
+    tenant<Record<string, unknown>>('POST', `/api/v1/admin/applications/${id}/review`, {
+      action,
+      ...payload,
+    }),
   adminTenants: () => tenant<{ items: AdminTenantRow[] }>('GET', '/api/v1/admin/tenants'),
   suspendTenant: (id: string, reason: string) =>
     tenant<{ tenant: { id: string; status: string }; changed: boolean }>(
@@ -622,7 +634,11 @@ export const tenantApi = {
       { reason },
     ),
   reactivateTenant: (id: string, note?: string) =>
-    tenant<{ tenant: { id: string; status: string } }>('POST', `/api/v1/admin/tenants/${id}/reactivate`, { note }),
+    tenant<{ tenant: { id: string; status: string } }>(
+      'POST',
+      `/api/v1/admin/tenants/${id}/reactivate`,
+      { note },
+    ),
   overview: () => tenant<AdminOverview>('GET', '/api/v1/admin/overview'),
 
   myTenants: () => tenant<{ items: TenantSummary[] }>('GET', '/api/v1/tenants/mine'),
@@ -645,22 +661,27 @@ export const tenantApi = {
       currency?: string;
       hours?: EstablishmentHours[];
     },
-  ) => tenant<{ tenant: { id: string; brandName: string; settings: TenantSettings } }>(
-    'PATCH',
-    `/api/v1/tenants/${id}/branding`,
-    branding,
-  ),
-  sites: (id: string) => tenant<{ items: Site[]; plan: Plan }>('GET', `/api/v1/tenants/${id}/sites`),
+  ) =>
+    tenant<{ tenant: { id: string; brandName: string; settings: TenantSettings } }>(
+      'PATCH',
+      `/api/v1/tenants/${id}/branding`,
+      branding,
+    ),
+  sites: (id: string) =>
+    tenant<{ items: Site[]; plan: Plan }>('GET', `/api/v1/tenants/${id}/sites`),
   createSite: (id: string, site: { name: string; address: string; phone?: string }) =>
     tenant<{ site: Site }>('POST', `/api/v1/tenants/${id}/sites`, site),
   deleteSite: (id: string, siteId: string) =>
     tenant<{ ok: true }>('DELETE', `/api/v1/tenants/${id}/sites/${siteId}`),
   onboarding: (id: string) => tenant<Onboarding>('GET', `/api/v1/tenants/${id}/onboarding`),
   subscription: (id: string) =>
-    tenant<{ subscription?: Subscription; plan: Plan; plans: Plan[]; invoices: Invoice[]; trialDays: number }>(
-      'GET',
-      `/api/v1/tenants/${id}/subscription`,
-    ),
+    tenant<{
+      subscription?: Subscription;
+      plan: Plan;
+      plans: Plan[];
+      invoices: Invoice[];
+      trialDays: number;
+    }>('GET', `/api/v1/tenants/${id}/subscription`),
   checkout: (id: string, plan: PlanCode) =>
     tenant<{ invoice: Invoice; plan: Plan; message: string; demoBilling: boolean }>(
       'POST',
@@ -686,8 +707,20 @@ export const tenantApi = {
 /* ------------------------------------------------------------------ */
 
 export type Allergen =
-  | 'gluten' | 'crustaces' | 'oeufs' | 'poisson' | 'arachides' | 'soja' | 'lait'
-  | 'fruits_a_coque' | 'celeri' | 'moutarde' | 'sesame' | 'sulfites' | 'lupin' | 'mollusques';
+  | 'gluten'
+  | 'crustaces'
+  | 'oeufs'
+  | 'poisson'
+  | 'arachides'
+  | 'soja'
+  | 'lait'
+  | 'fruits_a_coque'
+  | 'celeri'
+  | 'moutarde'
+  | 'sesame'
+  | 'sulfites'
+  | 'lupin'
+  | 'mollusques';
 
 export interface CatalogCategory {
   id: string;
@@ -738,13 +771,25 @@ export interface CatalogProduct {
   allergens: Allergen[];
   basePriceXof: number;
   effectivePriceXof: number;
-  activePriceRule: { id: string; label: string; start: string; end: string; priceXof: number } | null;
+  activePriceRule: {
+    id: string;
+    label: string;
+    start: string;
+    end: string;
+    priceXof: number;
+  } | null;
   variants: ProductVariant[];
   options: ProductOptionGroup[];
   priceRules: PriceRule[];
   active: boolean;
   station: 'cuisine' | 'bar';
-  availability: { available: boolean; reason?: string; until?: string; updatedAt: string; updatedBy: string };
+  availability: {
+    available: boolean;
+    reason?: string;
+    until?: string;
+    updatedAt: string;
+    updatedBy: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -798,24 +843,54 @@ export interface ProductInput {
     maxSelect?: number;
     choices: Array<{ name: string; priceDeltaXof: number }>;
   }>;
-  priceRules?: Array<{ id?: string; label?: string; days: string[]; start: string; end: string; priceXof: number }>;
+  priceRules?: Array<{
+    id?: string;
+    label?: string;
+    days: string[];
+    start: string;
+    end: string;
+    priceXof: number;
+  }>;
   active?: boolean;
 }
 
 export const catalogApi = {
   snapshot: (tenantId: string) =>
     catalog<CatalogSnapshot>('GET', `/api/v1/tenants/${tenantId}/catalog`),
-  createCategory: (tenantId: string, input: { name: string; description?: string; position?: number }) =>
-    catalog<{ category: CatalogCategory }>('POST', `/api/v1/tenants/${tenantId}/catalog/categories`, input),
+  createCategory: (
+    tenantId: string,
+    input: { name: string; description?: string; position?: number },
+  ) =>
+    catalog<{ category: CatalogCategory }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/catalog/categories`,
+      input,
+    ),
   updateCategory: (tenantId: string, id: string, input: Record<string, unknown>) =>
-    catalog<{ category: CatalogCategory }>('PATCH', `/api/v1/tenants/${tenantId}/catalog/categories/${id}`, input),
+    catalog<{ category: CatalogCategory }>(
+      'PATCH',
+      `/api/v1/tenants/${tenantId}/catalog/categories/${id}`,
+      input,
+    ),
   deleteCategory: (tenantId: string, id: string) =>
     catalog<{ ok: true }>('DELETE', `/api/v1/tenants/${tenantId}/catalog/categories/${id}`),
   createProduct: (tenantId: string, input: ProductInput) =>
-    catalog<{ product: CatalogProduct }>('POST', `/api/v1/tenants/${tenantId}/catalog/products`, input),
+    catalog<{ product: CatalogProduct }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/catalog/products`,
+      input,
+    ),
   updateProduct: (tenantId: string, id: string, input: Partial<ProductInput>) =>
-    catalog<{ product: CatalogProduct }>('PATCH', `/api/v1/tenants/${tenantId}/catalog/products/${id}`, input),
-  setAvailability: (tenantId: string, id: string, input: { available: boolean; reason?: string; until?: string }) =>
+    catalog<{ product: CatalogProduct }>(
+      'PATCH',
+      `/api/v1/tenants/${tenantId}/catalog/products/${id}`,
+      input,
+    ),
+  setAvailability: (
+    tenantId: string,
+    id: string,
+    input: { available: boolean; reason?: string; until?: string },
+  ) =>
     catalog<{ product: CatalogProduct }>(
       'PATCH',
       `/api/v1/tenants/${tenantId}/catalog/products/${id}/availability`,
@@ -825,7 +900,12 @@ export const catalogApi = {
     catalog<{ ok: true }>('DELETE', `/api/v1/tenants/${tenantId}/catalog/products/${id}`),
   createMenu: (
     tenantId: string,
-    input: { name: string; description?: string; priceXof: number; items: Array<{ productId: string; quantity: number; variantId?: string }> },
+    input: {
+      name: string;
+      description?: string;
+      priceXof: number;
+      items: Array<{ productId: string; quantity: number; variantId?: string }>;
+    },
   ) => catalog<{ menu: ComposedMenu }>('POST', `/api/v1/tenants/${tenantId}/catalog/menus`, input),
   deleteMenu: (tenantId: string, id: string) =>
     catalog<{ ok: true }>('DELETE', `/api/v1/tenants/${tenantId}/catalog/menus/${id}`),
@@ -841,18 +921,26 @@ export const catalogApi = {
       startsAt: string;
       endsAt: string;
     },
-  ) => catalog<{ promotion: Promotion }>('POST', `/api/v1/tenants/${tenantId}/catalog/promotions`, input),
+  ) =>
+    catalog<{ promotion: Promotion }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/catalog/promotions`,
+      input,
+    ),
   deletePromotion: (tenantId: string, id: string) =>
     catalog<{ ok: true }>('DELETE', `/api/v1/tenants/${tenantId}/catalog/promotions/${id}`),
   publicMenu: (tenantId: string) =>
-    catalog<PublicMenuPayload>('GET', `/api/v1/public/tenants/${tenantId}/menu`, undefined, { token: null }),
+    catalog<PublicMenuPayload>('GET', `/api/v1/public/tenants/${tenantId}/menu`, undefined, {
+      token: null,
+    }),
 };
 
 /* ------------------------------------------------------------------ */
 /* Plan de salle                                                       */
 /* ------------------------------------------------------------------ */
 
-export type FloorStatus = 'libre' | 'reservee' | 'occupee' | 'addition' | 'nettoyage' | 'hors_service';
+export type FloorStatus =
+  'libre' | 'reservee' | 'occupee' | 'addition' | 'nettoyage' | 'hors_service';
 export type ZoneKind = 'salle' | 'terrasse' | 'vip' | 'bar' | 'etage';
 export type TableType = 'table' | 'comptoir' | 'canape' | 'loge';
 
@@ -916,7 +1004,9 @@ export interface FloorSnapshot {
 export const floorApi = {
   snapshot: (tenantId: string) => floor<FloorSnapshot>('GET', `/api/v1/tenants/${tenantId}/floor`),
   updateSettings: (tenantId: string, establishmentCode: string) =>
-    floor<FloorSnapshot>('PUT', `/api/v1/tenants/${tenantId}/floor/settings`, { establishmentCode }),
+    floor<FloorSnapshot>('PUT', `/api/v1/tenants/${tenantId}/floor/settings`, {
+      establishmentCode,
+    }),
   createZone: (tenantId: string, input: { name: string; kind: ZoneKind; code?: string }) =>
     floor<{ zone: FloorZone }>('POST', `/api/v1/tenants/${tenantId}/floor/zones`, input),
   updateZone: (tenantId: string, id: string, input: Record<string, unknown>) =>
@@ -925,7 +1015,14 @@ export const floorApi = {
     floor<{ ok: true }>('DELETE', `/api/v1/tenants/${tenantId}/floor/zones/${id}`),
   createTable: (
     tenantId: string,
-    input: { zoneId: string; number?: number; capacity: number; type?: TableType; x?: number; y?: number },
+    input: {
+      zoneId: string;
+      number?: number;
+      capacity: number;
+      type?: TableType;
+      x?: number;
+      y?: number;
+    },
   ) => floor<{ table: FloorTable }>('POST', `/api/v1/tenants/${tenantId}/floor/tables`, input),
   updateTable: (tenantId: string, id: string, input: Record<string, unknown>) =>
     floor<{ table: FloorTable }>('PATCH', `/api/v1/tenants/${tenantId}/floor/tables/${id}`, input),
@@ -935,7 +1032,12 @@ export const floorApi = {
     tenantId: string,
     id: string,
     input: { status: FloorStatus; orderId?: string; reservationId?: string },
-  ) => floor<{ table: FloorTable }>('POST', `/api/v1/tenants/${tenantId}/floor/tables/${id}/status`, input),
+  ) =>
+    floor<{ table: FloorTable }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/floor/tables/${id}/status`,
+      input,
+    ),
   merge: (tenantId: string, tableIds: string[], primaryId?: string) =>
     floor<{ primary: FloorTable; summary: FloorSummary }>(
       'POST',
@@ -943,7 +1045,11 @@ export const floorApi = {
       { tableIds, primaryId },
     ),
   split: (tenantId: string, id: string) =>
-    floor<{ primary: FloorTable }>('POST', `/api/v1/tenants/${tenantId}/floor/tables/${id}/split`, {}),
+    floor<{ primary: FloorTable }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/floor/tables/${id}/split`,
+      {},
+    ),
   transfer: (tenantId: string, id: string, toTableId: string, releaseSource?: boolean) =>
     floor<{ source: FloorTable; target: FloorTable }>(
       'POST',
@@ -1186,11 +1292,10 @@ function orderQuery(params: Record<string, string | number | undefined>): string
 }
 
 export const orderApi = {
-  list: (tenantId: string, params: { status?: string; channel?: string; q?: string; limit?: number } = {}) =>
-    order<OrderListResponse>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/orders${orderQuery(params)}`,
-    ),
+  list: (
+    tenantId: string,
+    params: { status?: string; channel?: string; q?: string; limit?: number } = {},
+  ) => order<OrderListResponse>('GET', `/api/v1/tenants/${tenantId}/orders${orderQuery(params)}`),
   get: (tenantId: string, id: string) =>
     order<{ order: Order }>('GET', `/api/v1/tenants/${tenantId}/orders/${id}`),
   create: (tenantId: string, input: CreateOrderInput) =>
@@ -1202,30 +1307,45 @@ export const orderApi = {
     }),
   cancel: (tenantId: string, id: string, reason: string) =>
     order<{ order: Order }>('POST', `/api/v1/tenants/${tenantId}/orders/${id}/cancel`, { reason }),
-  discount: (tenantId: string, id: string, input: { type: 'percent' | 'amount'; value: number; reason: string }) =>
-    order<{ order: Order }>('POST', `/api/v1/tenants/${tenantId}/orders/${id}/discount`, input),
+  discount: (
+    tenantId: string,
+    id: string,
+    input: { type: 'percent' | 'amount'; value: number; reason: string },
+  ) => order<{ order: Order }>('POST', `/api/v1/tenants/${tenantId}/orders/${id}/discount`, input),
   pay: (
     tenantId: string,
     id: string,
     input: { method: PaymentMethod; amountXof: number; reference?: string },
   ) =>
-    order<{ payment: OrderPayment; invoiceIssued: boolean; session: CashSession | null; order: Order }>(
-      'POST',
-      `/api/v1/tenants/${tenantId}/orders/${id}/payments`,
-      input,
-    ),
+    order<{
+      payment: OrderPayment;
+      invoiceIssued: boolean;
+      session: CashSession | null;
+      order: Order;
+    }>('POST', `/api/v1/tenants/${tenantId}/orders/${id}/payments`, input),
   invoice: (tenantId: string, id: string) =>
-    order<{ invoice: { number: string; totalXof: number; netXof: number; taxXof: number; at?: string } | null; order: Order }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/orders/${id}/invoice`,
-    ),
+    order<{
+      invoice: {
+        number: string;
+        totalXof: number;
+        netXof: number;
+        taxXof: number;
+        at?: string;
+      } | null;
+      order: Order;
+    }>('GET', `/api/v1/tenants/${tenantId}/orders/${id}/invoice`),
   receiptBlob: (tenantId: string, id: string) =>
     serviceBlob(ORDER_URL, `/api/v1/tenants/${tenantId}/orders/${id}/receipt.pdf`),
   exportCsvBlob: (tenantId: string, range: { from?: string; to?: string } = {}) =>
     serviceBlob(ORDER_URL, `/api/v1/tenants/${tenantId}/orders/export.csv${orderQuery(range)}`),
   kds: (tenantId: string, station: OrderStation | 'all' = 'all') =>
     order<KdsPayload>('GET', `/api/v1/tenants/${tenantId}/kds${orderQuery({ station })}`),
-  ticketStatus: (tenantId: string, ticketId: string, status: 'en_preparation' | 'prete', expectedVersion?: number) =>
+  ticketStatus: (
+    tenantId: string,
+    ticketId: string,
+    status: 'en_preparation' | 'prete',
+    expectedVersion?: number,
+  ) =>
     order<{ ticket: OrderTicket; order: Order; kds: KdsPayload }>(
       'POST',
       `/api/v1/tenants/${tenantId}/kds/tickets/${ticketId}/status`,
@@ -1233,23 +1353,35 @@ export const orderApi = {
     ),
   pos: (tenantId: string) => order<PosPayload>('GET', `/api/v1/tenants/${tenantId}/pos`),
   openSession: (tenantId: string, openingFloatXof: number) =>
-    order<{ session: CashSession }>('POST', `/api/v1/tenants/${tenantId}/pos/session/open`, { openingFloatXof }),
+    order<{ session: CashSession }>('POST', `/api/v1/tenants/${tenantId}/pos/session/open`, {
+      openingFloatXof,
+    }),
   closeSession: (tenantId: string, countedXof: number, notes?: string) =>
-    order<{ session: CashSession }>('POST', `/api/v1/tenants/${tenantId}/pos/session/close`, { countedXof, notes }),
+    order<{ session: CashSession }>('POST', `/api/v1/tenants/${tenantId}/pos/session/close`, {
+      countedXof,
+      notes,
+    }),
   audit: (tenantId: string) =>
-    order<{ entries: Array<{ id: string; action: string; actorId: string; at: string; meta: Record<string, unknown> }>; integrity: boolean }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/orders/audit`,
-    ),
+    order<{
+      entries: Array<{
+        id: string;
+        action: string;
+        actorId: string;
+        at: string;
+        meta: Record<string, unknown>;
+      }>;
+      integrity: boolean;
+    }>('GET', `/api/v1/tenants/${tenantId}/orders/audit`),
   publicTable: (tenantId: string, code: string) =>
-    floor<{ table: { id: string; code: string; status: FloorStatus; capacity: number; orderId?: string } }>(
-      'GET',
-      `/api/v1/public/tenants/${tenantId}/tables/${encodeURIComponent(code)}`,
-      undefined,
-      { token: null },
-    ),
+    floor<{
+      table: { id: string; code: string; status: FloorStatus; capacity: number; orderId?: string };
+    }>('GET', `/api/v1/public/tenants/${tenantId}/tables/${encodeURIComponent(code)}`, undefined, {
+      token: null,
+    }),
   publicMenu: (tenantId: string) =>
-    catalog<PublicMenuPayload>('GET', `/api/v1/public/tenants/${tenantId}/menu`, undefined, { token: null }),
+    catalog<PublicMenuPayload>('GET', `/api/v1/public/tenants/${tenantId}/menu`, undefined, {
+      token: null,
+    }),
   publicCreate: (tenantId: string, input: CreateOrderInput & { tableToken?: string }) =>
     order<{ order: PublicOrder; trackingUrl: string; replayed: boolean }>(
       'POST',
@@ -1315,7 +1447,14 @@ export interface PaymentTransaction {
   customerName: string | null;
   note: string | null;
   fees: PaymentFees;
-  refunds: Array<{ id: string; amountXof: number; reason: string; by: string; at: string; providerReference: string }>;
+  refunds: Array<{
+    id: string;
+    amountXof: number;
+    reason: string;
+    by: string;
+    at: string;
+    providerReference: string;
+  }>;
   refundedXof: number;
   refundableXof: number;
   tipXof: number;
@@ -1498,7 +1637,14 @@ export const paymentApi = {
     ),
   transactions: (
     tenantId: string,
-    filters: { status?: string; method?: string; from?: string; to?: string; q?: string; limit?: number } = {},
+    filters: {
+      status?: string;
+      method?: string;
+      from?: string;
+      to?: string;
+      q?: string;
+      limit?: number;
+    } = {},
   ) =>
     payment<{ tenantId: string; items: PaymentTransaction[]; count: number }>(
       'GET',
@@ -1535,11 +1681,11 @@ export const paymentApi = {
       {},
     ),
   refund: (tenantId: string, id: string, input: { amountXof?: number; reason: string }) =>
-    payment<{ refund: { id: string; amountXof: number }; transaction: PaymentTransaction; wallet: WalletView }>(
-      'POST',
-      `/api/v1/tenants/${tenantId}/payments/transactions/${id}/refund`,
-      input,
-    ),
+    payment<{
+      refund: { id: string; amountXof: number };
+      transaction: PaymentTransaction;
+      wallet: WalletView;
+    }>('POST', `/api/v1/tenants/${tenantId}/payments/transactions/${id}/refund`, input),
   sandboxOutcome: (tenantId: string, id: string, outcome: 'confirme' | 'echoue' | 'expire') =>
     payment<{ transaction: PaymentTransaction; orderSynced?: boolean; warning?: string | null }>(
       'POST',
@@ -1557,25 +1703,40 @@ export const paymentApi = {
     input: {
       orderId: string;
       tipXof?: number;
-      parts: Array<{ label?: string; amountXof: number; method: 'mobile_money' | 'carte'; provider?: string }>;
+      parts: Array<{
+        label?: string;
+        amountXof: number;
+        method: 'mobile_money' | 'carte';
+        provider?: string;
+      }>;
     },
   ) =>
-    payment<{ split: { id: string; status: string; totalXof: number; parts: Array<{ transactionId: string; label: string; amountXof: number; status: string }> } }>(
-      'POST',
-      `/api/v1/tenants/${tenantId}/payments/splits`,
-      input,
-    ),
+    payment<{
+      split: {
+        id: string;
+        status: string;
+        totalXof: number;
+        parts: Array<{ transactionId: string; label: string; amountXof: number; status: string }>;
+      };
+    }>('POST', `/api/v1/tenants/${tenantId}/payments/splits`, input),
   split: (tenantId: string, id: string) =>
-    payment<{ split: { id: string; status: string; totalXof: number; parts: Array<{ transactionId: string; label: string; amountXof: number; status: string }> } }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/payments/splits/${id}`,
-    ),
+    payment<{
+      split: {
+        id: string;
+        status: string;
+        totalXof: number;
+        parts: Array<{ transactionId: string; label: string; amountXof: number; status: string }>;
+      };
+    }>('GET', `/api/v1/tenants/${tenantId}/payments/splits/${id}`),
   wallet: (tenantId: string) =>
     payment<{ wallet: WalletView; settlements: SettlementView[] }>(
       'GET',
       `/api/v1/tenants/${tenantId}/payments/wallet`,
     ),
-  requestSettlement: (tenantId: string, input: { amountXof: number; mode: SettlementMode; destination: string; note?: string }) =>
+  requestSettlement: (
+    tenantId: string,
+    input: { amountXof: number; mode: SettlementMode; destination: string; note?: string },
+  ) =>
     payment<{ settlement: SettlementView; wallet: WalletView }>(
       'POST',
       `/api/v1/tenants/${tenantId}/payments/settlements`,
@@ -1609,10 +1770,10 @@ export const paymentApi = {
       {},
     ),
   audit: (tenantId: string) =>
-    payment<{ entries: Array<{ id: string; action: string; actorId: string; at: string }>; integrity: boolean }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/payments/audit`,
-    ),
+    payment<{
+      entries: Array<{ id: string; action: string; actorId: string; at: string }>;
+      integrity: boolean;
+    }>('GET', `/api/v1/tenants/${tenantId}/payments/audit`),
   exportBlob: (tenantId: string, format: 'csv' | 'xls' | 'pdf') =>
     serviceBlob(PAYMENT_URL, `/api/v1/tenants/${tenantId}/payments/exports/transactions.${format}`),
 };
@@ -1646,10 +1807,21 @@ export const platformPaymentApi = {
       'GET',
       `/api/v1/platform/payments/disputes${paymentQuery({ status })}`,
     ),
-  openDispute: (input: { tenantId: string; transactionId: string; reason: string; description: string }) =>
-    payment<{ dispute: DisputeView }>('POST', '/api/v1/platform/payments/disputes', input),
-  resolveDispute: (id: string, input: { outcome: 'acceptee' | 'rejetee'; refundAmountXof?: number; note?: string }) =>
-    payment<{ dispute: DisputeView }>('POST', `/api/v1/platform/payments/disputes/${id}/resolve`, input),
+  openDispute: (input: {
+    tenantId: string;
+    transactionId: string;
+    reason: string;
+    description: string;
+  }) => payment<{ dispute: DisputeView }>('POST', '/api/v1/platform/payments/disputes', input),
+  resolveDispute: (
+    id: string,
+    input: { outcome: 'acceptee' | 'rejetee'; refundAmountXof?: number; note?: string },
+  ) =>
+    payment<{ dispute: DisputeView }>(
+      'POST',
+      `/api/v1/platform/payments/disputes/${id}/resolve`,
+      input,
+    ),
   ledger: () => payment<LedgerView>('GET', '/api/v1/platform/payments/ledger'),
 };
 
@@ -1799,7 +1971,8 @@ export interface StaffAuditEntry {
 }
 
 export const staffApi = {
-  summary: (tenantId: string) => staff<StaffSummary>('GET', `/api/v1/tenants/${tenantId}/staff/summary`),
+  summary: (tenantId: string) =>
+    staff<StaffSummary>('GET', `/api/v1/tenants/${tenantId}/staff/summary`),
   employees: (tenantId: string, filters: { status?: string; q?: string } = {}) =>
     staff<{ tenantId: string; items: StaffEmployee[]; count: number }>(
       'GET',
@@ -1834,9 +2007,18 @@ export const staffApi = {
       paymentMethod?: StaffPaymentMethod;
       paymentDestination?: string;
     },
-  ) => staff<{ employee: StaffEmployee }>('POST', `/api/v1/tenants/${tenantId}/staff/employees`, input),
+  ) =>
+    staff<{ employee: StaffEmployee }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/staff/employees`,
+      input,
+    ),
   updateEmployee: (tenantId: string, id: string, input: Record<string, unknown>) =>
-    staff<{ employee: StaffEmployee }>('PATCH', `/api/v1/tenants/${tenantId}/staff/employees/${id}`, input),
+    staff<{ employee: StaffEmployee }>(
+      'PATCH',
+      `/api/v1/tenants/${tenantId}/staff/employees/${id}`,
+      input,
+    ),
   addDocument: (tenantId: string, id: string, input: { name: string; type?: string }) =>
     staff<{ document: StaffDocument; employee: StaffEmployee }>(
       'POST',
@@ -1896,7 +2078,10 @@ export const staffApi = {
       toEmployeeId,
     }),
   swaps: (tenantId: string) =>
-    staff<{ tenantId: string; items: StaffSwap[] }>('GET', `/api/v1/tenants/${tenantId}/staff/swaps`),
+    staff<{ tenantId: string; items: StaffSwap[] }>(
+      'GET',
+      `/api/v1/tenants/${tenantId}/staff/swaps`,
+    ),
   decideSwap: (tenantId: string, id: string, decision: 'approuve' | 'refuse') =>
     staff<{ swap: StaffSwap; shift: StaffShift }>(
       'POST',
@@ -1904,10 +2089,11 @@ export const staffApi = {
       { decision },
     ),
   leaves: (tenantId: string, status?: string) =>
-    staff<{ tenantId: string; items: StaffLeave[]; counts: { en_attente: number; approuve: number } }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/staff/leaves${paymentQuery({ status })}`,
-    ),
+    staff<{
+      tenantId: string;
+      items: StaffLeave[];
+      counts: { en_attente: number; approuve: number };
+    }>('GET', `/api/v1/tenants/${tenantId}/staff/leaves${paymentQuery({ status })}`),
   requestLeave: (
     tenantId: string,
     input: { employeeId: string; type: StaffLeaveType; from: string; to: string; reason?: string },
@@ -1956,10 +2142,12 @@ export const staffApi = {
       { geofence },
     ),
   audit: (tenantId: string) =>
-    staff<{ tenantId: string; entries: StaffAuditEntry[]; integrity: boolean; generatedAt: string }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/staff/audit`,
-    ),
+    staff<{
+      tenantId: string;
+      entries: StaffAuditEntry[];
+      integrity: boolean;
+      generatedAt: string;
+    }>('GET', `/api/v1/tenants/${tenantId}/staff/audit`),
 };
 
 /* ------------------------------------------------------------------ */
@@ -2076,13 +2264,7 @@ export interface Payslip {
 }
 
 export type PayrollRunStatus =
-  | 'brouillon'
-  | 'preparee'
-  | 'validee'
-  | 'en_cours'
-  | 'reussi'
-  | 'echoue'
-  | 'a_rejouer';
+  'brouillon' | 'preparee' | 'validee' | 'en_cours' | 'reussi' | 'echoue' | 'a_rejouer';
 export type PayrollPaymentStatus = 'en_cours' | 'reussi' | 'echoue' | 'a_rejouer';
 
 export interface PayrollPaymentAttempt {
@@ -2125,7 +2307,12 @@ export interface PayrollRunSummary {
   lockReason: string | null;
   retentionBlocked: boolean;
   staleReason: string | null;
-  payment: { reference: string; status: PayrollPaymentStatus; attemptedAt: string; message: string } | null;
+  payment: {
+    reference: string;
+    status: PayrollPaymentStatus;
+    attemptedAt: string;
+    message: string;
+  } | null;
   attempts: PayrollPaymentAttempt[];
   pdfReady: boolean;
   sentCount: number;
@@ -2197,8 +2384,22 @@ export const payrollApi = {
   updateRun: (
     tenantId: string,
     id: string,
-    input: { notes?: string; adjustments?: Array<{ employeeId: string; label: string; type: PayrollAdjustmentType; amountXof: number; note?: string }> },
-  ) => payroll<{ run: PayrollRunDetail }>('PATCH', `/api/v1/tenants/${tenantId}/payroll/runs/${id}`, input),
+    input: {
+      notes?: string;
+      adjustments?: Array<{
+        employeeId: string;
+        label: string;
+        type: PayrollAdjustmentType;
+        amountXof: number;
+        note?: string;
+      }>;
+    },
+  ) =>
+    payroll<{ run: PayrollRunDetail }>(
+      'PATCH',
+      `/api/v1/tenants/${tenantId}/payroll/runs/${id}`,
+      input,
+    ),
   validateRun: (tenantId: string, id: string) =>
     payroll<{ run: PayrollRunDetail }>(
       'POST',
@@ -2206,7 +2407,11 @@ export const payrollApi = {
       {},
     ),
   payRun: (tenantId: string, id: string) =>
-    payroll<{ run: PayrollRunDetail }>('POST', `/api/v1/tenants/${tenantId}/payroll/runs/${id}/pay`, {}),
+    payroll<{ run: PayrollRunDetail }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/payroll/runs/${id}/pay`,
+      {},
+    ),
   batches: (tenantId: string, id: string) =>
     payroll<{
       tenantId: string;
@@ -2230,10 +2435,12 @@ export const payrollApi = {
   exportBlob: (tenantId: string, id: string, format: 'csv' | 'xls' | 'pdf' | 'rules.csv') =>
     serviceBlob(PAYROLL_URL, `/api/v1/tenants/${tenantId}/payroll/runs/${id}/exports/${format}`),
   audit: (tenantId: string) =>
-    payroll<{ tenantId: string; entries: StaffAuditEntry[]; integrity: boolean; generatedAt: string }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/payroll/audit`,
-    ),
+    payroll<{
+      tenantId: string;
+      entries: StaffAuditEntry[];
+      integrity: boolean;
+      generatedAt: string;
+    }>('GET', `/api/v1/tenants/${tenantId}/payroll/audit`),
 };
 
 /* ------------------------------------------------------------------ */
@@ -2371,7 +2578,13 @@ export interface PurchaseOrderView {
   supplierName: string;
   number: string;
   status: 'brouillon' | 'commandee' | 'recue';
-  lines: Array<{ itemId: string; itemName: string; quantity: number; unitCostXof: number; lineTotalXof: number }>;
+  lines: Array<{
+    itemId: string;
+    itemName: string;
+    quantity: number;
+    unitCostXof: number;
+    lineTotalXof: number;
+  }>;
   totalXof: number;
   createdAt: string;
   receivedAt: string | null;
@@ -2395,10 +2608,12 @@ export const inventoryApi = {
   summary: (tenantId: string) =>
     inventory<InventorySummary>('GET', `/api/v1/tenants/${tenantId}/inventory/summary`),
   items: (tenantId: string, filters: { q?: string; category?: string } = {}) =>
-    inventory<{ items: StockItem[]; categories: string[]; units: StockUnit[]; locations: StockLocation[] }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/inventory/items${paymentQuery(filters)}`,
-    ),
+    inventory<{
+      items: StockItem[];
+      categories: string[];
+      units: StockUnit[];
+      locations: StockLocation[];
+    }>('GET', `/api/v1/tenants/${tenantId}/inventory/items${paymentQuery(filters)}`),
   createItem: (
     tenantId: string,
     input: {
@@ -2414,20 +2629,34 @@ export const inventoryApi = {
     },
   ) => inventory<{ item: StockItem }>('POST', `/api/v1/tenants/${tenantId}/inventory/items`, input),
   updateItem: (tenantId: string, id: string, input: Record<string, unknown>) =>
-    inventory<{ item: StockItem }>('PATCH', `/api/v1/tenants/${tenantId}/inventory/items/${id}`, input),
-  movements: (tenantId: string, filters: { type?: string; itemId?: string; from?: string; to?: string } = {}) =>
+    inventory<{ item: StockItem }>(
+      'PATCH',
+      `/api/v1/tenants/${tenantId}/inventory/items/${id}`,
+      input,
+    ),
+  movements: (
+    tenantId: string,
+    filters: { type?: string; itemId?: string; from?: string; to?: string } = {},
+  ) =>
     inventory<{ movements: StockMovement[]; types: StockMovementType[] }>(
       'GET',
       `/api/v1/tenants/${tenantId}/inventory/movements${paymentQuery(filters)}`,
     ),
   createMovement: (
     tenantId: string,
-    input: { itemId: string; type: 'in' | 'out' | 'adjust'; quantity: number; reason: string; unitCostXof?: number },
-  ) => inventory<{ movement: StockMovement; item: StockItem }>(
-    'POST',
-    `/api/v1/tenants/${tenantId}/inventory/movements`,
-    input,
-  ),
+    input: {
+      itemId: string;
+      type: 'in' | 'out' | 'adjust';
+      quantity: number;
+      reason: string;
+      unitCostXof?: number;
+    },
+  ) =>
+    inventory<{ movement: StockMovement; item: StockItem }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/inventory/movements`,
+      input,
+    ),
   createWaste: (tenantId: string, input: { itemId: string; quantity: number; reason: string }) =>
     inventory<{ movement: StockMovement; item: StockItem }>(
       'POST',
@@ -2445,17 +2674,47 @@ export const inventoryApi = {
       yieldQty?: number;
       lines: Array<{ itemId: string; quantity: number }>;
     },
-  ) => inventory<{ recipe: RecipeView }>('POST', `/api/v1/tenants/${tenantId}/inventory/recipes`, input),
+  ) =>
+    inventory<{ recipe: RecipeView }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/inventory/recipes`,
+      input,
+    ),
   suppliers: (tenantId: string) =>
-    inventory<{ suppliers: StockSupplier[] }>('GET', `/api/v1/tenants/${tenantId}/inventory/suppliers`),
+    inventory<{ suppliers: StockSupplier[] }>(
+      'GET',
+      `/api/v1/tenants/${tenantId}/inventory/suppliers`,
+    ),
   createSupplier: (
     tenantId: string,
-    input: { name: string; contactName?: string; phone?: string; email?: string; termsDays?: number; notes?: string },
-  ) => inventory<{ supplier: StockSupplier }>('POST', `/api/v1/tenants/${tenantId}/inventory/suppliers`, input),
+    input: {
+      name: string;
+      contactName?: string;
+      phone?: string;
+      email?: string;
+      termsDays?: number;
+      notes?: string;
+    },
+  ) =>
+    inventory<{ supplier: StockSupplier }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/inventory/suppliers`,
+      input,
+    ),
   counts: (tenantId: string) =>
-    inventory<{ counts: InventoryCountView[] }>('GET', `/api/v1/tenants/${tenantId}/inventory/counts`),
-  createCount: (tenantId: string, input: { date?: string; lines: Array<{ itemId: string; counted: number }> }) =>
-    inventory<{ count: InventoryCountView }>('POST', `/api/v1/tenants/${tenantId}/inventory/counts`, input),
+    inventory<{ counts: InventoryCountView[] }>(
+      'GET',
+      `/api/v1/tenants/${tenantId}/inventory/counts`,
+    ),
+  createCount: (
+    tenantId: string,
+    input: { date?: string; lines: Array<{ itemId: string; counted: number }> },
+  ) =>
+    inventory<{ count: InventoryCountView }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/inventory/counts`,
+      input,
+    ),
   validateCount: (tenantId: string, id: string) =>
     inventory<{ count: InventoryCountView }>(
       'POST',
@@ -2469,12 +2728,16 @@ export const inventoryApi = {
     ),
   createPurchaseOrder: (
     tenantId: string,
-    input: { supplierId: string; lines: Array<{ itemId: string; quantity: number; unitCostXof: number }> },
-  ) => inventory<{ purchaseOrder: PurchaseOrderView }>(
-    'POST',
-    `/api/v1/tenants/${tenantId}/inventory/purchase-orders`,
-    input,
-  ),
+    input: {
+      supplierId: string;
+      lines: Array<{ itemId: string; quantity: number; unitCostXof: number }>;
+    },
+  ) =>
+    inventory<{ purchaseOrder: PurchaseOrderView }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/inventory/purchase-orders`,
+      input,
+    ),
   receivePurchaseOrder: (tenantId: string, id: string) =>
     inventory<{ purchaseOrder: PurchaseOrderView }>(
       'POST',
@@ -2639,7 +2902,12 @@ export const marketingApi = {
       endAt: string;
       active?: boolean;
     },
-  ) => marketing<{ promotion: PromotionView }>('POST', `/api/v1/tenants/${tenantId}/marketing/promotions`, input),
+  ) =>
+    marketing<{ promotion: PromotionView }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/marketing/promotions`,
+      input,
+    ),
   updatePromotion: (tenantId: string, id: string, input: Record<string, unknown>) =>
     marketing<{ promotion: PromotionView }>(
       'PATCH',
@@ -2666,11 +2934,12 @@ export const marketingApi = {
       endAt: string;
       active?: boolean;
     },
-  ) => marketing<{ promoCode: PromoCodeView }>(
-    'POST',
-    `/api/v1/tenants/${tenantId}/marketing/promo-codes`,
-    input,
-  ),
+  ) =>
+    marketing<{ promoCode: PromoCodeView }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/marketing/promo-codes`,
+      input,
+    ),
   updatePromoCode: (tenantId: string, id: string, input: Record<string, unknown>) =>
     marketing<{ promoCode: PromoCodeView }>(
       'PATCH',
@@ -2694,7 +2963,12 @@ export const marketingApi = {
       message: string;
       scheduledAt?: string | null;
     },
-  ) => marketing<{ campaign: CampaignView }>('POST', `/api/v1/tenants/${tenantId}/marketing/campaigns`, input),
+  ) =>
+    marketing<{ campaign: CampaignView }>(
+      'POST',
+      `/api/v1/tenants/${tenantId}/marketing/campaigns`,
+      input,
+    ),
   sendCampaign: (tenantId: string, id: string) =>
     marketing<{ campaign: CampaignView }>(
       'POST',
@@ -2737,7 +3011,8 @@ export const marketingApi = {
 /* reporting-service — tableaux de bord et exports                     */
 /* ------------------------------------------------------------------ */
 
-export type ReportName = 'dashboard' | 'sales' | 'products' | 'occupancy' | 'taxes' | 'payroll' | 'stock' | 'reviews';
+export type ReportName =
+  'dashboard' | 'sales' | 'products' | 'occupancy' | 'taxes' | 'payroll' | 'stock' | 'reviews';
 export type ReportFormat = 'csv' | 'xlsx' | 'pdf';
 export type ReportGranularity = 'day' | 'month';
 
@@ -2776,11 +3051,24 @@ export interface ReportDashboard {
   cogsXof: number | null;
   grossMarginXof: number | null;
   marginRatePct: number | null;
-  paymentMix: Array<{ method: string; amountXof: number; count: number; refundedXof: number; sharePct: number }>;
+  paymentMix: Array<{
+    method: string;
+    amountXof: number;
+    count: number;
+    refundedXof: number;
+    sharePct: number;
+  }>;
   channelMix: Array<{ channel: string; amountXof: number; count: number; sharePct: number }>;
   topProducts: ProductRankRow[];
   peakHours: Array<{ hour: number; orders: number; revenueXof: number }>;
-  occupancy: { days: number; covers: number; capacitySeats: number; ratePct: number; reservations: number; noShows: number };
+  occupancy: {
+    days: number;
+    covers: number;
+    capacitySeats: number;
+    ratePct: number;
+    reservations: number;
+    noShows: number;
+  };
   reservations: { count: number; covers: number; cancelled: number };
   payroll: { runs: number; totalXof: number };
   reviews: ReviewAggregate;
@@ -2822,10 +3110,11 @@ function reportQuery(params: Record<string, string | number | undefined>): strin
 }
 
 export const reportApi = {
-  sites: (tenantId: string) => reports<{ tenantId: string; items: ReportSite[] }>(
-    'GET',
-    `/api/v1/tenants/${tenantId}/reports/sites`,
-  ),
+  sites: (tenantId: string) =>
+    reports<{ tenantId: string; items: ReportSite[] }>(
+      'GET',
+      `/api/v1/tenants/${tenantId}/reports/sites`,
+    ),
   dashboard: (tenantId: string, params: { from?: string; to?: string; siteId?: string } = {}) =>
     reports<{ dashboard: ReportDashboard; sites: ReportSite[] }>(
       'GET',
@@ -2835,13 +3124,20 @@ export const reportApi = {
     tenantId: string,
     params: { from?: string; to?: string; siteId?: string; granularity?: ReportGranularity } = {},
   ) =>
-    reports<{ granularity: ReportGranularity; points: ReportTimeseriesPoint[]; generatedAt: string }>(
-      'GET',
-      `/api/v1/tenants/${tenantId}/reports/timeseries${reportQuery(params)}`,
-    ),
-  sales: (tenantId: string, params: { from?: string; to?: string; siteId?: string; group?: ReportGranularity } = {}) =>
+    reports<{
+      granularity: ReportGranularity;
+      points: ReportTimeseriesPoint[];
+      generatedAt: string;
+    }>('GET', `/api/v1/tenants/${tenantId}/reports/timeseries${reportQuery(params)}`),
+  sales: (
+    tenantId: string,
+    params: { from?: string; to?: string; siteId?: string; group?: ReportGranularity } = {},
+  ) =>
     reports<SalesReport>('GET', `/api/v1/tenants/${tenantId}/reports/sales${reportQuery(params)}`),
-  products: (tenantId: string, params: { from?: string; to?: string; siteId?: string; limit?: number } = {}) =>
+  products: (
+    tenantId: string,
+    params: { from?: string; to?: string; siteId?: string; limit?: number } = {},
+  ) =>
     reports<{ items: ProductRankRow[]; generatedAt: string }>(
       'GET',
       `/api/v1/tenants/${tenantId}/reports/products${reportQuery(params)}`,
@@ -2854,7 +3150,14 @@ export const reportApi = {
     }>('GET', `/api/v1/tenants/${tenantId}/reports/peak-hours${reportQuery(params)}`),
   occupancy: (tenantId: string, params: { from?: string; to?: string; siteId?: string } = {}) =>
     reports<{
-      summary: { days: number; covers: number; capacitySeats: number; ratePct: number; reservations: number; noShows: number };
+      summary: {
+        days: number;
+        covers: number;
+        capacitySeats: number;
+        ratePct: number;
+        reservations: number;
+        noShows: number;
+      };
       items: Array<{
         id: string;
         date: string;
@@ -2880,27 +3183,59 @@ export const reportApi = {
     }>('GET', `/api/v1/tenants/${tenantId}/reports/taxes${reportQuery(params)}`),
   payroll: (tenantId: string, params: { from?: string; to?: string; siteId?: string } = {}) =>
     reports<{
-      items: Array<{ id: string; runId: string; period: string; headcount: number; totalXof: number; paidAt: string }>;
+      items: Array<{
+        id: string;
+        runId: string;
+        period: string;
+        headcount: number;
+        totalXof: number;
+        paidAt: string;
+      }>;
       totals: { runs: number; totalXof: number };
       generatedAt: string;
     }>('GET', `/api/v1/tenants/${tenantId}/reports/payroll${reportQuery(params)}`),
   stock: (tenantId: string, params: { from?: string; to?: string; siteId?: string } = {}) =>
     reports<{
-      items: Array<{ id: string; at: string; stockValueXof: number; wasteXof: number; lowStockCount: number }>;
-      latest: { id: string; at: string; stockValueXof: number; wasteXof: number; lowStockCount: number } | null;
+      items: Array<{
+        id: string;
+        at: string;
+        stockValueXof: number;
+        wasteXof: number;
+        lowStockCount: number;
+      }>;
+      latest: {
+        id: string;
+        at: string;
+        stockValueXof: number;
+        wasteXof: number;
+        lowStockCount: number;
+      } | null;
       totals: { wasteXof: number };
       generatedAt: string;
     }>('GET', `/api/v1/tenants/${tenantId}/reports/stock${reportQuery(params)}`),
   reviews: (tenantId: string, params: { from?: string; to?: string; siteId?: string } = {}) =>
     reports<{
       summary: ReviewAggregate;
-      items: Array<{ id: string; reviewId: string; rating: number; status: ReviewStatus; at: string }>;
+      items: Array<{
+        id: string;
+        reviewId: string;
+        rating: number;
+        status: ReviewStatus;
+        at: string;
+      }>;
       generatedAt: string;
     }>('GET', `/api/v1/tenants/${tenantId}/reports/reviews${reportQuery(params)}`),
   exportBlob: (
     tenantId: string,
-    params: { report: ReportName; format: ReportFormat; from?: string; to?: string; siteId?: string },
-  ) => serviceBlob(REPORTING_URL, `/api/v1/tenants/${tenantId}/reports/export${reportQuery(params)}`),
+    params: {
+      report: ReportName;
+      format: ReportFormat;
+      from?: string;
+      to?: string;
+      siteId?: string;
+    },
+  ) =>
+    serviceBlob(REPORTING_URL, `/api/v1/tenants/${tenantId}/reports/export${reportQuery(params)}`),
   audit: (tenantId: string) =>
     reports<{ items: ReportAuditEntry[]; integrity: boolean }>(
       'GET',
@@ -3151,14 +3486,20 @@ export const platformAdminApi = {
       disputes: PlatformDisputeRow[];
     }>('GET', `/api/v1/platform/establishments/${tenantId}`),
   commissions: (days = 30) =>
-    platformAdmin<PlatformCommissionView>('GET', `/api/v1/platform/commissions${platformQuery({ days })}`),
+    platformAdmin<PlatformCommissionView>(
+      'GET',
+      `/api/v1/platform/commissions${platformQuery({ days })}`,
+    ),
   transactions: (filters: { kind?: string; tenantId?: string; limit?: number } = {}) =>
     platformAdmin<{ items: PlatformTransactionRow[] }>(
       'GET',
       `/api/v1/platform/transactions${platformQuery(filters)}`,
     ),
   disputes: (status?: string) =>
-    platformAdmin<{ items: PlatformDisputeRow[] }>('GET', `/api/v1/platform/disputes${platformQuery({ status })}`),
+    platformAdmin<{ items: PlatformDisputeRow[] }>(
+      'GET',
+      `/api/v1/platform/disputes${platformQuery({ status })}`,
+    ),
   supervision: () => platformAdmin<PlatformSupervision>('GET', '/api/v1/platform/supervision'),
   checkSupervision: () =>
     platformAdmin<{ results: unknown[]; services: SupervisionServiceRow[] }>(
@@ -3167,7 +3508,11 @@ export const platformAdminApi = {
       {},
     ),
   updateAlert: (id: string, action: 'acknowledge' | 'resolve') =>
-    platformAdmin<{ alert: PlatformAlertRow }>('PATCH', `/api/v1/platform/supervision/alerts/${id}`, { action }),
+    platformAdmin<{ alert: PlatformAlertRow }>(
+      'PATCH',
+      `/api/v1/platform/supervision/alerts/${id}`,
+      { action },
+    ),
   logs: (filters: { level?: string; service?: string; limit?: number } = {}) =>
     platformAdmin<{ items: PlatformLogRow[] }>(
       'GET',
@@ -3175,11 +3520,11 @@ export const platformAdminApi = {
     ),
   settings: () => platformAdmin<PlatformSettingsResponse>('GET', '/api/v1/platform/settings'),
   updateSettings: (settings: PlatformSettingsData) =>
-    platformAdmin<{ settings: PlatformSettingsData; audit: PlatformAuditEntry; changed: Record<string, boolean> }>(
-      'PUT',
-      '/api/v1/platform/settings',
-      settings,
-    ),
+    platformAdmin<{
+      settings: PlatformSettingsData;
+      audit: PlatformAuditEntry;
+      changed: Record<string, boolean>;
+    }>('PUT', '/api/v1/platform/settings', settings),
   audit: (limit = 100) =>
     platformAdmin<{ entries: PlatformAuditEntry[]; chain: { valid: boolean; length: number } }>(
       'GET',

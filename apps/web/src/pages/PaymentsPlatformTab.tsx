@@ -94,13 +94,14 @@ export function PaymentsPlatformTab({ locale }: Props) {
   const load = useCallback(async () => {
     try {
       setError(null);
-      const [summaryResult, settlementResult, disputeResult, txResult, ledgerResult] = await Promise.all([
-        platformPaymentApi.summary(),
-        platformPaymentApi.settlements(),
-        platformPaymentApi.disputes(),
-        platformPaymentApi.transactions({ limit: 20 }),
-        platformPaymentApi.ledger(),
-      ]);
+      const [summaryResult, settlementResult, disputeResult, txResult, ledgerResult] =
+        await Promise.all([
+          platformPaymentApi.summary(),
+          platformPaymentApi.settlements(),
+          platformPaymentApi.disputes(),
+          platformPaymentApi.transactions({ limit: 20 }),
+          platformPaymentApi.ledger(),
+        ]);
       setSummary(summaryResult);
       setSettlements(settlementResult.items);
       setDisputes(disputeResult.items);
@@ -155,7 +156,12 @@ export function PaymentsPlatformTab({ locale }: Props) {
       await platformPaymentApi.openDispute(disputeForm);
       toast.push({ tone: 'success', title: t('paymentsAdmin.disputeOpened') });
       setOpenDisputeOpen(false);
-      setDisputeForm({ tenantId: disputeForm.tenantId, transactionId: '', reason: '', description: '' });
+      setDisputeForm({
+        tenantId: disputeForm.tenantId,
+        transactionId: '',
+        reason: '',
+        description: '',
+      });
       await load();
     } catch (cause) {
       toast.push({ tone: 'error', title: errorMessage(cause) });
@@ -170,7 +176,9 @@ export function PaymentsPlatformTab({ locale }: Props) {
     try {
       await platformPaymentApi.resolveDispute(resolveTarget.id, {
         outcome: resolveForm.outcome,
-        refundAmountXof: resolveForm.refundAmountXof ? Number(resolveForm.refundAmountXof) : undefined,
+        refundAmountXof: resolveForm.refundAmountXof
+          ? Number(resolveForm.refundAmountXof)
+          : undefined,
         note: resolveForm.note || undefined,
       });
       toast.push({ tone: 'success', title: t('paymentsAdmin.disputeDone') });
@@ -203,7 +211,11 @@ export function PaymentsPlatformTab({ locale }: Props) {
     {
       key: 'mode',
       header: t('paymentsAdmin.settlementsColMode'),
-      render: (row) => <Badge tone="neutral">{t(`payments.settlementMode${row.mode === 'instant' ? 'Instant' : 'Batch'}`)}</Badge>,
+      render: (row) => (
+        <Badge tone="neutral">
+          {t(`payments.settlementMode${row.mode === 'instant' ? 'Instant' : 'Batch'}`)}
+        </Badge>
+      ),
     },
     {
       key: 'status',
@@ -225,10 +237,24 @@ export function PaymentsPlatformTab({ locale }: Props) {
       render: (row) =>
         row.status === 'en_attente' ? (
           <div className="console-filters">
-            <Button size="sm" variant="primary" onClick={() => { setApproveTarget(row); setSettleNote(''); }}>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                setApproveTarget(row);
+                setSettleNote('');
+              }}
+            >
               {t('paymentsAdmin.approve')}
             </Button>
-            <Button size="sm" variant="danger-soft" onClick={() => { setRejectTarget(row); setRejectReason(''); }}>
+            <Button
+              size="sm"
+              variant="danger-soft"
+              onClick={() => {
+                setRejectTarget(row);
+                setRejectReason('');
+              }}
+            >
               {t('paymentsAdmin.reject')}
             </Button>
           </div>
@@ -328,8 +354,12 @@ export function PaymentsPlatformTab({ locale }: Props) {
       {error && (
         <Card className="console-alert">
           <CardBody>
-            <p className="auth-error" role="alert">{error}</p>
-            <Button size="sm" variant="outline" onClick={() => void load()}>{t('paymentsAdmin.refresh')}</Button>
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void load()}>
+              {t('paymentsAdmin.refresh')}
+            </Button>
           </CardBody>
         </Card>
       )}
@@ -345,7 +375,9 @@ export function PaymentsPlatformTab({ locale }: Props) {
           label={t('paymentsAdmin.statCommissions')}
           value={formatXof(summary?.commissionXof ?? 0, locale)}
           icon="banknote"
-          meta={t('paymentsAdmin.statProviderFees', { amount: formatXof(summary?.providerFeesXof ?? 0, locale) })}
+          meta={t('paymentsAdmin.statProviderFees', {
+            amount: formatXof(summary?.providerFeesXof ?? 0, locale),
+          })}
         />
         <StatCard
           label={t('paymentsAdmin.statWalletLiability')}
@@ -364,13 +396,24 @@ export function PaymentsPlatformTab({ locale }: Props) {
       <Card>
         <CardHeader
           title={t('paymentsAdmin.settlementsTitle')}
-          subtitle={t('paymentsAdmin.statSettled', { amount: formatXof(summary?.settledXof ?? 0, locale) })}
+          subtitle={t('paymentsAdmin.statSettled', {
+            amount: formatXof(summary?.settledXof ?? 0, locale),
+          })}
         />
         <CardBody>
           {settlements.length === 0 ? (
-            <EmptyState icon="wallet" title={t('paymentsAdmin.settlementsTitle')} description={t('paymentsAdmin.settlementsEmpty')} />
+            <EmptyState
+              icon="wallet"
+              title={t('paymentsAdmin.settlementsTitle')}
+              description={t('paymentsAdmin.settlementsEmpty')}
+            />
           ) : (
-            <DataTable columns={settlementColumns} rows={settlements} getRowId={(row) => row.id} caption={t('paymentsAdmin.settlementsTitle')} />
+            <DataTable
+              columns={settlementColumns}
+              rows={settlements}
+              getRowId={(row) => row.id}
+              caption={t('paymentsAdmin.settlementsTitle')}
+            />
           )}
         </CardBody>
       </Card>
@@ -386,9 +429,18 @@ export function PaymentsPlatformTab({ locale }: Props) {
         />
         <CardBody>
           {disputes.length === 0 ? (
-            <EmptyState icon="alert" title={t('paymentsAdmin.disputesTitle')} description={t('paymentsAdmin.disputesEmpty')} />
+            <EmptyState
+              icon="alert"
+              title={t('paymentsAdmin.disputesTitle')}
+              description={t('paymentsAdmin.disputesEmpty')}
+            />
           ) : (
-            <DataTable columns={disputeColumns} rows={disputes} getRowId={(row) => row.id} caption={t('paymentsAdmin.disputesTitle')} />
+            <DataTable
+              columns={disputeColumns}
+              rows={disputes}
+              getRowId={(row) => row.id}
+              caption={t('paymentsAdmin.disputesTitle')}
+            />
           )}
         </CardBody>
       </Card>
@@ -406,9 +458,18 @@ export function PaymentsPlatformTab({ locale }: Props) {
         />
         <CardBody>
           {transactions.length === 0 ? (
-            <EmptyState icon="receipt" title={t('paymentsAdmin.txTitle')} description={t('paymentsAdmin.txEmpty')} />
+            <EmptyState
+              icon="receipt"
+              title={t('paymentsAdmin.txTitle')}
+              description={t('paymentsAdmin.txEmpty')}
+            />
           ) : (
-            <DataTable columns={transactionColumns} rows={transactions} getRowId={(row) => row.id} caption={t('paymentsAdmin.txTitle')} />
+            <DataTable
+              columns={transactionColumns}
+              rows={transactions}
+              getRowId={(row) => row.id}
+              caption={t('paymentsAdmin.txTitle')}
+            />
           )}
         </CardBody>
       </Card>
@@ -419,8 +480,12 @@ export function PaymentsPlatformTab({ locale }: Props) {
         title={t('paymentsAdmin.approve')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setApproveTarget(null)}>{t('meta.close')}</Button>
-            <Button loading={settlePending} onClick={() => void approve()}>{t('paymentsAdmin.approve')}</Button>
+            <Button variant="ghost" onClick={() => setApproveTarget(null)}>
+              {t('meta.close')}
+            </Button>
+            <Button loading={settlePending} onClick={() => void approve()}>
+              {t('paymentsAdmin.approve')}
+            </Button>
           </>
         }
       >
@@ -442,8 +507,15 @@ export function PaymentsPlatformTab({ locale }: Props) {
         title={t('paymentsAdmin.reject')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setRejectTarget(null)}>{t('meta.close')}</Button>
-            <Button variant="danger" loading={settlePending} disabled={rejectReason.trim().length < 3} onClick={() => void reject()}>
+            <Button variant="ghost" onClick={() => setRejectTarget(null)}>
+              {t('meta.close')}
+            </Button>
+            <Button
+              variant="danger"
+              loading={settlePending}
+              disabled={rejectReason.trim().length < 3}
+              onClick={() => void reject()}
+            >
               {t('paymentsAdmin.reject')}
             </Button>
           </>
@@ -467,10 +539,16 @@ export function PaymentsPlatformTab({ locale }: Props) {
         title={t('paymentsAdmin.disputeOpen')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setOpenDisputeOpen(false)}>{t('meta.close')}</Button>
+            <Button variant="ghost" onClick={() => setOpenDisputeOpen(false)}>
+              {t('meta.close')}
+            </Button>
             <Button
               loading={disputePending}
-              disabled={!disputeForm.transactionId || disputeForm.reason.trim().length < 3 || disputeForm.description.trim().length < 3}
+              disabled={
+                !disputeForm.transactionId ||
+                disputeForm.reason.trim().length < 3 ||
+                disputeForm.description.trim().length < 3
+              }
               onClick={() => void openDispute()}
             >
               {t('paymentsAdmin.disputeSubmit')}
@@ -487,7 +565,9 @@ export function PaymentsPlatformTab({ locale }: Props) {
           <Input
             label={t('paymentsAdmin.disputeTransaction')}
             value={disputeForm.transactionId}
-            onChange={(event) => setDisputeForm({ ...disputeForm, transactionId: event.target.value })}
+            onChange={(event) =>
+              setDisputeForm({ ...disputeForm, transactionId: event.target.value })
+            }
           />
           <Input
             label={t('paymentsAdmin.disputeReason')}
@@ -497,7 +577,9 @@ export function PaymentsPlatformTab({ locale }: Props) {
           <Textarea
             label={t('paymentsAdmin.disputeDescription')}
             value={disputeForm.description}
-            onChange={(event) => setDisputeForm({ ...disputeForm, description: event.target.value })}
+            onChange={(event) =>
+              setDisputeForm({ ...disputeForm, description: event.target.value })
+            }
           />
         </div>
       </Modal>
@@ -508,8 +590,12 @@ export function PaymentsPlatformTab({ locale }: Props) {
         title={t('paymentsAdmin.disputeResolve')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setResolveTarget(null)}>{t('meta.close')}</Button>
-            <Button loading={disputePending} onClick={() => void resolveDispute()}>{t('paymentsAdmin.disputeResolve')}</Button>
+            <Button variant="ghost" onClick={() => setResolveTarget(null)}>
+              {t('meta.close')}
+            </Button>
+            <Button loading={disputePending} onClick={() => void resolveDispute()}>
+              {t('paymentsAdmin.disputeResolve')}
+            </Button>
           </>
         }
       >
@@ -521,7 +607,10 @@ export function PaymentsPlatformTab({ locale }: Props) {
             label={t('paymentsAdmin.disputeOutcome')}
             value={resolveForm.outcome}
             onChange={(event) =>
-              setResolveForm({ ...resolveForm, outcome: event.target.value as 'acceptee' | 'rejetee' })
+              setResolveForm({
+                ...resolveForm,
+                outcome: event.target.value as 'acceptee' | 'rejetee',
+              })
             }
             options={[
               { value: 'acceptee', label: t('paymentsAdmin.disputeAccept') },
@@ -534,7 +623,9 @@ export function PaymentsPlatformTab({ locale }: Props) {
               type="number"
               min={1}
               value={resolveForm.refundAmountXof}
-              onChange={(event) => setResolveForm({ ...resolveForm, refundAmountXof: event.target.value })}
+              onChange={(event) =>
+                setResolveForm({ ...resolveForm, refundAmountXof: event.target.value })
+              }
             />
           )}
           <Textarea

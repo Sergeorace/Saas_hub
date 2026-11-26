@@ -50,7 +50,10 @@ const services = [
 ];
 
 const children = services.map(({ entry, env }) => {
-  const child = spawn(process.execPath, [entry], { stdio: 'inherit', env: { ...process.env, ...env } });
+  const child = spawn(process.execPath, [entry], {
+    stdio: 'inherit',
+    env: { ...process.env, ...env },
+  });
   child.on('exit', (code) => {
     if (code !== 0 && code !== null) process.exitCode = code;
   });
@@ -60,5 +63,11 @@ const children = services.map(({ entry, env }) => {
 function shutdown() {
   for (const child of children) child.kill();
 }
-process.on('SIGINT', () => { shutdown(); process.exit(0); });
-process.on('SIGTERM', () => { shutdown(); process.exit(0); });
+process.on('SIGINT', () => {
+  shutdown();
+  process.exit(0);
+});
+process.on('SIGTERM', () => {
+  shutdown();
+  process.exit(0);
+});

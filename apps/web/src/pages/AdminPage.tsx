@@ -40,9 +40,12 @@ import {
   type ApplicationStatus,
 } from '../lib/api';
 
-type Tab = 'overview' | 'applications' | 'tenants' | 'payments' | 'commissions' | 'supervision' | 'settings';
+type Tab =
+  'overview' | 'applications' | 'tenants' | 'payments' | 'commissions' | 'supervision' | 'settings';
 
-function statusTone(status: ApplicationStatus | string): 'neutral' | 'warning' | 'info' | 'success' | 'danger' {
+function statusTone(
+  status: ApplicationStatus | string,
+): 'neutral' | 'warning' | 'info' | 'success' | 'danger' {
   switch (status) {
     case 'submitted':
       return 'warning';
@@ -57,7 +60,11 @@ function statusTone(status: ApplicationStatus | string): 'neutral' | 'warning' |
   }
 }
 
-const PLAN_LABEL: Record<string, string> = { starter: 'Starter', pro: 'Pro', enterprise: 'Entreprise' };
+const PLAN_LABEL: Record<string, string> = {
+  starter: 'Starter',
+  pro: 'Pro',
+  enterprise: 'Entreprise',
+};
 
 export function AdminPage() {
   const { t, locale, setLocale } = useI18n();
@@ -77,7 +84,9 @@ export function AdminPage() {
 
   const [detail, setDetail] = useState<ApplicationDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | 'request_documents'>('approve');
+  const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | 'request_documents'>(
+    'approve',
+  );
   const [reviewNote, setReviewNote] = useState('');
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [reviewPending, setReviewPending] = useState(false);
@@ -88,29 +97,32 @@ export function AdminPage() {
 
   const allowed = hasPlatform('platform:establishments:review');
 
-  const loadAll = useCallback(async (searchTerm: string) => {
-    if (!allowed) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const [overviewResult, appsResult, tenantsResult] = await Promise.all([
-        tenantApi.overview(),
-        tenantApi.adminApplications({
-          status: statusFilter === 'all' ? undefined : statusFilter,
-          q: searchTerm.trim() || undefined,
-        }),
-        tenantApi.adminTenants(),
-      ]);
-      setOverview(overviewResult);
-      setApplications(appsResult.items);
-      setCounts(appsResult.counts);
-      setTenants(tenantsResult.items);
-    } catch (cause) {
-      setError(errorMessage(cause));
-    } finally {
-      setLoading(false);
-    }
-  }, [allowed, statusFilter]);
+  const loadAll = useCallback(
+    async (searchTerm: string) => {
+      if (!allowed) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const [overviewResult, appsResult, tenantsResult] = await Promise.all([
+          tenantApi.overview(),
+          tenantApi.adminApplications({
+            status: statusFilter === 'all' ? undefined : statusFilter,
+            q: searchTerm.trim() || undefined,
+          }),
+          tenantApi.adminTenants(),
+        ]);
+        setOverview(overviewResult);
+        setApplications(appsResult.items);
+        setCounts(appsResult.counts);
+        setTenants(tenantsResult.items);
+      } catch (cause) {
+        setError(errorMessage(cause));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [allowed, statusFilter],
+  );
 
   useEffect(() => {
     if (status !== 'authenticated' || !allowed) {
@@ -273,7 +285,13 @@ export function AdminPage() {
     {
       label: t('admin.navPlatform'),
       items: [
-        { id: 'overview', label: t('admin.tabOverview'), icon: 'grid', active: tab === 'overview', onClick: () => setTab('overview') },
+        {
+          id: 'overview',
+          label: t('admin.tabOverview'),
+          icon: 'grid',
+          active: tab === 'overview',
+          onClick: () => setTab('overview'),
+        },
         {
           id: 'applications',
           label: t('admin.tabApplications'),
@@ -282,23 +300,63 @@ export function AdminPage() {
           badge: counts.submitted ?? 0,
           onClick: () => setTab('applications'),
         },
-        { id: 'tenants', label: t('admin.tabTenants'), icon: 'home', active: tab === 'tenants', onClick: () => setTab('tenants') },
-        { id: 'payments', label: t('paymentsAdmin.nav'), icon: 'card', active: tab === 'payments', onClick: () => setTab('payments') },
+        {
+          id: 'tenants',
+          label: t('admin.tabTenants'),
+          icon: 'home',
+          active: tab === 'tenants',
+          onClick: () => setTab('tenants'),
+        },
+        {
+          id: 'payments',
+          label: t('paymentsAdmin.nav'),
+          icon: 'card',
+          active: tab === 'payments',
+          onClick: () => setTab('payments'),
+        },
       ],
     },
     {
       label: t('admin.navOps'),
       items: [
-        { id: 'commissions', label: t('admin.tabCommissions'), icon: 'banknote', active: tab === 'commissions', onClick: () => setTab('commissions') },
-        { id: 'supervision', label: t('admin.tabSupervision'), icon: 'monitor', active: tab === 'supervision', onClick: () => setTab('supervision') },
-        { id: 'settings', label: t('admin.tabSettings'), icon: 'settings', active: tab === 'settings', onClick: () => setTab('settings') },
+        {
+          id: 'commissions',
+          label: t('admin.tabCommissions'),
+          icon: 'banknote',
+          active: tab === 'commissions',
+          onClick: () => setTab('commissions'),
+        },
+        {
+          id: 'supervision',
+          label: t('admin.tabSupervision'),
+          icon: 'monitor',
+          active: tab === 'supervision',
+          onClick: () => setTab('supervision'),
+        },
+        {
+          id: 'settings',
+          label: t('admin.tabSettings'),
+          icon: 'settings',
+          active: tab === 'settings',
+          onClick: () => setTab('settings'),
+        },
       ],
     },
     {
       label: t('admin.navAccount'),
       items: [
-        { id: 'site', label: t('admin.backSite'), icon: 'arrow-left', onClick: () => navigate('/') },
-        { id: 'logout', label: t('admin.logout'), icon: 'logout', onClick: () => void signOut().then(() => navigate('/connexion')) },
+        {
+          id: 'site',
+          label: t('admin.backSite'),
+          icon: 'arrow-left',
+          onClick: () => navigate('/'),
+        },
+        {
+          id: 'logout',
+          label: t('admin.logout'),
+          icon: 'logout',
+          onClick: () => void signOut().then(() => navigate('/connexion')),
+        },
       ],
     },
   ];
@@ -412,7 +470,14 @@ export function AdminPage() {
       align: 'right',
       render: (row) =>
         row.status === 'active' ? (
-          <Button size="sm" variant="danger-soft" onClick={() => { setSuspendTarget(row); setSuspendReason(''); }}>
+          <Button
+            size="sm"
+            variant="danger-soft"
+            onClick={() => {
+              setSuspendTarget(row);
+              setSuspendReason('');
+            }}
+          >
             {t('admin.suspend')}
           </Button>
         ) : (
@@ -424,21 +489,33 @@ export function AdminPage() {
   ];
 
   const tabTitle =
-    tab === 'overview' ? t('admin.overviewTitle')
-      : tab === 'applications' ? t('admin.applicationsTitle')
-        : tab === 'payments' ? t('paymentsAdmin.title')
-          : tab === 'commissions' ? t('adminCommissions.title')
-            : tab === 'supervision' ? t('adminSupervision.title')
-              : tab === 'settings' ? t('adminSettings.title')
+    tab === 'overview'
+      ? t('admin.overviewTitle')
+      : tab === 'applications'
+        ? t('admin.applicationsTitle')
+        : tab === 'payments'
+          ? t('paymentsAdmin.title')
+          : tab === 'commissions'
+            ? t('adminCommissions.title')
+            : tab === 'supervision'
+              ? t('adminSupervision.title')
+              : tab === 'settings'
+                ? t('adminSettings.title')
                 : t('admin.tenantsTitle');
 
   const tabSubtitle =
-    tab === 'applications' ? t('admin.subtitleApplications')
-      : tab === 'tenants' ? t('admin.subtitleTenants')
-        : tab === 'payments' ? t('paymentsAdmin.subtitle')
-          : tab === 'commissions' ? t('adminCommissions.subtitle')
-            : tab === 'supervision' ? t('adminSupervision.subtitle')
-              : tab === 'settings' ? t('adminSettings.subtitle')
+    tab === 'applications'
+      ? t('admin.subtitleApplications')
+      : tab === 'tenants'
+        ? t('admin.subtitleTenants')
+        : tab === 'payments'
+          ? t('paymentsAdmin.subtitle')
+          : tab === 'commissions'
+            ? t('adminCommissions.subtitle')
+            : tab === 'supervision'
+              ? t('adminSupervision.subtitle')
+              : tab === 'settings'
+                ? t('adminSettings.subtitle')
                 : t('admin.subtitle');
 
   return (
@@ -456,7 +533,9 @@ export function AdminPage() {
         groups={navGroups}
         footer={
           <div className="console-user">
-            <span className="console-user__avatar">{(user?.name ?? '?').slice(0, 2).toUpperCase()}</span>
+            <span className="console-user__avatar">
+              {(user?.name ?? '?').slice(0, 2).toUpperCase()}
+            </span>
             <div>
               <div className="console-user__name">{user?.name}</div>
               <div className="console-user__role">{t('admin.platformBadge')}</div>
@@ -489,20 +568,69 @@ export function AdminPage() {
               iconLeft={theme === 'light' ? 'moon' : 'sun'}
               onClick={toggleTheme}
             />
-            <Button variant="ghost" iconOnly aria-label={t('admin.logout')} iconLeft="logout" onClick={() => void signOut().then(() => navigate('/connexion'))} />
+            <Button
+              variant="ghost"
+              iconOnly
+              aria-label={t('admin.logout')}
+              iconLeft="logout"
+              onClick={() => void signOut().then(() => navigate('/connexion'))}
+            />
           </div>
         </header>
 
         <MobileTabs
           label={t('admin.navLabel')}
           items={[
-            { id: 'overview', label: t('admin.tabOverview'), icon: 'grid', active: tab === 'overview', onClick: () => setTab('overview') },
-            { id: 'applications', label: t('admin.tabApplications'), icon: 'receipt', active: tab === 'applications', badge: counts.submitted ?? 0, onClick: () => setTab('applications') },
-            { id: 'tenants', label: t('admin.tabTenants'), icon: 'home', active: tab === 'tenants', onClick: () => setTab('tenants') },
-            { id: 'payments', label: t('paymentsAdmin.nav'), icon: 'card', active: tab === 'payments', onClick: () => setTab('payments') },
-            { id: 'commissions', label: t('admin.tabCommissions'), icon: 'banknote', active: tab === 'commissions', onClick: () => setTab('commissions') },
-            { id: 'supervision', label: t('admin.tabSupervision'), icon: 'monitor', active: tab === 'supervision', onClick: () => setTab('supervision') },
-            { id: 'settings', label: t('admin.tabSettings'), icon: 'settings', active: tab === 'settings', onClick: () => setTab('settings') },
+            {
+              id: 'overview',
+              label: t('admin.tabOverview'),
+              icon: 'grid',
+              active: tab === 'overview',
+              onClick: () => setTab('overview'),
+            },
+            {
+              id: 'applications',
+              label: t('admin.tabApplications'),
+              icon: 'receipt',
+              active: tab === 'applications',
+              badge: counts.submitted ?? 0,
+              onClick: () => setTab('applications'),
+            },
+            {
+              id: 'tenants',
+              label: t('admin.tabTenants'),
+              icon: 'home',
+              active: tab === 'tenants',
+              onClick: () => setTab('tenants'),
+            },
+            {
+              id: 'payments',
+              label: t('paymentsAdmin.nav'),
+              icon: 'card',
+              active: tab === 'payments',
+              onClick: () => setTab('payments'),
+            },
+            {
+              id: 'commissions',
+              label: t('admin.tabCommissions'),
+              icon: 'banknote',
+              active: tab === 'commissions',
+              onClick: () => setTab('commissions'),
+            },
+            {
+              id: 'supervision',
+              label: t('admin.tabSupervision'),
+              icon: 'monitor',
+              active: tab === 'supervision',
+              onClick: () => setTab('supervision'),
+            },
+            {
+              id: 'settings',
+              label: t('admin.tabSettings'),
+              icon: 'settings',
+              active: tab === 'settings',
+              onClick: () => setTab('settings'),
+            },
           ]}
         />
 
@@ -510,7 +638,9 @@ export function AdminPage() {
           {error && (
             <Card className="console-alert">
               <CardBody>
-                <p className="auth-error" role="alert">{error}</p>
+                <p className="auth-error" role="alert">
+                  {error}
+                </p>
                 <Button size="sm" variant="outline" onClick={() => void loadAll(query)}>
                   {t('admin.retry')}
                 </Button>
@@ -523,9 +653,15 @@ export function AdminPage() {
               <div className="console-stats">
                 <StatCard
                   label={t('admin.statPending')}
-                  value={loading || !overview ? '—' : overview.applications.pending + overview.applications.infoRequested}
+                  value={
+                    loading || !overview
+                      ? '—'
+                      : overview.applications.pending + overview.applications.infoRequested
+                  }
                   icon="receipt"
-                  meta={t('admin.statPendingMeta', { info: overview?.applications.infoRequested ?? 0 })}
+                  meta={t('admin.statPendingMeta', {
+                    info: overview?.applications.infoRequested ?? 0,
+                  })}
                 />
                 <StatCard
                   label={t('admin.statTenants')}
@@ -537,7 +673,9 @@ export function AdminPage() {
                   label={t('admin.statMrr')}
                   value={loading || !overview ? '—' : formatXof(overview.billing.mrrXof, locale)}
                   icon="banknote"
-                  meta={t('admin.statMrrMeta', { collected: formatXof(overview?.billing.collectedXof ?? 0, locale) })}
+                  meta={t('admin.statMrrMeta', {
+                    collected: formatXof(overview?.billing.collectedXof ?? 0, locale),
+                  })}
                 />
                 <StatCard
                   label={t('admin.statAudit')}
@@ -559,27 +697,50 @@ export function AdminPage() {
                     title={t('admin.queueTitle')}
                     subtitle={t('admin.queueSubtitle')}
                     action={
-                      <Button size="sm" variant="ghost" onClick={() => { setStatusFilter('submitted'); setTab('applications'); }}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setStatusFilter('submitted');
+                          setTab('applications');
+                        }}
+                      >
                         {t('admin.viewAll')}
                       </Button>
                     }
                   />
                   <CardBody>
-                    {applications.filter((row) => row.status === 'submitted' || row.status === 'info_requested').length === 0 ? (
-                      <EmptyState icon="check-circle" title={t('admin.queueEmptyTitle')} description={t('admin.queueEmptyBody')} />
+                    {applications.filter(
+                      (row) => row.status === 'submitted' || row.status === 'info_requested',
+                    ).length === 0 ? (
+                      <EmptyState
+                        icon="check-circle"
+                        title={t('admin.queueEmptyTitle')}
+                        description={t('admin.queueEmptyBody')}
+                      />
                     ) : (
                       <ul className="console-queue">
                         {applications
-                          .filter((row) => row.status === 'submitted' || row.status === 'info_requested')
+                          .filter(
+                            (row) => row.status === 'submitted' || row.status === 'info_requested',
+                          )
                           .slice(0, 6)
                           .map((row) => (
                             <li key={row.id}>
                               <div>
                                 <strong>{row.establishment.brandName}</strong>
-                                <span>{row.reference} · {row.city ?? '—'}</span>
+                                <span>
+                                  {row.reference} · {row.city ?? '—'}
+                                </span>
                               </div>
-                              <Badge tone={statusTone(row.status)} dot>{t(`admin.status.${row.status}`)}</Badge>
-                              <Button size="sm" variant="soft" onClick={() => void openDetail(row.id)}>
+                              <Badge tone={statusTone(row.status)} dot>
+                                {t(`admin.status.${row.status}`)}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="soft"
+                                onClick={() => void openDetail(row.id)}
+                              >
                                 {t('admin.inspect')}
                               </Button>
                             </li>
@@ -589,7 +750,10 @@ export function AdminPage() {
                   </CardBody>
                 </Card>
                 <Card>
-                  <CardHeader title={t('admin.billingTitle')} subtitle={t('admin.billingSubtitle')} />
+                  <CardHeader
+                    title={t('admin.billingTitle')}
+                    subtitle={t('admin.billingSubtitle')}
+                  />
                   <CardBody>
                     <dl className="console-kv">
                       <div>
@@ -621,7 +785,13 @@ export function AdminPage() {
                 title={t('admin.applicationsTitle')}
                 subtitle={t('admin.applicationsSubtitle')}
                 action={
-                  <Button size="sm" variant="outline" iconLeft="refresh" onClick={() => void loadAll(query)} loading={loading}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    iconLeft="refresh"
+                    onClick={() => void loadAll(query)}
+                    loading={loading}
+                  >
                     {t('admin.refresh')}
                   </Button>
                 }
@@ -642,7 +812,9 @@ export function AdminPage() {
                       <button
                         key={value}
                         type="button"
-                        className={statusFilter === value ? 'console-filter is-active' : 'console-filter'}
+                        className={
+                          statusFilter === value ? 'console-filter is-active' : 'console-filter'
+                        }
                         onClick={() => setStatusFilter(value)}
                       >
                         {label}
@@ -672,7 +844,11 @@ export function AdminPage() {
                 {loading ? (
                   <SkeletonText lines={6} />
                 ) : applications.length === 0 ? (
-                  <EmptyState icon="receipt" title={t('admin.appsEmptyTitle')} description={t('admin.appsEmptyBody')} />
+                  <EmptyState
+                    icon="receipt"
+                    title={t('admin.appsEmptyTitle')}
+                    description={t('admin.appsEmptyBody')}
+                  />
                 ) : (
                   <DataTable
                     columns={columns}
@@ -691,7 +867,13 @@ export function AdminPage() {
                 title={t('admin.tenantsTitle')}
                 subtitle={t('admin.tenantsSubtitle')}
                 action={
-                  <Button size="sm" variant="outline" iconLeft="refresh" onClick={() => void loadAll(query)} loading={loading}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    iconLeft="refresh"
+                    onClick={() => void loadAll(query)}
+                    loading={loading}
+                  >
                     {t('admin.refresh')}
                   </Button>
                 }
@@ -700,7 +882,11 @@ export function AdminPage() {
                 {loading ? (
                   <SkeletonText lines={6} />
                 ) : tenants.length === 0 ? (
-                  <EmptyState icon="home" title={t('admin.tenantsEmptyTitle')} description={t('admin.tenantsEmptyBody')} />
+                  <EmptyState
+                    icon="home"
+                    title={t('admin.tenantsEmptyTitle')}
+                    description={t('admin.tenantsEmptyBody')}
+                  />
                 ) : (
                   <DataTable
                     columns={tenantColumns}
@@ -721,14 +907,21 @@ export function AdminPage() {
 
       <Modal
         open={Boolean(detail) || detailLoading}
-        onClose={() => { setDetail(null); setDetailLoading(false); }}
-        title={detail ? `${detail.reference} — ${detail.establishment.brandName}` : t('admin.loading')}
+        onClose={() => {
+          setDetail(null);
+          setDetailLoading(false);
+        }}
+        title={
+          detail ? `${detail.reference} — ${detail.establishment.brandName}` : t('admin.loading')
+        }
         description={detail ? t(`admin.status.${detail.status}`) : undefined}
         size="lg"
         footer={
           detail && ['submitted', 'info_requested'].includes(detail.status) ? (
             <>
-              <Button variant="ghost" onClick={() => setDetail(null)}>{t('common.cancel')}</Button>
+              <Button variant="ghost" onClick={() => setDetail(null)}>
+                {t('common.cancel')}
+              </Button>
               <Button onClick={() => void submitReview()} loading={reviewPending}>
                 {reviewAction === 'approve'
                   ? t('admin.confirmApprove')
@@ -738,7 +931,9 @@ export function AdminPage() {
               </Button>
             </>
           ) : (
-            <Button variant="ghost" onClick={() => setDetail(null)}>{t('common.close')}</Button>
+            <Button variant="ghost" onClick={() => setDetail(null)}>
+              {t('common.close')}
+            </Button>
           )
         }
       >
@@ -747,10 +942,14 @@ export function AdminPage() {
         ) : (
           <div className="console-detail">
             <div className="console-detail__badges">
-              <Badge tone={statusTone(detail.status)} dot>{t(`admin.status.${detail.status}`)}</Badge>
+              <Badge tone={statusTone(detail.status)} dot>
+                {t(`admin.status.${detail.status}`)}
+              </Badge>
               <Badge tone="neutral">{PLAN_LABEL[detail.plan] ?? detail.plan}</Badge>
               <Badge tone="neutral">{detail.currency}</Badge>
-              <Badge tone="neutral">{detail.languages.map((entry) => entry.toUpperCase()).join(' · ')}</Badge>
+              <Badge tone="neutral">
+                {detail.languages.map((entry) => entry.toUpperCase()).join(' · ')}
+              </Badge>
             </div>
             <dl className="reg-recap">
               <div>
@@ -759,14 +958,20 @@ export function AdminPage() {
               </div>
               <div>
                 <dt>NIF / RCCM</dt>
-                <dd>{String(detail.establishmentFull.nif ?? '—')} · {String(detail.establishmentFull.rccm ?? '—')}</dd>
+                <dd>
+                  {String(detail.establishmentFull.nif ?? '—')} ·{' '}
+                  {String(detail.establishmentFull.rccm ?? '—')}
+                </dd>
               </div>
               <div>
                 <dt>{t('admin.address')}</dt>
                 <dd>
                   {(() => {
-                    const address = detail.establishmentFull.address as Record<string, string> | undefined;
-                    return address ? [address.street, address.district, address.city].filter(Boolean).join(', ') : '—';
+                    const address = detail.establishmentFull.address as
+                      Record<string, string> | undefined;
+                    return address
+                      ? [address.street, address.district, address.city].filter(Boolean).join(', ')
+                      : '—';
                   })()}
                 </dd>
               </div>
@@ -774,7 +979,8 @@ export function AdminPage() {
                 <dt>{t('admin.contact')}</dt>
                 <dd>
                   {(() => {
-                    const contact = detail.establishmentFull.contact as Record<string, string> | undefined;
+                    const contact = detail.establishmentFull.contact as
+                      Record<string, string> | undefined;
                     return contact ? `${contact.phone ?? '—'} · ${contact.email ?? '—'}` : '—';
                   })()}
                 </dd>
@@ -782,7 +988,8 @@ export function AdminPage() {
               <div>
                 <dt>{t('admin.manager')}</dt>
                 <dd>
-                  {detail.managerFull.name ?? '—'} · {detail.managerFull.email ?? '—'} · {detail.managerFull.phone ?? '—'}
+                  {detail.managerFull.name ?? '—'} · {detail.managerFull.email ?? '—'} ·{' '}
+                  {detail.managerFull.phone ?? '—'}
                 </dd>
               </div>
               <div>
@@ -793,7 +1000,9 @@ export function AdminPage() {
 
             {(() => {
               const logoUrl =
-                typeof detail.establishmentFull.logoUrl === 'string' ? detail.establishmentFull.logoUrl : '';
+                typeof detail.establishmentFull.logoUrl === 'string'
+                  ? detail.establishmentFull.logoUrl
+                  : '';
               const photos = Array.isArray(detail.establishmentFull.photos)
                 ? (detail.establishmentFull.photos as string[])
                 : [];
@@ -810,7 +1019,11 @@ export function AdminPage() {
                     )}
                     {photos.map((photo, index) => (
                       <figure className="console-gallery__item" key={`${photo}-${index}`}>
-                        <img src={photo} alt={t('admin.photoAlt', { index: index + 1 })} loading="lazy" />
+                        <img
+                          src={photo}
+                          alt={t('admin.photoAlt', { index: index + 1 })}
+                          loading="lazy"
+                        />
                         <figcaption>{t('admin.photoAlt', { index: index + 1 })}</figcaption>
                       </figure>
                     ))}
@@ -829,9 +1042,16 @@ export function AdminPage() {
                     <li key={doc.id}>
                       <div>
                         <strong>{t(`register.doc.${doc.type}`)}</strong>
-                        <span>{doc.fileName} · {Math.round(doc.sizeBytes / 1024)} Ko</span>
+                        <span>
+                          {doc.fileName} · {Math.round(doc.sizeBytes / 1024)} Ko
+                        </span>
                       </div>
-                      <Button size="sm" variant="outline" iconLeft="download" onClick={() => void openDocument(detail.id, doc.id)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        iconLeft="download"
+                        onClick={() => void openDocument(detail.id, doc.id)}
+                      >
                         {t('admin.openDocument')}
                       </Button>
                     </li>
@@ -864,15 +1084,30 @@ export function AdminPage() {
                       ['approve', t('admin.actionApprove'), 'check-circle'],
                       ['request_documents', t('admin.actionRequest'), 'edit'],
                       ['reject', t('admin.actionReject'), 'x-circle'],
-                    ] as Array<['approve' | 'reject' | 'request_documents', string, 'check-circle' | 'edit' | 'x-circle']>
+                    ] as Array<
+                      [
+                        'approve' | 'reject' | 'request_documents',
+                        string,
+                        'check-circle' | 'edit' | 'x-circle',
+                      ]
+                    >
                   ).map(([value, label, icon]) => (
                     <button
                       key={value}
                       type="button"
-                      className={reviewAction === value ? `console-review__btn is-active is-${value}` : 'console-review__btn'}
-                      onClick={() => { setReviewAction(value); setReviewError(null); }}
+                      className={
+                        reviewAction === value
+                          ? `console-review__btn is-active is-${value}`
+                          : 'console-review__btn'
+                      }
+                      onClick={() => {
+                        setReviewAction(value);
+                        setReviewError(null);
+                      }}
                     >
-                      <span className={`console-review__icon is-${value}`} aria-hidden="true">{icon === 'check-circle' ? '✓' : icon === 'x-circle' ? '✕' : '✎'}</span>
+                      <span className={`console-review__icon is-${value}`} aria-hidden="true">
+                        {icon === 'check-circle' ? '✓' : icon === 'x-circle' ? '✕' : '✎'}
+                      </span>
                       {label}
                     </button>
                   ))}
@@ -897,9 +1132,7 @@ export function AdminPage() {
                   rows={3}
                   error={reviewError ?? undefined}
                 />
-                {reviewAction === 'approve' && (
-                  <p className="reg-note">{t('admin.approveHint')}</p>
-                )}
+                {reviewAction === 'approve' && <p className="reg-note">{t('admin.approveHint')}</p>}
               </div>
             )}
           </div>
@@ -913,8 +1146,15 @@ export function AdminPage() {
         description={t('admin.suspendBody')}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setSuspendTarget(null)}>{t('common.cancel')}</Button>
-            <Button variant="danger" onClick={() => void submitSuspend()} loading={suspendPending} disabled={suspendReason.trim().length < 3}>
+            <Button variant="ghost" onClick={() => setSuspendTarget(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => void submitSuspend()}
+              loading={suspendPending}
+              disabled={suspendReason.trim().length < 3}
+            >
               {t('admin.suspendConfirm')}
             </Button>
           </>

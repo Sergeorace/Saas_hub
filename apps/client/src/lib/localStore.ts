@@ -1,4 +1,11 @@
-import type { OrderChannel, OrderStatus, PaymentStatus, PublicOrder, Reservation, ReservationStatus } from './api';
+import type {
+  OrderChannel,
+  OrderStatus,
+  PaymentStatus,
+  PublicOrder,
+  Reservation,
+  ReservationStatus,
+} from './api';
 
 const ORDERS_KEY = 'restohub.client.orders';
 const RESERVATIONS_KEY = 'restohub.client.reservations';
@@ -63,7 +70,9 @@ export function getOrder(orderId: string): LocalOrder | undefined {
 }
 
 export function saveOrder(entry: LocalOrder): LocalOrder {
-  const others = readList<LocalOrder>(ORDERS_KEY).filter((order) => order.orderId !== entry.orderId);
+  const others = readList<LocalOrder>(ORDERS_KEY).filter(
+    (order) => order.orderId !== entry.orderId,
+  );
   writeList(ORDERS_KEY, [entry, ...others].slice(0, 40));
   return entry;
 }
@@ -98,15 +107,24 @@ export function recordPublicOrder(input: {
 export function syncOrder(order: PublicOrder): LocalOrder | undefined {
   const existing = getOrder(order.id);
   if (!existing) return undefined;
-  return saveOrder({ ...existing, status: order.status, paymentStatus: order.paymentStatus, updatedAt: new Date().toISOString() });
+  return saveOrder({
+    ...existing,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 export function listReservations(): LocalReservation[] {
-  return readList<LocalReservation>(RESERVATIONS_KEY).sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
+  return readList<LocalReservation>(RESERVATIONS_KEY).sort((a, b) =>
+    `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`),
+  );
 }
 
 export function saveReservation(entry: LocalReservation): LocalReservation {
-  const others = readList<LocalReservation>(RESERVATIONS_KEY).filter((item) => item.reservationId !== entry.reservationId);
+  const others = readList<LocalReservation>(RESERVATIONS_KEY).filter(
+    (item) => item.reservationId !== entry.reservationId,
+  );
   writeList(RESERVATIONS_KEY, [entry, ...others].slice(0, 40));
   return entry;
 }

@@ -11,7 +11,11 @@ function parseHex(input: string | null | undefined, fallback: string): Rgb {
   const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value);
   if (!match) return parseHex(fallback, '#c2410c');
   let hex = match[1];
-  if (hex.length === 3) hex = hex.split('').map((part) => part + part).join('');
+  if (hex.length === 3)
+    hex = hex
+      .split('')
+      .map((part) => part + part)
+      .join('');
   return {
     r: parseInt(hex.slice(0, 2), 16),
     g: parseInt(hex.slice(2, 4), 16),

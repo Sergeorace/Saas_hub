@@ -46,7 +46,11 @@ export interface EnqueueResult {
   error?: string;
 }
 
-export function enqueueOrder(tenantId: string, payload: CreateOrderInput, error?: string): QueuedOrder {
+export function enqueueOrder(
+  tenantId: string,
+  payload: CreateOrderInput,
+  error?: string,
+): QueuedOrder {
   const item: QueuedOrder = {
     id: clientRequestId(tenantId),
     tenantId,

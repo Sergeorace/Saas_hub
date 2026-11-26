@@ -59,7 +59,14 @@ export interface SidebarProps {
   className?: string;
 }
 
-export function Sidebar({ brand, groups, tenant, footer, navLabel = 'Navigation principale', className }: SidebarProps) {
+export function Sidebar({
+  brand,
+  groups,
+  tenant,
+  footer,
+  navLabel = 'Navigation principale',
+  className,
+}: SidebarProps) {
   return (
     <aside className={cx('rh-sidebar', className)}>
       <div className="rh-sidebar__brand">{brand}</div>
@@ -112,7 +119,14 @@ export interface AppShellProps {
   bottomNav?: ReactNode;
 }
 
-export function AppShell({ sidebar, title, subtitle, topbarActions, children, bottomNav }: AppShellProps) {
+export function AppShell({
+  sidebar,
+  title,
+  subtitle,
+  topbarActions,
+  children,
+  bottomNav,
+}: AppShellProps) {
   return (
     <div className="rh-shell">
       {sidebar}

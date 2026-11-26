@@ -16,7 +16,11 @@ export default function CheckoutPage({ slug }: { slug: string }) {
   const toast = useToast();
   const { data, loading } = useEstablishment(slug);
   const establishment = data?.establishment;
-  useTenantTheme(establishment ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor } : null);
+  useTenantTheme(
+    establishment
+      ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor }
+      : null,
+  );
 
   const cart = useCart(establishment?.id);
   const [method, setMethod] = useState<'server' | 'cashier' | 'mobile'>('server');
@@ -24,7 +28,12 @@ export default function CheckoutPage({ slug }: { slug: string }) {
   const draft = loadCustomerDraft();
 
   const hasTable = Boolean(cart.tableCode && cart.tableToken);
-  const channel = hasTable && cart.channel === 'sur_place' ? 'sur_place' : cart.channel === 'sur_place' ? 'a_emporter' : cart.channel;
+  const channel =
+    hasTable && cart.channel === 'sur_place'
+      ? 'sur_place'
+      : cart.channel === 'sur_place'
+        ? 'a_emporter'
+        : cart.channel;
   const subtotal = cartSubtotal(cart);
   const deliveryFee = channel === 'livraison' ? DELIVERY_FEE : 0;
   const total = subtotal + deliveryFee;
@@ -88,7 +97,9 @@ export default function CheckoutPage({ slug }: { slug: string }) {
           ...(item.optionChoiceIds.length > 0 ? { optionChoiceIds: item.optionChoiceIds } : {}),
           ...(item.notes ? { notes: item.notes } : {}),
         })),
-        ...(channel === 'sur_place' ? { tableCode: cart.tableCode, tableToken: cart.tableToken } : {}),
+        ...(channel === 'sur_place'
+          ? { tableCode: cart.tableCode, tableToken: cart.tableToken }
+          : {}),
         customer: {
           name: draft.name.trim(),
           phone: draft.phone.trim(),
@@ -108,8 +119,14 @@ export default function CheckoutPage({ slug }: { slug: string }) {
         order: result.order,
       });
       clearCart(cart);
-      toast.push({ title: t('checkout.orderSent'), description: t('checkout.sentHint'), tone: 'success' });
-      navigate(`/suivi/${establishment.id}/${result.order.id}?k=${encodeURIComponent(token)}`, { replace: true });
+      toast.push({
+        title: t('checkout.orderSent'),
+        description: t('checkout.sentHint'),
+        tone: 'success',
+      });
+      navigate(`/suivi/${establishment.id}/${result.order.id}?k=${encodeURIComponent(token)}`, {
+        replace: true,
+      });
     } catch (caught) {
       const message =
         caught instanceof ApiError && caught.code === 'table_token_required'
@@ -126,7 +143,11 @@ export default function CheckoutPage({ slug }: { slug: string }) {
   if (cart.items.length === 0) {
     return (
       <div className="rh-client-screen">
-        <ClientHeader title={t('checkout.title')} back={`/e/${establishment.slug}/menu`} logo={establishment.logoUrl} />
+        <ClientHeader
+          title={t('checkout.title')}
+          back={`/e/${establishment.slug}/menu`}
+          logo={establishment.logoUrl}
+        />
         <main className="rh-client-page">
           <div className="rh-client-empty">
             <span className="rh-client-empty__icon">
@@ -134,7 +155,11 @@ export default function CheckoutPage({ slug }: { slug: string }) {
             </span>
             <h2>{t('cart.empty')}</h2>
             <p>{t('cart.emptyDesc')}</p>
-            <button type="button" className="rh-client-btn rh-client-btn--primary" onClick={() => navigate(`/e/${establishment.slug}/menu`)}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--primary"
+              onClick={() => navigate(`/e/${establishment.slug}/menu`)}
+            >
               {t('cart.browseMenu')}
             </button>
           </div>
@@ -172,7 +197,12 @@ export default function CheckoutPage({ slug }: { slug: string }) {
 
   return (
     <div className="rh-client-screen">
-      <ClientHeader title={t('checkout.title')} subtitle={establishment.brandName} back={`/e/${establishment.slug}/panier`} logo={establishment.logoUrl} />
+      <ClientHeader
+        title={t('checkout.title')}
+        subtitle={establishment.brandName}
+        back={`/e/${establishment.slug}/panier`}
+        logo={establishment.logoUrl}
+      />
       <main className="rh-client-page rh-client-page--flush">
         <section className="rh-checkout-steps" aria-label={t('checkout.title')}>
           <span className="is-done">
@@ -188,7 +218,11 @@ export default function CheckoutPage({ slug }: { slug: string }) {
             <button
               key={option.id}
               type="button"
-              className={cx('rh-pay-option', method === option.id && 'is-active', option.disabled && 'is-disabled')}
+              className={cx(
+                'rh-pay-option',
+                method === option.id && 'is-active',
+                option.disabled && 'is-disabled',
+              )}
               role="radio"
               aria-checked={method === option.id}
               disabled={option.disabled}
@@ -201,8 +235,13 @@ export default function CheckoutPage({ slug }: { slug: string }) {
                 <strong>{option.title}</strong>
                 <span>{option.description}</span>
               </span>
-              {option.badge && <span className="rh-client-pill rh-client-pill--info">{option.badge}</span>}
-              <span className={cx('rh-pay-option__radio', method === option.id && 'is-on')} aria-hidden="true" />
+              {option.badge && (
+                <span className="rh-client-pill rh-client-pill--info">{option.badge}</span>
+              )}
+              <span
+                className={cx('rh-pay-option__radio', method === option.id && 'is-on')}
+                aria-hidden="true"
+              />
             </button>
           ))}
           <p className="rh-client-hint">
@@ -244,7 +283,10 @@ export default function CheckoutPage({ slug }: { slug: string }) {
               <Icon name="users" size="sm" /> {draft.name || '—'} · {draft.phone || '—'}
             </span>
             <span>
-              <Icon name={channel === 'sur_place' ? 'qr' : channel === 'livraison' ? 'truck' : 'box'} size="sm" />
+              <Icon
+                name={channel === 'sur_place' ? 'qr' : channel === 'livraison' ? 'truck' : 'box'}
+                size="sm"
+              />
               {channel === 'sur_place'
                 ? t('cart.tableFromQr', { code: cart.tableCode ?? '' })
                 : channel === 'livraison'
@@ -253,7 +295,11 @@ export default function CheckoutPage({ slug }: { slug: string }) {
                     ? t('cart.precommande')
                     : t('cart.aEmporter')}
             </span>
-            <button type="button" className="rh-client-link-btn" onClick={() => navigate(`/e/${establishment.slug}/panier`)}>
+            <button
+              type="button"
+              className="rh-client-link-btn"
+              onClick={() => navigate(`/e/${establishment.slug}/panier`)}
+            >
               {t('checkout.backToCart')}
             </button>
           </div>
@@ -263,7 +309,12 @@ export default function CheckoutPage({ slug }: { slug: string }) {
         </section>
 
         <div className="rh-checkout-actions">
-          <button type="button" className="rh-client-btn rh-client-btn--primary rh-client-btn--block rh-client-btn--lg" onClick={placeOrder} disabled={placing}>
+          <button
+            type="button"
+            className="rh-client-btn rh-client-btn--primary rh-client-btn--block rh-client-btn--lg"
+            onClick={placeOrder}
+            disabled={placing}
+          >
             {placing ? t('checkout.placing') : t('checkout.placeOrder')}
           </button>
         </div>

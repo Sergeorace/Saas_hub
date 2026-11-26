@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   ApiError,
   identityApi,
@@ -34,11 +42,9 @@ const SessionContext = createContext<SessionValue | null>(null);
 let refreshInFlight: Promise<TokenBundle> | null = null;
 
 function refreshOnce(refreshToken: string): Promise<TokenBundle> {
-  refreshInFlight ??= identityApi
-    .refresh(refreshToken)
-    .finally(() => {
-      refreshInFlight = null;
-    });
+  refreshInFlight ??= identityApi.refresh(refreshToken).finally(() => {
+    refreshInFlight = null;
+  });
   return refreshInFlight;
 }
 
@@ -88,7 +94,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setAccessToken(initial?.accessToken ?? null);
     return initial;
   });
-  const [status, setStatus] = useState<SessionValue['status']>(() => (readStored() ? 'loading' : 'anonymous'));
+  const [status, setStatus] = useState<SessionValue['status']>(() =>
+    readStored() ? 'loading' : 'anonymous',
+  );
 
   const signIn = useCallback(async (bundle: TokenBundle) => {
     setAccessToken(bundle.accessToken);
@@ -178,7 +186,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       status,
       user: stored?.user,
       claims: stored?.claims,
-      tokens: stored ? { accessToken: stored.accessToken, refreshToken: stored.refreshToken } : undefined,
+      tokens: stored
+        ? { accessToken: stored.accessToken, refreshToken: stored.refreshToken }
+        : undefined,
       signIn,
       signOut,
       reloadClaims,

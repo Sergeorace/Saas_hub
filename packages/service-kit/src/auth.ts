@@ -60,7 +60,10 @@ export function hasTenantPermission(
   return Boolean(claims.tenantPermissions[tenantId]?.includes(permission));
 }
 
-export function requirePlatformPermission(claims: AuthClaims | undefined, permission: string): AuthClaims {
+export function requirePlatformPermission(
+  claims: AuthClaims | undefined,
+  permission: string,
+): AuthClaims {
   if (!claims) throw HttpError.unauthorized();
   if (!hasPlatformPermission(claims, permission)) {
     throw HttpError.forbidden('Permission plateforme requise.');

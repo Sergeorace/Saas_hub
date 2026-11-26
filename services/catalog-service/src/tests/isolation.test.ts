@@ -42,13 +42,20 @@ async function main() {
 
   const ownerA = register(
     'token-owner-a',
-    claims('usr_owner_a', { tnt_alpha: ['catalog:view', 'catalog:manage', 'catalog:availability', 'audit:view'] }),
+    claims('usr_owner_a', {
+      tnt_alpha: ['catalog:view', 'catalog:manage', 'catalog:availability', 'audit:view'],
+    }),
   );
   const ownerB = register(
     'token-owner-b',
-    claims('usr_owner_b', { tnt_beta: ['catalog:view', 'catalog:manage', 'catalog:availability', 'audit:view'] }),
+    claims('usr_owner_b', {
+      tnt_beta: ['catalog:view', 'catalog:manage', 'catalog:availability', 'audit:view'],
+    }),
   );
-  const waiterA = register('token-waiter-a', claims('usr_waiter_a', { tnt_alpha: ['catalog:view'] }));
+  const waiterA = register(
+    'token-waiter-a',
+    claims('usr_waiter_a', { tnt_alpha: ['catalog:view'] }),
+  );
 
   const server = await startServer(
     {
@@ -116,7 +123,10 @@ async function main() {
         const crossProduct = await api(base, 'GET', `${a}/products/${alphaProduct.id}`, undefined, {
           token: ownerB,
         });
-        assert(crossProduct.status === 403 || crossProduct.status === 404, 'Produit Alpha inaccessible à Beta');
+        assert(
+          crossProduct.status === 403 || crossProduct.status === 404,
+          'Produit Alpha inaccessible à Beta',
+        );
       },
     },
     {
@@ -168,7 +178,9 @@ async function main() {
         assertEqual(product.effectivePriceXof, 1500, 'Prix happy hour appliqué');
         assertEqual(product.activePriceRule?.label, 'Happy hour', 'Plage active exposée');
         const snapshot = await api(base, 'GET', a, undefined, { token: ownerA });
-        const listed = snapshot.body.products.find((entry: { id: string }) => entry.id === product.id);
+        const listed = snapshot.body.products.find(
+          (entry: { id: string }) => entry.id === product.id,
+        );
         assertEqual(listed.effectivePriceXof, 1500, 'Prix recalculé dans le snapshot');
       },
     },
@@ -187,7 +199,12 @@ async function main() {
           base,
           'POST',
           `${a}/products`,
-          { categoryId: alphaCategory, name: 'Y', basePriceXof: 100, variants: [{ name: 'Grand', priceXof: -1 }] },
+          {
+            categoryId: alphaCategory,
+            name: 'Y',
+            basePriceXof: 100,
+            variants: [{ name: 'Grand', priceXof: -1 }],
+          },
           { token: ownerA },
         );
         assertStatus(badVariant, 422, 'Prix de variante négatif refusé');
@@ -220,7 +237,9 @@ async function main() {
         assertStatus(audit, 200, 'Lecture du journal');
         assertEqual(audit.body.integrity, true, 'Chaîne d’audit intègre');
         assert(
-          audit.body.entries.some((entry: { action: string }) => entry.action === 'catalog.product.availability_changed'),
+          audit.body.entries.some(
+            (entry: { action: string }) => entry.action === 'catalog.product.availability_changed',
+          ),
           'Entrée d’audit de disponibilité présente',
         );
         const crossAudit = await api(base, 'GET', `${b}/audit`, undefined, { token: ownerA });
@@ -331,7 +350,11 @@ async function main() {
                 quantity: 1,
                 variantId: alphaProduct.variants[0]?.id,
               },
-              { productId: (await api(base, 'GET', a, undefined, { token: ownerA })).body.products[1].id, quantity: 1 },
+              {
+                productId: (await api(base, 'GET', a, undefined, { token: ownerA })).body
+                  .products[1].id,
+                quantity: 1,
+              },
             ],
           },
           { token: ownerA },
@@ -341,7 +364,11 @@ async function main() {
           base,
           'POST',
           `${a}/menus`,
-          { name: 'Menu pirate', priceXof: 1000, items: [{ productId: 'prd_inexistant', quantity: 1 }] },
+          {
+            name: 'Menu pirate',
+            priceXof: 1000,
+            items: [{ productId: 'prd_inexistant', quantity: 1 }],
+          },
           { token: ownerA },
         );
         assertStatus(foreign, 404, 'Produit étranger refusé dans un menu');
@@ -354,7 +381,13 @@ async function main() {
         assertStatus(before, 200, 'Menu public accessible');
         assert(before.body.categories.length > 0, 'Catégories publiques présentes');
         assertEqual(before.body.promotions[0]?.code, 'ETUD10', 'Promotion active publiée');
-        await api(base, 'PATCH', `${a}/products/${alphaProduct.id}`, { active: false }, { token: ownerA });
+        await api(
+          base,
+          'PATCH',
+          `${a}/products/${alphaProduct.id}`,
+          { active: false },
+          { token: ownerA },
+        );
         const after = await api(base, 'GET', '/api/v1/public/tenants/tnt_alpha/menu');
         const names = after.body.categories.flatMap((category: { products: { id: string }[] }) =>
           category.products.map((product) => product.id),
@@ -365,14 +398,26 @@ async function main() {
     {
       name: 'Isolation : la synthèse interne ne franchit pas la frontière de tenant',
       run: async () => {
-        const alpha = await api(base, 'GET', '/internal/tenants/tnt_alpha/catalog/summary', undefined, {
-          internalKey: INTERNAL_KEY,
-        });
+        const alpha = await api(
+          base,
+          'GET',
+          '/internal/tenants/tnt_alpha/catalog/summary',
+          undefined,
+          {
+            internalKey: INTERNAL_KEY,
+          },
+        );
         assertStatus(alpha, 200, 'Synthèse Alpha');
         assert(alpha.body.products >= 2, 'Produits Alpha comptés');
-        const beta = await api(base, 'GET', '/internal/tenants/tnt_beta/catalog/summary', undefined, {
-          internalKey: INTERNAL_KEY,
-        });
+        const beta = await api(
+          base,
+          'GET',
+          '/internal/tenants/tnt_beta/catalog/summary',
+          undefined,
+          {
+            internalKey: INTERNAL_KEY,
+          },
+        );
         assertEqual(beta.body.products, 0, 'Aucun produit Beta');
         const forbidden = await api(base, 'GET', '/internal/tenants/tnt_alpha/catalog/summary');
         assertStatus(forbidden, 401, 'Synthèse interne protégée par clé de service');

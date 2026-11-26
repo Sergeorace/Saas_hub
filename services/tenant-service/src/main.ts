@@ -23,8 +23,14 @@ bus.on('SubscriptionInvoicePaid', async (envelope) => {
   console.log(`[tenant-service] Facture payée pour ${String(envelope.payload.tenantId ?? '')}.`);
 });
 
-const identity = createServiceClient({ baseUrl: config.identityUrl, internalKey: config.internalKey });
-const catalog = createServiceClient({ baseUrl: config.catalogUrl, internalKey: config.internalKey });
+const identity = createServiceClient({
+  baseUrl: config.identityUrl,
+  internalKey: config.internalKey,
+});
+const catalog = createServiceClient({
+  baseUrl: config.catalogUrl,
+  internalKey: config.internalKey,
+});
 const routes = buildTenantApp({
   store,
   config,

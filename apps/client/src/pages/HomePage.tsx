@@ -4,7 +4,12 @@ import { publicApi, type ReviewAggregate } from '../lib/api';
 import { useAsync, useFavorites } from '../lib/hooks';
 import { useSession } from '../lib/session';
 import { navigate } from '../lib/router';
-import { ClientBottomBar, LocaleToggle, SectionTitle, ThemeToggle } from '../components/ClientChrome';
+import {
+  ClientBottomBar,
+  LocaleToggle,
+  SectionTitle,
+  ThemeToggle,
+} from '../components/ClientChrome';
 import { EstablishmentCard } from '../components/EstablishmentCard';
 
 interface HomeData {
@@ -48,7 +53,11 @@ export default function HomePage() {
 
   const onFavorite = async (tenantId: string) => {
     if (!user) {
-      toast.push({ title: t('common.signInRequired'), description: t('establishment.favoriteLogin'), tone: 'info' });
+      toast.push({
+        title: t('common.signInRequired'),
+        description: t('establishment.favoriteLogin'),
+        tone: 'info',
+      });
       navigate('/compte');
       return;
     }
@@ -129,7 +138,11 @@ export default function HomePage() {
             <strong>{t('home.quickReserve')}</strong>
             <span>{t('home.quickReserveDesc')}</span>
           </button>
-          <button type="button" className="rh-client-quick-card" onClick={() => navigate('/commandes')}>
+          <button
+            type="button"
+            className="rh-client-quick-card"
+            onClick={() => navigate('/commandes')}
+          >
             <span className="rh-client-quick-card__icon rh-client-quick-card__icon--info">
               <Icon name="receipt" />
             </span>

@@ -174,11 +174,9 @@ export function sitesOf(store: ReportingStore, tenantId: string): Site[] {
   return [...store.sites.values()].filter((site) => site.tenantId === tenantId);
 }
 
-function matched<T extends { tenantId: string; siteId: string; at?: string; date?: string; paidAt?: string }>(
-  entries: Iterable<T>,
-  filter: DateFilter,
-  pick: (entry: T) => string,
-): T[] {
+function matched<
+  T extends { tenantId: string; siteId: string; at?: string; date?: string; paidAt?: string },
+>(entries: Iterable<T>, filter: DateFilter, pick: (entry: T) => string): T[] {
   return [...entries].filter(
     (entry) =>
       entry.tenantId === filter.tenantId &&
@@ -194,7 +192,9 @@ export function salesIn(store: ReportingStore, filter: DateFilter): SalesFact[] 
 }
 
 export function refundsIn(store: ReportingStore, filter: DateFilter): RefundFact[] {
-  return matched(store.refunds.values(), filter, (entry) => entry.at).sort((a, b) => a.at.localeCompare(b.at));
+  return matched(store.refunds.values(), filter, (entry) => entry.at).sort((a, b) =>
+    a.at.localeCompare(b.at),
+  );
 }
 
 export function failuresIn(store: ReportingStore, filter: DateFilter): PaymentFailureFact[] {
@@ -202,23 +202,33 @@ export function failuresIn(store: ReportingStore, filter: DateFilter): PaymentFa
 }
 
 export function occupancyIn(store: ReportingStore, filter: DateFilter): OccupancyFact[] {
-  return matched(store.occupancy.values(), filter, (entry) => entry.date).sort((a, b) => a.date.localeCompare(b.date));
+  return matched(store.occupancy.values(), filter, (entry) => entry.date).sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
 }
 
 export function stockIn(store: ReportingStore, filter: DateFilter): StockFact[] {
-  return matched(store.stock.values(), filter, (entry) => entry.at).sort((a, b) => a.at.localeCompare(b.at));
+  return matched(store.stock.values(), filter, (entry) => entry.at).sort((a, b) =>
+    a.at.localeCompare(b.at),
+  );
 }
 
 export function payrollIn(store: ReportingStore, filter: DateFilter): PayrollFact[] {
-  return matched(store.payroll.values(), filter, (entry) => entry.paidAt).sort((a, b) => a.period.localeCompare(b.period));
+  return matched(store.payroll.values(), filter, (entry) => entry.paidAt).sort((a, b) =>
+    a.period.localeCompare(b.period),
+  );
 }
 
 export function reviewsIn(store: ReportingStore, filter: DateFilter): ReviewFact[] {
-  return matched(store.reviews.values(), filter, (entry) => entry.at).sort((a, b) => a.at.localeCompare(b.at));
+  return matched(store.reviews.values(), filter, (entry) => entry.at).sort((a, b) =>
+    a.at.localeCompare(b.at),
+  );
 }
 
 export function reservationsIn(store: ReportingStore, filter: DateFilter): ReservationFact[] {
-  return matched(store.reservations.values(), filter, (entry) => entry.date).sort((a, b) => a.date.localeCompare(b.date));
+  return matched(store.reservations.values(), filter, (entry) => entry.date).sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
 }
 
 export function sum(values: number[]): number {
@@ -235,7 +245,16 @@ export function sharePct(part: number, whole: number): number {
 }
 
 export function productRanking(sales: SalesFact[]) {
-  const byProduct = new Map<string, { productId: string; productName: string; station: string; quantity: number; revenueXof: number }>();
+  const byProduct = new Map<
+    string,
+    {
+      productId: string;
+      productName: string;
+      station: string;
+      quantity: number;
+      revenueXof: number;
+    }
+  >();
   for (const sale of sales) {
     for (const line of sale.lines) {
       const current = byProduct.get(line.productId) ?? {
@@ -268,9 +287,17 @@ export function peakHours(sales: SalesFact[]) {
 }
 
 export function paymentMix(sales: SalesFact[], refunds: RefundFact[]) {
-  const byMethod = new Map<string, { method: string; amountXof: number; count: number; refundedXof: number }>();
+  const byMethod = new Map<
+    string,
+    { method: string; amountXof: number; count: number; refundedXof: number }
+  >();
   for (const sale of sales) {
-    const current = byMethod.get(sale.method) ?? { method: sale.method, amountXof: 0, count: 0, refundedXof: 0 };
+    const current = byMethod.get(sale.method) ?? {
+      method: sale.method,
+      amountXof: 0,
+      count: 0,
+      refundedXof: 0,
+    };
     current.amountXof += sale.totalXof;
     current.count += 1;
     byMethod.set(sale.method, current);
@@ -290,7 +317,11 @@ export function paymentMix(sales: SalesFact[], refunds: RefundFact[]) {
 export function channelMix(sales: SalesFact[]) {
   const byChannel = new Map<string, { channel: string; amountXof: number; count: number }>();
   for (const sale of sales) {
-    const current = byChannel.get(sale.channel) ?? { channel: sale.channel, amountXof: 0, count: 0 };
+    const current = byChannel.get(sale.channel) ?? {
+      channel: sale.channel,
+      amountXof: 0,
+      count: 0,
+    };
     current.amountXof += sale.totalXof;
     current.count += 1;
     byChannel.set(sale.channel, current);
@@ -325,9 +356,18 @@ export function dailySeries(sales: SalesFact[], refunds: RefundFact[], from: str
 }
 
 export function monthlySeries(sales: SalesFact[], refunds: RefundFact[]) {
-  const buckets = new Map<string, { month: string; orders: number; revenueXof: number; taxXof: number; refundsXof: number }>();
+  const buckets = new Map<
+    string,
+    { month: string; orders: number; revenueXof: number; taxXof: number; refundsXof: number }
+  >();
   const ensure = (month: string) => {
-    const current = buckets.get(month) ?? { month, orders: 0, revenueXof: 0, taxXof: 0, refundsXof: 0 };
+    const current = buckets.get(month) ?? {
+      month,
+      orders: 0,
+      revenueXof: 0,
+      taxXof: 0,
+      refundsXof: 0,
+    };
     buckets.set(month, current);
     return current;
   };
@@ -352,11 +392,15 @@ export function monthlySeries(sales: SalesFact[], refunds: RefundFact[]) {
 export function reviewSummary(reviews: ReviewFact[]) {
   const approved = reviews.filter((entry) => entry.status === 'approved');
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-  for (const review of approved) distribution[review.rating] = (distribution[review.rating] ?? 0) + 1;
+  for (const review of approved)
+    distribution[review.rating] = (distribution[review.rating] ?? 0) + 1;
   return {
     count: approved.length,
     pending: reviews.filter((entry) => entry.status === 'pending').length,
-    average: approved.length > 0 ? round(sum(approved.map((entry) => entry.rating)) / approved.length, 1) : 0,
+    average:
+      approved.length > 0
+        ? round(sum(approved.map((entry) => entry.rating)) / approved.length, 1)
+        : 0,
     distribution,
   };
 }
@@ -382,11 +426,7 @@ export function occupancySummary(facts: OccupancyFact[]) {
   };
 }
 
-export function dashboardView(
-  store: ReportingStore,
-  filter: DateFilter,
-  cogsXof: number | null,
-) {
+export function dashboardView(store: ReportingStore, filter: DateFilter, cogsXof: number | null) {
   const sales = salesIn(store, filter);
   const refunds = refundsIn(store, filter);
   const failures = failuresIn(store, filter);
@@ -418,7 +458,8 @@ export function dashboardView(
     failedPayments: failures.length,
     cogsXof,
     grossMarginXof: cogsXof === null ? null : subtotal - cogsXof,
-    marginRatePct: cogsXof === null || subtotal === 0 ? null : round(((subtotal - cogsXof) / subtotal) * 100, 1),
+    marginRatePct:
+      cogsXof === null || subtotal === 0 ? null : round(((subtotal - cogsXof) / subtotal) * 100, 1),
     paymentMix: paymentMix(sales, refunds),
     channelMix: channelMix(sales),
     topProducts: productRanking(sales).slice(0, 8),
@@ -443,8 +484,18 @@ export function dashboardView(
 export function seedReportingDemo(store: ReportingStore): void {
   if (store.sales.size > 0) return;
   const tenantId = 'tnt_sahelgrill';
-  const plateau: Site = { id: 'ste_plateau', tenantId, name: 'Sahel Grill — Plateau', isDefault: true };
-  const lagune: Site = { id: 'ste_lagune', tenantId, name: 'Sahel Grill — Lagune', isDefault: false };
+  const plateau: Site = {
+    id: 'ste_plateau',
+    tenantId,
+    name: 'Sahel Grill — Plateau',
+    isDefault: true,
+  };
+  const lagune: Site = {
+    id: 'ste_lagune',
+    tenantId,
+    name: 'Sahel Grill — Lagune',
+    isDefault: false,
+  };
   for (const site of [plateau, lagune]) store.sites.set(site.id, site);
 
   let seed = 20261125;
@@ -452,16 +503,36 @@ export function seedReportingDemo(store: ReportingStore): void {
     seed = (seed * 1103515245 + 12345) % 2147483648;
     return seed / 2147483648;
   };
-  const pick = <T,>(items: T[]): T => items[Math.floor(random() * items.length)];
+  const pick = <T>(items: T[]): T => items[Math.floor(random() * items.length)];
   const between = (min: number, max: number) => min + Math.floor(random() * (max - min + 1));
 
   const menu = [
-    { productId: 'prd_sg_poulet', productName: 'Poulet braisé', priceXof: 4500, station: 'cuisine' },
-    { productId: 'prd_sg_brochettes', productName: 'Brochettes de bœuf', priceXof: 3000, station: 'cuisine' },
-    { productId: 'prd_sg_attieke', productName: 'Attiéké garni', priceXof: 3500, station: 'cuisine' },
+    {
+      productId: 'prd_sg_poulet',
+      productName: 'Poulet braisé',
+      priceXof: 4500,
+      station: 'cuisine',
+    },
+    {
+      productId: 'prd_sg_brochettes',
+      productName: 'Brochettes de bœuf',
+      priceXof: 3000,
+      station: 'cuisine',
+    },
+    {
+      productId: 'prd_sg_attieke',
+      productName: 'Attiéké garni',
+      priceXof: 3500,
+      station: 'cuisine',
+    },
     { productId: 'prd_sg_bissap', productName: 'Bissap maison', priceXof: 2000, station: 'bar' },
     { productId: 'prd_sg_biere', productName: 'Bière locale', priceXof: 1500, station: 'bar' },
-    { productId: 'prd_sg_salade', productName: 'Salade de mangue', priceXof: 2000, station: 'cuisine' },
+    {
+      productId: 'prd_sg_salade',
+      productName: 'Salade de mangue',
+      priceXof: 2000,
+      station: 'cuisine',
+    },
   ];
   const paymentMethods = ['tmoney', 'moov', 'especes', 'carte'];
   const taxRate = 0.18;

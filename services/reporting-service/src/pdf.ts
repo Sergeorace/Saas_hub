@@ -19,11 +19,13 @@ export interface PdfReportInput {
 }
 
 function ascii(value: string): string {
-  return value
-    .replace(/[\u202f\u00a0]/g, ' ')
-    .replace(/\u2192/g, '->')
-    // eslint-disable-next-line no-control-regex -- assainissement PDF : les caractères de contrôle sont remplacés
-    .replace(/[^\x00-\xFF\u2018\u2019\u201c\u201d\u2013\u2014\u2026\u20ac\u0153\u0152]/g, '?');
+  return (
+    value
+      .replace(/[\u202f\u00a0]/g, ' ')
+      .replace(/\u2192/g, '->')
+      // eslint-disable-next-line no-control-regex -- assainissement PDF : les caractères de contrôle sont remplacés
+      .replace(/[^\x00-\xFF\u2018\u2019\u201c\u201d\u2013\u2014\u2026\u20ac\u0153\u0152]/g, '?')
+  );
 }
 
 function stamp(iso: string): string {
@@ -56,9 +58,20 @@ export async function reportPdf(input: PdfReportInput): Promise<Uint8Array> {
     text(page, input.subtitle, { x: margin, y: y - 36, size: 9, font, color: MUTED });
     text(page, input.tenantName, { x: 360, y, size: 10, font: bold, color: INK });
     text(page, input.periodLabel, { x: 360, y: y - 15, size: 9, font, color: INK });
-    text(page, `Édité le ${stamp(input.generatedAt)}`, { x: 360, y: y - 29, size: 8, font, color: MUTED });
+    text(page, `Édité le ${stamp(input.generatedAt)}`, {
+      x: 360,
+      y: y - 29,
+      size: 8,
+      font,
+      color: MUTED,
+    });
     y -= 54;
-    page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 1, color: LINE });
+    page.drawLine({
+      start: { x: margin, y },
+      end: { x: width - margin, y },
+      thickness: 1,
+      color: LINE,
+    });
     y -= 22;
   };
   header();
@@ -73,7 +86,12 @@ export async function reportPdf(input: PdfReportInput): Promise<Uint8Array> {
       text(page, kpi.value, { x, y: y - 12, size: 11, font: bold, color: INK });
     });
     y -= 34;
-    page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.7, color: LINE });
+    page.drawLine({
+      start: { x: margin, y },
+      end: { x: width - margin, y },
+      thickness: 0.7,
+      color: LINE,
+    });
     y -= 20;
   }
 
@@ -91,7 +109,12 @@ export async function reportPdf(input: PdfReportInput): Promise<Uint8Array> {
       });
     });
     y -= 6;
-    page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.7, color: LINE });
+    page.drawLine({
+      start: { x: margin, y },
+      end: { x: width - margin, y },
+      thickness: 0.7,
+      color: LINE,
+    });
     y -= 14;
   };
   drawHeaderRow();

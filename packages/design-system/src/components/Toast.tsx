@@ -62,7 +62,10 @@ export function ToastProvider({
       setToasts((current) => [...current.slice(-3), { ...toast, id }]);
       const duration = toast.duration ?? 4500;
       if (duration > 0) {
-        timers.current.set(id, window.setTimeout(() => dismiss(id), duration));
+        timers.current.set(
+          id,
+          window.setTimeout(() => dismiss(id), duration),
+        );
       }
     },
     [dismiss],
@@ -91,11 +94,7 @@ export function ToastProvider({
                 <div className="rh-toast__title">{toast.title}</div>
                 {toast.description && <div className="rh-toast__desc">{toast.description}</div>}
               </div>
-              <button
-                type="button"
-                className="rh-toast__close"
-                onClick={() => dismiss(toast.id)}
-              >
+              <button type="button" className="rh-toast__close" onClick={() => dismiss(toast.id)}>
                 <Icon name="x" size="sm" />
                 <span className="rh-sr-only">{closeLabel}</span>
               </button>

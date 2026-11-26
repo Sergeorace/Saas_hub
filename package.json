@@ -21,6 +21,8 @@
     "tokens": "npm run build -w @resto-hub/design-tokens",
     "typecheck": "npm run typecheck -w @resto-hub/web && npm run typecheck -w @resto-hub/client",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "npm run test:packages && npm run test:coverage",
     "test:packages": "npm run test -w @resto-hub/shared-contracts && npm run test -w @resto-hub/design-tokens",
     "test:tokens": "npm run test -w @resto-hub/design-tokens",
@@ -47,6 +49,11 @@
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
+    "prettier": "^3.10.1",
     "typescript-eslint": "^8.74.0"
+  },
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10"
   }
 }

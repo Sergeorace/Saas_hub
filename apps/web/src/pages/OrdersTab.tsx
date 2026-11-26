@@ -92,7 +92,11 @@ function lineKey(productId: string, variantId?: string, choices: string[] = []) 
   return [productId, variantId ?? '', [...choices].sort().join('+')].join('|');
 }
 
-function productUnitPrice(product: CatalogProduct, variantId?: string, choices: string[] = []): number {
+function productUnitPrice(
+  product: CatalogProduct,
+  variantId?: string,
+  choices: string[] = [],
+): number {
   const variant = product.variants.find((entry) => entry.id === variantId);
   const base = variant ? variant.priceXof : product.effectivePriceXof;
   let extra = 0;
@@ -139,7 +143,10 @@ function OrderComposer({
     let cancelled = false;
     (async () => {
       try {
-        const [floorResult, catalogResult] = await Promise.all([floorApi.snapshot(tenantId), catalogApi.snapshot(tenantId)]);
+        const [floorResult, catalogResult] = await Promise.all([
+          floorApi.snapshot(tenantId),
+          catalogApi.snapshot(tenantId),
+        ]);
         if (!cancelled) {
           setFloor(floorResult);
           setCatalog(catalogResult);
@@ -182,7 +189,9 @@ function OrderComposer({
     setCart((current) => {
       const existing = current.find((line) => line.key === key);
       if (existing) {
-        return current.map((line) => (line.key === key ? { ...line, quantity: line.quantity + 1 } : line));
+        return current.map((line) =>
+          line.key === key ? { ...line, quantity: line.quantity + 1 } : line,
+        );
       }
       return [
         ...current,
@@ -248,7 +257,11 @@ function OrderComposer({
       ...(channel === 'livraison' ? { deliveryFeeXof: Math.max(0, Number(deliveryFee) || 0) } : {}),
       ...(channel === 'precommande' ? { scheduledFor: new Date(scheduledFor).toISOString() } : {}),
     };
-    const hasCustomer = customer.name.trim() || customer.phone.trim() || customer.address.trim() || customer.note.trim();
+    const hasCustomer =
+      customer.name.trim() ||
+      customer.phone.trim() ||
+      customer.address.trim() ||
+      customer.note.trim();
     if (hasCustomer) {
       payload.customer = {
         name: customer.name.trim() || 'Client comptoir',
@@ -260,7 +273,10 @@ function OrderComposer({
     setSubmitting(true);
     try {
       const result = await orderApi.create(tenantId, payload);
-      toast.push({ title: t('orders.orderCreated', { number: result.order.number }), tone: 'success' });
+      toast.push({
+        title: t('orders.orderCreated', { number: result.order.number }),
+        tone: 'success',
+      });
       onCreated(result.order);
       onClose();
     } catch (cause) {
@@ -269,7 +285,11 @@ function OrderComposer({
         toast.push({ title: t('orders.offlineQueued'), tone: 'warning' });
         onClose();
       } else {
-        toast.push({ title: t('orders.errorLoad'), description: errorMessage(cause), tone: 'error' });
+        toast.push({
+          title: t('orders.errorLoad'),
+          description: errorMessage(cause),
+          tone: 'error',
+        });
       }
     } finally {
       setSubmitting(false);
@@ -291,8 +311,15 @@ function OrderComposer({
               {t('orders.totalLabel')} <strong>{formatXof(total, locale)}</strong>
             </span>
             <div className="ord-composer__footer-actions">
-              <Button variant="ghost" onClick={onClose}>{t('orders.back')}</Button>
-              <Button iconLeft="check" loading={submitting} disabled={cart.length === 0} onClick={() => void submit()}>
+              <Button variant="ghost" onClick={onClose}>
+                {t('orders.back')}
+              </Button>
+              <Button
+                iconLeft="check"
+                loading={submitting}
+                disabled={cart.length === 0}
+                onClick={() => void submit()}
+              >
                 {t('orders.sendOrder')}
               </Button>
             </div>
@@ -346,7 +373,9 @@ function OrderComposer({
                             >
                               <strong>{table.number}</strong>
                               <span>{table.capacity}p</span>
-                              <Badge tone={TABLE_TONE[table.status]} dot>{t(`floor.statusLabel.${table.status}`)}</Badge>
+                              <Badge tone={TABLE_TONE[table.status]} dot>
+                                {t(`floor.statusLabel.${table.status}`)}
+                              </Badge>
                             </button>
                           );
                         })}
@@ -372,7 +401,10 @@ function OrderComposer({
                     onChange={(event) => setCategory(event.target.value)}
                     options={[
                       { value: 'all', label: t('orders.all') },
-                      ...(catalog?.categories ?? []).map((entry) => ({ value: entry.id, label: entry.name })),
+                      ...(catalog?.categories ?? []).map((entry) => ({
+                        value: entry.id,
+                        label: entry.name,
+                      })),
                     ]}
                   />
                 </div>
@@ -381,14 +413,18 @@ function OrderComposer({
                     <button
                       key={product.id}
                       type="button"
-                      className={product.availability.available ? 'ord-product' : 'ord-product is-off'}
+                      className={
+                        product.availability.available ? 'ord-product' : 'ord-product is-off'
+                      }
                       disabled={!product.availability.available}
                       onClick={() => tapProduct(product)}
                     >
                       <span className="ord-product__name">{product.name}</span>
                       <span className="ord-product__meta">
                         <strong>{formatXof(product.effectivePriceXof, locale)}</strong>
-                        <Badge tone={product.station === 'bar' ? 'info' : 'accent'}>{t(`kds.station${product.station === 'bar' ? 'Bar' : 'Cuisine'}`)}</Badge>
+                        <Badge tone={product.station === 'bar' ? 'info' : 'accent'}>
+                          {t(`kds.station${product.station === 'bar' ? 'Bar' : 'Cuisine'}`)}
+                        </Badge>
                       </span>
                       {(product.variants.length > 0 || product.options.length > 0) && (
                         <span className="ord-product__badge">{t('orders.configure')}</span>
@@ -405,7 +441,9 @@ function OrderComposer({
                 <div className="ord-cart__head">
                   <strong>{t('orders.cart')}</strong>
                   {cart.length > 0 && (
-                    <Button size="sm" variant="ghost" onClick={() => setCart([])}>{t('orders.clearCart')}</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setCart([])}>
+                      {t('orders.clearCart')}
+                    </Button>
                   )}
                 </div>
                 {cart.length === 0 ? (
@@ -417,14 +455,28 @@ function OrderComposer({
                         <div>
                           <strong>{line.productName}</strong>
                           {(line.variantName || line.optionNames.length > 0) && (
-                            <span>{[line.variantName, ...line.optionNames].filter(Boolean).join(' · ')}</span>
+                            <span>
+                              {[line.variantName, ...line.optionNames].filter(Boolean).join(' · ')}
+                            </span>
                           )}
                           <em>{formatXof(line.unitPriceXof, locale)}</em>
                         </div>
                         <div className="ord-qty">
-                          <button type="button" aria-label="−" onClick={() => setQuantity(line.key, -1)}>−</button>
+                          <button
+                            type="button"
+                            aria-label="−"
+                            onClick={() => setQuantity(line.key, -1)}
+                          >
+                            −
+                          </button>
                           <span>{line.quantity}</span>
-                          <button type="button" aria-label="+" onClick={() => setQuantity(line.key, 1)}>+</button>
+                          <button
+                            type="button"
+                            aria-label="+"
+                            onClick={() => setQuantity(line.key, 1)}
+                          >
+                            +
+                          </button>
                         </div>
                       </li>
                     ))}
@@ -466,7 +518,9 @@ function OrderComposer({
                       <Input
                         label={t('orders.customerAddress')}
                         value={customer.address}
-                        onChange={(event) => setCustomer({ ...customer, address: event.target.value })}
+                        onChange={(event) =>
+                          setCustomer({ ...customer, address: event.target.value })
+                        }
                       />
                       <Input
                         label={t('orders.deliveryFee')}
@@ -517,7 +571,11 @@ function ProductConfigModal({
   const { t, locale } = useI18n();
   const [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [choices, setChoices] = useState<string[]>(() =>
-    product.options.flatMap((group) => (group.required ? group.choices.slice(0, Math.max(1, group.minSelect)).map((choice) => choice.id) : [])),
+    product.options.flatMap((group) =>
+      group.required
+        ? group.choices.slice(0, Math.max(1, group.minSelect)).map((choice) => choice.id)
+        : [],
+    ),
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -557,8 +615,12 @@ function ProductConfigModal({
       closeLabel={t('meta.close')}
       footer={
         <div className="ord-composer__footer-actions">
-          <Button variant="ghost" onClick={onClose}>{t('orders.back')}</Button>
-          <Button iconLeft="plus" onClick={confirm}>{t('orders.add')}</Button>
+          <Button variant="ghost" onClick={onClose}>
+            {t('orders.back')}
+          </Button>
+          <Button iconLeft="plus" onClick={confirm}>
+            {t('orders.add')}
+          </Button>
         </div>
       }
     >
@@ -567,7 +629,12 @@ function ProductConfigModal({
           <fieldset className="ord-config__group">
             <legend>{t('orders.variant')}</legend>
             {product.variants.map((variant) => (
-              <label key={variant.id} className={variant.id === variantId ? 'ord-config__option is-active' : 'ord-config__option'}>
+              <label
+                key={variant.id}
+                className={
+                  variant.id === variantId ? 'ord-config__option is-active' : 'ord-config__option'
+                }
+              >
                 <input
                   type="radio"
                   name={`variant-${product.id}`}
@@ -584,10 +651,19 @@ function ProductConfigModal({
           <fieldset key={group.id} className="ord-config__group">
             <legend>
               {group.name}
-              {group.required && <span className="ord-config__required"> {t('publicOrder.required')}</span>}
+              {group.required && (
+                <span className="ord-config__required"> {t('publicOrder.required')}</span>
+              )}
             </legend>
             {group.choices.map((choice) => (
-              <label key={choice.id} className={choices.includes(choice.id) ? 'ord-config__option is-active' : 'ord-config__option'}>
+              <label
+                key={choice.id}
+                className={
+                  choices.includes(choice.id)
+                    ? 'ord-config__option is-active'
+                    : 'ord-config__option'
+                }
+              >
                 <input
                   type={group.maxSelect === 1 ? 'radio' : 'checkbox'}
                   name={`group-${group.id}`}
@@ -595,7 +671,9 @@ function ProductConfigModal({
                   onChange={() => toggle(group.id, choice.id)}
                 />
                 <span>{choice.name}</span>
-                <em>{choice.priceDeltaXof ? `+${formatXof(choice.priceDeltaXof, locale)}` : '—'}</em>
+                <em>
+                  {choice.priceDeltaXof ? `+${formatXof(choice.priceDeltaXof, locale)}` : '—'}
+                </em>
               </label>
             ))}
           </fieldset>
@@ -603,7 +681,11 @@ function ProductConfigModal({
         {product.options.length === 0 && product.variants.length === 0 && (
           <p className="console-muted">{product.description}</p>
         )}
-        {error && <p className="auth-error" role="alert">{error}</p>}
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     </Modal>
   );
@@ -705,7 +787,11 @@ function OrderDetail({
 
   const nextAction =
     order.status === 'recue'
-      ? { status: 'en_preparation' as const, label: t('orders.actionPrepare'), icon: 'chef' as const }
+      ? {
+          status: 'en_preparation' as const,
+          label: t('orders.actionPrepare'),
+          icon: 'chef' as const,
+        }
       : order.status === 'en_preparation'
         ? { status: 'prete' as const, label: t('orders.actionReady'), icon: 'bell' as const }
         : order.status === 'prete'
@@ -718,8 +804,12 @@ function OrderDetail({
         title={
           <span className="ord-detail__title">
             {order.number}
-            <Badge tone={STATUS_TONE[order.status]} dot>{t(`orders.status.${order.status}`)}</Badge>
-            <Badge tone={PAYMENT_TONE[order.paymentStatus]}>{t(`orders.paymentStatus.${order.paymentStatus}`)}</Badge>
+            <Badge tone={STATUS_TONE[order.status]} dot>
+              {t(`orders.status.${order.status}`)}
+            </Badge>
+            <Badge tone={PAYMENT_TONE[order.paymentStatus]}>
+              {t(`orders.paymentStatus.${order.paymentStatus}`)}
+            </Badge>
           </span>
         }
         subtitle={[
@@ -742,11 +832,22 @@ function OrderDetail({
               {nextAction.label}
             </Button>
           )}
-          <Button variant="outline" size="sm" iconLeft="download" loading={acting === 'receipt'} onClick={() => void downloadReceipt()}>
+          <Button
+            variant="outline"
+            size="sm"
+            iconLeft="download"
+            loading={acting === 'receipt'}
+            onClick={() => void downloadReceipt()}
+          >
             {t('orders.actionReceipt')}
           </Button>
           {canDiscount && order.paymentStatus === 'impayee' && order.status !== 'annulee' && (
-            <Button variant="outline" size="sm" iconLeft="gift" onClick={() => setDiscountOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              iconLeft="gift"
+              onClick={() => setDiscountOpen(true)}
+            >
               {t('orders.actionDiscount')}
             </Button>
           )}
@@ -762,34 +863,81 @@ function OrderDetail({
             <li key={line.id}>
               <span className="ord-lines__qty">{line.quantity}×</span>
               <div className="ord-lines__body">
-                <strong>{line.productName}{line.variantName ? ` — ${line.variantName}` : ''}</strong>
-                {line.options.length > 0 && <span>{line.options.map((option) => option.name).join(' · ')}</span>}
+                <strong>
+                  {line.productName}
+                  {line.variantName ? ` — ${line.variantName}` : ''}
+                </strong>
+                {line.options.length > 0 && (
+                  <span>{line.options.map((option) => option.name).join(' · ')}</span>
+                )}
               </div>
-              <span className="ord-lines__station"><Badge tone={line.station === 'bar' ? 'info' : 'accent'}>{t(`orders.station${line.station === 'bar' ? 'Bar' : 'Cuisine'}`)}</Badge></span>
+              <span className="ord-lines__station">
+                <Badge tone={line.station === 'bar' ? 'info' : 'accent'}>
+                  {t(`orders.station${line.station === 'bar' ? 'Bar' : 'Cuisine'}`)}
+                </Badge>
+              </span>
               <strong className="ord-lines__total">{formatXof(line.lineTotalXof, locale)}</strong>
             </li>
           ))}
         </ul>
 
         <dl className="ord-totals">
-          <div><dt>{t('orders.subtotal')}</dt><dd>{formatXof(order.subtotalXof, locale)}</dd></div>
+          <div>
+            <dt>{t('orders.subtotal')}</dt>
+            <dd>{formatXof(order.subtotalXof, locale)}</dd>
+          </div>
           {order.discount && (
-            <div><dt>{t('orders.discount')} — {order.discount.reason}</dt><dd>−{formatXof(order.discount.amountXof, locale)}</dd></div>
+            <div>
+              <dt>
+                {t('orders.discount')} — {order.discount.reason}
+              </dt>
+              <dd>−{formatXof(order.discount.amountXof, locale)}</dd>
+            </div>
           )}
           {order.deliveryFeeXof > 0 && (
-            <div><dt>{t('orders.delivery')}</dt><dd>{formatXof(order.deliveryFeeXof, locale)}</dd></div>
+            <div>
+              <dt>{t('orders.delivery')}</dt>
+              <dd>{formatXof(order.deliveryFeeXof, locale)}</dd>
+            </div>
           )}
-          <div><dt>{t('orders.netHt')}</dt><dd>{formatXof(order.netXof, locale)}</dd></div>
-          <div><dt>{t('orders.tax')}</dt><dd>{formatXof(order.taxXof, locale)}</dd></div>
-          <div className="is-total"><dt>{t('orders.total')}</dt><dd>{formatXof(order.totalXof, locale)}</dd></div>
-          {order.paidXof > 0 && <div><dt>{t('orders.paid')}</dt><dd>{formatXof(order.paidXof, locale)}</dd></div>}
-          {order.remainingXof > 0 && <div><dt>{t('orders.remaining')}</dt><dd>{formatXof(order.remainingXof, locale)}</dd></div>}
+          <div>
+            <dt>{t('orders.netHt')}</dt>
+            <dd>{formatXof(order.netXof, locale)}</dd>
+          </div>
+          <div>
+            <dt>{t('orders.tax')}</dt>
+            <dd>{formatXof(order.taxXof, locale)}</dd>
+          </div>
+          <div className="is-total">
+            <dt>{t('orders.total')}</dt>
+            <dd>{formatXof(order.totalXof, locale)}</dd>
+          </div>
+          {order.paidXof > 0 && (
+            <div>
+              <dt>{t('orders.paid')}</dt>
+              <dd>{formatXof(order.paidXof, locale)}</dd>
+            </div>
+          )}
+          {order.remainingXof > 0 && (
+            <div>
+              <dt>{t('orders.remaining')}</dt>
+              <dd>{formatXof(order.remainingXof, locale)}</dd>
+            </div>
+          )}
         </dl>
 
         {(order.invoiceNumber || order.receiptNumber) && (
           <p className="ord-detail__invoice">
-            {order.invoiceNumber && <span>{t('orders.invoice')} <strong>{order.invoiceNumber}</strong></span>}
-            {order.receiptNumber && <span>{t('orders.receiptNumber')} <strong>{order.receiptNumber}</strong></span>}
+            {order.invoiceNumber && (
+              <span>
+                {t('orders.invoice')} <strong>{order.invoiceNumber}</strong>
+              </span>
+            )}
+            {order.receiptNumber && (
+              <span>
+                {t('orders.receiptNumber')} <strong>{order.receiptNumber}</strong>
+              </span>
+            )}
           </p>
         )}
 
@@ -799,7 +947,11 @@ function OrderDetail({
               <Badge tone={ticket.station === 'bar' ? 'info' : 'accent'}>
                 {t(`orders.station${ticket.station === 'bar' ? 'Bar' : 'Cuisine'}`)}
               </Badge>
-              <span>{t(`orders.ticket${ticket.status === 'nouvelle' ? 'Nouvelle' : ticket.status === 'prete' ? 'Prete' : 'EnPreparation'}`)}</span>
+              <span>
+                {t(
+                  `orders.ticket${ticket.status === 'nouvelle' ? 'Nouvelle' : ticket.status === 'prete' ? 'Prete' : 'EnPreparation'}`,
+                )}
+              </span>
             </div>
           ))}
         </div>
@@ -808,7 +960,13 @@ function OrderDetail({
           <ul className="ord-payments">
             {order.payments.map((payment) => (
               <li key={payment.id}>
-                <Badge tone="success">{payment.method === 'especes' ? t('pos.methodEspeces') : payment.method === 'mobile_money' ? t('pos.methodMobile') : t('pos.methodCarte')}</Badge>
+                <Badge tone="success">
+                  {payment.method === 'especes'
+                    ? t('pos.methodEspeces')
+                    : payment.method === 'mobile_money'
+                      ? t('pos.methodMobile')
+                      : t('pos.methodCarte')}
+                </Badge>
                 <strong>{formatXof(payment.amountXof, locale)}</strong>
                 <span>{formatTime(payment.at, locale)}</span>
                 {payment.reference && <code>{payment.reference}</code>}
@@ -832,8 +990,14 @@ function OrderDetail({
         closeLabel={t('meta.close')}
         footer={
           <div className="ord-composer__footer-actions">
-            <Button variant="ghost" onClick={() => setDiscountOpen(false)}>{t('orders.back')}</Button>
-            <Button loading={acting === 'discount'} disabled={discountReason.trim().length < 3} onClick={() => void applyDiscount()}>
+            <Button variant="ghost" onClick={() => setDiscountOpen(false)}>
+              {t('orders.back')}
+            </Button>
+            <Button
+              loading={acting === 'discount'}
+              disabled={discountReason.trim().length < 3}
+              onClick={() => void applyDiscount()}
+            >
               {t('orders.discountApply')}
             </Button>
           </div>
@@ -873,8 +1037,15 @@ function OrderDetail({
         closeLabel={t('meta.close')}
         footer={
           <div className="ord-composer__footer-actions">
-            <Button variant="ghost" onClick={() => setCancelOpen(false)}>{t('orders.back')}</Button>
-            <Button variant="danger" loading={acting === 'cancel'} disabled={cancelReason.trim().length < 4} onClick={() => void cancelOrder()}>
+            <Button variant="ghost" onClick={() => setCancelOpen(false)}>
+              {t('orders.back')}
+            </Button>
+            <Button
+              variant="danger"
+              loading={acting === 'cancel'}
+              disabled={cancelReason.trim().length < 4}
+              onClick={() => void cancelOrder()}
+            >
               {t('orders.cancelConfirm')}
             </Button>
           </div>
@@ -930,7 +1101,9 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
         setList(result);
         setError(null);
         setSelectedId((current) =>
-          current && result.items.some((order) => order.id === current) ? current : result.items[0]?.id ?? null,
+          current && result.items.some((order) => order.id === current)
+            ? current
+            : (result.items[0]?.id ?? null),
         );
       } catch (cause) {
         setError(errorMessage(cause));
@@ -976,7 +1149,9 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
     for (const conflict of outcome.conflicts) {
       toast.push({
         title: t('orders.offlineConflict', { message: conflict.lastError ?? '' }),
-        description: conflict.payload.items.map((item) => `${item.quantity}× ${item.productId}`).join(', '),
+        description: conflict.payload.items
+          .map((item) => `${item.quantity}× ${item.productId}`)
+          .join(', '),
         tone: 'warning',
       });
     }
@@ -1011,7 +1186,10 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
     );
   }, [list, search]);
 
-  const selected = items.find((order) => order.id === selectedId) ?? list?.items.find((order) => order.id === selectedId) ?? null;
+  const selected =
+    items.find((order) => order.id === selectedId) ??
+    list?.items.find((order) => order.id === selectedId) ??
+    null;
   const summary = list?.summary;
 
   const replaceOrder = (updated: Order) => {
@@ -1047,20 +1225,50 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
     <>
       <div className="ord-topbar">
         <div className="ord-topbar__stats">
-          <div className="ord-stat"><span>{t('orders.statsTotal')}</span><strong>{summary?.total ?? 0}</strong></div>
-          <div className="ord-stat"><span>{t('orders.statsOpen')}</span><strong>{summary ? summary.byStatus.recue + summary.byStatus.en_preparation + summary.byStatus.prete : 0}</strong></div>
-          <div className="ord-stat"><span>{t('orders.statsUnpaid')}</span><strong>{formatXof(summary?.unpaidXof ?? 0, locale)}</strong></div>
-          <div className="ord-stat"><span>{t('orders.statsPaid')}</span><strong>{formatXof(summary?.paidTodayXof ?? 0, locale)}</strong></div>
+          <div className="ord-stat">
+            <span>{t('orders.statsTotal')}</span>
+            <strong>{summary?.total ?? 0}</strong>
+          </div>
+          <div className="ord-stat">
+            <span>{t('orders.statsOpen')}</span>
+            <strong>
+              {summary
+                ? summary.byStatus.recue + summary.byStatus.en_preparation + summary.byStatus.prete
+                : 0}
+            </strong>
+          </div>
+          <div className="ord-stat">
+            <span>{t('orders.statsUnpaid')}</span>
+            <strong>{formatXof(summary?.unpaidXof ?? 0, locale)}</strong>
+          </div>
+          <div className="ord-stat">
+            <span>{t('orders.statsPaid')}</span>
+            <strong>{formatXof(summary?.paidTodayXof ?? 0, locale)}</strong>
+          </div>
         </div>
         <div className="ord-topbar__actions">
-          <Button variant="ghost" iconOnly iconLeft="refresh" aria-label={t('orders.refresh')} onClick={() => void load()} />
+          <Button
+            variant="ghost"
+            iconOnly
+            iconLeft="refresh"
+            aria-label={t('orders.refresh')}
+            onClick={() => void load()}
+          />
           {canExport && (
-            <Button variant="outline" size="sm" iconLeft="download" loading={exporting} onClick={() => void exportCsv()}>
+            <Button
+              variant="outline"
+              size="sm"
+              iconLeft="download"
+              loading={exporting}
+              onClick={() => void exportCsv()}
+            >
               {t('orders.actionExport')}
             </Button>
           )}
           {canCreate && (
-            <Button iconLeft="plus" onClick={() => setComposerOpen(true)}>{t('orders.newOrder')}</Button>
+            <Button iconLeft="plus" onClick={() => setComposerOpen(true)}>
+              {t('orders.newOrder')}
+            </Button>
           )}
         </div>
       </div>
@@ -1069,15 +1277,26 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
         <Card className="ord-offline">
           <CardBody>
             <div className="ord-offline__row">
-              <Badge tone="warning" dot>{t('orders.offlinePending', { count: queue.length })}</Badge>
+              <Badge tone="warning" dot>
+                {t('orders.offlinePending', { count: queue.length })}
+              </Badge>
               <div className="ord-offline__actions">
-                <Button size="sm" variant="outline" iconLeft="refresh" onClick={() => void runSync()}>{t('orders.offlineSync')}</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  iconLeft="refresh"
+                  onClick={() => void runSync()}
+                >
+                  {t('orders.offlineSync')}
+                </Button>
                 {queue.some((entry) => entry.conflicted) && (
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => {
-                      queue.filter((entry) => entry.conflicted).forEach((entry) => removeQueued(entry.id));
+                      queue
+                        .filter((entry) => entry.conflicted)
+                        .forEach((entry) => removeQueued(entry.id));
                       setQueue(queuedOrders(tenantId));
                     }}
                   >
@@ -1090,7 +1309,11 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
               {queue.map((entry) => (
                 <li key={entry.id}>
                   <code>{entry.payload.channel}</code>
-                  <span>{entry.payload.items.map((item) => `${item.quantity}× ${item.productId}`).join(', ')}</span>
+                  <span>
+                    {entry.payload.items
+                      .map((item) => `${item.quantity}× ${item.productId}`)
+                      .join(', ')}
+                  </span>
                   {entry.lastError && <em>{entry.lastError}</em>}
                 </li>
               ))}
@@ -1102,15 +1325,23 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
       {error && (
         <Card className="console-alert">
           <CardBody>
-            <p className="auth-error" role="alert">{error}</p>
-            <Button size="sm" variant="outline" onClick={() => void load()}>{t('workspace.retry')}</Button>
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void load()}>
+              {t('workspace.retry')}
+            </Button>
           </CardBody>
         </Card>
       )}
 
       <div className="ord-filters">
         <div className="ord-filters__chips" role="group" aria-label={t('orders.filterStatus')}>
-          <button type="button" className={status === 'all' ? 'ord-chip is-active' : 'ord-chip'} onClick={() => setStatus('all')}>
+          <button
+            type="button"
+            className={status === 'all' ? 'ord-chip is-active' : 'ord-chip'}
+            onClick={() => setStatus('all')}
+          >
             {t('orders.all')}
           </button>
           {STATUS_ORDER.map((entry) => (
@@ -1154,7 +1385,13 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
                 icon="receipt"
                 title={t('orders.emptyTitle')}
                 description={t('orders.emptyBody')}
-                action={canCreate ? <Button size="sm" iconLeft="plus" onClick={() => setComposerOpen(true)}>{t('orders.newOrder')}</Button> : undefined}
+                action={
+                  canCreate ? (
+                    <Button size="sm" iconLeft="plus" onClick={() => setComposerOpen(true)}>
+                      {t('orders.newOrder')}
+                    </Button>
+                  ) : undefined
+                }
               />
             ) : (
               <ul className="ord-rows">
@@ -1175,8 +1412,12 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
                         </span>
                       </span>
                       <span className="ord-row__status">
-                        <Badge tone={STATUS_TONE[order.status]} dot>{t(`orders.status.${order.status}`)}</Badge>
-                        <Badge tone={PAYMENT_TONE[order.paymentStatus]}>{t(`orders.paymentStatus.${order.paymentStatus}`)}</Badge>
+                        <Badge tone={STATUS_TONE[order.status]} dot>
+                          {t(`orders.status.${order.status}`)}
+                        </Badge>
+                        <Badge tone={PAYMENT_TONE[order.paymentStatus]}>
+                          {t(`orders.paymentStatus.${order.paymentStatus}`)}
+                        </Badge>
                       </span>
                       <span className="ord-row__amount">
                         <strong>{formatXof(order.totalXof, locale)}</strong>
@@ -1192,7 +1433,11 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
 
         <div className="ord-detail-wrap">
           {loading ? (
-            <Card><CardBody><SkeletonText lines={6} /></CardBody></Card>
+            <Card>
+              <CardBody>
+                <SkeletonText lines={6} />
+              </CardBody>
+            </Card>
           ) : selected ? (
             <OrderDetail
               key={selected.id}
@@ -1207,7 +1452,11 @@ export function OrdersTab({ tenantId, locale, permissions }: Props) {
           ) : (
             <Card>
               <CardBody>
-                <EmptyState icon="receipt" title={t('orders.detailTitle')} description={t('orders.detailEmpty')} />
+                <EmptyState
+                  icon="receipt"
+                  title={t('orders.detailTitle')}
+                  description={t('orders.detailEmpty')}
+                />
               </CardBody>
             </Card>
           )}

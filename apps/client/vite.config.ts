@@ -9,8 +9,7 @@ export default defineConfig({
       {
         find: /^@resto-hub\/design-system\/(styles|tokens|base|components|layout)\.css$/,
         replacement:
-          fileURLToPath(new URL('../../packages/design-system/src/', import.meta.url)) +
-          '$1.css',
+          fileURLToPath(new URL('../../packages/design-system/src/', import.meta.url)) + '$1.css',
       },
       {
         find: /^@resto-hub\/design-system$/,

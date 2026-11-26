@@ -19,7 +19,10 @@ const bus = createEventBus({
   internalKey: config.internalKey,
   subscribers: config.eventSubscribers,
 });
-const identity: ServiceClient = createServiceClient({ baseUrl: config.identityUrl, internalKey: config.internalKey });
+const identity: ServiceClient = createServiceClient({
+  baseUrl: config.identityUrl,
+  internalKey: config.internalKey,
+});
 
 const contactCache = new Map<string, { at: number; contact: ContactInfo | null }>();
 async function resolveContact(userId: string): Promise<ContactInfo | null> {
@@ -27,7 +30,13 @@ async function resolveContact(userId: string): Promise<ContactInfo | null> {
   if (cached && Date.now() - cached.at < 60_000) return cached.contact;
   try {
     const response = await identity.get<{
-      user: { id: string; name: string; email: string | null; phone: string | null; locale: string };
+      user: {
+        id: string;
+        name: string;
+        email: string | null;
+        phone: string | null;
+        locale: string;
+      };
     }>(`/internal/users/${encodeURIComponent(userId)}/contacts`);
     const contact: ContactInfo = {
       name: response.user.name,
@@ -52,7 +61,9 @@ async function resolveStaff(tenantId: string): Promise<Set<string>> {
       `/internal/tenants/${encodeURIComponent(tenantId)}/members`,
     );
     const ids = new Set(
-      response.items.filter((member) => member.roles.some((role) => role !== 'client')).map((member) => member.userId),
+      response.items
+        .filter((member) => member.roles.some((role) => role !== 'client'))
+        .map((member) => member.userId),
     );
     staffCache.set(tenantId, { at: Date.now(), ids });
     return ids;
@@ -63,7 +74,8 @@ async function resolveStaff(tenantId: string): Promise<Set<string>> {
 
 const options = {
   store,
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => bus.publish(type, tenantId, payload),
+  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) =>
+    bus.publish(type, tenantId, payload),
   smsSecret: config.smsWebhookSecret,
   resolveContact,
   resolveStaff,

@@ -65,7 +65,12 @@ function itemKey(input: {
   optionChoiceIds: string[];
   notes?: string;
 }): string {
-  return [input.productId, input.variantId ?? '-', [...input.optionChoiceIds].sort().join('+'), input.notes ?? ''].join('|');
+  return [
+    input.productId,
+    input.variantId ?? '-',
+    [...input.optionChoiceIds].sort().join('+'),
+    input.notes ?? '',
+  ].join('|');
 }
 
 export function addItem(
@@ -85,7 +90,9 @@ export function addItem(
 
 export function setQuantity(cart: Cart, key: string, quantity: number): Cart {
   const items = cart.items
-    .map((item) => (item.key === key ? { ...item, quantity: Math.max(0, Math.min(30, quantity)) } : item))
+    .map((item) =>
+      item.key === key ? { ...item, quantity: Math.max(0, Math.min(30, quantity)) } : item,
+    )
     .filter((item) => item.quantity > 0);
   return saveCart({ ...cart, items });
 }
@@ -99,7 +106,12 @@ export function updateCart(cart: Cart, patch: Partial<Omit<Cart, 'tenantId' | 'i
 }
 
 export function clearCart(cart: Cart): Cart {
-  return saveCart({ ...emptyCart(cart.tenantId), channel: cart.channel, tableCode: cart.tableCode, tableToken: cart.tableToken });
+  return saveCart({
+    ...emptyCart(cart.tenantId),
+    channel: cart.channel,
+    tableCode: cart.tableCode,
+    tableToken: cart.tableToken,
+  });
 }
 
 export function cartCount(cart: Cart): number {

@@ -16,12 +16,12 @@ npm run dev:client           # PWA client http://localhost:5175
 
 Comptes de démonstration :
 
-| Compte | Mot de passe | Périmètre |
-|---|---|---|
-| `admin@resto-hub.tg` | `Admin#2026` | Super-administrateur plateforme, sans MFA |
-| `gerant@sahelgrill.tg` | `Gerant#2026` | Gérant Sahel Grill (MFA TOTP exigée) |
-| `serveur@sahelgrill.tg` | `Serveur#2026` | Serveur, accès salle/commandes |
-| `comptable@sahelgrill.tg` | `Comptable#2026` | Comptable, consultation et exports |
+| Compte                    | Mot de passe     | Périmètre                                 |
+| ------------------------- | ---------------- | ----------------------------------------- |
+| `admin@resto-hub.tg`      | `Admin#2026`     | Super-administrateur plateforme, sans MFA |
+| `gerant@sahelgrill.tg`    | `Gerant#2026`    | Gérant Sahel Grill (MFA TOTP exigée)      |
+| `serveur@sahelgrill.tg`   | `Serveur#2026`   | Serveur, accès salle/commandes            |
+| `comptable@sahelgrill.tg` | `Comptable#2026` | Comptable, consultation et exports        |
 
 Établissements de démonstration : `tnt_sahelgrill` (Sahel Grill, Pro), `tnt_baobab`
 (Baobab Lounge, Starter), `tnt_akwaba` (Akwaba Maquis, Entreprise, suspendu).
@@ -38,15 +38,15 @@ Critères d'acceptation :
 
 - [ ] `typecheck` et build web sans erreur.
 - [ ] `test:services` se termine avec le code 0 et **159 tests** :
-  identity 15, tenant 17, catalog 13, floor 13, order 15, loyalty 9, payment 17, staff 10,
-  payroll 12, inventory 12, notification 9, reporting 8, platform-admin 9.
+      identity 15, tenant 17, catalog 13, floor 13, order 15, loyalty 9, payment 17, staff 10,
+      payroll 12, inventory 12, notification 9, reporting 8, platform-admin 9.
 - [ ] Chaque service possède des tests d'isolation croisée : un utilisateur d'un établissement
-  reçoit `403` sur toute route d'un autre établissement, y compris en lecture et en export.
+      reçoit `403` sur toute route d'un autre établissement, y compris en lecture et en export.
 - [ ] platform-admin : un gérant reçoit `403 platform_scope_denied` sur toutes les routes
-  `/api/v1/platform/*` ; un accès anonyme reçoit `401`.
+      `/api/v1/platform/*` ; un accès anonyme reçoit `401`.
 - [ ] Chaîne d'audit platform-admin : la falsification d'une entrée est détectée (`chain.valid=false`).
 - [ ] Limitation de débit : la 4e requête d'un quota de test (3/min) reçoit `429 rate_limited`,
-  tandis que `/health` reste disponible.
+      tandis que `/health` reste disponible.
 
 ## 3. Socle technique (contrats, jetons, RLS, CI, OpenAPI)
 
@@ -78,31 +78,31 @@ Critères d'acceptation :
 
 ## 4. Sécurité — contrôles manuels
 
-| Contrôle | Procédure | Résultat attendu |
-|---|---|---|
-| Isolation multi-tenant | Connecté `serveur@sahelgrill.tg`, appeler `/api/v1/tenants/tnt_baobab/...` (console ou client HTTP) | `403 tenant_scope_denied`, aucune donnée retournée |
-| Périmètre plateforme | Connecté gérant, ouvrir `#/admin` | Écran « Accès restreint » ; appels API `403` |
-| RBAC fine | Comptable : onglets Stocks/Rapports visibles, actions d'écriture masquées ; Marketing absent | Boutons désactivés/masqués, API `403` en écriture |
-| Audit immuable | Admin → Paramètres globaux : modifier un taux puis enregistrer | Entrée `platform.settings.updated` visible, badge « Chaîne intègre » |
-| Webhooks signés | POST `/api/v1/webhooks/payments/...` sans en-tête `x-restohub-signature` | `401 invalid_signature` |
-| Aucune donnée carte | Rechercher `cardNumber`, `cvv`, `pan` dans `services/` | Aucun stockage ; seuls jetons de prestataire |
-| Secrets | Vérifier que les clés proviennent de `process.env` (`INTERNAL_API_KEY`, secrets prestataires) | Aucun secret en dur hors valeurs de démo |
-| Limitation de débit | Script : 601 appels `GET /api/v1/platform/dashboard` en < 1 min | `429` avec `retryAfterSeconds` |
-| En-têtes de sécurité | `curl -I http://localhost:4013/health` | `x-content-type-options`, `x-frame-options`, `referrer-policy` |
+| Contrôle               | Procédure                                                                                           | Résultat attendu                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Isolation multi-tenant | Connecté `serveur@sahelgrill.tg`, appeler `/api/v1/tenants/tnt_baobab/...` (console ou client HTTP) | `403 tenant_scope_denied`, aucune donnée retournée                   |
+| Périmètre plateforme   | Connecté gérant, ouvrir `#/admin`                                                                   | Écran « Accès restreint » ; appels API `403`                         |
+| RBAC fine              | Comptable : onglets Stocks/Rapports visibles, actions d'écriture masquées ; Marketing absent        | Boutons désactivés/masqués, API `403` en écriture                    |
+| Audit immuable         | Admin → Paramètres globaux : modifier un taux puis enregistrer                                      | Entrée `platform.settings.updated` visible, badge « Chaîne intègre » |
+| Webhooks signés        | POST `/api/v1/webhooks/payments/...` sans en-tête `x-restohub-signature`                            | `401 invalid_signature`                                              |
+| Aucune donnée carte    | Rechercher `cardNumber`, `cvv`, `pan` dans `services/`                                              | Aucun stockage ; seuls jetons de prestataire                         |
+| Secrets                | Vérifier que les clés proviennent de `process.env` (`INTERNAL_API_KEY`, secrets prestataires)       | Aucun secret en dur hors valeurs de démo                             |
+| Limitation de débit    | Script : 601 appels `GET /api/v1/platform/dashboard` en < 1 min                                     | `429` avec `retryAfterSeconds`                                       |
+| En-têtes de sécurité   | `curl -I http://localhost:4013/health`                                                              | `x-content-type-options`, `x-frame-options`, `referrer-policy`       |
 
 ## 5. Back-office plateforme (Étape 8)
 
 Connexion `admin@resto-hub.tg` → `#/admin`.
 
-| Écran | Vérifications | Critère |
-|---|---|---|
-| Vue d'ensemble | Demandes, établissements, MRR, audit | Données cohérentes, états vide/erreur/chargement |
-| Demandes | Filtres, recherche, ouverture dossier, approbation/refus/complément | Action journalisée, toast de confirmation |
-| Établissements | Liste, suspension avec motif, réactivation | Statut mis à jour, motif obligatoire |
-| Paiements | Résumé, reversements, litiges, grand livre | Approbation/rejet et ouverture de litige fonctionnels |
-| Commissions | Périodes 7/30/90 j, graphique, regroupements, transactions | Totaux cohérents entre résumé et groupes |
-| Supervision | 13 services, latence, disponibilité, alertes, journaux | « Vérifier maintenant » met à jour les états ; acquitter/résoudre |
-| Paramètres globaux | Langues, pays, taxes, fournisseurs, support | Validation serveur (400/422) sur entrée invalide, événement publié, audit |
+| Écran              | Vérifications                                                       | Critère                                                                   |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Vue d'ensemble     | Demandes, établissements, MRR, audit                                | Données cohérentes, états vide/erreur/chargement                          |
+| Demandes           | Filtres, recherche, ouverture dossier, approbation/refus/complément | Action journalisée, toast de confirmation                                 |
+| Établissements     | Liste, suspension avec motif, réactivation                          | Statut mis à jour, motif obligatoire                                      |
+| Paiements          | Résumé, reversements, litiges, grand livre                          | Approbation/rejet et ouverture de litige fonctionnels                     |
+| Commissions        | Périodes 7/30/90 j, graphique, regroupements, transactions          | Totaux cohérents entre résumé et groupes                                  |
+| Supervision        | 13 services, latence, disponibilité, alertes, journaux              | « Vérifier maintenant » met à jour les états ; acquitter/résoudre         |
+| Paramètres globaux | Langues, pays, taxes, fournisseurs, support                         | Validation serveur (400/422) sur entrée invalide, événement publié, audit |
 
 ## 6. Parcours clés
 
@@ -112,7 +112,7 @@ Connexion `admin@resto-hub.tg` → `#/admin`.
 - [ ] Parcours complet en **5 écrans maximum** : menu → panier → paiement → suivi temps réel.
 - [ ] Devise XOF, formats locaux, FR par défaut, bascule EN.
 - [ ] Statuts de table : libre, réservée, occupée, addition demandée, à nettoyer, hors service
-  (couleurs distinctes et libellés accessibles).
+      (couleurs distinctes et libellés accessibles).
 
 ### Serveur
 

@@ -1,5 +1,16 @@
-import { buildAuditEntry, newId, nowIso, randomToken, type AuditEntry } from '@resto-hub/service-kit';
-import { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type PaymentMethod } from '@resto-hub/shared-contracts';
+import {
+  buildAuditEntry,
+  newId,
+  nowIso,
+  randomToken,
+  type AuditEntry,
+} from '@resto-hub/service-kit';
+import {
+  ORDER_STATUSES,
+  PAYMENT_METHODS,
+  type OrderStatus,
+  type PaymentMethod,
+} from '@resto-hub/shared-contracts';
 
 export { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type PaymentMethod };
 
@@ -181,12 +192,19 @@ export function newOrderId(prefix: string): string {
   return newId(prefix);
 }
 
-export function taxBreakdown(totalXof: number, taxRate: number): { netXof: number; taxXof: number } {
+export function taxBreakdown(
+  totalXof: number,
+  taxRate: number,
+): { netXof: number; taxXof: number } {
   const netXof = Math.round(totalXof / (1 + taxRate));
   return { netXof, taxXof: totalXof - netXof };
 }
 
-export function nextNumber(store: OrderStore, tenantId: string, kind: 'order' | 'invoice' | 'receipt'): string {
+export function nextNumber(
+  store: OrderStore,
+  tenantId: string,
+  kind: 'order' | 'invoice' | 'receipt',
+): string {
   const year = new Date().getUTCFullYear();
   let counters = store.counters.get(tenantId);
   if (!counters || counters.year !== year) {
@@ -195,7 +213,9 @@ export function nextNumber(store: OrderStore, tenantId: string, kind: 'order' | 
       order: 0,
       invoice: 0,
       receipt: 0,
-      ...(counters?.year === year ? { order: counters.order, invoice: counters.invoice, receipt: counters.receipt } : {}),
+      ...(counters?.year === year
+        ? { order: counters.order, invoice: counters.invoice, receipt: counters.receipt }
+        : {}),
     };
     store.counters.set(tenantId, counters);
   }
@@ -205,7 +225,11 @@ export function nextNumber(store: OrderStore, tenantId: string, kind: 'order' | 
   return `${prefix}-${year}-${seq}`;
 }
 
-export function ticketsForOrder(store: OrderStore, tenantId: string, orderId: string): StationTicket[] {
+export function ticketsForOrder(
+  store: OrderStore,
+  tenantId: string,
+  orderId: string,
+): StationTicket[] {
   return [...store.tickets.values()]
     .filter((ticket) => ticket.tenantId === tenantId && ticket.orderId === orderId)
     .sort((a, b) => a.station.localeCompare(b.station));
@@ -312,7 +336,9 @@ export function seedOrderDemo(store: OrderStore): void {
       readyAt: input.status === 'prete' || input.status === 'servie' ? created : undefined,
       servedAt: input.status === 'servie' ? created : undefined,
       canceledAt: input.status === 'annulee' ? created : undefined,
-      cancel: input.cancelReason ? { reason: input.cancelReason, by: actor, at: created } : undefined,
+      cancel: input.cancelReason
+        ? { reason: input.cancelReason, by: actor, at: created }
+        : undefined,
     };
     if (input.paymentMethod) {
       const payment: OrderPayment = {
@@ -333,7 +359,11 @@ export function seedOrderDemo(store: OrderStore): void {
     }
     store.orders.set(order.id, order);
     const ticketStatus: TicketStatus =
-      input.status === 'recue' ? 'nouvelle' : input.status === 'en_preparation' ? 'en_preparation' : 'prete';
+      input.status === 'recue'
+        ? 'nouvelle'
+        : input.status === 'en_preparation'
+          ? 'en_preparation'
+          : 'prete';
     const ticketLines = new Map<Station, string[]>();
     for (const entry of order.lines) {
       ticketLines.set(entry.station, [...(ticketLines.get(entry.station) ?? []), entry.id]);
@@ -440,7 +470,11 @@ export function seedOrderDemo(store: OrderStore): void {
     minutesAgo: 7,
     source: 'client',
     deliveryFeeXof: 1000,
-    customer: { name: 'Kossi Adjo', phone: '+228 91 55 02 11', address: 'Rue des Palmiers, Kégué, Lomé' },
+    customer: {
+      name: 'Kossi Adjo',
+      phone: '+228 91 55 02 11',
+      address: 'Rue des Palmiers, Kégué, Lomé',
+    },
     lines: [
       line('lin_d6_1', 'prd_sg_poulet', 'Poulet braisé', 4500, 1, 'cuisine', {
         variantId: 'var_sg_poulet_entier',

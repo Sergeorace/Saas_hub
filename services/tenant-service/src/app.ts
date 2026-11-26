@@ -37,7 +37,11 @@ export interface TenantAppOptions {
   config: TenantConfig;
   identity: ServiceClient;
   catalog?: ServiceClient;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 const DEFAULT_COLORS = { primary: '#C2410C', secondary: '#0F766E' };
@@ -45,7 +49,10 @@ const DOC_TYPES: DocumentType[] = ['nif', 'rccm', 'id_card', 'business_license',
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function hasPlatform(claims: AuthClaims, permission: string): boolean {
-  return claims.platformPermissions.includes(permission) || claims.platformPermissions.includes('platform:operate');
+  return (
+    claims.platformPermissions.includes(permission) ||
+    claims.platformPermissions.includes('platform:operate')
+  );
 }
 
 function ensurePlatform(claims: AuthClaims | undefined, permission: string): AuthClaims {
@@ -74,7 +81,11 @@ function ensureTenant(
 
 function ensureWritable(tenant: TenantRecord): void {
   if (tenant.status === 'suspended') {
-    throw new HttpError(403, 'tenant_suspended', 'Établissement suspendu : réactivez l’abonnement pour modifier.');
+    throw new HttpError(
+      403,
+      'tenant_suspended',
+      'Établissement suspendu : réactivez l’abonnement pour modifier.',
+    );
   }
 }
 
@@ -101,7 +112,12 @@ function publicEstablishmentView(store: TenantStore, tenant: TenantRecord) {
     hours: tenant.settings.hours ?? [],
     siteCount: sites.length,
     primarySite: primary
-      ? { id: primary.id, name: primary.name, address: primary.address, phone: primary.phone ?? null }
+      ? {
+          id: primary.id,
+          name: primary.name,
+          address: primary.address,
+          phone: primary.phone ?? null,
+        }
       : null,
     updatedAt: tenant.updatedAt,
   };
@@ -147,7 +163,12 @@ function publicApplication(application: ApplicationRecord) {
       uploadedAt: doc.uploadedAt,
     })),
     review: {
-      notes: application.review.notes.map((note) => ({ action: note.action, reason: note.reason, note: note.note, at: note.at })),
+      notes: application.review.notes.map((note) => ({
+        action: note.action,
+        reason: note.reason,
+        note: note.note,
+        at: note.at,
+      })),
       decidedAt: application.review.decidedAt,
       reason: application.review.reason,
     },
@@ -164,12 +185,18 @@ function mergeEstablishment(
 ): Partial<ApplicationRecord['establishment']> {
   const source = asObject(input);
   const merged: Partial<ApplicationRecord['establishment']> = { ...existing };
-  if (source.legalName !== undefined) merged.legalName = requireString(source, 'legalName', { min: 2, max: 120 });
-  if (source.brandName !== undefined) merged.brandName = requireString(source, 'brandName', { min: 2, max: 80 });
-  if (source.type !== undefined) merged.type = requireEnum(source, 'type', ['restaurant', 'bar', 'both'] as const);
-  if (source.nif !== undefined) merged.nif = requireString(source, 'nif', { pattern: /^[A-Z0-9]{6,20}$/i }).toUpperCase();
-  if (source.rccm !== undefined) merged.rccm = optionalString(source, 'rccm', { max: 40 })?.toUpperCase();
-  if (source.description !== undefined) merged.description = optionalString(source, 'description', { max: 400 });
+  if (source.legalName !== undefined)
+    merged.legalName = requireString(source, 'legalName', { min: 2, max: 120 });
+  if (source.brandName !== undefined)
+    merged.brandName = requireString(source, 'brandName', { min: 2, max: 80 });
+  if (source.type !== undefined)
+    merged.type = requireEnum(source, 'type', ['restaurant', 'bar', 'both'] as const);
+  if (source.nif !== undefined)
+    merged.nif = requireString(source, 'nif', { pattern: /^[A-Z0-9]{6,20}$/i }).toUpperCase();
+  if (source.rccm !== undefined)
+    merged.rccm = optionalString(source, 'rccm', { max: 40 })?.toUpperCase();
+  if (source.description !== undefined)
+    merged.description = optionalString(source, 'description', { max: 400 });
   if (source.logoUrl !== undefined) {
     const logoUrl = optionalString(source, 'logoUrl', { max: 500 });
     if (logoUrl && !/^https:\/\//i.test(logoUrl)) {
@@ -179,12 +206,18 @@ function mergeEstablishment(
   }
   if (source.photos !== undefined) {
     if (!Array.isArray(source.photos) || source.photos.length > 6) {
-      throw HttpError.unprocessable('validation_error', '« photos » doit être une liste de 6 URL maximum.');
+      throw HttpError.unprocessable(
+        'validation_error',
+        '« photos » doit être une liste de 6 URL maximum.',
+      );
     }
     merged.photos = source.photos.map((photo) => {
       const url = String(photo ?? '').trim();
       if (!/^https:\/\//i.test(url) || url.length > 500) {
-        throw HttpError.unprocessable('validation_error', 'Chaque photo doit être une URL HTTPS (500 caractères max).');
+        throw HttpError.unprocessable(
+          'validation_error',
+          'Chaque photo doit être une URL HTTPS (500 caractères max).',
+        );
       }
       return url;
     });
@@ -208,7 +241,10 @@ function mergeEstablishment(
   }
   if (source.hours !== undefined) {
     if (!Array.isArray(source.hours) || source.hours.length > 14) {
-      throw HttpError.unprocessable('validation_error', '« hours » doit être une liste de créneaux.');
+      throw HttpError.unprocessable(
+        'validation_error',
+        '« hours » doit être une liste de créneaux.',
+      );
     }
     merged.hours = source.hours.map((entry) => {
       const slot = asObject(entry);
@@ -232,7 +268,10 @@ function mergeManager(existing: Partial<ApplicationRecord['manager']>, input: un
   if (source.password !== undefined) {
     const password = requireString(source, 'password', { max: 128 });
     if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
-      throw HttpError.unprocessable('weak_password', 'Mot de passe : 8 caractères minimum, lettres et chiffres.');
+      throw HttpError.unprocessable(
+        'weak_password',
+        'Mot de passe : 8 caractères minimum, lettres et chiffres.',
+      );
     }
     merged.password = password;
   }
@@ -261,30 +300,46 @@ function validateForSubmit(application: ApplicationRecord): string[] {
 }
 
 function randomTempPassword(): string {
-  return `Rh-${randomToken(9).replace(/[^a-zA-Z0-9]/g, '').slice(0, 10)}9`;
+  return `Rh-${randomToken(9)
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 10)}9`;
 }
 
-export function buildTenantApp({ store, config, identity, catalog, publish }: TenantAppOptions): Route[] {
+export function buildTenantApp({
+  store,
+  config,
+  identity,
+  catalog,
+  publish,
+}: TenantAppOptions): Route[] {
   const identityCall = async <T>(action: () => Promise<T>): Promise<T> => {
     try {
       return await action();
     } catch (error) {
       if (error instanceof HttpError) throw error;
       console.error('[tenant-service] identity indisponible', error);
-      throw new HttpError(502, 'identity_unavailable', 'Service d’identité indisponible. Réessayez.');
+      throw new HttpError(
+        502,
+        'identity_unavailable',
+        'Service d’identité indisponible. Réessayez.',
+      );
     }
   };
 
   const teamCount = async (tenantId: string): Promise<number | null> => {
     try {
-      const members = await identity.get<{ count?: number; items?: unknown[] }>(`/internal/tenants/${tenantId}/members`);
+      const members = await identity.get<{ count?: number; items?: unknown[] }>(
+        `/internal/tenants/${tenantId}/members`,
+      );
       return members.count ?? members.items?.length ?? 0;
     } catch {
       return null;
     }
   };
 
-  const catalogSummary = async (tenantId: string): Promise<{ products: number; categories: number } | null> => {
+  const catalogSummary = async (
+    tenantId: string,
+  ): Promise<{ products: number; categories: number } | null> => {
     if (!catalog) return null;
     try {
       const summary = await catalog.get<{ products?: number; categories?: number }>(
@@ -296,7 +351,11 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
     }
   };
 
-  const createInvoice = (tenantId: string, plan: PlanCode, options: { dueDays?: number } = {}): InvoiceRecord => {
+  const createInvoice = (
+    tenantId: string,
+    plan: PlanCode,
+    options: { dueDays?: number } = {},
+  ): InvoiceRecord => {
     const now = nowIso();
     const invoice: InvoiceRecord = {
       id: newId('inv'),
@@ -360,7 +419,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         provider,
       });
       if (reactivated) {
-        await publish('TenantReactivated', tenant.id, { tenantId: tenant.id, reason: 'payment_received' });
+        await publish('TenantReactivated', tenant.id, {
+          tenantId: tenant.id,
+          reason: 'payment_received',
+        });
       }
     }
     store.recordAudit({
@@ -403,7 +465,8 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
     tenant.updatedAt = nowIso();
     const subscription = store.subscriptions.get(tenant.id);
     if (subscription) {
-      subscription.status = subscription.trialEndsAt && !subscription.trialUsed ? 'trialing' : 'active';
+      subscription.status =
+        subscription.trialEndsAt && !subscription.trialUsed ? 'trialing' : 'active';
       subscription.updatedAt = nowIso();
     }
     store.recordAudit({
@@ -514,15 +577,26 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         const establishment = mergeEstablishment({}, establishmentInput);
         const manager = mergeManager({}, managerInput);
         if (!establishment.legalName || !establishment.brandName) {
-          throw HttpError.unprocessable('validation_error', 'Raison sociale et nom commercial requis.', {
-            field: 'establishment',
-          });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Raison sociale et nom commercial requis.',
+            {
+              field: 'establishment',
+            },
+          );
         }
         if (!manager.email || !manager.phone || !manager.name) {
-          throw HttpError.unprocessable('validation_error', 'Coordonnées du gérant requises.', { field: 'manager' });
+          throw HttpError.unprocessable('validation_error', 'Coordonnées du gérant requises.', {
+            field: 'manager',
+          });
         }
-        const plan = requireEnum(body, 'plan', PLAN_CODES as unknown as readonly string[]) as PlanCode;
-        const languages = body.languages === undefined ? ['fr', 'en'] : requireArray(body, 'languages', 2);
+        const plan = requireEnum(
+          body,
+          'plan',
+          PLAN_CODES as unknown as readonly string[],
+        ) as PlanCode;
+        const languages =
+          body.languages === undefined ? ['fr', 'en'] : requireArray(body, 'languages', 2);
         for (const language of languages) {
           if (language !== 'fr' && language !== 'en') {
             throw HttpError.unprocessable('validation_error', 'Langues supportées : fr, en.');
@@ -574,17 +648,27 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
       handler: (ctx) => {
         const application = applicationFromToken(store, ctx.params.id, tokenFromHeaders(ctx));
         if (application.status === 'approved' || application.status === 'rejected') {
-          throw HttpError.conflict('application_locked', 'Cette demande est clôturée et ne peut plus être modifiée.');
+          throw HttpError.conflict(
+            'application_locked',
+            'Cette demande est clôturée et ne peut plus être modifiée.',
+          );
         }
         const body = asObject(ctx.body);
         if (body.establishment !== undefined) {
-          application.establishment = mergeEstablishment(application.establishment, body.establishment);
+          application.establishment = mergeEstablishment(
+            application.establishment,
+            body.establishment,
+          );
         }
         if (body.manager !== undefined) {
           application.manager = mergeManager(application.manager, body.manager);
         }
         if (body.plan !== undefined) {
-          application.plan = requireEnum(body, 'plan', PLAN_CODES as unknown as readonly string[]) as PlanCode;
+          application.plan = requireEnum(
+            body,
+            'plan',
+            PLAN_CODES as unknown as readonly string[],
+          ) as PlanCode;
         }
         if (body.languages !== undefined) {
           const languages = requireArray(body, 'languages', 2);
@@ -598,7 +682,8 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         if (body.currency !== undefined) {
           application.currency = requireEnum(body, 'currency', ['XOF', 'EUR', 'USD'] as const);
         }
-        if (body.acceptTerms !== undefined) application.acceptTerms = optionalBoolean(body, 'acceptTerms') ?? false;
+        if (body.acceptTerms !== undefined)
+          application.acceptTerms = optionalBoolean(body, 'acceptTerms') ?? false;
         application.updatedAt = nowIso();
         return { body: { application: publicApplication(application) } };
       },
@@ -613,9 +698,14 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           throw HttpError.conflict('application_locked', 'Cette demande est clôturée.');
         }
         const body = asObject(ctx.body);
-        const type = requireEnum(body, 'type', DOC_TYPES as unknown as readonly string[]) as DocumentType;
+        const type = requireEnum(
+          body,
+          'type',
+          DOC_TYPES as unknown as readonly string[],
+        ) as DocumentType;
         const fileName = requireString(body, 'fileName', { max: 120 });
-        const mimeType = optionalString(body, 'mimeType', { max: 80 }) ?? 'application/octet-stream';
+        const mimeType =
+          optionalString(body, 'mimeType', { max: 80 }) ?? 'application/octet-stream';
         const dataBase64 = requireString(body, 'dataBase64', { max: 4_000_000 });
         const sizeBytes = Buffer.from(dataBase64, 'base64').length;
         if (sizeBytes === 0) throw HttpError.unprocessable('validation_error', 'Document vide.');
@@ -631,12 +721,21 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           dataBase64,
           uploadedAt: nowIso(),
         };
-        application.documents = application.documents.filter((existing) => existing.type !== type || existing.fileName !== fileName);
+        application.documents = application.documents.filter(
+          (existing) => existing.type !== type || existing.fileName !== fileName,
+        );
         application.documents.push(doc);
         application.updatedAt = nowIso();
         return {
           status: 201,
-          body: { document: { id: doc.id, type: doc.type, fileName: doc.fileName, sizeBytes: doc.sizeBytes } },
+          body: {
+            document: {
+              id: doc.id,
+              type: doc.type,
+              fileName: doc.fileName,
+              sizeBytes: doc.sizeBytes,
+            },
+          },
         };
       },
     },
@@ -651,12 +750,18 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         }
         const missing = validateForSubmit(application);
         if (missing.length > 0) {
-          throw HttpError.unprocessable('application_incomplete', 'Demande incomplète.', { missing });
+          throw HttpError.unprocessable('application_incomplete', 'Demande incomplète.', {
+            missing,
+          });
         }
         application.status = 'submitted';
         application.submittedAt = nowIso();
         application.updatedAt = application.submittedAt;
-        application.review.notes.push({ actorId: 'applicant', action: 'submitted', at: application.submittedAt });
+        application.review.notes.push({
+          actorId: 'applicant',
+          action: 'submitted',
+          at: application.submittedAt,
+        });
         await publish('TenantApplicationSubmitted', null, {
           applicationId: application.id,
           reference: application.reference,
@@ -674,7 +779,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         const claims = ensurePlatform(ctx.auth, 'platform:establishments:review');
         const statusFilter = ctx.query.get('status');
         const query = (ctx.query.get('q') ?? '').toLowerCase();
-        const all = [...store.applications.values()].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+        const all = [...store.applications.values()].sort((a, b) =>
+          a.createdAt < b.createdAt ? 1 : -1,
+        );
         const counts = all.reduce<Record<string, number>>((acc, application) => {
           acc[application.status] = (acc[application.status] ?? 0) + 1;
           return acc;
@@ -683,9 +790,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           .filter((application) => (statusFilter ? application.status === statusFilter : true))
           .filter((application) => {
             if (!query) return true;
-            const haystack = `${application.reference} ${application.establishment.brandName ?? ''} ${
-              application.establishment.legalName ?? ''
-            } ${application.manager.email ?? ''}`.toLowerCase();
+            const haystack =
+              `${application.reference} ${application.establishment.brandName ?? ''} ${
+                application.establishment.legalName ?? ''
+              } ${application.manager.email ?? ''}`.toLowerCase();
             return haystack.includes(query);
           })
           .map((application) => ({
@@ -756,23 +864,34 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           throw HttpError.conflict('not_submitted', 'La demande n’a pas encore été soumise.');
         }
         if (application.status === 'rejected') {
-          throw HttpError.conflict('application_closed', 'Cette demande a été refusée définitivement.');
+          throw HttpError.conflict(
+            'application_closed',
+            'Cette demande a été refusée définitivement.',
+          );
         }
         const body = asObject(ctx.body);
-        const action = requireEnum(body, 'action', ['approve', 'reject', 'request_documents'] as const);
+        const action = requireEnum(body, 'action', [
+          'approve',
+          'reject',
+          'request_documents',
+        ] as const);
         const reason = optionalString(body, 'reason', { max: 400 });
         const note = optionalString(body, 'note', { max: 400 });
         const now = nowIso();
 
         if (action === 'reject') {
-          if (!reason) throw HttpError.unprocessable('validation_error', 'Un motif de refus est requis.');
+          if (!reason)
+            throw HttpError.unprocessable('validation_error', 'Un motif de refus est requis.');
           application.status = 'rejected';
           application.review = {
             ...application.review,
             decidedBy: claims.sub,
             decidedAt: now,
             reason,
-            notes: [...application.review.notes, { actorId: claims.sub, action: 'reject', reason, note, at: now }],
+            notes: [
+              ...application.review.notes,
+              { actorId: claims.sub, action: 'reject', reason, note, at: now },
+            ],
           };
           application.updatedAt = now;
           await publish('TenantApplicationRejected', null, {
@@ -784,9 +903,18 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         }
 
         if (action === 'request_documents') {
-          if (!note) throw HttpError.unprocessable('validation_error', 'Précisez les pièces ou informations attendues.');
+          if (!note)
+            throw HttpError.unprocessable(
+              'validation_error',
+              'Précisez les pièces ou informations attendues.',
+            );
           application.status = 'info_requested';
-          application.review.notes.push({ actorId: claims.sub, action: 'request_documents', note, at: now });
+          application.review.notes.push({
+            actorId: claims.sub,
+            action: 'request_documents',
+            note,
+            at: now,
+          });
           application.updatedAt = now;
           await publish('TenantApplicationInfoRequested', null, {
             applicationId: application.id,
@@ -796,9 +924,15 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           return { body: { application: publicApplication(application) } };
         }
 
-        const missing = validateForSubmit(application).filter((item) => item !== 'mot de passe du gérant');
+        const missing = validateForSubmit(application).filter(
+          (item) => item !== 'mot de passe du gérant',
+        );
         if (missing.length > 0) {
-          throw HttpError.unprocessable('application_incomplete', 'Dossier incomplet pour une validation.', { missing });
+          throw HttpError.unprocessable(
+            'application_incomplete',
+            'Dossier incomplet pour une validation.',
+            { missing },
+          );
         }
 
         const managerEmail = application.manager.email as string;
@@ -824,7 +958,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           photos: application.establishment.photos,
           primaryColor: DEFAULT_COLORS.primary,
           secondaryColor: DEFAULT_COLORS.secondary,
-          languages: application.languages.includes('en') ? (['fr', 'en'] as Array<'fr' | 'en'>) : (['fr'] as Array<'fr' | 'en'>),
+          languages: application.languages.includes('en')
+            ? (['fr', 'en'] as Array<'fr' | 'en'>)
+            : (['fr'] as Array<'fr' | 'en'>),
           currency: application.currency,
           timezone: 'Africa/Lome',
           address: application.establishment.address,
@@ -853,7 +989,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         store.tenants.set(tenant.id, tenant);
 
         const trialUsed = [...store.tenants.values()].some(
-          (existing) => existing.id !== tenant.id && existing.managerEmail.toLowerCase() === managerEmail.toLowerCase(),
+          (existing) =>
+            existing.id !== tenant.id &&
+            existing.managerEmail.toLowerCase() === managerEmail.toLowerCase(),
         );
         const primarySite: SiteRecord = {
           id: newId('ste'),
@@ -879,9 +1017,13 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           plan: application.plan,
           status: trialUsed ? 'active' : 'trialing',
           trialStartedAt: trialUsed ? undefined : now,
-          trialEndsAt: trialUsed ? undefined : new Date(Date.now() + config.trialDays * DAY_MS).toISOString(),
+          trialEndsAt: trialUsed
+            ? undefined
+            : new Date(Date.now() + config.trialDays * DAY_MS).toISOString(),
           currentPeriodStart: now,
-          currentPeriodEnd: new Date(Date.now() + (trialUsed ? 30 : config.trialDays) * DAY_MS).toISOString(),
+          currentPeriodEnd: new Date(
+            Date.now() + (trialUsed ? 30 : config.trialDays) * DAY_MS,
+          ).toISOString(),
           trialUsed,
           updatedAt: now,
         });
@@ -893,7 +1035,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           ...application.review,
           decidedBy: claims.sub,
           decidedAt: now,
-          notes: [...application.review.notes, { actorId: claims.sub, action: 'approve', note, at: now }],
+          notes: [
+            ...application.review.notes,
+            { actorId: claims.sub, action: 'approve', note, at: now },
+          ],
         };
         application.updatedAt = now;
 
@@ -964,7 +1109,12 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         const body = asObject(ctx.body);
         const reason = requireString(body, 'reason', { min: 3, max: 200 });
         const changed = await suspend(tenant, claims.sub, reason);
-        return { body: { tenant: { id: tenant.id, status: tenant.status, suspension: tenant.suspension }, changed } };
+        return {
+          body: {
+            tenant: { id: tenant.id, status: tenant.status, suspension: tenant.suspension },
+            changed,
+          },
+        };
       },
     },
     {
@@ -1029,7 +1179,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
       handler: (ctx) => {
         const claims = ctx.auth;
         if (!claims) throw HttpError.unauthorized();
-        const known = new Set([...Object.keys(claims.tenantPermissions), ...Object.keys(claims.tenantPermissions)]);
+        const known = new Set([
+          ...Object.keys(claims.tenantPermissions),
+          ...Object.keys(claims.tenantPermissions),
+        ]);
         const items = [...store.tenants.values()]
           .filter((tenant) => known.has(tenant.id) || tenant.ownerUserId === claims.sub)
           .map((tenant) => {
@@ -1042,7 +1195,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
               subdomain: tenant.subdomain,
               status: tenant.status,
               plan: tenant.plan,
-              role: claims.tenantPermissions[tenant.id]?.includes('team:manage') ? 'owner' : 'member',
+              role: claims.tenantPermissions[tenant.id]?.includes('team:manage')
+                ? 'owner'
+                : 'member',
               permissions: claims.tenantPermissions[tenant.id] ?? [],
               subscriptionStatus: subscription?.status,
               primaryColor: tenant.settings.primaryColor,
@@ -1090,10 +1245,14 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           else delete tenant.settings.logoUrl;
         }
         if (body.primaryColor !== undefined) {
-          tenant.settings.primaryColor = requireString(body, 'primaryColor', { pattern: /^#[0-9A-Fa-f]{6}$/ }).toUpperCase();
+          tenant.settings.primaryColor = requireString(body, 'primaryColor', {
+            pattern: /^#[0-9A-Fa-f]{6}$/,
+          }).toUpperCase();
         }
         if (body.secondaryColor !== undefined) {
-          tenant.settings.secondaryColor = requireString(body, 'secondaryColor', { pattern: /^#[0-9A-Fa-f]{6}$/ }).toUpperCase();
+          tenant.settings.secondaryColor = requireString(body, 'secondaryColor', {
+            pattern: /^#[0-9A-Fa-f]{6}$/,
+          }).toUpperCase();
         }
         if (body.brandName !== undefined) {
           tenant.brandName = requireString(body, 'brandName', { min: 2, max: 80 });
@@ -1111,7 +1270,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           tenant.settings.currency = requireEnum(body, 'currency', ['XOF', 'EUR', 'USD'] as const);
         }
         if (body.hours !== undefined) {
-          const establishment = mergeEstablishment({ hours: tenant.settings.hours ?? [] }, { hours: body.hours });
+          const establishment = mergeEstablishment(
+            { hours: tenant.settings.hours ?? [] },
+            { hours: body.hours },
+          );
           tenant.settings.hours = establishment.hours;
         }
         tenant.updatedAt = nowIso();
@@ -1130,7 +1292,11 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           languages: tenant.settings.languages,
           currency: tenant.settings.currency,
         });
-        return { body: { tenant: { id: tenant.id, brandName: tenant.brandName, settings: tenant.settings } } };
+        return {
+          body: {
+            tenant: { id: tenant.id, brandName: tenant.brandName, settings: tenant.settings },
+          },
+        };
       },
     },
     {
@@ -1151,10 +1317,14 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         const plan = planByCode(tenant.plan);
         const existing = store.sitesForTenant(tenant.id);
         if (plan.maxSites !== null && existing.length >= plan.maxSites) {
-          throw HttpError.unprocessable('plan_site_limit', `Le plan ${plan.name} est limité à ${plan.maxSites} établissement(s).`, {
-            plan: plan.code,
-            limit: plan.maxSites,
-          });
+          throw HttpError.unprocessable(
+            'plan_site_limit',
+            `Le plan ${plan.name} est limité à ${plan.maxSites} établissement(s).`,
+            {
+              plan: plan.code,
+              limit: plan.maxSites,
+            },
+          );
         }
         const body = asObject(ctx.body);
         const now = nowIso();
@@ -1192,9 +1362,11 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         if (!site || site.tenantId !== tenant.id) throw HttpError.notFound('Site introuvable.');
         const body = asObject(ctx.body);
         if (body.name !== undefined) site.name = requireString(body, 'name', { min: 2, max: 80 });
-        if (body.address !== undefined) site.address = requireString(body, 'address', { min: 3, max: 200 });
+        if (body.address !== undefined)
+          site.address = requireString(body, 'address', { min: 3, max: 200 });
         if (body.phone !== undefined) site.phone = optionalString(body, 'phone', { max: 20 });
-        if (body.status !== undefined) site.status = requireEnum(body, 'status', ['active', 'closed'] as const);
+        if (body.status !== undefined)
+          site.status = requireEnum(body, 'status', ['active', 'closed'] as const);
         site.updatedAt = nowIso();
         store.recordAudit({
           tenantId: tenant.id,
@@ -1217,7 +1389,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         const site = store.sites.get(ctx.params.siteId);
         if (!site || site.tenantId !== tenant.id) throw HttpError.notFound('Site introuvable.');
         if (site.isPrimary) {
-          throw HttpError.unprocessable('primary_site', 'Le site principal ne peut pas être supprimé.');
+          throw HttpError.unprocessable(
+            'primary_site',
+            'Le site principal ne peut pas être supprimé.',
+          );
         }
         store.sites.delete(site.id);
         store.recordAudit({
@@ -1270,7 +1445,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
             label: 'Renseignez vos horaires',
             description: 'Les horaires alimentent la page client et les réservations.',
             done: (tenant.settings.hours?.length ?? 0) > 0,
-            detail: tenant.settings.hours ? `${tenant.settings.hours.length} créneau(x)` : 'À faire',
+            detail: tenant.settings.hours
+              ? `${tenant.settings.hours.length} créneau(x)`
+              : 'À faire',
           },
           {
             key: 'team',
@@ -1310,7 +1487,12 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
             progress: Math.round((done / items.length) * 100),
             completed: done,
             total: items.length,
-            tenant: { id: tenant.id, brandName: tenant.brandName, slug: tenant.slug, subdomain: tenant.subdomain },
+            tenant: {
+              id: tenant.id,
+              brandName: tenant.brandName,
+              slug: tenant.slug,
+              subdomain: tenant.subdomain,
+            },
           },
         };
       },
@@ -1341,7 +1523,11 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         ensureWritable(tenant);
         const claims = ctx.auth as AuthClaims;
         const body = asObject(ctx.body);
-        const plan = requireEnum(body, 'plan', PLAN_CODES as unknown as readonly string[]) as PlanCode;
+        const plan = requireEnum(
+          body,
+          'plan',
+          PLAN_CODES as unknown as readonly string[],
+        ) as PlanCode;
         const invoice = createInvoice(tenant.id, plan);
         void claims;
         return {
@@ -1365,7 +1551,8 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
         const tenant = ensureTenant(store, ctx.auth, ctx.params.tenantId, 'subscription:manage');
         const claims = ctx.auth as AuthClaims;
         const invoice = store.invoices.get(ctx.params.invoiceId);
-        if (!invoice || invoice.tenantId !== tenant.id) throw HttpError.notFound('Facture introuvable.');
+        if (!invoice || invoice.tenantId !== tenant.id)
+          throw HttpError.notFound('Facture introuvable.');
         const result = await markInvoicePaid(invoice, 'demo', `DEMO-${invoice.number}`, claims.sub);
         return { body: { invoice, ...result, tenant: { id: tenant.id, status: tenant.status } } };
       },
@@ -1375,7 +1562,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
       path: '/api/v1/tenants/:tenantId/team',
       handler: async (ctx) => {
         const tenant = ensureTenant(store, ctx.auth, ctx.params.tenantId, 'team:view');
-        const members = await identityCall(() => identity.get(`/internal/tenants/${tenant.id}/members`));
+        const members = await identityCall(() =>
+          identity.get(`/internal/tenants/${tenant.id}/members`),
+        );
         return { body: members };
       },
     },
@@ -1385,7 +1574,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
       handler: (ctx) => {
         const tenant = ensureTenant(store, ctx.auth, ctx.params.tenantId, 'audit:view');
         const limit = Math.min(Number(ctx.query.get('limit') ?? 50), 200);
-        const items = store.audit.filter((entry) => entry.tenantId === tenant.id).slice(-limit).reverse();
+        const items = store.audit
+          .filter((entry) => entry.tenantId === tenant.id)
+          .slice(-limit)
+          .reverse();
         return { body: { items, integrity: verifyAuditChain(store.audit) } };
       },
     },
@@ -1395,7 +1587,10 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
       handler: (ctx) => {
         const tenant = ensureTenant(store, ctx.auth, ctx.params.tenantId, 'report:export');
         const claims = ctx.auth as AuthClaims;
-        const format = requireEnum({ format: ctx.query.get('format') ?? 'json' }, 'format', ['json', 'csv'] as const);
+        const format = requireEnum({ format: ctx.query.get('format') ?? 'json' }, 'format', [
+          'json',
+          'csv',
+        ] as const);
         const sites = store.sitesForTenant(tenant.id);
         const invoices = store.invoicesForTenant(tenant.id);
         const subscription = store.subscriptions.get(tenant.id);
@@ -1411,7 +1606,14 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
           const header = 'numero,date,plan,montant_xof,statut,paye_le\n';
           const rows = invoices
             .map((invoice) =>
-              [invoice.number, invoice.issuedAt.slice(0, 10), invoice.plan, invoice.amountXof, invoice.status, invoice.paidAt ?? ''].join(','),
+              [
+                invoice.number,
+                invoice.issuedAt.slice(0, 10),
+                invoice.plan,
+                invoice.amountXof,
+                invoice.status,
+                invoice.paidAt ?? '',
+              ].join(','),
             )
             .join('\n');
           const csv = `# ${tenant.brandName} (${tenant.slug})\n# Sites: ${sites.length} · Abonnement: ${subscription?.status ?? 'aucun'}\n${header}${rows}`;
@@ -1449,7 +1651,9 @@ export function buildTenantApp({ store, config, identity, catalog, publish }: Te
       handler: async (ctx) => {
         const signatureHeader = String(ctx.headers['x-billing-signature'] ?? '');
         const body = asObject(ctx.body);
-        const expected = createHmac('sha256', config.billingWebhookSecret).update(JSON.stringify(body)).digest('hex');
+        const expected = createHmac('sha256', config.billingWebhookSecret)
+          .update(JSON.stringify(body))
+          .digest('hex');
         const actual = Buffer.from(signatureHeader);
         const wanted = Buffer.from(expected);
         if (actual.length !== wanted.length || !timingSafeEqual(actual, wanted)) {

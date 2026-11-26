@@ -46,14 +46,10 @@ test('chaque événement imposé est réellement publié par un service', () => 
 });
 
 test('les six statuts de table sont exposés', () => {
-  assert.deepEqual([...TABLE_STATUSES], [
-    'libre',
-    'reservee',
-    'occupee',
-    'addition',
-    'nettoyage',
-    'hors_service',
-  ]);
+  assert.deepEqual(
+    [...TABLE_STATUSES],
+    ['libre', 'reservee', 'occupee', 'addition', 'nettoyage', 'hors_service'],
+  );
 });
 
 test('une enveloppe valide est acceptée, une enveloppe incomplète rejetée', () => {

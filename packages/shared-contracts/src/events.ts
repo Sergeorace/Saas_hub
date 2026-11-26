@@ -68,7 +68,9 @@ export const DOMAIN_EVENTS = [
 export type DomainEventName = (typeof DOMAIN_EVENTS)[number];
 export type RequiredDomainEventName = (typeof REQUIRED_DOMAIN_EVENTS)[number];
 
-export interface DomainEventEnvelope<TPayload extends Record<string, unknown> = Record<string, unknown>> {
+export interface DomainEventEnvelope<
+  TPayload extends Record<string, unknown> = Record<string, unknown>,
+> {
   id: string;
   type: DomainEventName;
   tenantId: string | null;

@@ -201,10 +201,17 @@ export function createLoyaltyStore(): LoyaltyStore {
 }
 
 export function tierFor(lifetimePoints: number) {
-  return [...LOYALTY_TIERS].reverse().find((tier) => lifetimePoints >= tier.minLifetimePoints) ?? LOYALTY_TIERS[0];
+  return (
+    [...LOYALTY_TIERS].reverse().find((tier) => lifetimePoints >= tier.minLifetimePoints) ??
+    LOYALTY_TIERS[0]
+  );
 }
 
-export function getOrCreateAccount(store: LoyaltyStore, userId: string, tenantId: string): LoyaltyAccount {
+export function getOrCreateAccount(
+  store: LoyaltyStore,
+  userId: string,
+  tenantId: string,
+): LoyaltyAccount {
   const key = accountKey(userId, tenantId);
   const existing = store.accounts.get(key);
   if (existing) return existing;
@@ -315,13 +322,23 @@ export function discountFor(type: DiscountType, value: number, totalXof: number)
   return Math.max(0, Math.min(totalXof, Math.round(raw)));
 }
 
-export function activePromotions(store: LoyaltyStore, tenantId: string, at = nowIso()): Promotion[] {
+export function activePromotions(
+  store: LoyaltyStore,
+  tenantId: string,
+  at = nowIso(),
+): Promotion[] {
   return [...store.promotions.values()]
-    .filter((promotion) => promotion.tenantId === tenantId && promotionStatus(promotion, at) === 'active')
+    .filter(
+      (promotion) => promotion.tenantId === tenantId && promotionStatus(promotion, at) === 'active',
+    )
     .sort((a, b) => a.endAt.localeCompare(b.endAt));
 }
 
-export function findPromoCode(store: LoyaltyStore, tenantId: string, code: string): PromoCode | undefined {
+export function findPromoCode(
+  store: LoyaltyStore,
+  tenantId: string,
+  code: string,
+): PromoCode | undefined {
   const normalized = code.trim().toUpperCase();
   return [...store.promoCodes.values()].find(
     (entry) => entry.tenantId === tenantId && entry.code === normalized,
@@ -336,7 +353,8 @@ export function campaignRecipients(
   const accounts = [...store.accounts.values()].filter((account) => account.tenantId === tenantId);
   const inactiveSince = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
   if (segment === 'all') return accounts;
-  if (segment === 'inactifs') return accounts.filter((account) => account.updatedAt < inactiveSince);
+  if (segment === 'inactifs')
+    return accounts.filter((account) => account.updatedAt < inactiveSince);
   return accounts.filter((account) => tierFor(account.lifetimePoints).code === segment);
 }
 
@@ -368,13 +386,76 @@ export function seedLoyaltyDemo(store: LoyaltyStore): void {
     };
   };
   const reviews = [
-    review('rev_demo_1', 'tnt_sahelgrill', 'usr_demo_visiteur', 'Akouvi M.', 5, 'Poulet braisé parfait, service rapide malgré le monde.', 'approved', 2),
-    review('rev_demo_2', 'tnt_sahelgrill', 'usr_demo_kossi', 'Kossi A.', 4, 'Très bonne terrasse, addition un peu salée le week-end.', 'approved', 6),
-    review('rev_demo_3', 'tnt_sahelgrill', 'usr_demo_sena', 'Sena A.', 5, 'Le bissap maison est incontournable.', 'approved', 12),
-    review('rev_demo_4', 'tnt_sahelgrill', 'usr_demo_ami', 'Ami S.', 3, 'Attente longue samedi soir, mais plats généreux.', 'pending', 1),
-    review('rev_demo_5', 'tnt_baobab', 'usr_demo_visiteur', 'Akouvi M.', 5, 'Cocktails signature et ambiance live au top.', 'approved', 3),
-    review('rev_demo_6', 'tnt_baobab', 'usr_demo_sena', 'Sena A.', 4, 'Cuisine de rue relevée comme il faut.', 'approved', 9),
-    review('rev_demo_7', 'tnt_lagune', 'usr_demo_kossi', 'Kossi A.', 5, 'Poisson grillé face à la lagune, coucher de soleil magique.', 'approved', 4),
+    review(
+      'rev_demo_1',
+      'tnt_sahelgrill',
+      'usr_demo_visiteur',
+      'Akouvi M.',
+      5,
+      'Poulet braisé parfait, service rapide malgré le monde.',
+      'approved',
+      2,
+    ),
+    review(
+      'rev_demo_2',
+      'tnt_sahelgrill',
+      'usr_demo_kossi',
+      'Kossi A.',
+      4,
+      'Très bonne terrasse, addition un peu salée le week-end.',
+      'approved',
+      6,
+    ),
+    review(
+      'rev_demo_3',
+      'tnt_sahelgrill',
+      'usr_demo_sena',
+      'Sena A.',
+      5,
+      'Le bissap maison est incontournable.',
+      'approved',
+      12,
+    ),
+    review(
+      'rev_demo_4',
+      'tnt_sahelgrill',
+      'usr_demo_ami',
+      'Ami S.',
+      3,
+      'Attente longue samedi soir, mais plats généreux.',
+      'pending',
+      1,
+    ),
+    review(
+      'rev_demo_5',
+      'tnt_baobab',
+      'usr_demo_visiteur',
+      'Akouvi M.',
+      5,
+      'Cocktails signature et ambiance live au top.',
+      'approved',
+      3,
+    ),
+    review(
+      'rev_demo_6',
+      'tnt_baobab',
+      'usr_demo_sena',
+      'Sena A.',
+      4,
+      'Cuisine de rue relevée comme il faut.',
+      'approved',
+      9,
+    ),
+    review(
+      'rev_demo_7',
+      'tnt_lagune',
+      'usr_demo_kossi',
+      'Kossi A.',
+      5,
+      'Poisson grillé face à la lagune, coucher de soleil magique.',
+      'approved',
+      4,
+    ),
   ];
   for (const entry of reviews) store.reviews.set(entry.id, entry);
 
@@ -421,7 +502,8 @@ export function seedLoyaltyDemo(store: LoyaltyStore): void {
     };
   }
 
-  const daysFromNow = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+  const daysFromNow = (days: number) =>
+    new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
   const promotions: Promotion[] = [
     {
       id: 'promo_heures_creuses',
@@ -530,7 +612,8 @@ export function seedLoyaltyDemo(store: LoyaltyStore): void {
       name: 'Nouveaux cocktails',
       channel: 'push',
       segment: 'argent',
-      message: 'Découvrez les cocktails signature du barman Sena, points fidélité doublés cette semaine.',
+      message:
+        'Découvrez les cocktails signature du barman Sena, points fidélité doublés cette semaine.',
       scheduledAt: daysFromNow(2),
       status: 'planifiee',
       recipients: null,

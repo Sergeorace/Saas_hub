@@ -64,7 +64,8 @@ const fr: Messages = {
     greeting: 'Bonjour',
     greetingName: 'Bonjour {name}',
     heroTitle: 'Votre table vous attend',
-    heroSub: 'Scannez, commandez, savourez. Le menu, le panier, le paiement et le suivi en cinq écrans.',
+    heroSub:
+      'Scannez, commandez, savourez. Le menu, le panier, le paiement et le suivi en cinq écrans.',
     searchPlaceholder: 'Restaurant, bar, plat, quartier…',
     nearby: 'À découvrir près de vous',
     nearbySub: 'Trois adresses partenaires à Lomé, prêtes à vous accueillir.',
@@ -80,7 +81,8 @@ const fr: Messages = {
     promoTitle: 'Happy hour 17h – 19h',
     promoDesc: 'Cocktails Bissap et bières locales à prix doux au Sahel Grill et au Baobab.',
     installTitle: 'Installez RESTO-HUB',
-    installDesc: 'Ajoutez l’application à votre écran d’accueil : elle fonctionne comme une app native.',
+    installDesc:
+      'Ajoutez l’application à votre écran d’accueil : elle fonctionne comme une app native.',
     nearbyCount: '{count} établissements',
     favorites: 'Vos favoris',
     noFavorites: 'Touchez le cœur d’un établissement pour le retrouver ici.',
@@ -100,7 +102,8 @@ const fr: Messages = {
     allCities: 'Toutes les villes',
     mapView: 'Carte',
     listView: 'Liste',
-    mapHint: 'Touchez un point pour voir l’adresse. Carte indicative, sans service de géolocalisation externe.',
+    mapHint:
+      'Touchez un point pour voir l’adresse. Carte indicative, sans service de géolocalisation externe.',
     inside: 'à {distance} km',
     openNow: 'Ouverts maintenant',
     filterAllergens: 'Sans allergène',
@@ -124,7 +127,8 @@ const fr: Messages = {
     submitReview: 'Publier mon avis',
     reviewThanks: 'Merci ! Votre avis sera publié après modération.',
     reviewLogin: 'Connectez-vous pour laisser un avis.',
-    reviewExisting: 'Vous avez déjà noté cet établissement. Une nouvelle note remplace la précédente.',
+    reviewExisting:
+      'Vous avez déjà noté cet établissement. Une nouvelle note remplace la précédente.',
     noReviews: 'Aucun avis publié pour l’instant.',
     loyaltyTitle: 'Programme de fidélité',
     loyaltyDesc: '1 point par 500 F CFA · {tiers}',
@@ -242,7 +246,8 @@ const fr: Messages = {
     placing: 'Envoi en cours…',
     orderSent: 'Commande envoyée !',
     backToCart: 'Modifier le panier',
-    infoNoCard: 'Aucune donnée bancaire n’est saisie dans l’application. Les paiements en ligne arrivent prochainement.',
+    infoNoCard:
+      'Aucune donnée bancaire n’est saisie dans l’application. Les paiements en ligne arrivent prochainement.',
     customerRequired: 'Renseignez votre nom et votre téléphone.',
     tableRequired: 'Scannez le QR de votre table pour commander sur place.',
     serverOnly: 'Le règlement au serveur est proposé uniquement sur place.',
@@ -306,7 +311,8 @@ const fr: Messages = {
     manualTenant: 'Établissement',
     openTable: 'Ouvrir le menu',
     demoTitle: 'Tables de démonstration',
-    demoDesc: 'Scannez avec la caméra ou ouvrez directement une table libre pour tester le parcours.',
+    demoDesc:
+      'Scannez avec la caméra ou ouvrez directement une table libre pour tester le parcours.',
     openDemo: 'Ouvrir {code}',
     invalidCode: 'QR non reconnu. Vérifiez le lien ou le code saisi.',
     permissionHelp: 'Autorisez l’accès à la caméra dans les réglages du navigateur.',
@@ -360,7 +366,8 @@ const fr: Messages = {
   account: {
     title: 'Compte',
     guestTitle: 'Bienvenue',
-    guestDesc: 'Connectez-vous en quelques secondes avec votre numéro de téléphone. Pas de mot de passe.',
+    guestDesc:
+      'Connectez-vous en quelques secondes avec votre numéro de téléphone. Pas de mot de passe.',
     loginTitle: 'Connexion',
     loginDesc: 'Nous vous envoyons un code à 6 chiffres par SMS.',
     phone: 'Numéro de téléphone',
@@ -394,7 +401,8 @@ const fr: Messages = {
     install: 'Installer l’application',
     installDesc: 'Depuis le menu du navigateur : « Ajouter à l’écran d’accueil ».',
     about: 'À propos',
-    aboutDesc: 'RESTO-HUB — plateforme de gestion pour restaurants et bars. Application cliente v0.1, devise XOF.',
+    aboutDesc:
+      'RESTO-HUB — plateforme de gestion pour restaurants et bars. Application cliente v0.1, devise XOF.',
     welcomeTitle: 'Vos avantages',
     welcome1: 'Historique et reçus numériques sur cet appareil',
     welcome2: 'Favoris et points de fidélité synchronisés',
@@ -406,7 +414,8 @@ const fr: Messages = {
     subtitle: 'Historique local, reçus numériques et suivi en direct.',
     empty: 'Aucune commande pour l’instant',
     emptyDesc: 'Vos commandes passées depuis cet appareil apparaîtront ici.',
-    localHint: 'Historique conservé sur cet appareil. Connectez-vous pour retrouver vos favoris et vos points.',
+    localHint:
+      'Historique conservé sur cet appareil. Connectez-vous pour retrouver vos favoris et vos points.',
     viewOrder: 'Suivre',
     receipt: 'Reçu',
     statusRecue: 'Reçue',
@@ -470,7 +479,8 @@ const fr: Messages = {
     paid: 'Payé',
     unpaid: 'À régler sur place',
     partial: 'Partiellement payé',
-    footer: 'Ce reçu est conservé localement. La facture officielle est émise par la caisse de l’établissement.',
+    footer:
+      'Ce reçu est conservé localement. La facture officielle est émise par la caisse de l’établissement.',
     back: 'Retour au suivi',
   },
 };
@@ -706,7 +716,8 @@ const en: Messages = {
     title: 'Payment',
     payment: 'Payment method',
     payAtServer: 'Pay the waiter',
-    payAtServerDesc: 'The waiter collects payment at the table. Your order goes to the kitchen right away.',
+    payAtServerDesc:
+      'The waiter collects payment at the table. Your order goes to the kitchen right away.',
     payAtCashier: 'Pay at the till',
     payAtCashierDesc: 'Pay at the counter when picking up your order.',
     mobileMoney: 'Mobile Money',
@@ -869,7 +880,8 @@ const en: Messages = {
     install: 'Install the app',
     installDesc: 'From your browser menu: “Add to Home screen”.',
     about: 'About',
-    aboutDesc: 'RESTO-HUB — management platform for restaurants and bars. Guest app v0.1, XOF currency.',
+    aboutDesc:
+      'RESTO-HUB — management platform for restaurants and bars. Guest app v0.1, XOF currency.',
     welcomeTitle: 'Your benefits',
     welcome1: 'Order history and digital receipts on this device',
     welcome2: 'Favourites and loyalty points synced',

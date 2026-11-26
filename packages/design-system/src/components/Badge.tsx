@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { cx } from '../lib/cx';
 import { Icon, type IconName } from './Icon';
 
-export type BadgeTone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
+export type BadgeTone =
+  'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
 
 export interface BadgeProps {
   tone?: BadgeTone;
@@ -16,12 +17,7 @@ export interface BadgeProps {
 export function Badge({ tone = 'neutral', children, dot, live, icon, className }: BadgeProps) {
   return (
     <span
-      className={cx(
-        'rh-badge',
-        `rh-badge--${tone}`,
-        (dot || live) && 'rh-badge--live',
-        className,
-      )}
+      className={cx('rh-badge', `rh-badge--${tone}`, (dot || live) && 'rh-badge--live', className)}
     >
       {icon && <Icon name={icon} size="sm" />}
       {(dot || live) && <span className="rh-badge__dot" aria-hidden="true" />}

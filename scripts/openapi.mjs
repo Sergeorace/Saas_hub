@@ -18,14 +18,22 @@ const SERVICES = [
   ['catalog-service', 4003, 'Produits, catégories, variantes, menus, promotions.'],
   ['floor-service', 4004, 'Zones, plan de salle, tables, QR, réservations.'],
   ['order-service', 4005, 'Paniers, commandes, workflow, KDS, caisse (POS).'],
-  ['payment-service', 4006, 'Agrégateur de paiement, portefeuille, reversements, commissions, litiges.'],
+  [
+    'payment-service',
+    4006,
+    'Agrégateur de paiement, portefeuille, reversements, commissions, litiges.',
+  ],
   ['staff-service', 4007, 'Employés, plannings, pointage, performances, audit.'],
   ['payroll-service', 4008, 'Paie mensuelle, bulletins, paiements groupés à double validation.'],
   ['inventory-service', 4009, 'Stocks, fiches techniques, inventaires, pertes, fournisseurs.'],
   ['loyalty-marketing-service', 4010, 'Fidélité, codes promo, campagnes, avis clients.'],
   ['notification-service', 4011, 'Push, SMS, e-mail, notifications temps réel.'],
   ['reporting-service', 4012, 'Tableaux de bord, rapports PDF/Excel/CSV, exports.'],
-  ['platform-admin-service', 4013, 'Supervision, litiges, paramètres globaux, journaux techniques.'],
+  [
+    'platform-admin-service',
+    4013,
+    'Supervision, litiges, paramètres globaux, journaux techniques.',
+  ],
 ];
 
 function parseTableMap(source) {
@@ -82,7 +90,10 @@ function operation(route, service) {
     'x-service': service,
     responses: {
       200: { description: 'Succès (corps conforme au contrat du service).' },
-      400: { description: 'Requête invalide (validation d’entrée).', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+      400: {
+        description: 'Requête invalide (validation d’entrée).',
+        content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+      },
       401: { description: 'Authentification requise ou invalide.' },
       403: { description: 'Permission insuffisante ou accès inter-tenant refusé.' },
       404: { description: 'Ressource inexistante.' },

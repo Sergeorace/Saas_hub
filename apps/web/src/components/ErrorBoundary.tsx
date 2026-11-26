@@ -26,13 +26,15 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="rh-card">
             <div className="rh-card__body" role="alert">
               <strong>Une erreur est survenue</strong>
-              <p className="console-muted">
-                Actualisez la page ou revenez à l’accueil.
-              </p>
+              <p className="console-muted">Actualisez la page ou revenez à l’accueil.</p>
               <p className="console-muted" data-error-message>
                 {this.state.error.message}
               </p>
-              <button type="button" className="rh-btn rh-btn--primary" onClick={() => window.location.assign('#/')}>
+              <button
+                type="button"
+                className="rh-btn rh-btn--primary"
+                onClick={() => window.location.assign('#/')}
+              >
                 Retour à l’accueil
               </button>
             </div>

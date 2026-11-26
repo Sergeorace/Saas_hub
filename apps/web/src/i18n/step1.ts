@@ -38,7 +38,8 @@ export const frStep1: Messages = {
     verify: 'Vérifier',
     changePhone: 'Changer de numéro',
     or: 'ou',
-    socialHint: 'En démonstration, Google et Apple utilisent l’e-mail saisi ci-dessus (ou le gérant de démo).',
+    socialHint:
+      'En démonstration, Google et Apple utilisent l’e-mail saisi ci-dessus (ou le gérant de démo).',
     noAccount: 'Pas encore d’espace ?',
     createAccount: 'Créer un établissement',
     mfaRequired: 'MFA obligatoire pour votre rôle',
@@ -56,7 +57,8 @@ export const frStep1: Messages = {
     back: 'Revenir à la connexion',
     mfaVerifyBadge: 'Double authentification',
     mfaVerifyTitle: 'Confirmez votre identité',
-    mfaVerifyLead: 'Saisissez le code de votre application d’authentification ou un code de secours.',
+    mfaVerifyLead:
+      'Saisissez le code de votre application d’authentification ou un code de secours.',
     recoveryCode: 'Code de secours',
     mfaVerify: 'Valider',
     mfaUseTotp: 'Utiliser un code TOTP',
@@ -76,8 +78,7 @@ export const frStep1: Messages = {
     backHome: 'Retour au site',
     eyebrow: 'Inscription établissement',
     title: 'Ouvrez votre espace RESTO-HUB',
-    lead:
-      'Cinq étapes, puis notre équipe vérifie votre dossier KYC/KYB. Votre espace, vos paramètres et votre équipe sont créés automatiquement à la validation.',
+    lead: 'Cinq étapes, puis notre équipe vérifie votre dossier KYC/KYB. Votre espace, vos paramètres et votre équipe sont créés automatiquement à la validation.',
     progress: 'Progression de l’inscription',
     stepEstablishment: 'Établissement',
     stepContact: 'Coordonnées',
@@ -86,7 +87,8 @@ export const frStep1: Messages = {
     stepReview: 'Récapitulatif',
     stepEstablishmentHint: 'Informations légales et commerciales de votre établissement.',
     stepContactHint: 'Adresse, contacts et horaires d’ouverture.',
-    stepManagerHint: 'Ce compte administrera l’établissement. Le MFA sera exigé à la première connexion.',
+    stepManagerHint:
+      'Ce compte administrera l’établissement. Le MFA sera exigé à la première connexion.',
     stepDocumentsHint: 'Pièces justificatives (KYC/KYB léger). Formats image ou PDF, 2 Mo maximum.',
     stepReviewHint: 'Vérifiez les informations avant de soumettre votre demande.',
     required: 'Champ obligatoire',
@@ -156,14 +158,17 @@ export const frStep1: Messages = {
     documentHint: 'Image ou PDF · 2 Mo max.',
     replaceDocument: 'Remplacer',
     chooseDocument: 'Choisir un fichier',
-    documentSecurity: 'Vos pièces sont stockées de façon privée et visibles uniquement par l’équipe de validation.',
+    documentSecurity:
+      'Vos pièces sont stockées de façon privée et visibles uniquement par l’équipe de validation.',
     nifRccm: 'NIF / RCCM',
     address: 'Adresse',
     contact: 'Coordonnées',
     manager: 'Gérant',
     documents: 'Pièces justificatives',
-    terms: 'J’accepte les conditions générales et la politique de confidentialité (loi n° 2019-014, principes RGPD).',
-    termsNote: 'Les pièces et informations transmises servent uniquement à vérifier votre établissement.',
+    terms:
+      'J’accepte les conditions générales et la politique de confidentialité (loi n° 2019-014, principes RGPD).',
+    termsNote:
+      'Les pièces et informations transmises servent uniquement à vérifier votre établissement.',
     cancel: 'Annuler',
     back: 'Retour',
     continue: 'Continuer',
@@ -175,7 +180,8 @@ export const frStep1: Messages = {
     summaryFeature3: 'Paiements Mobile Money & caisse',
     summaryFeature4: 'Support en français',
     trialBadge: '14 jours d’essai offerts',
-    trialNote: 'Aucun prélèvement pendant l’essai. Vous choisissez ensuite votre moyen de paiement.',
+    trialNote:
+      'Aucun prélèvement pendant l’essai. Vous choisissez ensuite votre moyen de paiement.',
     helpTitle: 'Besoin d’aide ?',
     helpBody: 'Notre équipe vous accompagne dans la configuration, du lundi au samedi.',
     draftBadge: 'Demande enregistrée',
@@ -221,7 +227,8 @@ export const frStep1: Messages = {
     authBody: 'Le back-office plateforme est réservé aux super-administrateurs.',
     authCta: 'Se connecter',
     forbiddenTitle: 'Accès restreint',
-    forbiddenBody: 'Votre compte ne dispose pas de la permission « platform:establishments:review ».',
+    forbiddenBody:
+      'Votre compte ne dispose pas de la permission « platform:establishments:review ».',
     backSite: 'Retour au site',
     navPlatform: 'Supervision',
     navAccount: 'Compte',
@@ -327,7 +334,8 @@ export const frStep1: Messages = {
     rejectReasonRequired: 'Un motif de refus est requis.',
     requestNoteRequired: 'Précisez les éléments attendus.',
     approveSuccess: 'Demande validée — espace créé',
-    approveCredentials: 'Identifiants gérant : {email} / {password} (à changer à la première connexion)',
+    approveCredentials:
+      'Identifiants gérant : {email} / {password} (à changer à la première connexion)',
     approveExistingAccount: 'Compte existant rattaché : {email}',
     rejectSuccess: 'Demande refusée',
     requestSuccess: 'Complément demandé',
@@ -424,7 +432,8 @@ export const frStep1: Messages = {
     addSite: 'Ajouter le site',
     siteAdded: 'Site ajouté',
     siteInvalid: 'Renseignez un nom et une adresse valides',
-    siteLimit: 'Votre formule est limitée à {max} site(s). Passez à une formule supérieure pour en ajouter.',
+    siteLimit:
+      'Votre formule est limitée à {max} site(s). Passez à une formule supérieure pour en ajouter.',
     subscriptionTitle: 'Abonnement',
     currentPlan: 'Formule actuelle',
     subscriptionStatus: 'Statut de l’abonnement',
@@ -465,8 +474,10 @@ export const frStep1: Messages = {
     teamTitle: 'Équipe',
     teamSubtitle: 'Comptes rattachés à l’établissement et rôles RBAC.',
     teamEmptyTitle: 'Équipe vide',
-    teamEmptyBody: 'Invitez vos managers, serveurs, cuisiniers et caissiers (étape équipe à venir).',
-    teamNote: 'Les rôles s’appuient sur le RBAC fin : voir, créer, modifier, annuler, rembourser, exporter.',
+    teamEmptyBody:
+      'Invitez vos managers, serveurs, cuisiniers et caissiers (étape équipe à venir).',
+    teamNote:
+      'Les rôles s’appuient sur le RBAC fin : voir, créer, modifier, annuler, rembourser, exporter.',
     colMember: 'Membre',
     colRoles: 'Rôles',
     mfaOn: 'Activé',
@@ -563,8 +574,7 @@ export const enStep1: Messages = {
     backHome: 'Back to site',
     eyebrow: 'Establishment registration',
     title: 'Open your RESTO-HUB workspace',
-    lead:
-      'Five steps, then our team reviews your light KYC/KYB file. Your workspace, settings and team are created automatically on approval.',
+    lead: 'Five steps, then our team reviews your light KYC/KYB file. Your workspace, settings and team are created automatically on approval.',
     progress: 'Registration progress',
     stepEstablishment: 'Establishment',
     stepContact: 'Contact',
@@ -573,7 +583,8 @@ export const enStep1: Messages = {
     stepReview: 'Review',
     stepEstablishmentHint: 'Legal and commercial details of your establishment.',
     stepContactHint: 'Address, contacts and opening hours.',
-    stepManagerHint: 'This account will administer the establishment. MFA is required at first sign-in.',
+    stepManagerHint:
+      'This account will administer the establishment. MFA is required at first sign-in.',
     stepDocumentsHint: 'Supporting documents (light KYC/KYB). Image or PDF, 2 MB maximum.',
     stepReviewHint: 'Check the information before submitting your application.',
     required: 'Required field',

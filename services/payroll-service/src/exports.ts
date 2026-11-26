@@ -57,13 +57,19 @@ export function payrollCsv(run: PayrollRun): string {
 }
 
 function xmlEscape(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 export function payrollXls(run: PayrollRun, sheetName = `Paie ${run.period}`): string {
   const cell = (value: string, style?: string) =>
     `<Cell${style ? ` ss:StyleID="${style}"` : ''}><Data ss:Type="String">${xmlEscape(value)}</Data></Cell>`;
-  const headerRow = `<Row>${header().map((value) => cell(value, 'head')).join('')}</Row>`;
+  const headerRow = `<Row>${header()
+    .map((value) => cell(value, 'head'))
+    .join('')}</Row>`;
   const rows = run.payslips
     .map((_, index) => {
       const cells = row(run, index);
@@ -89,7 +95,21 @@ export function payrollXls(run: PayrollRun, sheetName = `Paie ${run.period}`): s
 export function rulesCsv(run: PayrollRun): string {
   const rules = run.snapshot.settings.rules;
   const lines = [
-    ['Code', 'Libellé', 'Type', 'Base', 'Mode', 'Taux %', 'Montant F', 'Coefficient', 'Plafond F', 'Actif', 'Imposable', 'Déductible', 'Description'],
+    [
+      'Code',
+      'Libellé',
+      'Type',
+      'Base',
+      'Mode',
+      'Taux %',
+      'Montant F',
+      'Coefficient',
+      'Plafond F',
+      'Actif',
+      'Imposable',
+      'Déductible',
+      'Description',
+    ],
     ...rules.map((rule) => [
       rule.code,
       rule.label,

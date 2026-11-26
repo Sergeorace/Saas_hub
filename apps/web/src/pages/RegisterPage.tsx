@@ -134,7 +134,9 @@ function writeStorage(key: string, value: unknown) {
   }
 }
 
-function statusTone(status: ApplicationStatus): 'neutral' | 'warning' | 'info' | 'success' | 'danger' {
+function statusTone(
+  status: ApplicationStatus,
+): 'neutral' | 'warning' | 'info' | 'success' | 'danger' {
   switch (status) {
     case 'submitted':
       return 'warning';
@@ -240,7 +242,8 @@ export function RegisterPage() {
       if (form.legalName.trim().length < 2) next.legalName = required;
       if (!/^[A-Za-z0-9]{6,20}$/.test(form.nif.trim())) next.nif = t('register.nifInvalid');
       if (form.rccm.trim().length < 3) next.rccm = required;
-      if (form.logoUrl.trim() && !/^https:\/\//i.test(form.logoUrl.trim())) next.logoUrl = t('register.urlInvalid');
+      if (form.logoUrl.trim() && !/^https:\/\//i.test(form.logoUrl.trim()))
+        next.logoUrl = t('register.urlInvalid');
       if (form.photos.some((photo) => photo.trim() && !/^https:\/\//i.test(photo.trim()))) {
         next.photos = t('register.urlInvalid');
       }
@@ -248,17 +251,26 @@ export function RegisterPage() {
     if (index === 1) {
       if (form.district.trim().length < 2) next.district = required;
       if (form.city.trim().length < 2) next.city = required;
-      if (!/^\+?\d[\d\s-]{7,}$/.test(form.contactPhone.trim())) next.contactPhone = t('register.phoneInvalid');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.contactEmail.trim())) next.contactEmail = t('register.emailInvalid');
+      if (!/^\+?\d[\d\s-]{7,}$/.test(form.contactPhone.trim()))
+        next.contactPhone = t('register.phoneInvalid');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.contactEmail.trim()))
+        next.contactEmail = t('register.emailInvalid');
     }
     if (index === 2) {
       if (form.managerName.trim().length < 2) next.managerName = required;
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.managerEmail.trim())) next.managerEmail = t('register.emailInvalid');
-      if (!/^\+?\d[\d\s-]{7,}$/.test(form.managerPhone.trim())) next.managerPhone = t('register.phoneInvalid');
-      if (form.password.length < 8 || !/[a-zA-Z]/.test(form.password) || !/\d/.test(form.password)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.managerEmail.trim()))
+        next.managerEmail = t('register.emailInvalid');
+      if (!/^\+?\d[\d\s-]{7,}$/.test(form.managerPhone.trim()))
+        next.managerPhone = t('register.phoneInvalid');
+      if (
+        form.password.length < 8 ||
+        !/[a-zA-Z]/.test(form.password) ||
+        !/\d/.test(form.password)
+      ) {
         next.password = t('register.passwordInvalid');
       }
-      if (form.password !== form.confirmPassword) next.confirmPassword = t('register.passwordMismatch');
+      if (form.password !== form.confirmPassword)
+        next.confirmPassword = t('register.passwordMismatch');
     }
     if (index === 3) {
       if (!documents.nif) next.nif = t('register.documentRequired');
@@ -304,7 +316,11 @@ export function RegisterPage() {
 
   const ensureApplication = async (): Promise<Pointer> => {
     if (pointer) {
-      await tenantApi.updateApplication(pointer.applicationId, pointer.applicationToken, applicationPayload());
+      await tenantApi.updateApplication(
+        pointer.applicationId,
+        pointer.applicationToken,
+        applicationPayload(),
+      );
       return pointer;
     }
     const created = await tenantApi.createApplication(applicationPayload());
@@ -345,7 +361,11 @@ export function RegisterPage() {
     if (pointer && step > 2) {
       setPending(true);
       try {
-        await tenantApi.updateApplication(pointer.applicationId, pointer.applicationToken, applicationPayload());
+        await tenantApi.updateApplication(
+          pointer.applicationId,
+          pointer.applicationToken,
+          applicationPayload(),
+        );
       } catch {
         /* la sauvegarde de brouillon reste locale */
       } finally {
@@ -370,15 +390,23 @@ export function RegisterPage() {
         reader.onerror = () => reject(reader.error);
         reader.readAsDataURL(file);
       });
-      const result = await tenantApi.uploadDocument(pointer.applicationId, pointer.applicationToken, {
-        type,
-        fileName: file.name,
-        mimeType: file.type || 'application/octet-stream',
-        dataBase64,
-      });
+      const result = await tenantApi.uploadDocument(
+        pointer.applicationId,
+        pointer.applicationToken,
+        {
+          type,
+          fileName: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          dataBase64,
+        },
+      );
       setDocuments((current) => ({
         ...current,
-        [type]: { fileName: result.document.fileName, sizeBytes: result.document.sizeBytes, uploadedAt: result.document.uploadedAt },
+        [type]: {
+          fileName: result.document.fileName,
+          sizeBytes: result.document.sizeBytes,
+          uploadedAt: result.document.uploadedAt,
+        },
       }));
       setErrors((current) => ({ ...current, [type]: '' }));
       toast.push({ title: t('register.documentUploaded'), description: file.name });
@@ -406,7 +434,10 @@ export function RegisterPage() {
         ...applicationPayload(),
         acceptTerms: true,
       });
-      const result = await tenantApi.submitApplication(active.applicationId, active.applicationToken);
+      const result = await tenantApi.submitApplication(
+        active.applicationId,
+        active.applicationToken,
+      );
       setSubmitted(result.application);
       writeStorage(DRAFT_KEY, null);
       toast.push({ title: t('register.submitSuccess') });
@@ -563,7 +594,9 @@ export function RegisterPage() {
                 </div>
               </div>
               <div className="reg-confirm__credentials">
-                <Badge tone="info" icon="lock">{t('register.credentialsTitle')}</Badge>
+                <Badge tone="info" icon="lock">
+                  {t('register.credentialsTitle')}
+                </Badge>
                 <p>{t('register.credentialsBody', { email: form.managerEmail })}</p>
               </div>
               <div className="reg-actions">
@@ -575,7 +608,13 @@ export function RegisterPage() {
                     tenantApi
                       .getApplication(pointer!.applicationId, pointer!.applicationToken)
                       .then((result) => setTracking(result.application))
-                      .catch((error: unknown) => toast.push({ title: t('register.errorTitle'), description: errorMessage(error), tone: 'error' }))
+                      .catch((error: unknown) =>
+                        toast.push({
+                          title: t('register.errorTitle'),
+                          description: errorMessage(error),
+                          tone: 'error',
+                        }),
+                      )
                   }
                 >
                   {t('register.track')}
@@ -625,7 +664,11 @@ export function RegisterPage() {
                 <span style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
               </div>
 
-              {alert && <p className="auth-error" role="alert">{alert}</p>}
+              {alert && (
+                <p className="auth-error" role="alert">
+                  {alert}
+                </p>
+              )}
 
               {step === 0 && (
                 <section className="reg-section">
@@ -693,7 +736,11 @@ export function RegisterPage() {
                       />
                       <div className="reg-logo__preview" aria-label={t('register.logoPreview')}>
                         {/^https:\/\//i.test(form.logoUrl.trim()) ? (
-                          <img src={form.logoUrl.trim()} alt={t('register.logoPreview')} loading="lazy" />
+                          <img
+                            src={form.logoUrl.trim()}
+                            alt={t('register.logoPreview')}
+                            loading="lazy"
+                          />
                         ) : (
                           'LOGO'
                         )}
@@ -808,8 +855,13 @@ export function RegisterPage() {
                     {hours.map((slot, index) => {
                       const day = DAYS[index];
                       return (
-                        <div className={slot.closed ? 'reg-hours__row is-closed' : 'reg-hours__row'} key={slot.day}>
-                          <span className="reg-hours__day">{locale === 'en' ? day.labelEn : day.labelFr}</span>
+                        <div
+                          className={slot.closed ? 'reg-hours__row is-closed' : 'reg-hours__row'}
+                          key={slot.day}
+                        >
+                          <span className="reg-hours__day">
+                            {locale === 'en' ? day.labelEn : day.labelFr}
+                          </span>
                           <input
                             type="time"
                             aria-label={`${day.labelFr} — ${t('register.open')}`}
@@ -817,7 +869,9 @@ export function RegisterPage() {
                             disabled={slot.closed}
                             onChange={(event) =>
                               setHours((current) =>
-                                current.map((entry, i) => (i === index ? { ...entry, open: event.target.value } : entry)),
+                                current.map((entry, i) =>
+                                  i === index ? { ...entry, open: event.target.value } : entry,
+                                ),
                               )
                             }
                           />
@@ -829,7 +883,9 @@ export function RegisterPage() {
                             disabled={slot.closed}
                             onChange={(event) =>
                               setHours((current) =>
-                                current.map((entry, i) => (i === index ? { ...entry, close: event.target.value } : entry)),
+                                current.map((entry, i) =>
+                                  i === index ? { ...entry, close: event.target.value } : entry,
+                                ),
                               )
                             }
                           />
@@ -840,7 +896,9 @@ export function RegisterPage() {
                               onChange={(event) =>
                                 setHours((current) =>
                                   current.map((entry, i) =>
-                                    i === index ? { ...entry, closed: event.target.checked } : entry,
+                                    i === index
+                                      ? { ...entry, closed: event.target.checked }
+                                      : entry,
                                   ),
                                 )
                               }
@@ -919,7 +977,9 @@ export function RegisterPage() {
                       >
                         <span className="reg-plan__head">
                           <strong>{plan.name}</strong>
-                          {plan.highlight && <Badge tone="accent">{t('register.recommended')}</Badge>}
+                          {plan.highlight && (
+                            <Badge tone="accent">{t('register.recommended')}</Badge>
+                          )}
                         </span>
                         <span className="reg-plan__price">
                           {formatXof(plan.priceXof, locale)}
@@ -980,13 +1040,11 @@ export function RegisterPage() {
                   <h2 className="reg-subtitle">{t('register.stepDocuments')}</h2>
                   <p className="reg-section__hint">{t('register.stepDocumentsHint')}</p>
                   <div className="reg-docs">
-                    {(
-                      [
-                        { type: 'nif' as const, required: true },
-                        { type: 'rccm' as const, required: true },
-                        { type: 'id_card' as const, required: false },
-                      ]
-                    ).map((doc) => {
+                    {[
+                      { type: 'nif' as const, required: true },
+                      { type: 'rccm' as const, required: true },
+                      { type: 'id_card' as const, required: false },
+                    ].map((doc) => {
                       const uploaded = documents[doc.type];
                       return (
                         <div className={uploaded ? 'reg-doc is-done' : 'reg-doc'} key={doc.type}>
@@ -1001,7 +1059,9 @@ export function RegisterPage() {
                                 ? `${uploaded.fileName} · ${Math.round(uploaded.sizeBytes / 1024)} Ko`
                                 : t('register.documentHint')}
                             </span>
-                            {errors[doc.type] && <span className="auth-error">{errors[doc.type]}</span>}
+                            {errors[doc.type] && (
+                              <span className="auth-error">{errors[doc.type]}</span>
+                            )}
                           </div>
                           <input
                             ref={fileInputs[doc.type]}
@@ -1019,7 +1079,9 @@ export function RegisterPage() {
                             onClick={() => fileInputs[doc.type].current?.click()}
                             disabled={pending}
                           >
-                            {uploaded ? t('register.replaceDocument') : t('register.chooseDocument')}
+                            {uploaded
+                              ? t('register.replaceDocument')
+                              : t('register.chooseDocument')}
                           </Button>
                         </div>
                       );
@@ -1036,11 +1098,15 @@ export function RegisterPage() {
                   <div className="reg-recap">
                     <div>
                       <dt>{t('register.establishment')}</dt>
-                      <dd>{form.brandName} — {form.legalName}</dd>
+                      <dd>
+                        {form.brandName} — {form.legalName}
+                      </dd>
                     </div>
                     <div>
                       <dt>{t('register.nifRccm')}</dt>
-                      <dd>{form.nif} · {form.rccm}</dd>
+                      <dd>
+                        {form.nif} · {form.rccm}
+                      </dd>
                     </div>
                     <div>
                       <dt>{t('register.address')}</dt>
@@ -1048,7 +1114,9 @@ export function RegisterPage() {
                     </div>
                     <div>
                       <dt>{t('register.contact')}</dt>
-                      <dd>{form.contactPhone} · {form.contactEmail}</dd>
+                      <dd>
+                        {form.contactPhone} · {form.contactEmail}
+                      </dd>
                     </div>
                     <div>
                       <dt>{t('register.visual')}</dt>
@@ -1061,7 +1129,9 @@ export function RegisterPage() {
                     </div>
                     <div>
                       <dt>{t('register.manager')}</dt>
-                      <dd>{form.managerName} · {form.managerEmail} · {form.managerPhone}</dd>
+                      <dd>
+                        {form.managerName} · {form.managerEmail} · {form.managerPhone}
+                      </dd>
                     </div>
                     <div>
                       <dt>{t('register.plan')}</dt>
@@ -1072,7 +1142,10 @@ export function RegisterPage() {
                     </div>
                     <div>
                       <dt>{t('register.languages')}</dt>
-                      <dd>{form.languages.map((entry) => entry.toUpperCase()).join(' · ')} — {form.currency}</dd>
+                      <dd>
+                        {form.languages.map((entry) => entry.toUpperCase()).join(' · ')} —{' '}
+                        {form.currency}
+                      </dd>
                     </div>
                     <div>
                       <dt>{t('register.documents')}</dt>
@@ -1122,7 +1195,8 @@ export function RegisterPage() {
                 <div className="reg-summary__plan">
                   <strong>{selectedPlan.name}</strong>
                   <span>
-                    {formatXof(selectedPlan.priceXof, locale)} <small>{t('register.perMonth')}</small>
+                    {formatXof(selectedPlan.priceXof, locale)}{' '}
+                    <small>{t('register.perMonth')}</small>
                   </span>
                 </div>
                 <ul className="reg-summary__features">
@@ -1136,7 +1210,9 @@ export function RegisterPage() {
                   ))}
                 </ul>
                 <div className="reg-summary__trial">
-                  <Badge tone="success" icon="gift">{t('register.trialBadge')}</Badge>
+                  <Badge tone="success" icon="gift">
+                    {t('register.trialBadge')}
+                  </Badge>
                   <p>{t('register.trialNote')}</p>
                 </div>
                 <div className="reg-summary__help">
@@ -1149,7 +1225,9 @@ export function RegisterPage() {
             {pointer && (
               <Card className="reg-summary reg-summary--draft">
                 <CardBody>
-                  <Badge tone="info" icon="edit">{t('register.draftBadge')}</Badge>
+                  <Badge tone="info" icon="edit">
+                    {t('register.draftBadge')}
+                  </Badge>
                   <p>{t('register.draftNote', { reference: pointer.reference })}</p>
                 </CardBody>
               </Card>

@@ -20,7 +20,10 @@ export function loadStaffConfig(): StaffConfig {
     internalKey: process.env.INTERNAL_API_KEY ?? 'dev-internal-key',
     identityUrl: process.env.IDENTITY_URL ?? 'http://127.0.0.1:4001',
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
-    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     demoSeed: envFlag('DEMO_SEED', !production),
   };
 }

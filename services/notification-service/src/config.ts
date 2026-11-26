@@ -22,7 +22,8 @@ export function loadNotificationConfig(): NotificationConfig {
     internalKey: process.env.INTERNAL_API_KEY ?? 'dev-internal-key',
     identityUrl: process.env.IDENTITY_URL ?? 'http://127.0.0.1:4001',
     tenantUrl: process.env.TENANT_URL ?? 'http://127.0.0.1:4002',
-    smsWebhookSecret: process.env.SMS_WEBHOOK_SECRET ?? (production ? '' : 'dev-sms-webhook-secret'),
+    smsWebhookSecret:
+      process.env.SMS_WEBHOOK_SECRET ?? (production ? '' : 'dev-sms-webhook-secret'),
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
     eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '')
       .split(',')

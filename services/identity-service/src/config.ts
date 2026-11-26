@@ -29,7 +29,10 @@ export function loadIdentityConfig(): IdentityConfig {
     tokenSecret,
     internalKey,
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
-    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     demoOtp: envFlag('DEMO_OTP', !production),
     accessTtlSeconds: Number(process.env.ACCESS_TTL_SECONDS ?? 900),
     refreshTtlDays: Number(process.env.REFRESH_TTL_DAYS ?? 30),

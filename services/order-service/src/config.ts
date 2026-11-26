@@ -30,7 +30,10 @@ export function loadOrderConfig(): OrderConfig {
     floorUrl: process.env.FLOOR_URL ?? 'http://127.0.0.1:4004',
     tenantUrl: process.env.TENANT_URL ?? 'http://127.0.0.1:4002',
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
-    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     appPublicUrl: process.env.CLIENT_APP_URL ?? 'https://app.resto-hub.tg',
     timeZone: process.env.ORDER_TIMEZONE ?? 'Africa/Lome',
     vatRate: Number.isFinite(vat) && vat >= 0 && vat < 1 ? vat : 0.18,

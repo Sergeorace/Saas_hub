@@ -9,11 +9,20 @@ import {
   useToast,
   type Locale,
 } from '@resto-hub/design-system';
-import { errorMessage, orderApi, type KdsPayload, type KdsTicket, type OrderStation } from '../lib/api';
+import {
+  errorMessage,
+  orderApi,
+  type KdsPayload,
+  type KdsTicket,
+  type OrderStation,
+} from '../lib/api';
 
 const STATIONS: Array<OrderStation | 'all'> = ['all', 'cuisine', 'bar'];
 
-const COLUMNS: Array<{ key: 'nouvelle' | 'en_preparation' | 'prete'; label: 'colNew' | 'colPrep' | 'colReady' }> = [
+const COLUMNS: Array<{
+  key: 'nouvelle' | 'en_preparation' | 'prete';
+  label: 'colNew' | 'colPrep' | 'colReady';
+}> = [
   { key: 'nouvelle', label: 'colNew' },
   { key: 'en_preparation', label: 'colPrep' },
   { key: 'prete', label: 'colReady' },
@@ -88,7 +97,9 @@ export function KdsTab({ tenantId, locale, canUpdate }: Props) {
           <p>{t('kds.subtitle')}</p>
         </div>
         <div className="kds-head__controls">
-          <Badge tone="success" live>{t('kds.live')}</Badge>
+          <Badge tone="success" live>
+            {t('kds.live')}
+          </Badge>
           <div className="kds-stations" role="group" aria-label={t('kds.title')}>
             {STATIONS.map((entry) => (
               <button
@@ -98,7 +109,11 @@ export function KdsTab({ tenantId, locale, canUpdate }: Props) {
                 aria-pressed={station === entry}
                 onClick={() => setStation(entry)}
               >
-                {entry === 'all' ? t('kds.stationAll') : entry === 'cuisine' ? t('kds.stationCuisine') : t('kds.stationBar')}
+                {entry === 'all'
+                  ? t('kds.stationAll')
+                  : entry === 'cuisine'
+                    ? t('kds.stationCuisine')
+                    : t('kds.stationBar')}
               </button>
             ))}
           </div>
@@ -109,16 +124,23 @@ export function KdsTab({ tenantId, locale, canUpdate }: Props) {
       {error && (
         <div className="kds-alert" role="alert">
           {error}
-          <Button size="sm" variant="outline" onClick={() => void tick()}>{t('orders.refresh')}</Button>
+          <Button size="sm" variant="outline" onClick={() => void tick()}>
+            {t('orders.refresh')}
+          </Button>
         </div>
       )}
 
       {loading && !payload ? (
-        <div className="kds-loading"><SkeletonText lines={6} /><span>{t('kds.loading')}</span></div>
+        <div className="kds-loading">
+          <SkeletonText lines={6} />
+          <span>{t('kds.loading')}</span>
+        </div>
       ) : (
         <div className="kds-board">
           {COLUMNS.map((column) => {
-            const tickets = (payload?.tickets ?? []).filter((ticket) => ticket.status === column.key);
+            const tickets = (payload?.tickets ?? []).filter(
+              (ticket) => ticket.status === column.key,
+            );
             return (
               <section key={column.key} className="kds-col">
                 <header className="kds-col__head">
@@ -134,7 +156,9 @@ export function KdsTab({ tenantId, locale, canUpdate }: Props) {
                         'kds-ticket',
                         ticket.urgent ? 'is-urgent' : '',
                         ticket.critical ? 'is-critical' : '',
-                      ].filter(Boolean).join(' ')}
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                     >
                       <header className="kds-ticket__head">
                         <strong className="kds-ticket__number">{ticket.orderNumber}</strong>
@@ -142,27 +166,38 @@ export function KdsTab({ tenantId, locale, canUpdate }: Props) {
                       </header>
                       <div className="kds-ticket__meta">
                         <Badge tone={ticket.channel === 'sur_place' ? 'primary' : 'info'}>
-                          {t(`kds.${ticket.channel === 'sur_place' ? 'table' : ticket.channel === 'a_emporter' ? 'takeaway' : ticket.channel === 'livraison' ? 'delivery' : 'preorder'}`)}
+                          {t(
+                            `kds.${ticket.channel === 'sur_place' ? 'table' : ticket.channel === 'a_emporter' ? 'takeaway' : ticket.channel === 'livraison' ? 'delivery' : 'preorder'}`,
+                          )}
                         </Badge>
                         {ticket.tableCode && <strong>{ticket.tableCode}</strong>}
                         {station === 'all' && (
                           <Badge tone={ticket.station === 'bar' ? 'info' : 'accent'}>
-                            {ticket.station === 'bar' ? t('kds.stationBar') : t('kds.stationCuisine')}
+                            {ticket.station === 'bar'
+                              ? t('kds.stationBar')
+                              : t('kds.stationCuisine')}
                           </Badge>
                         )}
                         {(ticket.critical || ticket.urgent) && (
-                          <span className="kds-ticket__flag">{ticket.critical ? t('kds.late') : t('kds.urgent')}</span>
+                          <span className="kds-ticket__flag">
+                            {ticket.critical ? t('kds.late') : t('kds.urgent')}
+                          </span>
                         )}
                       </div>
                       {ticket.scheduledFor && (
-                        <p className="kds-ticket__scheduled">{t('kds.scheduled', { time: formatTime(ticket.scheduledFor, locale) })}</p>
+                        <p className="kds-ticket__scheduled">
+                          {t('kds.scheduled', { time: formatTime(ticket.scheduledFor, locale) })}
+                        </p>
                       )}
                       <ul className="kds-ticket__lines">
                         {ticket.lines.map((line, index) => (
                           <li key={`${ticket.id}-${index}`}>
                             <span className="kds-ticket__qty">{line.quantity}×</span>
                             <div>
-                              <strong>{line.name}{line.variantName ? ` — ${line.variantName}` : ''}</strong>
+                              <strong>
+                                {line.name}
+                                {line.variantName ? ` — ${line.variantName}` : ''}
+                              </strong>
                               {line.options.length > 0 && <span>{line.options.join(' · ')}</span>}
                               {line.notes && <em>{line.notes}</em>}
                             </div>
@@ -174,7 +209,9 @@ export function KdsTab({ tenantId, locale, canUpdate }: Props) {
                           type="button"
                           className={column.key === 'prete' ? 'kds-action is-done' : 'kds-action'}
                           disabled={acting === ticket.id || column.key === 'prete'}
-                          onClick={() => void act(ticket, column.key === 'nouvelle' ? 'en_preparation' : 'prete')}
+                          onClick={() =>
+                            void act(ticket, column.key === 'nouvelle' ? 'en_preparation' : 'prete')
+                          }
                         >
                           {column.key === 'nouvelle' ? t('kds.start') : t('kds.ready')}
                         </button>

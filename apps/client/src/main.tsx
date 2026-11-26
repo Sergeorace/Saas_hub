@@ -11,7 +11,9 @@ import App from './App';
 
 function LocalizedToasts({ children }: { children: ReactNode }) {
   const { locale } = useI18n();
-  return <ToastProvider closeLabel={locale === 'fr' ? 'Fermer' : 'Close'}>{children}</ToastProvider>;
+  return (
+    <ToastProvider closeLabel={locale === 'fr' ? 'Fermer' : 'Close'}>{children}</ToastProvider>
+  );
 }
 
 adoptLegacyPaths();

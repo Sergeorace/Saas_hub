@@ -15,7 +15,14 @@ export {
   type RateLimitOptions,
 } from './http.js';
 export { signToken, verifyToken, type TokenClaims, type TokenKind } from './jwt.js';
-export { hashPassword, verifyPassword, sha256, hashToken, randomToken, randomDigits } from './password.js';
+export {
+  hashPassword,
+  verifyPassword,
+  sha256,
+  hashToken,
+  randomToken,
+  randomDigits,
+} from './password.js';
 export {
   asObject,
   requireString,
@@ -54,4 +61,13 @@ export {
   type DomainEventName,
 } from '@resto-hub/shared-contracts';
 export { createServiceClient, type ServiceClient } from './client.js';
-export { api, assert, assertEqual, assertStatus, runTests, waitFor, type ApiResult, type TestCase } from './testing.js';
+export {
+  api,
+  assert,
+  assertEqual,
+  assertStatus,
+  runTests,
+  waitFor,
+  type ApiResult,
+  type TestCase,
+} from './testing.js';

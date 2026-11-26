@@ -17,15 +17,15 @@ conçue pour le marché ouest-africain (Togo en priorité). Elle réunit dans un
 
 Contraintes structurantes :
 
-| Contrainte | Décision |
-|---|---|
-| Devise par défaut | **XOF** (FCFA, montants entiers, aucune décimale) |
-| Langues | **FR** par défaut, **EN** livré, architecture i18n extensible |
-| Contexte terrain | réseau instable, écrans sombres, usage à une main, bruit |
-| Paiements | TMoney, Moov Money, CinetPay, PayDunya, FedaPay, PayGate, Stripe (option) |
-| Conformité | loi togolaise n° 2019-014 + principes RGPD ; PCI DSS via prestataires (aucune carte stockée) |
-| Charge cible v1 | 500 établissements, 10 000 utilisateurs simultanés, p95 < 500 ms, cuisine < 2 s |
-| Disponibilité | 99,9 % mensuel, sauvegardes quotidiennes, rétention 30 jours |
+| Contrainte        | Décision                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| Devise par défaut | **XOF** (FCFA, montants entiers, aucune décimale)                                            |
+| Langues           | **FR** par défaut, **EN** livré, architecture i18n extensible                                |
+| Contexte terrain  | réseau instable, écrans sombres, usage à une main, bruit                                     |
+| Paiements         | TMoney, Moov Money, CinetPay, PayDunya, FedaPay, PayGate, Stripe (option)                    |
+| Conformité        | loi togolaise n° 2019-014 + principes RGPD ; PCI DSS via prestataires (aucune carte stockée) |
+| Charge cible v1   | 500 établissements, 10 000 utilisateurs simultanés, p95 < 500 ms, cuisine < 2 s              |
+| Disponibilité     | 99,9 % mensuel, sauvegardes quotidiennes, rétention 30 jours                                 |
 
 ---
 
@@ -107,24 +107,24 @@ Aucune jointure inter-bases n'est autorisée.
 
 ## 4. Stack technique
 
-| Couche | Choix | Justification |
-|---|---|---|
-| Services backend | **NestJS 11 / Node.js 22 / TypeScript** | modularité, DI, validation, WebSocket natif |
-| Base de données | **PostgreSQL 16**, une base par service, RLS | ACID pour paiements/paie, isolation |
-| ORM / migrations | **Prisma** + migrations SQL brutes (policies RLS) | typage fort, SQL maîtrisé pour RLS |
-| Bus d'événements | **NATS JetStream** | léger, persistant, ack/DLQ, adapté à 500 tenants |
-| Jobs & files | **BullMQ sur Redis** | relances, exports, paie mensuelle, notifications |
-| Cache / verrous | **Redis** | sessions, verrous de table, rate-limit, cache menu |
-| Temps réel | **Socket.IO** (rooms par tenant/canal) | plan de salle, KDS, suivi client |
-| Stockage fichiers | **S3 compatible** + URL signées | photos menu, logos, bulletins PDF, exports |
-| Recherche | **PostgreSQL full-text** puis **Meilisearch** si volume | simplicité d'abord |
-| Web | **React 18 + TypeScript + Vite**, design system maison | back-office, PWA client et employés |
-| PWA | **Workbox** (cache menu/plan de salle, file offline) | terrain à réseau instable |
-| Mobile stores | wrapper **Capacitor** des PWA (phase 2) | un seul codebase UI |
-| PDF | rendu HTML → PDF côté service (Chromium headless) | bulletins, rapports, reçus |
-| Observabilité | **OpenTelemetry**, Prometheus/Grafana, Sentry, logs structurés | SLO et diagnostic |
-| Conteneurisation | **Docker**, Kubernetes (ou ECS), Nginx/Ingress | scalabilité horizontale |
-| CI/CD | GitHub Actions : lint, tests, contrats, isolation, e2e, SAST, image scan | qualité continue |
+| Couche            | Choix                                                                    | Justification                                      |
+| ----------------- | ------------------------------------------------------------------------ | -------------------------------------------------- |
+| Services backend  | **NestJS 11 / Node.js 22 / TypeScript**                                  | modularité, DI, validation, WebSocket natif        |
+| Base de données   | **PostgreSQL 16**, une base par service, RLS                             | ACID pour paiements/paie, isolation                |
+| ORM / migrations  | **Prisma** + migrations SQL brutes (policies RLS)                        | typage fort, SQL maîtrisé pour RLS                 |
+| Bus d'événements  | **NATS JetStream**                                                       | léger, persistant, ack/DLQ, adapté à 500 tenants   |
+| Jobs & files      | **BullMQ sur Redis**                                                     | relances, exports, paie mensuelle, notifications   |
+| Cache / verrous   | **Redis**                                                                | sessions, verrous de table, rate-limit, cache menu |
+| Temps réel        | **Socket.IO** (rooms par tenant/canal)                                   | plan de salle, KDS, suivi client                   |
+| Stockage fichiers | **S3 compatible** + URL signées                                          | photos menu, logos, bulletins PDF, exports         |
+| Recherche         | **PostgreSQL full-text** puis **Meilisearch** si volume                  | simplicité d'abord                                 |
+| Web               | **React 18 + TypeScript + Vite**, design system maison                   | back-office, PWA client et employés                |
+| PWA               | **Workbox** (cache menu/plan de salle, file offline)                     | terrain à réseau instable                          |
+| Mobile stores     | wrapper **Capacitor** des PWA (phase 2)                                  | un seul codebase UI                                |
+| PDF               | rendu HTML → PDF côté service (Chromium headless)                        | bulletins, rapports, reçus                         |
+| Observabilité     | **OpenTelemetry**, Prometheus/Grafana, Sentry, logs structurés           | SLO et diagnostic                                  |
+| Conteneurisation  | **Docker**, Kubernetes (ou ECS), Nginx/Ingress                           | scalabilité horizontale                            |
+| CI/CD             | GitHub Actions : lint, tests, contrats, isolation, e2e, SAST, image scan | qualité continue                                   |
 
 ---
 
@@ -138,7 +138,7 @@ Aucune jointure inter-bases n'est autorisée.
 - Enveloppe de succès :
 
 ```json
-{ "data": { }, "meta": { "requestId": "req_01J...", "cursor": "..." } }
+{ "data": {}, "meta": { "requestId": "req_01J...", "cursor": "..." } }
 ```
 
 - Erreur normalisée :
@@ -160,13 +160,13 @@ Aucune jointure inter-bases n'est autorisée.
 
 ### 5.2 En-têtes
 
-| En-tête | Usage |
-|---|---|
-| `Authorization: Bearer <jwt>` | accès utilisateur ou service (client credentials) |
-| `X-Tenant-Id` | tenant actif ; **doit** correspondre aux claims du jeton |
-| `Idempotency-Key` | obligatoire sur POST financiers (paiement, remboursement, paie) |
-| `X-Request-Id` | corrélation ; propagé dans les événements et les logs |
-| `If-Match` | contrôle de version optimiste sur les mutations sensibles |
+| En-tête                       | Usage                                                           |
+| ----------------------------- | --------------------------------------------------------------- |
+| `Authorization: Bearer <jwt>` | accès utilisateur ou service (client credentials)               |
+| `X-Tenant-Id`                 | tenant actif ; **doit** correspondre aux claims du jeton        |
+| `Idempotency-Key`             | obligatoire sur POST financiers (paiement, remboursement, paie) |
+| `X-Request-Id`                | corrélation ; propagé dans les événements et les logs           |
+| `If-Match`                    | contrôle de version optimiste sur les mutations sensibles       |
 
 ### 5.3 Pagination, filtres, tri
 
@@ -225,6 +225,7 @@ CREATE POLICY tenant_isolation ON orders
 ```
 
 Garde-fous complémentaires :
+
 - middleware NestJS qui exige `app.tenant_id` avant toute requête métier ;
 - repository de base qui injecte `tenant_id` et refuse une requête sans contexte ;
 - **aucun rôle applicatif `BYPASSRLS`** ;
@@ -281,21 +282,21 @@ une room temps réel ou un export de A.
 
 ## 7. Catalogue des services
 
-| # | Service | Responsabilité | Base | Publie (extraits) | Consomme (extraits) |
-|---|---|---|---|---|---|
-| 1 | identity | auth, OTP, sessions, MFA, RBAC | `identity` | UserRegistered, RoleChanged | TenantSuspended |
-| 2 | tenant | établissements, KYC, branding, abonnements | `tenant` | TenantApproved, SubscriptionChanged | InvoicePaid |
-| 3 | catalog | produits, menus, prix, promos | `catalog` | ProductUpdated, PriceChanged | TenantApproved, StockBelowThreshold |
-| 4 | floor | zones, tables, QR, réservations, temps réel | `floor` | TableStatusChanged, ReservationCreated | OrderPaid, OrderCancelled |
-| 5 | order | panier, commandes, KDS, POS, caisse | `order` | OrderCreated, OrderPaid, OrderCancelled | PaymentSucceeded, PaymentFailed |
-| 6 | payment | agrégateur, portefeuille, commissions, grand livre | `payment` | PaymentSucceeded, PayoutSucceeded | OrderCreated, PayrollApproved |
-| 7 | staff | employés, plannings, pointage, audit | `staff` | EmployeeHired, AuditRecorded | OrderPaid |
-| 8 | payroll | paie, bulletins, paiement groupé 2 niveaux | `payroll` | PayrollApproved, PayslipPublished | AttendanceClocked, SalaryPaymentSucceeded |
-| 9 | inventory | stocks, recettes, pertes, fournisseurs | `inventory` | StockBelowThreshold, WasteRecorded | OrderPaid, ProductUpdated |
-| 10 | loyalty-marketing | fidélité, promos, campagnes, avis | `loyalty` | PointsEarned, ReviewSubmitted | OrderPaid, CustomerRegistered |
-| 11 | notification | push, SMS, e-mail, temps réel | `notification` | NotificationSent, NotificationFailed | (tous les événements métier) |
-| 12 | reporting | entrepôt de lecture, KPI, exports | `reporting` | ReportReady, AnomalyDetected | OrderPaid, PosShiftClosed, PayrollApproved |
-| 13 | platform-admin | supervision, litiges, paramètres globaux | `platform` | DisputeResolved, FeatureFlagChanged | TenantApplied, PaymentFailed |
+| #   | Service           | Responsabilité                                     | Base           | Publie (extraits)                       | Consomme (extraits)                        |
+| --- | ----------------- | -------------------------------------------------- | -------------- | --------------------------------------- | ------------------------------------------ |
+| 1   | identity          | auth, OTP, sessions, MFA, RBAC                     | `identity`     | UserRegistered, RoleChanged             | TenantSuspended                            |
+| 2   | tenant            | établissements, KYC, branding, abonnements         | `tenant`       | TenantApproved, SubscriptionChanged     | InvoicePaid                                |
+| 3   | catalog           | produits, menus, prix, promos                      | `catalog`      | ProductUpdated, PriceChanged            | TenantApproved, StockBelowThreshold        |
+| 4   | floor             | zones, tables, QR, réservations, temps réel        | `floor`        | TableStatusChanged, ReservationCreated  | OrderPaid, OrderCancelled                  |
+| 5   | order             | panier, commandes, KDS, POS, caisse                | `order`        | OrderCreated, OrderPaid, OrderCancelled | PaymentSucceeded, PaymentFailed            |
+| 6   | payment           | agrégateur, portefeuille, commissions, grand livre | `payment`      | PaymentSucceeded, PayoutSucceeded       | OrderCreated, PayrollApproved              |
+| 7   | staff             | employés, plannings, pointage, audit               | `staff`        | EmployeeHired, AuditRecorded            | OrderPaid                                  |
+| 8   | payroll           | paie, bulletins, paiement groupé 2 niveaux         | `payroll`      | PayrollApproved, PayslipPublished       | AttendanceClocked, SalaryPaymentSucceeded  |
+| 9   | inventory         | stocks, recettes, pertes, fournisseurs             | `inventory`    | StockBelowThreshold, WasteRecorded      | OrderPaid, ProductUpdated                  |
+| 10  | loyalty-marketing | fidélité, promos, campagnes, avis                  | `loyalty`      | PointsEarned, ReviewSubmitted           | OrderPaid, CustomerRegistered              |
+| 11  | notification      | push, SMS, e-mail, temps réel                      | `notification` | NotificationSent, NotificationFailed    | (tous les événements métier)               |
+| 12  | reporting         | entrepôt de lecture, KPI, exports                  | `reporting`    | ReportReady, AnomalyDetected            | OrderPaid, PosShiftClosed, PayrollApproved |
+| 13  | platform-admin    | supervision, litiges, paramètres globaux           | `platform`     | DisputeResolved, FeatureFlagChanged     | TenantApplied, PaymentFailed               |
 
 Ports de développement (convention) : identity 4001, tenant 4002, catalog 4003, floor 4004,
 order 4005, payment 4006, staff 4007, payroll 4008, inventory 4009, loyalty 4010,
@@ -314,6 +315,7 @@ et un `openapi.yaml` (ajouté au moment de l'implémentation du service).
 ### 8.1 identity-service
 
 **Responsabilités**
+
 - Inscription/connexion client : téléphone + OTP SMS, e-mail + mot de passe, Google, Apple.
 - Sessions (access + refresh rotatif), révocation, appareils.
 - MFA (TOTP) obligatoire pour gérants et super-admins ; step-up avant opérations sensibles.
@@ -328,27 +330,27 @@ name, is_system), `Permission` (global catalogue), `RolePermission`, `UserRole` 
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| POST | `/auth/register` | phone/email + locale → user + challenge OTP | public |
-| POST | `/auth/otp/request` | phone, purpose → `{ expiresIn }` (jamais le code) | public, rate-limité |
-| POST | `/auth/otp/verify` | phone, code, device → tokens | public |
-| POST | `/auth/login` | email, password, device → tokens ou `mfaRequired` | public |
-| POST | `/auth/social/:provider` | idToken Google/Apple → tokens | public |
-| POST | `/auth/mfa/enroll` | → secret + otpauth URI | authentifié |
-| POST | `/auth/mfa/verify` | code → tokens / activation | authentifié |
-| POST | `/auth/step-up` | code MFA → `stepUpToken` (5 min) | authentifié |
-| POST | `/auth/refresh` | refresh token → nouveaux tokens (rotation) | refresh |
-| POST | `/auth/logout` | → 204, session révoquée | authentifié |
-| GET | `/auth/me` | → profil + rôles + permissions effectives | authentifié |
-| GET | `/users` | filtres rôle/statut → liste | `staff:view` |
-| POST | `/invitations` | email/phone, roleId, siteIds → invitation envoyée | `staff:invite` |
-| POST | `/invitations/:token/accept` | mot de passe / OTP → compte actif | public |
-| GET | `/roles` · POST `/roles` · PATCH `/roles/:id` | nom, permissions → rôle | `staff:role:manage` |
-| POST | `/users/:id/roles` | roleId, scope → affectation | `staff:role:assign` |
-| DELETE | `/sessions/:id` | → 204 | propriétaire ou `staff:security:manage` |
-| GET | `/internal/users/:id` | → identité minimale (service-à-service) | mTLS + scope interne |
-| POST | `/internal/introspect` | jeton → claims validés | interne |
+| Méthode | Chemin                                        | Entrée → Sortie                                   | Permission                              |
+| ------- | --------------------------------------------- | ------------------------------------------------- | --------------------------------------- |
+| POST    | `/auth/register`                              | phone/email + locale → user + challenge OTP       | public                                  |
+| POST    | `/auth/otp/request`                           | phone, purpose → `{ expiresIn }` (jamais le code) | public, rate-limité                     |
+| POST    | `/auth/otp/verify`                            | phone, code, device → tokens                      | public                                  |
+| POST    | `/auth/login`                                 | email, password, device → tokens ou `mfaRequired` | public                                  |
+| POST    | `/auth/social/:provider`                      | idToken Google/Apple → tokens                     | public                                  |
+| POST    | `/auth/mfa/enroll`                            | → secret + otpauth URI                            | authentifié                             |
+| POST    | `/auth/mfa/verify`                            | code → tokens / activation                        | authentifié                             |
+| POST    | `/auth/step-up`                               | code MFA → `stepUpToken` (5 min)                  | authentifié                             |
+| POST    | `/auth/refresh`                               | refresh token → nouveaux tokens (rotation)        | refresh                                 |
+| POST    | `/auth/logout`                                | → 204, session révoquée                           | authentifié                             |
+| GET     | `/auth/me`                                    | → profil + rôles + permissions effectives         | authentifié                             |
+| GET     | `/users`                                      | filtres rôle/statut → liste                       | `staff:view`                            |
+| POST    | `/invitations`                                | email/phone, roleId, siteIds → invitation envoyée | `staff:invite`                          |
+| POST    | `/invitations/:token/accept`                  | mot de passe / OTP → compte actif                 | public                                  |
+| GET     | `/roles` · POST `/roles` · PATCH `/roles/:id` | nom, permissions → rôle                           | `staff:role:manage`                     |
+| POST    | `/users/:id/roles`                            | roleId, scope → affectation                       | `staff:role:assign`                     |
+| DELETE  | `/sessions/:id`                               | → 204                                             | propriétaire ou `staff:security:manage` |
+| GET     | `/internal/users/:id`                         | → identité minimale (service-à-service)           | mTLS + scope interne                    |
+| POST    | `/internal/introspect`                        | jeton → claims validés                            | interne                                 |
 
 **Événements publiés** : `UserRegistered`, `UserInvited`, `UserRoleChanged`, `MfaEnabled`,
 `SessionRevoked`, `PasswordChanged`.
@@ -363,6 +365,7 @@ progressif ; Argon2id ; refresh tokens rotatifs avec détection de réutilisatio
 ### 8.2 tenant-service
 
 **Responsabilités**
+
 - Candidature d'établissement, KYC/KYB léger, validation par le super-admin.
 - Espace dédié (slug/sous-domaine), paramètres, horaires, devise, taxes, langues.
 - Branding (logo, couleurs) de l'espace client.
@@ -379,25 +382,25 @@ secondary_color, welcome_text), `OpeningHours`, `TaxProfile` (VAT rates, fiscal 
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| POST | `/tenants` | raison sociale, RCCM, adresse, contact, pièces → dossier `pending_kyc` | public |
-| GET | `/tenants/:id` | → fiche + branding + statut | `tenant:view` |
-| PATCH | `/tenants/:id` | champs modifiables → fiche | `tenant:settings:update` |
-| POST | `/tenants/:id/kyc` | documents (URL signées) → statut | `tenant:settings:update` |
-| GET | `/tenants/:id/branding` | → logo, couleurs, textes | `tenant:view` / public si active |
-| PUT | `/tenants/:id/branding` | logo, couleurs (validées AA) → branding | `tenant:settings:update` |
-| GET/PUT | `/tenants/:id/settings` | devise, langues, taxes, horaires | `tenant:settings:update` |
-| POST | `/groups` · POST `/groups/:id/tenants` | nom, sites → groupe | `tenant:group:manage` |
-| GET | `/plans` | → plans, limites, commissions | public |
-| POST | `/tenants/:id/subscription` | planId, cycle → abonnement | `tenant:billing:manage` |
-| POST | `/tenants/:id/subscription/change` | planId → prorata | `tenant:billing:manage` |
-| GET | `/invoices` | période → factures SaaS | `tenant:billing:manage` |
-| GET | `/admin/tenants` | statut, recherche → file de validation | `platform:tenant:view` |
-| POST | `/admin/tenants/:id/approve` | → tenant actif + onboarding | `platform:tenant:approve` |
-| POST | `/admin/tenants/:id/reject` | motif → rejet notifié | `platform:tenant:approve` |
-| POST | `/admin/tenants/:id/suspend` · `/reactivate` | motif → statut | `platform:tenant:manage` |
-| GET | `/internal/tenants/:id/entitlements` | → limites et commissions effectives | interne |
+| Méthode | Chemin                                       | Entrée → Sortie                                                        | Permission                       |
+| ------- | -------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------- |
+| POST    | `/tenants`                                   | raison sociale, RCCM, adresse, contact, pièces → dossier `pending_kyc` | public                           |
+| GET     | `/tenants/:id`                               | → fiche + branding + statut                                            | `tenant:view`                    |
+| PATCH   | `/tenants/:id`                               | champs modifiables → fiche                                             | `tenant:settings:update`         |
+| POST    | `/tenants/:id/kyc`                           | documents (URL signées) → statut                                       | `tenant:settings:update`         |
+| GET     | `/tenants/:id/branding`                      | → logo, couleurs, textes                                               | `tenant:view` / public si active |
+| PUT     | `/tenants/:id/branding`                      | logo, couleurs (validées AA) → branding                                | `tenant:settings:update`         |
+| GET/PUT | `/tenants/:id/settings`                      | devise, langues, taxes, horaires                                       | `tenant:settings:update`         |
+| POST    | `/groups` · POST `/groups/:id/tenants`       | nom, sites → groupe                                                    | `tenant:group:manage`            |
+| GET     | `/plans`                                     | → plans, limites, commissions                                          | public                           |
+| POST    | `/tenants/:id/subscription`                  | planId, cycle → abonnement                                             | `tenant:billing:manage`          |
+| POST    | `/tenants/:id/subscription/change`           | planId → prorata                                                       | `tenant:billing:manage`          |
+| GET     | `/invoices`                                  | période → factures SaaS                                                | `tenant:billing:manage`          |
+| GET     | `/admin/tenants`                             | statut, recherche → file de validation                                 | `platform:tenant:view`           |
+| POST    | `/admin/tenants/:id/approve`                 | → tenant actif + onboarding                                            | `platform:tenant:approve`        |
+| POST    | `/admin/tenants/:id/reject`                  | motif → rejet notifié                                                  | `platform:tenant:approve`        |
+| POST    | `/admin/tenants/:id/suspend` · `/reactivate` | motif → statut                                                         | `platform:tenant:manage`         |
+| GET     | `/internal/tenants/:id/entitlements`         | → limites et commissions effectives                                    | interne                          |
 
 **Événements publiés** : `TenantApplied`, `TenantApproved`, `TenantRejected`, `TenantSuspended`,
 `TenantReactivated`, `TenantBrandingUpdated`, `SubscriptionChanged`, `InvoiceIssued`, `InvoicePaid`.
@@ -413,6 +416,7 @@ AA vérifié côté serveur avant enregistrement.
 ### 8.3 catalog-service
 
 **Responsabilités**
+
 - Catégories, produits, variantes, groupes d'options et suppléments.
 - Menus composés (formules), sections, ordre d'affichage, canaux (sur place, emporter, livraison).
 - Allergènes, médias, disponibilité, rupture manuelle (86).
@@ -428,20 +432,20 @@ starts/ends, channels), `ProductAvailability` (channel, is_available, reason).
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET/POST | `/categories` · PATCH/DELETE `/categories/:id` | nom, position → catégorie | `catalog:view` / `catalog:manage` |
-| GET/POST | `/products` · PATCH `/products/:id` | produit complet (variantes, options) | `catalog:view` / `catalog:manage` |
-| DELETE | `/products/:id` | soft delete + événement | `catalog:manage` |
-| POST | `/products/:id/availability` | canal, dispo, motif → 86 | `catalog:availability` |
-| GET/POST | `/menus` · PATCH `/menus/:id` | sections, items → menu brouillon | `catalog:manage` |
-| POST | `/menus/:id/publish` | → version publiée + cache invalidé | `catalog:publish` |
-| GET | `/public/menu?tenant=:slug` | canal, langue → menu public (cache) | public |
-| GET/POST | `/price-schedules` | plage horaire, prix → planning tarifaire | `catalog:price:manage` |
-| GET/POST | `/promotions` · PATCH `/promotions/:id` | type, valeur, période → promotion | `catalog:promo:manage` |
-| GET | `/products/:id/price?at=` | date/heure, canal → prix effectif | `catalog:view` |
-| POST | `/imports` | CSV produits → job d'import + rapport | `catalog:import` |
-| GET | `/internal/products?ids=` | → prix et disponibilité à jour | interne |
+| Méthode  | Chemin                                         | Entrée → Sortie                          | Permission                        |
+| -------- | ---------------------------------------------- | ---------------------------------------- | --------------------------------- |
+| GET/POST | `/categories` · PATCH/DELETE `/categories/:id` | nom, position → catégorie                | `catalog:view` / `catalog:manage` |
+| GET/POST | `/products` · PATCH `/products/:id`            | produit complet (variantes, options)     | `catalog:view` / `catalog:manage` |
+| DELETE   | `/products/:id`                                | soft delete + événement                  | `catalog:manage`                  |
+| POST     | `/products/:id/availability`                   | canal, dispo, motif → 86                 | `catalog:availability`            |
+| GET/POST | `/menus` · PATCH `/menus/:id`                  | sections, items → menu brouillon         | `catalog:manage`                  |
+| POST     | `/menus/:id/publish`                           | → version publiée + cache invalidé       | `catalog:publish`                 |
+| GET      | `/public/menu?tenant=:slug`                    | canal, langue → menu public (cache)      | public                            |
+| GET/POST | `/price-schedules`                             | plage horaire, prix → planning tarifaire | `catalog:price:manage`            |
+| GET/POST | `/promotions` · PATCH `/promotions/:id`        | type, valeur, période → promotion        | `catalog:promo:manage`            |
+| GET      | `/products/:id/price?at=`                      | date/heure, canal → prix effectif        | `catalog:view`                    |
+| POST     | `/imports`                                     | CSV produits → job d'import + rapport    | `catalog:import`                  |
+| GET      | `/internal/products?ids=`                      | → prix et disponibilité à jour           | interne                           |
 
 **Événements publiés** : `ProductCreated`, `ProductUpdated`, `PriceChanged`, `ProductUnavailable`,
 `MenuPublished`, `PromotionActivated`, `PromotionEnded`.
@@ -456,6 +460,7 @@ jamais confiance au prix envoyé par le client. Toute modification de prix est a
 ### 8.4 floor-service
 
 **Responsabilités**
+
 - Zones (salle, terrasse, VIP, bar, étage) et plan de salle (éditeur glisser-déposer).
 - Tables/places avec identifiant structuré unique `ETAB-ZONE-NUMERO` (ex. `LOME01-TER-014`),
   unicité garantie par contrainte en base **au sein du tenant**.
@@ -473,23 +478,23 @@ source, notes, reminders_sent), `WaitlistEntry` (position, quoted_minutes).
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET/POST | `/zones` · PATCH/DELETE `/zones/:id` | nom, plan → zone | `floor:view` / `floor:manage` |
-| GET | `/floor` | → snapshot complet (zones, tables, sessions) | `floor:view` |
-| PUT | `/floor/layout` | positions/tailles des tables → plan | `floor:layout:manage` |
-| POST | `/tables` | code, zone, capacité, type → table | `floor:manage` |
-| PATCH | `/tables/:id` | capacité, zone, statut manuel | `floor:manage` |
-| PATCH | `/tables/:id/status` | `{ status, reason?, version }` → statut + event | `floor:status` |
-| POST | `/tables/:id/qr/rotate` | → nouveau token QR (ancien invalide) | `floor:qr:manage` |
-| GET | `/public/qr/:token` | → tenant + table + menu URL | public, rate-limité |
-| POST | `/tables/:id/transfer` | orderId, targetTableId → commande déplacée | `floor:manage` |
-| POST | `/tables/:id/merge` · `/split` | tables, sens → fusion/scission | `floor:manage` |
-| GET/POST | `/reservations` · PATCH `/reservations/:id` | créneau, couverts, table → réservation | `floor:reservation:manage` |
-| GET | `/reservations/availability?date=&party=` | → créneaux libres | `floor:view` / public |
-| POST | `/reservations/:id/check-in` · `/no-show` · `/cancel` | → statut | `floor:reservation:manage` |
-| GET | `/waitlist` · POST `/waitlist/:id/promote` | file d'attente → table | `floor:manage` |
-| WS | `/floor` (rooms `t:${tenant}:floor`, `t:${tenant}:reservation`) | events temps réel | jeton |
+| Méthode  | Chemin                                                          | Entrée → Sortie                                 | Permission                    |
+| -------- | --------------------------------------------------------------- | ----------------------------------------------- | ----------------------------- |
+| GET/POST | `/zones` · PATCH/DELETE `/zones/:id`                            | nom, plan → zone                                | `floor:view` / `floor:manage` |
+| GET      | `/floor`                                                        | → snapshot complet (zones, tables, sessions)    | `floor:view`                  |
+| PUT      | `/floor/layout`                                                 | positions/tailles des tables → plan             | `floor:layout:manage`         |
+| POST     | `/tables`                                                       | code, zone, capacité, type → table              | `floor:manage`                |
+| PATCH    | `/tables/:id`                                                   | capacité, zone, statut manuel                   | `floor:manage`                |
+| PATCH    | `/tables/:id/status`                                            | `{ status, reason?, version }` → statut + event | `floor:status`                |
+| POST     | `/tables/:id/qr/rotate`                                         | → nouveau token QR (ancien invalide)            | `floor:qr:manage`             |
+| GET      | `/public/qr/:token`                                             | → tenant + table + menu URL                     | public, rate-limité           |
+| POST     | `/tables/:id/transfer`                                          | orderId, targetTableId → commande déplacée      | `floor:manage`                |
+| POST     | `/tables/:id/merge` · `/split`                                  | tables, sens → fusion/scission                  | `floor:manage`                |
+| GET/POST | `/reservations` · PATCH `/reservations/:id`                     | créneau, couverts, table → réservation          | `floor:reservation:manage`    |
+| GET      | `/reservations/availability?date=&party=`                       | → créneaux libres                               | `floor:view` / public         |
+| POST     | `/reservations/:id/check-in` · `/no-show` · `/cancel`           | → statut                                        | `floor:reservation:manage`    |
+| GET      | `/waitlist` · POST `/waitlist/:id/promote`                      | file d'attente → table                          | `floor:manage`                |
+| WS       | `/floor` (rooms `t:${tenant}:floor`, `t:${tenant}:reservation`) | events temps réel                               | jeton                         |
 
 **Événements publiés** : `TableStatusChanged`, `TableOpened`, `TableClosed`, `ReservationCreated`,
 `ReservationConfirmed`, `ReservationCancelled`, `ReservationNoShow`, `WaitlistPromoted`.
@@ -506,6 +511,7 @@ order-service (API), pas d'écriture croisée.
 ### 8.5 order-service
 
 **Responsabilités**
+
 - Panier client (persistant, multi-appareils), commandes sur place / à emporter / livraison /
   précommande, ajouts successifs sur une même table.
 - Lignes, options, notes cuisine, allergies, découpage par poste (cuisine, bar).
@@ -528,29 +534,29 @@ approved_by), `FiscalReceipt` (sequential number, hash), `OutboxEvent`.
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| POST | `/carts` | channel, tableId/customerId → panier | `order:create` / client |
-| POST | `/carts/:id/lines` | productId, qty, options, notes → ligne + totaux | idem |
-| PATCH/DELETE | `/carts/:id/lines/:lineId` | qty, options → totaux | idem |
-| POST | `/carts/:id/promo` | code → remise validée | idem |
-| POST | `/orders` | panier, table/canal, clientUuid → commande confirmée | `order:create` |
-| GET | `/orders` | statut, période, table, serveur → liste | `order:view` |
-| GET | `/orders/:id` | → commande complète + timeline | `order:view` |
-| PATCH | `/orders/:id/status` | transition + motif → commande | selon transition |
-| POST | `/orders/:id/discount` | type, valeur, motif → remise auditée | `order:discount` |
-| POST | `/orders/:id/cancel` | motif, stepUpToken → annulation auditée | `order:cancel` |
-| POST | `/orders/:id/pay` | mode, montant, split → intent de paiement | `order:pay` / client |
-| POST | `/orders/:id/refund` | montant, motif → remboursement (via payment) | `payment:refund` |
-| GET | `/kds/tickets?station=` | station, statut → tickets triés | `kds:view` |
-| PATCH | `/kds/tickets/:id/bump` | → ticket avancé (preparing/ready) | `kds:operate` |
-| GET | `/pos/shifts/current` | → shift + fond de caisse | `pos:operate` |
-| POST | `/pos/shifts/open` · `/close` | fond initial / comptage final → écart | `pos:operate` |
-| POST | `/pos/cash-movements` | entrée/sortie, motif → mouvement | `pos:cash:manage` |
-| GET | `/pos/receipts/:id` | → reçu fiscal (PDF) | `pos:view` |
-| POST | `/orders/sync` | lot d'ordres offline (client_uuid) → résultats par item | `order:create` |
-| GET | `/internal/orders/:id` | → commande (service-à-service) | interne |
-| GET | `/internal/orders?tableId=&status=` | → commandes de la table | interne |
+| Méthode      | Chemin                              | Entrée → Sortie                                         | Permission              |
+| ------------ | ----------------------------------- | ------------------------------------------------------- | ----------------------- |
+| POST         | `/carts`                            | channel, tableId/customerId → panier                    | `order:create` / client |
+| POST         | `/carts/:id/lines`                  | productId, qty, options, notes → ligne + totaux         | idem                    |
+| PATCH/DELETE | `/carts/:id/lines/:lineId`          | qty, options → totaux                                   | idem                    |
+| POST         | `/carts/:id/promo`                  | code → remise validée                                   | idem                    |
+| POST         | `/orders`                           | panier, table/canal, clientUuid → commande confirmée    | `order:create`          |
+| GET          | `/orders`                           | statut, période, table, serveur → liste                 | `order:view`            |
+| GET          | `/orders/:id`                       | → commande complète + timeline                          | `order:view`            |
+| PATCH        | `/orders/:id/status`                | transition + motif → commande                           | selon transition        |
+| POST         | `/orders/:id/discount`              | type, valeur, motif → remise auditée                    | `order:discount`        |
+| POST         | `/orders/:id/cancel`                | motif, stepUpToken → annulation auditée                 | `order:cancel`          |
+| POST         | `/orders/:id/pay`                   | mode, montant, split → intent de paiement               | `order:pay` / client    |
+| POST         | `/orders/:id/refund`                | montant, motif → remboursement (via payment)            | `payment:refund`        |
+| GET          | `/kds/tickets?station=`             | station, statut → tickets triés                         | `kds:view`              |
+| PATCH        | `/kds/tickets/:id/bump`             | → ticket avancé (preparing/ready)                       | `kds:operate`           |
+| GET          | `/pos/shifts/current`               | → shift + fond de caisse                                | `pos:operate`           |
+| POST         | `/pos/shifts/open` · `/close`       | fond initial / comptage final → écart                   | `pos:operate`           |
+| POST         | `/pos/cash-movements`               | entrée/sortie, motif → mouvement                        | `pos:cash:manage`       |
+| GET          | `/pos/receipts/:id`                 | → reçu fiscal (PDF)                                     | `pos:view`              |
+| POST         | `/orders/sync`                      | lot d'ordres offline (client_uuid) → résultats par item | `order:create`          |
+| GET          | `/internal/orders/:id`              | → commande (service-à-service)                          | interne                 |
+| GET          | `/internal/orders?tableId=&status=` | → commandes de la table                                 | interne                 |
 
 **Événements publiés** : `OrderCreated`, `OrderConfirmed`, `OrderSentToKitchen`,
 `OrderItemReady`, `OrderServed`, `OrderPaid`, `OrderCancelled`, `OrderRefunded`,
@@ -568,6 +574,7 @@ validé par un caissier).
 ### 8.6 payment-service (agrégateur)
 
 **Responsabilités**
+
 - Couche d'abstraction (pattern adapter) au-dessus des prestataires : TMoney, Moov Money/Flooz,
   CinetPay, PayDunya, FedaPay, PayGate, Stripe (option cartes internationales).
 - Routage intelligent (moyen de paiement, coût, disponibilité, pays) + bascule automatique.
@@ -607,26 +614,26 @@ interface PaymentProviderAdapter {
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| POST | `/payments/intents` | orderId, montant, méthode, split → intent + instructions | `payment:initiate` / client |
-| GET | `/payments/intents/:id` | → statut, provider, prochaine action | propriétaire / `payment:view` |
-| POST | `/payments/intents/:id/cancel` | → annulation | propriétaire / `payment:cancel` |
-| POST | `/webhooks/:provider` | corps brut + signature → 2xx rapide | public, signature |
-| POST | `/refunds` | transactionId, montant, motif → remboursement | `payment:refund` |
-| GET | `/refunds/:id` | → statut | `payment:view` |
-| GET | `/transactions` | période, méthode, statut → liste | `payment:view` |
-| GET | `/wallets/:tenantId` | → solde disponible/en attente | `wallet:view` |
-| GET | `/payouts` · POST `/payouts` | montant, compte → reversement | `wallet:payout` |
-| GET | `/commissions` | période, plan → commissions | `payment:commission:view` |
-| GET | `/ledger/entries` · `/ledger/trial-balance` | période → grand livre / balance | `ledger:view` |
-| POST | `/reconciliation/runs` | période, provider → exécution | `payment:reconcile` |
-| GET | `/reconciliation/runs/:id` | → rapprochement + écarts | `payment:reconcile` |
-| GET/PUT | `/providers` · `/providers/:key` | activation, priorité, compte | `platform:payment:manage` |
-| GET/PUT | `/routing-rules` | règles de routage | `platform:payment:manage` |
-| GET | `/fraud/events` · PATCH `/fraud/rules` | → alertes / règles | `payment:fraud:manage` |
-| POST | `/tips/:paymentId/allocate` | répartition serveurs → allocations | `payment:tip:manage` |
-| GET | `/internal/payments/:id` | → statut et montants (inter-service) | interne |
+| Méthode | Chemin                                      | Entrée → Sortie                                          | Permission                      |
+| ------- | ------------------------------------------- | -------------------------------------------------------- | ------------------------------- |
+| POST    | `/payments/intents`                         | orderId, montant, méthode, split → intent + instructions | `payment:initiate` / client     |
+| GET     | `/payments/intents/:id`                     | → statut, provider, prochaine action                     | propriétaire / `payment:view`   |
+| POST    | `/payments/intents/:id/cancel`              | → annulation                                             | propriétaire / `payment:cancel` |
+| POST    | `/webhooks/:provider`                       | corps brut + signature → 2xx rapide                      | public, signature               |
+| POST    | `/refunds`                                  | transactionId, montant, motif → remboursement            | `payment:refund`                |
+| GET     | `/refunds/:id`                              | → statut                                                 | `payment:view`                  |
+| GET     | `/transactions`                             | période, méthode, statut → liste                         | `payment:view`                  |
+| GET     | `/wallets/:tenantId`                        | → solde disponible/en attente                            | `wallet:view`                   |
+| GET     | `/payouts` · POST `/payouts`                | montant, compte → reversement                            | `wallet:payout`                 |
+| GET     | `/commissions`                              | période, plan → commissions                              | `payment:commission:view`       |
+| GET     | `/ledger/entries` · `/ledger/trial-balance` | période → grand livre / balance                          | `ledger:view`                   |
+| POST    | `/reconciliation/runs`                      | période, provider → exécution                            | `payment:reconcile`             |
+| GET     | `/reconciliation/runs/:id`                  | → rapprochement + écarts                                 | `payment:reconcile`             |
+| GET/PUT | `/providers` · `/providers/:key`            | activation, priorité, compte                             | `platform:payment:manage`       |
+| GET/PUT | `/routing-rules`                            | règles de routage                                        | `platform:payment:manage`       |
+| GET     | `/fraud/events` · PATCH `/fraud/rules`      | → alertes / règles                                       | `payment:fraud:manage`          |
+| POST    | `/tips/:paymentId/allocate`                 | répartition serveurs → allocations                       | `payment:tip:manage`            |
+| GET     | `/internal/payments/:id`                    | → statut et montants (inter-service)                     | interne                         |
 
 **Événements publiés** : `PaymentInitiated`, `PaymentSucceeded`, `PaymentFailed`,
 `PaymentExpired`, `RefundSucceeded`, `RefundFailed`, `PayoutSucceeded`, `PayoutFailed`,
@@ -638,12 +645,12 @@ interface PaymentProviderAdapter {
 **Écriture comptable (partie double)** — exemple d'un encaissement de 10 000 XOF,
 commission plateforme 2 %, frais prestataire 150 XOF :
 
-| Compte | Débit | Crédit |
-|---|---|---|
-| 511 Prestataire (clearing) | 9 850 | |
-| 627 Frais prestataire | 150 | |
-| 401 Dette établissement (portefeuille) | | 9 800 |
-| 701 Commissions plateforme | | 200 |
+| Compte                                 | Débit | Crédit |
+| -------------------------------------- | ----- | ------ |
+| 511 Prestataire (clearing)             | 9 850 |        |
+| 627 Frais prestataire                  | 150   |        |
+| 401 Dette établissement (portefeuille) |       | 9 800  |
+| 701 Commissions plateforme             |       | 200    |
 
 Chaque opération crée un `entry_group` équilibré (Σ débits = Σ crédits), vérifié en base.
 
@@ -656,6 +663,7 @@ relevés prestataires et clôtures de caisse (order-service), et ouvre un litige
 ### 8.7 staff-service
 
 **Responsabilités**
+
 - Fiches employés, contrats, coordonnées de paiement (mobile money/banque, chiffrées au repos).
 - Invitations et cycle de vie (embauche, suspension, départ).
 - Plannings, équipes, échanges de shifts, congés et absences.
@@ -673,22 +681,22 @@ action, resource, before/after diff, ip, ua, request_id, prev_hash, hash).
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET/POST | `/employees` · PATCH `/employees/:id` | fiche complète → employé | `staff:view` / `staff:manage` |
-| POST | `/employees/:id/offboard` | date, motif → désactivation + événement | `staff:manage` |
-| GET/POST | `/contracts` · PATCH `/contracts/:id` | contrat, salaire de base | `staff:contract:manage` |
-| GET/POST | `/shifts` | période, équipe → planning | `staff:planning:view` / `staff:planning:manage` |
-| PUT | `/shifts/publish` | semaine → publication + notifications | `staff:planning:publish` |
-| POST | `/shifts/:id/swap-request` · `/swap/:id/approve` | échange entre employés | `staff:planning:manage` / employé |
-| GET/POST | `/leaves` · POST `/leaves/:id/approve` | congés, absences | `staff:leave:manage` |
-| POST | `/attendance/clock-in` · `/clock-out` | méthode, PIN/QR, géoloc → pointage | employé |
-| GET | `/attendance` | période, employé, anomalies → liste | `staff:attendance:view` |
-| GET | `/performance?period=` | → ventes, tables, pourboires par employé | `staff:performance:view` |
-| GET | `/audit-logs` | acteur, action, période → journal (lecture seule) | `audit:view` |
-| POST | `/internal/audit` | action sensible → entrée chaînée | interne, service |
-| GET | `/internal/employees/:id` | → identité, poste, contrat | interne |
-| GET | `/internal/employees/:id/payroll-inputs` | période → heures, primes, tips | interne |
+| Méthode  | Chemin                                           | Entrée → Sortie                                   | Permission                                      |
+| -------- | ------------------------------------------------ | ------------------------------------------------- | ----------------------------------------------- |
+| GET/POST | `/employees` · PATCH `/employees/:id`            | fiche complète → employé                          | `staff:view` / `staff:manage`                   |
+| POST     | `/employees/:id/offboard`                        | date, motif → désactivation + événement           | `staff:manage`                                  |
+| GET/POST | `/contracts` · PATCH `/contracts/:id`            | contrat, salaire de base                          | `staff:contract:manage`                         |
+| GET/POST | `/shifts`                                        | période, équipe → planning                        | `staff:planning:view` / `staff:planning:manage` |
+| PUT      | `/shifts/publish`                                | semaine → publication + notifications             | `staff:planning:publish`                        |
+| POST     | `/shifts/:id/swap-request` · `/swap/:id/approve` | échange entre employés                            | `staff:planning:manage` / employé               |
+| GET/POST | `/leaves` · POST `/leaves/:id/approve`           | congés, absences                                  | `staff:leave:manage`                            |
+| POST     | `/attendance/clock-in` · `/clock-out`            | méthode, PIN/QR, géoloc → pointage                | employé                                         |
+| GET      | `/attendance`                                    | période, employé, anomalies → liste               | `staff:attendance:view`                         |
+| GET      | `/performance?period=`                           | → ventes, tables, pourboires par employé          | `staff:performance:view`                        |
+| GET      | `/audit-logs`                                    | acteur, action, période → journal (lecture seule) | `audit:view`                                    |
+| POST     | `/internal/audit`                                | action sensible → entrée chaînée                  | interne, service                                |
+| GET      | `/internal/employees/:id`                        | → identité, poste, contrat                        | interne                                         |
+| GET      | `/internal/employees/:id/payroll-inputs`         | période → heures, primes, tips                    | interne                                         |
 
 **Événements publiés** : `EmployeeHired`, `EmployeeOffboarded`, `ShiftPublished`, `ShiftSwapped`,
 `AttendanceClocked`, `AttendanceAnomaly`, `LeaveApproved`, `TipDistributed`, `AuditRecorded`.
@@ -703,6 +711,7 @@ le journal d'audit est la seule source de vérité des actions sensibles, répli
 ### 8.8 payroll-service
 
 **Responsabilités**
+
 - Paramétrage de la paie (salaire de base, primes, indemnités, heures sup., avances, retenues,
   cotisations et impôts selon la législation applicable — barèmes par pays/version).
 - Calcul mensuel automatique à partir du pointage, plannings, pourboires et commissions.
@@ -721,21 +730,21 @@ submitted_by, approved_by), `Payslip` (employee, gross, net, contributions, pdf_
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET/PUT | `/settings` | pays, barèmes, composants → paramétrage | `payroll:settings:manage` |
-| GET/POST | `/components` · PATCH `/components/:id` | primes, retenues → composant | `payroll:settings:manage` |
-| POST | `/runs` | mois, site → run en brouillon | `payroll:prepare` |
-| POST | `/runs/:id/calculate` | → calcul + écarts + totaux | `payroll:prepare` |
-| GET | `/runs/:id` · `/runs/:id/payslips` | → détail des bulletins | `payroll:view` |
-| POST | `/runs/:id/submit` | → validation niveau 1 (préparateur) | `payroll:prepare` |
-| POST | `/runs/:id/approve` | stepUpToken → validation niveau 2 (gérant) | `payroll:approve` |
-| POST | `/runs/:id/reject` | motif → retour brouillon | `payroll:approve` |
-| POST | `/runs/:id/pay` | idempotency key → paiement groupé | `payroll:pay` |
-| GET | `/runs/:id/payment` | → statut par employé, rejeu possible | `payroll:view` |
-| GET | `/payslips/:id/pdf` | → PDF signé (URL S3 courte) | propriétaire / `payroll:view` |
-| GET/POST | `/advances` | avances sur salaire → validation | `payroll:advance:manage` |
-| GET | `/exports` | mois → CSV/XLS paie et charges | `payroll:export` |
+| Méthode  | Chemin                                  | Entrée → Sortie                            | Permission                    |
+| -------- | --------------------------------------- | ------------------------------------------ | ----------------------------- |
+| GET/PUT  | `/settings`                             | pays, barèmes, composants → paramétrage    | `payroll:settings:manage`     |
+| GET/POST | `/components` · PATCH `/components/:id` | primes, retenues → composant               | `payroll:settings:manage`     |
+| POST     | `/runs`                                 | mois, site → run en brouillon              | `payroll:prepare`             |
+| POST     | `/runs/:id/calculate`                   | → calcul + écarts + totaux                 | `payroll:prepare`             |
+| GET      | `/runs/:id` · `/runs/:id/payslips`      | → détail des bulletins                     | `payroll:view`                |
+| POST     | `/runs/:id/submit`                      | → validation niveau 1 (préparateur)        | `payroll:prepare`             |
+| POST     | `/runs/:id/approve`                     | stepUpToken → validation niveau 2 (gérant) | `payroll:approve`             |
+| POST     | `/runs/:id/reject`                      | motif → retour brouillon                   | `payroll:approve`             |
+| POST     | `/runs/:id/pay`                         | idempotency key → paiement groupé          | `payroll:pay`                 |
+| GET      | `/runs/:id/payment`                     | → statut par employé, rejeu possible       | `payroll:view`                |
+| GET      | `/payslips/:id/pdf`                     | → PDF signé (URL S3 courte)                | propriétaire / `payroll:view` |
+| GET/POST | `/advances`                             | avances sur salaire → validation           | `payroll:advance:manage`      |
+| GET      | `/exports`                              | mois → CSV/XLS paie et charges             | `payroll:export`              |
 
 **Événements publiés** : `PayrollPrepared`, `PayrollSubmitted`, `PayrollApproved`,
 `PayrollRejected`, `PayslipPublished`, `SalaryPaymentInitiated`, `SalaryPaymentCompleted`,
@@ -753,6 +762,7 @@ Les coordonnées de paiement sont masquées dans toutes les réponses.
 ### 8.9 inventory-service
 
 **Responsabilités**
+
 - Articles de stock, unités, seuils d'alerte, emplacements.
 - Fiches techniques (recettes) : consommation théorique par produit vendu et coût matière.
 - Mouvements : entrées, sorties, ajustements, pertes ; inventaires physiques.
@@ -768,21 +778,21 @@ variance), `Supplier` (contacts, terms), `PurchaseOrder` (supplier, status, tota
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET/POST | `/items` · PATCH `/items/:id` | article, seuil, coût → fiche | `inventory:view` / `inventory:manage` |
-| GET | `/levels` | → niveaux par emplacement + alertes | `inventory:view` |
-| POST | `/movements` | type, quantité, motif, référence → mouvement | `inventory:move` |
-| GET | `/movements` | période, article, type → historique | `inventory:view` |
-| GET/POST | `/recipes` · PATCH `/recipes/:id` | produit, lignes → fiche technique | `inventory:recipe:manage` |
-| GET | `/recipes/:id/cost` | → coût matière et marge | `inventory:view` |
-| POST | `/counts` · POST `/counts/:id/validate` | comptage physique → écarts + ajustements | `inventory:count` |
-| GET/POST | `/suppliers` · PATCH `/suppliers/:id` | fournisseur → fiche | `inventory:supplier:manage` |
-| GET/POST | `/purchase-orders` · POST `/purchase-orders/:id/receive` | commande, réception → entrées | `inventory:purchase:manage` |
-| POST | `/waste` | perte, motif, photo → perte valorisée | `inventory:waste` |
-| GET | `/alerts` · GET `/reorder-suggestions` | → seuils, suggestions | `inventory:view` |
-| GET | `/internal/availability?productIds=` | → produits épuisés (pour 86) | interne |
-| GET | `/internal/cogs?period=` | → coût matière (reporting) | interne |
+| Méthode  | Chemin                                                   | Entrée → Sortie                              | Permission                            |
+| -------- | -------------------------------------------------------- | -------------------------------------------- | ------------------------------------- |
+| GET/POST | `/items` · PATCH `/items/:id`                            | article, seuil, coût → fiche                 | `inventory:view` / `inventory:manage` |
+| GET      | `/levels`                                                | → niveaux par emplacement + alertes          | `inventory:view`                      |
+| POST     | `/movements`                                             | type, quantité, motif, référence → mouvement | `inventory:move`                      |
+| GET      | `/movements`                                             | période, article, type → historique          | `inventory:view`                      |
+| GET/POST | `/recipes` · PATCH `/recipes/:id`                        | produit, lignes → fiche technique            | `inventory:recipe:manage`             |
+| GET      | `/recipes/:id/cost`                                      | → coût matière et marge                      | `inventory:view`                      |
+| POST     | `/counts` · POST `/counts/:id/validate`                  | comptage physique → écarts + ajustements     | `inventory:count`                     |
+| GET/POST | `/suppliers` · PATCH `/suppliers/:id`                    | fournisseur → fiche                          | `inventory:supplier:manage`           |
+| GET/POST | `/purchase-orders` · POST `/purchase-orders/:id/receive` | commande, réception → entrées                | `inventory:purchase:manage`           |
+| POST     | `/waste`                                                 | perte, motif, photo → perte valorisée        | `inventory:waste`                     |
+| GET      | `/alerts` · GET `/reorder-suggestions`                   | → seuils, suggestions                        | `inventory:view`                      |
+| GET      | `/internal/availability?productIds=`                     | → produits épuisés (pour 86)                 | interne                               |
+| GET      | `/internal/cogs?period=`                                 | → coût matière (reporting)                   | interne                               |
 
 **Événements publiés** : `StockBelowThreshold`, `StockDepleted`, `StockReplenished`,
 `InventoryCountValidated`, `WasteRecorded`, `PurchaseOrderReceived`, `RecipeCostChanged`.
@@ -797,6 +807,7 @@ selon paramétrage) ; toute perte et tout ajustement d'inventaire sont audités.
 ### 8.10 loyalty-marketing-service
 
 **Responsabilités**
+
 - Programmes de fidélité : points, niveaux, récompenses, expiration.
 - Codes promo (validation, limites d'usage, cumul), campagnes (push/SMS/e-mail), segments.
 - Avis clients et réponses du gérant ; modération.
@@ -811,21 +822,21 @@ selon paramétrage) ; toute perte et tout ajustement d'inventaire sont audités.
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET/PUT | `/program` | règles de points, niveaux → programme | `loyalty:settings:manage` |
-| GET | `/accounts/:customerId` | → solde, niveau, historique | `loyalty:view` / client |
-| POST | `/points/earn` | customerId, montant, source → points | interne / `loyalty:manage` |
-| POST | `/points/redeem` | customerId, rewardId → récompense | client |
-| GET/POST | `/rewards` · PATCH `/rewards/:id` | catalogue de récompenses | `loyalty:settings:manage` |
-| GET/POST | `/promo-codes` · PATCH `/promo-codes/:id` | code, règles → code promo | `marketing:promo:manage` |
-| POST | `/promo-codes/validate` | code, panier, client → remise applicable | client / `order:create` |
-| POST | `/promo-codes/:id/redeem` | commande → consommation | interne |
-| GET/POST | `/campaigns` · POST `/campaigns/:id/send` | audience, message → campagne | `marketing:campaign:manage` |
-| GET | `/campaigns/:id/stats` | → envoyés, ouverts, conversions | `marketing:campaign:view` |
-| GET/POST | `/segments` | règles → segment | `marketing:segment:manage` |
-| GET | `/reviews` · POST `/reviews/:id/reply` | → avis, réponse | public (création) / `marketing:review:reply` |
-| GET | `/internal/customers/:id/loyalty` | → solde et codes utilisables | interne |
+| Méthode  | Chemin                                    | Entrée → Sortie                          | Permission                                   |
+| -------- | ----------------------------------------- | ---------------------------------------- | -------------------------------------------- |
+| GET/PUT  | `/program`                                | règles de points, niveaux → programme    | `loyalty:settings:manage`                    |
+| GET      | `/accounts/:customerId`                   | → solde, niveau, historique              | `loyalty:view` / client                      |
+| POST     | `/points/earn`                            | customerId, montant, source → points     | interne / `loyalty:manage`                   |
+| POST     | `/points/redeem`                          | customerId, rewardId → récompense        | client                                       |
+| GET/POST | `/rewards` · PATCH `/rewards/:id`         | catalogue de récompenses                 | `loyalty:settings:manage`                    |
+| GET/POST | `/promo-codes` · PATCH `/promo-codes/:id` | code, règles → code promo                | `marketing:promo:manage`                     |
+| POST     | `/promo-codes/validate`                   | code, panier, client → remise applicable | client / `order:create`                      |
+| POST     | `/promo-codes/:id/redeem`                 | commande → consommation                  | interne                                      |
+| GET/POST | `/campaigns` · POST `/campaigns/:id/send` | audience, message → campagne             | `marketing:campaign:manage`                  |
+| GET      | `/campaigns/:id/stats`                    | → envoyés, ouverts, conversions          | `marketing:campaign:view`                    |
+| GET/POST | `/segments`                               | règles → segment                         | `marketing:segment:manage`                   |
+| GET      | `/reviews` · POST `/reviews/:id/reply`    | → avis, réponse                          | public (création) / `marketing:review:reply` |
+| GET      | `/internal/customers/:id/loyalty`         | → solde et codes utilisables             | interne                                      |
 
 **Événements publiés** : `PointsEarned`, `PointsRedeemed`, `TierUpgraded`, `PromoCodeApplied`,
 `CampaignSent`, `ReviewSubmitted`, `ReviewReplied`.
@@ -840,6 +851,7 @@ respectent le consentement et les quotas SMS ; les avis sont publiés après con
 ### 8.11 notification-service
 
 **Responsabilités**
+
 - Envoi multi-canal : push (FCM/APNs), SMS (passerelle locale), e-mail transactionnel.
 - Notifications internes temps réel (salle, cuisine, bar, caisse) via WebSocket.
 - Templates localisés FR/EN, préférences utilisateur, quotas et anti-spam.
@@ -853,17 +865,17 @@ quiet_hours), `DeviceToken` (user, platform, token, last_seen), `RealtimeSubscri
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| POST | `/internal/notifications` | destinataires, template, variables, canaux → notification | interne |
-| GET | `/notifications` | → notifications de l'utilisateur | authentifié |
-| PATCH | `/notifications/:id/read` · `/read-all` | → statut de lecture | authentifié |
-| GET/PUT | `/preferences` | canaux, opt-in, heures calmes | authentifié |
-| POST | `/devices` · DELETE `/devices/:token` | enregistrement push | authentifié |
-| GET/POST | `/templates` · PATCH `/templates/:id` | templates localisés | `platform:notification:manage` |
-| POST | `/test` | canal, destinataire → envoi de test | `platform:notification:manage` |
-| POST | `/webhooks/sms/:provider` | accusés de livraison signés | signature |
-| WS | `/realtime` | rooms `t:{tenant}:floor|kds|pos|admin` | jeton |
+| Méthode  | Chemin                                  | Entrée → Sortie                                           | Permission                     |
+| -------- | --------------------------------------- | --------------------------------------------------------- | ------------------------------ |
+| POST     | `/internal/notifications`               | destinataires, template, variables, canaux → notification | interne                        |
+| GET      | `/notifications`                        | → notifications de l'utilisateur                          | authentifié                    |
+| PATCH    | `/notifications/:id/read` · `/read-all` | → statut de lecture                                       | authentifié                    |
+| GET/PUT  | `/preferences`                          | canaux, opt-in, heures calmes                             | authentifié                    |
+| POST     | `/devices` · DELETE `/devices/:token`   | enregistrement push                                       | authentifié                    |
+| GET/POST | `/templates` · PATCH `/templates/:id`   | templates localisés                                       | `platform:notification:manage` |
+| POST     | `/test`                                 | canal, destinataire → envoi de test                       | `platform:notification:manage` |
+| POST     | `/webhooks/sms/:provider`               | accusés de livraison signés                               | signature                      |
+| WS       | `/realtime`                             | rooms `t:{tenant}:floor                                   | kds                            | pos | admin` | jeton |
 
 **Événements publiés** : `NotificationSent`, `NotificationFailed`, `NotificationRead`.
 **Événements consommés** (sélection) : `OrderCreated`, `OrderSentToKitchen`, `OrderItemReady`,
@@ -879,6 +891,7 @@ critique opérationnel) ; quotas par tenant ; contenu sensible jamais inclus en 
 ### 8.12 reporting-service
 
 **Responsabilités**
+
 - Entrepôt de lecture (CQRS) alimenté uniquement par événements — aucune requête croisée.
 - Tableaux de bord gérant et plateforme : CA, panier moyen, tickets, occupation, top produits,
   marges, heures de pointe, taxes, paie, stocks, avis.
@@ -892,17 +905,17 @@ critique opérationnel) ; quotas par tenant ; contenu sensible jamais inclus en 
 
 **API**
 
-| Méthode | Chemin | Entrée → Sortie | Permission |
-|---|---|---|---|
-| GET | `/dashboards/overview` | période, site → KPI + séries | `report:view` |
-| GET | `/dashboards/overview/compare` | période vs précédente → deltas | `report:view` |
-| GET | `/kpis/timeseries` | metric, granularity → série | `report:view` |
-| GET | `/reports/sales` · `/taxes` · `/stock` · `/payroll` · `/reviews` | filtres → tableau | `report:view` |
-| POST | `/exports` | rapport, format, filtres → job | `report:export` |
-| GET | `/exports/:id` | → statut + URL signée (expiration) | `report:export` |
-| GET/POST | `/scheduled-reports` | cron, rapport, destinataires | `report:schedule` |
-| GET | `/dashboards/:id` · PUT | configuration des widgets | `report:view` |
-| GET | `/admin/overview` | → KPI plateforme (MRR, tenants, incidents) | `platform:report:view` |
+| Méthode  | Chemin                                                           | Entrée → Sortie                            | Permission             |
+| -------- | ---------------------------------------------------------------- | ------------------------------------------ | ---------------------- |
+| GET      | `/dashboards/overview`                                           | période, site → KPI + séries               | `report:view`          |
+| GET      | `/dashboards/overview/compare`                                   | période vs précédente → deltas             | `report:view`          |
+| GET      | `/kpis/timeseries`                                               | metric, granularity → série                | `report:view`          |
+| GET      | `/reports/sales` · `/taxes` · `/stock` · `/payroll` · `/reviews` | filtres → tableau                          | `report:view`          |
+| POST     | `/exports`                                                       | rapport, format, filtres → job             | `report:export`        |
+| GET      | `/exports/:id`                                                   | → statut + URL signée (expiration)         | `report:export`        |
+| GET/POST | `/scheduled-reports`                                             | cron, rapport, destinataires               | `report:schedule`      |
+| GET      | `/dashboards/:id` · PUT                                          | configuration des widgets                  | `report:view`          |
+| GET      | `/admin/overview`                                                | → KPI plateforme (MRR, tenants, incidents) | `platform:report:view` |
 
 **Événements publiés** : `ReportReady`, `ReportFailed`, `AnomalyDetected`.
 **Événements consommés** : `OrderPaid`, `OrderRefunded`, `PaymentSucceeded`, `PosShiftClosed`,
@@ -917,6 +930,7 @@ journalisation de l'export (audit). Le reporting ne détient aucun PII de paieme
 ### 8.13 platform-admin-service
 
 **Responsabilités**
+
 - Supervision de la plateforme : annuaire des établissements, disponibilité des 12 autres services (sondes `/health`), latence, alertes, incidents, journaux techniques.
 - Projection financière : paiements confirmés, remboursements, échecs, abonnements et litiges reçus par événements ; agrégats de commissions par établissement, fournisseur, moyen de paiement et jour.
 - Paramètres globaux : langues, pays, taxes, fournisseurs de paiement, support, fuseau et devise de référence.
@@ -927,21 +941,21 @@ journalisation de l'export (audit). Le reporting ne détient aucun PII de paieme
 
 **API** (préfixe `/api/v1/platform`, auth porteur + permissions plateforme)
 
-| Méthode | Chemin | Sortie | Permission |
-|---|---|---|---|
-| GET | `/dashboard` | établissements, MRR, volume/commissions 30 j, incidents, événements 24 h | logs:view, establishments:review, settings:manage ou operate |
-| GET | `/establishments?status&plan&q` | annuaire + volumes et litiges par tenant | establishments:review ou operate |
-| GET | `/establishments/:tenantId` | fiche annuaire, transactions et litiges projetés | establishments:review ou operate |
-| GET | `/commissions?days` | résumé, regroupements tenant/fournisseur/moyen/jour, dernières commissions | disputes:manage, settings:manage ou operate |
-| GET | `/transactions?kind&tenantId&limit` | flux financier projeté | disputes:manage, operate ou logs:view |
-| GET | `/disputes?status` | projection des litiges (ouverture/résolution) | disputes:manage, operate ou logs:view |
-| GET | `/supervision` | services, alertes, journaux, métriques d'événements, audit | logs:view ou operate |
-| POST | `/supervision/check` | contrôle immédiat des sondes (audité) | operate |
-| PATCH | `/supervision/alerts/:id` | acquitter ou résoudre une alerte (audité) | operate |
-| GET | `/supervision/logs?level&service&limit` | journaux techniques filtrables | logs:view ou operate |
-| GET/PUT | `/settings` | paramètres globaux validés (langues, pays, taxes, fournisseurs) | settings:manage ou operate (lecture) |
-| GET | `/audit` | journal chaîné + validité d'intégrité | logs:view, operate ou settings:manage |
-| POST | `/internal/logs` | ingestion technique (clé de service) | service interne |
+| Méthode | Chemin                                  | Sortie                                                                     | Permission                                                   |
+| ------- | --------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| GET     | `/dashboard`                            | établissements, MRR, volume/commissions 30 j, incidents, événements 24 h   | logs:view, establishments:review, settings:manage ou operate |
+| GET     | `/establishments?status&plan&q`         | annuaire + volumes et litiges par tenant                                   | establishments:review ou operate                             |
+| GET     | `/establishments/:tenantId`             | fiche annuaire, transactions et litiges projetés                           | establishments:review ou operate                             |
+| GET     | `/commissions?days`                     | résumé, regroupements tenant/fournisseur/moyen/jour, dernières commissions | disputes:manage, settings:manage ou operate                  |
+| GET     | `/transactions?kind&tenantId&limit`     | flux financier projeté                                                     | disputes:manage, operate ou logs:view                        |
+| GET     | `/disputes?status`                      | projection des litiges (ouverture/résolution)                              | disputes:manage, operate ou logs:view                        |
+| GET     | `/supervision`                          | services, alertes, journaux, métriques d'événements, audit                 | logs:view ou operate                                         |
+| POST    | `/supervision/check`                    | contrôle immédiat des sondes (audité)                                      | operate                                                      |
+| PATCH   | `/supervision/alerts/:id`               | acquitter ou résoudre une alerte (audité)                                  | operate                                                      |
+| GET     | `/supervision/logs?level&service&limit` | journaux techniques filtrables                                             | logs:view ou operate                                         |
+| GET/PUT | `/settings`                             | paramètres globaux validés (langues, pays, taxes, fournisseurs)            | settings:manage ou operate (lecture)                         |
+| GET     | `/audit`                                | journal chaîné + validité d'intégrité                                      | logs:view, operate ou settings:manage                        |
+| POST    | `/internal/logs`                        | ingestion technique (clé de service)                                       | service interne                                              |
 
 **Événements publiés** : `PlatformSettingsUpdated`.
 **Événements consommés** : `TenantApplicationSubmitted`, `TenantApproved`, `TenantApplicationRejected`, `TenantSuspended`, `TenantReactivated`, `PaymentConfirmed`, `PaymentFailed`, `RefundIssued`, `DisputeOpened`, `DisputeResolved`, `SettlementPaid`, `SubscriptionInvoicePaid` (idempotence par identifiant d'événement).
@@ -976,42 +990,43 @@ journalisation de l'export (audit). Le reporting ne détient aucun PII de paieme
 
 ### 16.1 Vue d'ensemble
 
-| Élément | identity-service | tenant-service |
-|---|---|---|
-| Port dev | `4001` (`IDENTITY_PORT`) | `4002` (`TENANT_PORT`) |
-| Base / stockage v1 | store mémoire semé (`DEMO_SEED=true`) | store mémoire semé (`DEMO_SEED=true`) |
-| Cœur technique | `@resto-hub/service-kit` (routes, auth, erreurs, événements) | idem |
-| Contrôle d'accès | JWT HS256 + scopes `tenantPermissions` | JWT vérifié via claims partagés + `x-tenant-id` |
-| Messagerie | consommateur `TenantSuspended`, `TenantApproved` | publieur d'événements tenant |
-| Contrat d'erreur | `{ error: { code, message, details, requestId } }` | idem |
+| Élément            | identity-service                                             | tenant-service                                  |
+| ------------------ | ------------------------------------------------------------ | ----------------------------------------------- |
+| Port dev           | `4001` (`IDENTITY_PORT`)                                     | `4002` (`TENANT_PORT`)                          |
+| Base / stockage v1 | store mémoire semé (`DEMO_SEED=true`)                        | store mémoire semé (`DEMO_SEED=true`)           |
+| Cœur technique     | `@resto-hub/service-kit` (routes, auth, erreurs, événements) | idem                                            |
+| Contrôle d'accès   | JWT HS256 + scopes `tenantPermissions`                       | JWT vérifié via claims partagés + `x-tenant-id` |
+| Messagerie         | consommateur `TenantSuspended`, `TenantApproved`             | publieur d'événements tenant                    |
+| Contrat d'erreur   | `{ error: { code, message, details, requestId } }`           | idem                                            |
 
 ### 16.2 identity-service
 
 **Endpoints implémentés** (préfixe `/api/v1`)
 
-| Méthode | Chemin | Rôle |
-|---|---|---|
-| GET | `/auth/config` | providers activés (email, téléphone, Google/Apple, MFA) |
-| POST | `/auth/email/register` | création compte + tokens |
-| POST | `/auth/email/login` | email + mot de passe → tokens ou `mfaRequired` |
-| POST | `/auth/phone/start` | challenge OTP (code dev renvoyé si `DEMO_OTP`) |
-| POST | `/auth/phone/verify` | OTP → tokens (création compte client si inconnu) |
-| POST | `/auth/social/:provider` | Google/Apple (mode démo, `idToken` simulé) |
-| POST | `/auth/mfa/enroll` · `/mfa/confirm` | enrôlement TOTP + 8 codes de secours |
-| POST | `/auth/mfa/verify` | TOTP ou code de secours → tokens |
-| POST | `/auth/mfa/disable` | désactivation (interdite si politique MFA obligatoire) |
-| POST | `/auth/refresh` · `/auth/logout` | rotation refresh, révocation de session |
-| GET | `/auth/me` | profil + rôles + permissions effectives par tenant |
-| GET/DELETE | `/sessions`, `/sessions/:id` | liste et révocation d'appareils |
-| GET/POST/PATCH | `/roles`, `/roles/:id` | rôles personnalisables par établissement |
-| GET | `/permissions` | catalogue global (voir, créer, modifier, annuler, rembourser, exporter…) |
-| GET/PATCH/PUT/DELETE | `/tenants/:tenantId/team…` | équipe, affectation de rôles |
-| GET | `/audit`, `/audit/integrity` | journal immuable + vérification de la chaîne de hachage |
-| POST | `/internal/introspect` | validation de jeton service-à-service |
-| POST | `/internal/provision-user`, `/internal/provision-platform-user` | provisioning (tenant-service) |
-| POST | `/internal/revoke-sessions` | révocation ciblée (suspension, offboarding) |
+| Méthode              | Chemin                                                          | Rôle                                                                     |
+| -------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| GET                  | `/auth/config`                                                  | providers activés (email, téléphone, Google/Apple, MFA)                  |
+| POST                 | `/auth/email/register`                                          | création compte + tokens                                                 |
+| POST                 | `/auth/email/login`                                             | email + mot de passe → tokens ou `mfaRequired`                           |
+| POST                 | `/auth/phone/start`                                             | challenge OTP (code dev renvoyé si `DEMO_OTP`)                           |
+| POST                 | `/auth/phone/verify`                                            | OTP → tokens (création compte client si inconnu)                         |
+| POST                 | `/auth/social/:provider`                                        | Google/Apple (mode démo, `idToken` simulé)                               |
+| POST                 | `/auth/mfa/enroll` · `/mfa/confirm`                             | enrôlement TOTP + 8 codes de secours                                     |
+| POST                 | `/auth/mfa/verify`                                              | TOTP ou code de secours → tokens                                         |
+| POST                 | `/auth/mfa/disable`                                             | désactivation (interdite si politique MFA obligatoire)                   |
+| POST                 | `/auth/refresh` · `/auth/logout`                                | rotation refresh, révocation de session                                  |
+| GET                  | `/auth/me`                                                      | profil + rôles + permissions effectives par tenant                       |
+| GET/DELETE           | `/sessions`, `/sessions/:id`                                    | liste et révocation d'appareils                                          |
+| GET/POST/PATCH       | `/roles`, `/roles/:id`                                          | rôles personnalisables par établissement                                 |
+| GET                  | `/permissions`                                                  | catalogue global (voir, créer, modifier, annuler, rembourser, exporter…) |
+| GET/PATCH/PUT/DELETE | `/tenants/:tenantId/team…`                                      | équipe, affectation de rôles                                             |
+| GET                  | `/audit`, `/audit/integrity`                                    | journal immuable + vérification de la chaîne de hachage                  |
+| POST                 | `/internal/introspect`                                          | validation de jeton service-à-service                                    |
+| POST                 | `/internal/provision-user`, `/internal/provision-platform-user` | provisioning (tenant-service)                                            |
+| POST                 | `/internal/revoke-sessions`                                     | révocation ciblée (suspension, offboarding)                              |
 
 **Sécurité implémentée**
+
 - Mots de passe `scrypt` salés ; politique de complexité ; anti-énumération.
 - JWT HS256, types `access` / `mfa` / `stepup` (claim `purpose`), refresh rotatif avec détection de réutilisation.
 - MFA **obligatoire** pour le rôle `owner` et les comptes plateforme (TOTP + codes de secours).
@@ -1024,31 +1039,31 @@ journalisation de l'export (audit). Le reporting ne détient aucun PII de paieme
 
 **Endpoints implémentés**
 
-| Méthode | Chemin | Rôle |
-|---|---|---|
-| GET | `/api/v1/plans` | Starter / Pro / Entreprise (prix XOF, limites, commissions, essai) |
-| POST | `/api/v1/applications` | brouillon de candidature (public, jeton de suivi) |
-| GET/PATCH | `/api/v1/applications/:id` | reprise multi-étapes via `x-application-token` |
-| POST | `/api/v1/applications/:id/documents` | pièces justificatives (NIF, RCCM, pièce d'identité) || POST | `/api/v1/applications/:id/submit` | soumission → statut `submitted` |
-| GET | `/api/v1/admin/applications` | file de validation (filtres statut, recherche) |
-| GET | `/api/v1/admin/applications/:id` | dossier complet + historique de revue |
-| GET | `/api/v1/admin/applications/:id/documents/:docId` | téléchargement contrôlé |
-| POST | `/api/v1/admin/applications/:id/review` | `approve` \| `reject` \| `request_documents` |
-| GET | `/api/v1/admin/tenants` | établissements actifs/suspendus |
-| POST | `/api/v1/admin/tenants/:id/suspend` · `/reactivate` | décision plateforme motivée |
-| GET | `/api/v1/admin/overview` | agrégats supervision + intégrité audit |
-| GET | `/api/v1/tenants/mine` | espaces accessibles au compte connecté |
-| GET | `/api/v1/tenants/:id` | fiche, branding, plan, sites, abonnement, factures |
-| PATCH | `/api/v1/tenants/:id/branding` | logo, couleurs, langues FR/EN, devise, horaires |
-| GET/POST/PATCH/DELETE | `/api/v1/tenants/:id/sites…` | multi-sites avec limite de plan |
-| GET | `/api/v1/tenants/:id/onboarding` | checklist de configuration calculée |
-| GET | `/api/v1/tenants/:id/subscription` | abonnement, plans, factures, essai restant |
-| POST | `/api/v1/tenants/:id/subscription/checkout` | souscription / changement de plan |
-| POST | `/api/v1/tenants/:id/subscription/invoices/:invoiceId/pay-demo` | paiement démo idempotent |
-| GET | `/api/v1/tenants/:id/team` · `/audit` · `/export` | équipe, audit, export CSV cloisonné |
-| POST | `/internal/webhooks/billing` | webhook signé HMAC + idempotence |
-| POST | `/internal/billing/run-dunning` | relance impayés → suspension |
-| GET | `/internal/tenants/:id/summary` | résumé service-à-service |
+| Méthode               | Chemin                                                          | Rôle                                                               |
+| --------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------ |
+| GET                   | `/api/v1/plans`                                                 | Starter / Pro / Entreprise (prix XOF, limites, commissions, essai) |
+| POST                  | `/api/v1/applications`                                          | brouillon de candidature (public, jeton de suivi)                  |
+| GET/PATCH             | `/api/v1/applications/:id`                                      | reprise multi-étapes via `x-application-token`                     |
+| POST                  | `/api/v1/applications/:id/documents`                            | pièces justificatives (NIF, RCCM, pièce d'identité)                |     | POST | `/api/v1/applications/:id/submit` | soumission → statut `submitted` |
+| GET                   | `/api/v1/admin/applications`                                    | file de validation (filtres statut, recherche)                     |
+| GET                   | `/api/v1/admin/applications/:id`                                | dossier complet + historique de revue                              |
+| GET                   | `/api/v1/admin/applications/:id/documents/:docId`               | téléchargement contrôlé                                            |
+| POST                  | `/api/v1/admin/applications/:id/review`                         | `approve` \| `reject` \| `request_documents`                       |
+| GET                   | `/api/v1/admin/tenants`                                         | établissements actifs/suspendus                                    |
+| POST                  | `/api/v1/admin/tenants/:id/suspend` · `/reactivate`             | décision plateforme motivée                                        |
+| GET                   | `/api/v1/admin/overview`                                        | agrégats supervision + intégrité audit                             |
+| GET                   | `/api/v1/tenants/mine`                                          | espaces accessibles au compte connecté                             |
+| GET                   | `/api/v1/tenants/:id`                                           | fiche, branding, plan, sites, abonnement, factures                 |
+| PATCH                 | `/api/v1/tenants/:id/branding`                                  | logo, couleurs, langues FR/EN, devise, horaires                    |
+| GET/POST/PATCH/DELETE | `/api/v1/tenants/:id/sites…`                                    | multi-sites avec limite de plan                                    |
+| GET                   | `/api/v1/tenants/:id/onboarding`                                | checklist de configuration calculée                                |
+| GET                   | `/api/v1/tenants/:id/subscription`                              | abonnement, plans, factures, essai restant                         |
+| POST                  | `/api/v1/tenants/:id/subscription/checkout`                     | souscription / changement de plan                                  |
+| POST                  | `/api/v1/tenants/:id/subscription/invoices/:invoiceId/pay-demo` | paiement démo idempotent                                           |
+| GET                   | `/api/v1/tenants/:id/team` · `/audit` · `/export`               | équipe, audit, export CSV cloisonné                                |
+| POST                  | `/internal/webhooks/billing`                                    | webhook signé HMAC + idempotence                                   |
+| POST                  | `/internal/billing/run-dunning`                                 | relance impayés → suspension                                       |
+| GET                   | `/internal/tenants/:id/summary`                                 | résumé service-à-service                                           |
 
 **Cycle de vie implémenté** : `draft → submitted → info_requested → approved | rejected`,
 puis `active ⇄ suspended`. L'approbation crée atomiquement le tenant (slug et sous-domaine
@@ -1066,12 +1081,12 @@ agrégats ne franchissent jamais la frontière ; tests croisés A↔B sur chaque
 
 ### 16.4 Interface web (design system)
 
-| Route | Écran | Fichier |
-|---|---|---|
-| `#/connexion` | connexion email / téléphone OTP / Google-Apple / MFA | `apps/web/src/pages/LoginPage.tsx` |
-| `#/inscription` | parcours établissement en 5 étapes + suivi de demande | `apps/web/src/pages/RegisterPage.tsx` |
-| `#/admin` | back-office super-admin (demandes, validation, suspension) | `apps/web/src/pages/AdminPage.tsx` |
-| `#/espace` | espace gérant (onboarding, branding, sites, abonnement, équipe) | `apps/web/src/pages/WorkspacePage.tsx` |
+| Route           | Écran                                                           | Fichier                                |
+| --------------- | --------------------------------------------------------------- | -------------------------------------- |
+| `#/connexion`   | connexion email / téléphone OTP / Google-Apple / MFA            | `apps/web/src/pages/LoginPage.tsx`     |
+| `#/inscription` | parcours établissement en 5 étapes + suivi de demande           | `apps/web/src/pages/RegisterPage.tsx`  |
+| `#/admin`       | back-office super-admin (demandes, validation, suspension)      | `apps/web/src/pages/AdminPage.tsx`     |
+| `#/espace`      | espace gérant (onboarding, branding, sites, abonnement, équipe) | `apps/web/src/pages/WorkspacePage.tsx` |
 
 Briques : `apps/web/src/lib/api.ts` (client typé), `router.ts` (hash routing),
 `session.tsx` (session + refresh + claims), `i18n/step1.ts` (FR/EN).
@@ -1079,11 +1094,11 @@ Tous les écrans appliquent tokens, composants et thème clair/sombre du design 
 
 ### 16.5 Comptes et données de démonstration
 
-| Compte | Identifiant | Mot de passe | Profil |
-|---|---|---|---|
-| Super-admin | `admin@resto-hub.tg` | `Admin#2026` | plateforme, MFA |
-| Gérant | `gerant@sahelgrill.tg` | `Gerant#2026` | owner, MFA obligatoire |
-| Serveur | `serveur@sahelgrill.tg` | `Serveur#2026` | waiter |
+| Compte      | Identifiant             | Mot de passe   | Profil                 |
+| ----------- | ----------------------- | -------------- | ---------------------- |
+| Super-admin | `admin@resto-hub.tg`    | `Admin#2026`   | plateforme, MFA        |
+| Gérant      | `gerant@sahelgrill.tg`  | `Gerant#2026`  | owner, MFA obligatoire |
+| Serveur     | `serveur@sahelgrill.tg` | `Serveur#2026` | waiter                 |
 
 Établissement démo : `tnt_sahelgrill` (« Sahel Grill », slug `sahel-grill`,
 sous-domaine `sahel-grill.resto-hub.tg`). Demandes de démo : `APP-2026-0001` (`submitted`),
@@ -1119,58 +1134,58 @@ sur demande explicite uniquement.
 
 ### 17.1 catalog-service
 
-| Élément | Détail |
-|---|---|
-| Port | `4003` (`CATALOG_PORT`) |
-| Fuseau | `Africa/Lome` (`CATALOG_TIMEZONE`) — les plages horaires sont évaluées dans le fuseau de l'établissement |
-| Entités | `CatalogCategory`, `CatalogProduct` (variantes, groupes d'options obligatoires/facultatifs, photos, 14 allergènes UE, `PriceRule`), `ComposedMenu` + items, `Promotion` (`percent`/`amount`, portée tout/catégorie/produit) |
-| Disponibilité | `ProductAvailability { available, reason?, until?, updatedAt, updatedBy }` — bascule 86 immédiate |
-| Audit | chaîne de hachage pour créations, changements de prix (avant/après), disponibilité, promotions |
+| Élément       | Détail                                                                                                                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Port          | `4003` (`CATALOG_PORT`)                                                                                                                                                                                                     |
+| Fuseau        | `Africa/Lome` (`CATALOG_TIMEZONE`) — les plages horaires sont évaluées dans le fuseau de l'établissement                                                                                                                    |
+| Entités       | `CatalogCategory`, `CatalogProduct` (variantes, groupes d'options obligatoires/facultatifs, photos, 14 allergènes UE, `PriceRule`), `ComposedMenu` + items, `Promotion` (`percent`/`amount`, portée tout/catégorie/produit) |
+| Disponibilité | `ProductAvailability { available, reason?, until?, updatedAt, updatedBy }` — bascule 86 immédiate                                                                                                                           |
+| Audit         | chaîne de hachage pour créations, changements de prix (avant/après), disponibilité, promotions                                                                                                                              |
 
 **Endpoints** (préfixe `/api/v1/tenants/:tenantId/catalog`) :
 
-| Méthode | Chemin | Rôle |
-|---|---|---|
-| GET | `/` | snapshot complet (prix effectifs, plage active, menus nommés, promotions) |
-| GET | `/products/:id` | fiche produit calculée |
-| POST/PATCH/DELETE | `/categories`, `/categories/:id` | catégories ordonnées (doublon 409, suppression bloquée si non vide) |
-| POST/PATCH/DELETE | `/products`, `/products/:id` | catalogue (validation catégorie, URL HTTPS, allergènes, ≤ 10 variantes, ≤ 6 plages HH:MM) |
-| PATCH | `/products/:id/availability` | rupture/remise en vente (`catalog:availability` ou `catalog:manage`) |
-| POST/PATCH/DELETE | `/menus`, `/menus/:id` | menus composés (produits et variantes du même établissement) |
-| POST/PATCH/DELETE | `/promotions`, `/promotions/:id` | codes `A-Z0-9` 4–20 uniques, pourcentage ≤ 100, dates ordonnées |
-| GET | `/audit` | journal cloisonné + intégrité (`audit:view`) |
-| GET | `/api/v1/public/tenants/:tenantId/menu` | carte client publique (produits inactifs masqués, prix effectifs, promotions) |
-| GET | `/internal/tenants/:tenantId/catalog/summary` | résumé service-à-service (order-service, reporting) |
+| Méthode           | Chemin                                        | Rôle                                                                                      |
+| ----------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| GET               | `/`                                           | snapshot complet (prix effectifs, plage active, menus nommés, promotions)                 |
+| GET               | `/products/:id`                               | fiche produit calculée                                                                    |
+| POST/PATCH/DELETE | `/categories`, `/categories/:id`              | catégories ordonnées (doublon 409, suppression bloquée si non vide)                       |
+| POST/PATCH/DELETE | `/products`, `/products/:id`                  | catalogue (validation catégorie, URL HTTPS, allergènes, ≤ 10 variantes, ≤ 6 plages HH:MM) |
+| PATCH             | `/products/:id/availability`                  | rupture/remise en vente (`catalog:availability` ou `catalog:manage`)                      |
+| POST/PATCH/DELETE | `/menus`, `/menus/:id`                        | menus composés (produits et variantes du même établissement)                              |
+| POST/PATCH/DELETE | `/promotions`, `/promotions/:id`              | codes `A-Z0-9` 4–20 uniques, pourcentage ≤ 100, dates ordonnées                           |
+| GET               | `/audit`                                      | journal cloisonné + intégrité (`audit:view`)                                              |
+| GET               | `/api/v1/public/tenants/:tenantId/menu`       | carte client publique (produits inactifs masqués, prix effectifs, promotions)             |
+| GET               | `/internal/tenants/:tenantId/catalog/summary` | résumé service-à-service (order-service, reporting)                                       |
 
 **Événement publié** : `CatalogItemUpdated` `{ tenantId, itemType, itemId, change: created|updated|availability|archived, name?, priceXof?, available?, reason?, at }` pour chaque mutation.
 
 ### 17.2 floor-service
 
-| Élément | Détail |
-|---|---|
-| Port | `4004` (`FLOOR_PORT`) |
-| Entités | `FloorSettings` (code établissement), `FloorZone` (salle, terrasse, VIP, bar, étage), `FloorTable` (numéro, code, capacité, type, position %, statut, commande/réservation, fusion, jeton QR) |
-| Numérotation | `ETAB-ZONE-NUMERO` (ex. `LOME01-TER-014`), recalculée à chaque changement de code établissement/zone ; doublons refusés `409 table_number_conflict` / `table_code_conflict` |
-| Statuts | `libre → réservée|occupée|hors service`, `réservée → libre|occupée|hors service`, `occupée → addition|libre|hors service`, `addition → nettoyage|occupée`, `nettoyage → libre`, `hors service → libre` ; transition invalide 409, statut identique 422 |
-| QR | token unique par place, SVG/PNG unitaires, planche PDF A4 3×4 (`pdf-lib` + `qrcode`), URL publique `…/t/{tenantId}/{code}?k={token}` |
-| Audit | créations, déplacements, statuts, fusions/divisions, transferts, paramétrage |
+| Élément      | Détail                                                                                                                                                                                        |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Port         | `4004` (`FLOOR_PORT`)                                                                                                                                                                         |
+| Entités      | `FloorSettings` (code établissement), `FloorZone` (salle, terrasse, VIP, bar, étage), `FloorTable` (numéro, code, capacité, type, position %, statut, commande/réservation, fusion, jeton QR) |
+| Numérotation | `ETAB-ZONE-NUMERO` (ex. `LOME01-TER-014`), recalculée à chaque changement de code établissement/zone ; doublons refusés `409 table_number_conflict` / `table_code_conflict`                   |
+| Statuts      | `libre → réservée                                                                                                                                                                             | occupée | hors service`, `réservée → libre | occupée | hors service`, `occupée → addition | libre | hors service`, `addition → nettoyage | occupée`, `nettoyage → libre`, `hors service → libre` ; transition invalide 409, statut identique 422 |
+| QR           | token unique par place, SVG/PNG unitaires, planche PDF A4 3×4 (`pdf-lib` + `qrcode`), URL publique `…/t/{tenantId}/{code}?k={token}`                                                          |
+| Audit        | créations, déplacements, statuts, fusions/divisions, transferts, paramétrage                                                                                                                  |
 
 **Endpoints** (préfixe `/api/v1/tenants/:tenantId/floor`) :
 
-| Méthode | Chemin | Rôle |
-|---|---|---|
-| GET | `/` | snapshot { settings, zones, tables, summary, live } |
-| GET | `/occupancy` | tableau de bord d'occupation par zone et global (taux, couverts, fusions) |
-| PUT | `/settings` | code établissement + recalcul des codes (`floor:manage`) |
-| POST/PATCH/DELETE | `/zones`, `/zones/:id` | zones (code 2–4 A-Z/0-9 unique, recodage des places, suppression bloquée si non vide) |
-| POST/PATCH/DELETE | `/tables`, `/tables/:id` | places (numéro unique par zone, capacité, type, position glisser-déposer, re-code au déplacement) |
-| POST | `/tables/:id/status` | transition contrôlée (`floor:status` ou `floor:manage`) |
-| POST | `/tables/merge` · `/tables/:id/split` | fusion 2–6 places de même zone (capacité cumulée) et division |
-| POST | `/tables/:id/transfer` | transfert de commande (source → nettoyage/libre, cible occupée) |
-| GET | `/tables/:id/qr?format=svg|png` · `/qr-sheet.pdf` | QR unitaire et planche en lot (binaire protégé) |
-| GET | `/audit` | journal cloisonné + intégrité |
-| GET | `/api/v1/public/tenants/:tenantId/tables/:code` | résolution du scan QR côté client |
-| GET | `/internal/tenants/:tenantId/floor/tables/:code` | lecture service-à-service (order-service) |
+| Méthode           | Chemin                                           | Rôle                                                                                              |
+| ----------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| GET               | `/`                                              | snapshot { settings, zones, tables, summary, live }                                               |
+| GET               | `/occupancy`                                     | tableau de bord d'occupation par zone et global (taux, couverts, fusions)                         |
+| PUT               | `/settings`                                      | code établissement + recalcul des codes (`floor:manage`)                                          |
+| POST/PATCH/DELETE | `/zones`, `/zones/:id`                           | zones (code 2–4 A-Z/0-9 unique, recodage des places, suppression bloquée si non vide)             |
+| POST/PATCH/DELETE | `/tables`, `/tables/:id`                         | places (numéro unique par zone, capacité, type, position glisser-déposer, re-code au déplacement) |
+| POST              | `/tables/:id/status`                             | transition contrôlée (`floor:status` ou `floor:manage`)                                           |
+| POST              | `/tables/merge` · `/tables/:id/split`            | fusion 2–6 places de même zone (capacité cumulée) et division                                     |
+| POST              | `/tables/:id/transfer`                           | transfert de commande (source → nettoyage/libre, cible occupée)                                   |
+| GET               | `/tables/:id/qr?format=svg                       | png`·`/qr-sheet.pdf`                                                                              | QR unitaire et planche en lot (binaire protégé) |
+| GET               | `/audit`                                         | journal cloisonné + intégrité                                                                     |
+| GET               | `/api/v1/public/tenants/:tenantId/tables/:code`  | résolution du scan QR côté client                                                                 |
+| GET               | `/internal/tenants/:tenantId/floor/tables/:code` | lecture service-à-service (order-service)                                                         |
 
 **Événements publiés** : `TableStatusChanged` `{ tenantId, tableId, code, zoneId, from, to, orderId?, reservationId?, actorId, at }`, `FloorLayoutUpdated`, `FloorTablesMerged`, `FloorTablesSplit`, `FloorOrderTransferred`.
 
@@ -1183,10 +1198,10 @@ sur demande explicite uniquement.
 
 ### 17.4 Interface web
 
-| Onglet `#/espace` | Contenu |
-|---|---|
-| Catalogue | indicateurs, recherche/filtre, catégories, tableau produits (prix effectif + happy hour, 86, édition), fiche produit (variantes, allergènes, photos, plages horaires multi-jours), promotions, menus composés |
-| Plan de salle | indicateurs d'occupation en direct (rafraîchissement 15 s), zones, plan glisser-déposer (HTML5) + flèches accessibles, statuts couleur AA (tokens `--table-*`, clair/sombre), fiche place (transitions rapides, fusion/division, transfert, QR), planche PDF, paramétrage code établissement |
+| Onglet `#/espace` | Contenu                                                                                                                                                                                                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catalogue         | indicateurs, recherche/filtre, catégories, tableau produits (prix effectif + happy hour, 86, édition), fiche produit (variantes, allergènes, photos, plages horaires multi-jours), promotions, menus composés                                                                                |
+| Plan de salle     | indicateurs d'occupation en direct (rafraîchissement 15 s), zones, plan glisser-déposer (HTML5) + flèches accessibles, statuts couleur AA (tokens `--table-*`, clair/sombre), fiche place (transitions rapides, fusion/division, transfert, QR), planche PDF, paramétrage code établissement |
 
 Les statuts utilisent les mêmes tokens que `TableStatusBadge` du design system : libre (vert), réservée (ambre), occupée (orange), addition (bleu), à nettoyer (violet), hors service (gris) — lisibles en mode sombre comme en mode clair.
 
@@ -1225,34 +1240,34 @@ npm run typecheck && npm run build
 
 ### 18.1 Entités (store isolé par `tenantId`)
 
-| Entité | Champs structurants |
-|---|---|
-| `Order` | `number` séquentiel annuel (`CMD-AAAA-000001`), `channel` (`sur_place`, `a_emporter`, `livraison`, `precommande`), `status`, `source` (`client` \| `staff`), `tableId/tableCode`, `customer`, `scheduledFor`, `lines`, `subtotalXof`, `discount`, `deliveryFeeXof`, `totalXof`, `netXof`, `taxXof`/`taxRate`, `payments`, `paymentStatus`, `invoiceNumber`/`receiptNumber`, `cancel`, `clientRequestId`, `publicToken`, `version`, horodatages par étape |
-| `OrderLine` | produit, variante, options (prix imposés serveur), quantité, prix unitaire/ligne, `station` (`cuisine` \| `bar`), notes |
-| `OrderDiscount` | type (`percent`/`amount`), valeur, **motif obligatoire**, auteur, montant calculé serveur |
-| `OrderPayment` | méthode (`especes`, `mobile_money`, `carte`, `credit`), montant, référence, session de caisse, opérateur |
-| `StationTicket` | poste, statut (`nouvelle` → `en_preparation` → `prete`), lignes rattachées, auteur du dernier changement |
-| `CashSession` | fond de caisse d’ouverture, encaissements attendus/comptés, écart, clôture — **une seule session ouverte par établissement** |
-| `OrderCounters` | compteurs annuels commande / facture / reçu |
-| Audit | journal chaîné (annulations, remises, remboursements, paiements, clôtures) avec contrôle d’intégrité |
+| Entité          | Champs structurants                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Order`         | `number` séquentiel annuel (`CMD-AAAA-000001`), `channel` (`sur_place`, `a_emporter`, `livraison`, `precommande`), `status`, `source` (`client` \| `staff`), `tableId/tableCode`, `customer`, `scheduledFor`, `lines`, `subtotalXof`, `discount`, `deliveryFeeXof`, `totalXof`, `netXof`, `taxXof`/`taxRate`, `payments`, `paymentStatus`, `invoiceNumber`/`receiptNumber`, `cancel`, `clientRequestId`, `publicToken`, `version`, horodatages par étape |
+| `OrderLine`     | produit, variante, options (prix imposés serveur), quantité, prix unitaire/ligne, `station` (`cuisine` \| `bar`), notes                                                                                                                                                                                                                                                                                                                                  |
+| `OrderDiscount` | type (`percent`/`amount`), valeur, **motif obligatoire**, auteur, montant calculé serveur                                                                                                                                                                                                                                                                                                                                                                |
+| `OrderPayment`  | méthode (`especes`, `mobile_money`, `carte`, `credit`), montant, référence, session de caisse, opérateur                                                                                                                                                                                                                                                                                                                                                 |
+| `StationTicket` | poste, statut (`nouvelle` → `en_preparation` → `prete`), lignes rattachées, auteur du dernier changement                                                                                                                                                                                                                                                                                                                                                 |
+| `CashSession`   | fond de caisse d’ouverture, encaissements attendus/comptés, écart, clôture — **une seule session ouverte par établissement**                                                                                                                                                                                                                                                                                                                             |
+| `OrderCounters` | compteurs annuels commande / facture / reçu                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Audit           | journal chaîné (annulations, remises, remboursements, paiements, clôtures) avec contrôle d’intégrité                                                                                                                                                                                                                                                                                                                                                     |
 
 ### 18.2 Endpoints (extrait)
 
-| Méthode | Route | Permission |
-|---|---|---|
-| GET/POST | `…/orders` (filtres statut/canal/recherche, limite 200) | `order:view` / `order:create` |
-| GET | `…/orders/:id`, `…/orders/:id/invoice`, `…/orders/:id/receipt.pdf` | `order:view` |
-| GET | `…/orders/export.csv` (bornes `from`/`to`) | `report:export` |
-| GET | `…/orders/audit` | `audit:view` |
-| POST | `…/orders/:id/status` (transitions contrôlées + `expectedVersion`) | `order:update` |
-| POST | `…/orders/:id/cancel` (motif requis, commande payée verrouillée) | `order:cancel` |
-| POST | `…/orders/:id/discount` (motif requis, verrouillé après premier paiement) | `order:discount` |
-| POST | `…/orders/:id/payments` (partiel/total, facture + reçu émis au solde) | `pos:operate` |
-| GET | `…/kds?station=all|cuisine|bar` · POST `…/kds/tickets/:id/status` | `order:view` / `order:update` |
-| GET | `…/pos` · POST `…/pos/session/open` · POST `…/pos/session/close` | `payment:view` / `pos:operate` / `pos:close` |
-| POST | `/api/v1/public/tenants/:tenantId/orders` (scan QR : `tableToken` vérifié auprès du floor) | public |
-| GET | `/api/v1/public/tenants/:tenantId/orders/:id?k=<publicToken>` | public (suivi protégé) |
-| GET | `/internal/tenants/:tenantId/orders/summary` | `x-internal-key` (reporting, onboarding) |
+| Méthode  | Route                                                                                      | Permission                                   |
+| -------- | ------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| GET/POST | `…/orders` (filtres statut/canal/recherche, limite 200)                                    | `order:view` / `order:create`                |
+| GET      | `…/orders/:id`, `…/orders/:id/invoice`, `…/orders/:id/receipt.pdf`                         | `order:view`                                 |
+| GET      | `…/orders/export.csv` (bornes `from`/`to`)                                                 | `report:export`                              |
+| GET      | `…/orders/audit`                                                                           | `audit:view`                                 |
+| POST     | `…/orders/:id/status` (transitions contrôlées + `expectedVersion`)                         | `order:update`                               |
+| POST     | `…/orders/:id/cancel` (motif requis, commande payée verrouillée)                           | `order:cancel`                               |
+| POST     | `…/orders/:id/discount` (motif requis, verrouillé après premier paiement)                  | `order:discount`                             |
+| POST     | `…/orders/:id/payments` (partiel/total, facture + reçu émis au solde)                      | `pos:operate`                                |
+| GET      | `…/kds?station=all                                                                         | cuisine                                      | bar`· POST`…/kds/tickets/:id/status` | `order:view` / `order:update` |
+| GET      | `…/pos` · POST `…/pos/session/open` · POST `…/pos/session/close`                           | `payment:view` / `pos:operate` / `pos:close` |
+| POST     | `/api/v1/public/tenants/:tenantId/orders` (scan QR : `tableToken` vérifié auprès du floor) | public                                       |
+| GET      | `/api/v1/public/tenants/:tenantId/orders/:id?k=<publicToken>`                              | public (suivi protégé)                       |
+| GET      | `/internal/tenants/:tenantId/orders/summary`                                               | `x-internal-key` (reporting, onboarding)     |
 
 ### 18.3 Événements
 
@@ -1271,13 +1286,13 @@ npm run typecheck && npm run build
 
 ### 18.5 Interface web
 
-| Écran | Contenu |
-|---|---|
-| **Commandes** (web/tablette) | indicateurs (nombre du jour, en cours, à encaisser, encaissé), filtres statut/canal + recherche, liste et fiche détaillée, composition en **deux touches** (place → produit), variantes/options, remise motivée, annulation motivée, facture/reçu, export CSV, file hors ligne + synchronisation |
-| **KDS** (cuisine/bar) | coque sombre dédiée (`#0c0a09`), colonnes Nouvelles / En préparation / Prêtes, tickets par poste, minuteur et alerte de retard, gros boutons (56 px), rafraîchissement 3 s, numéros 24 px lisibles à distance |
-| **Caisse (POS)** | ouverture/clôture de session, fond de caisse, encaissement multi-méthodes, paiement partiel, tickets du jour, écart de caisse |
-| **Carte publique** (`#/t/:tenantId/:code?k=…`) | 3 étapes (carte → panier → coordonnées) puis suivi ; catégories, fiches produit, configuration obligatoire des options, jeton de table vérifié, refus si place déjà commandée |
-| **Suivi client** (`#/suivi/...`) | timeline Reçue → En préparation → Prête → Servie (mise à jour automatique 3 s), détail et tickets par poste, clé `k` dans l’URL |
+| Écran                                          | Contenu                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Commandes** (web/tablette)                   | indicateurs (nombre du jour, en cours, à encaisser, encaissé), filtres statut/canal + recherche, liste et fiche détaillée, composition en **deux touches** (place → produit), variantes/options, remise motivée, annulation motivée, facture/reçu, export CSV, file hors ligne + synchronisation |
+| **KDS** (cuisine/bar)                          | coque sombre dédiée (`#0c0a09`), colonnes Nouvelles / En préparation / Prêtes, tickets par poste, minuteur et alerte de retard, gros boutons (56 px), rafraîchissement 3 s, numéros 24 px lisibles à distance                                                                                    |
+| **Caisse (POS)**                               | ouverture/clôture de session, fond de caisse, encaissement multi-méthodes, paiement partiel, tickets du jour, écart de caisse                                                                                                                                                                    |
+| **Carte publique** (`#/t/:tenantId/:code?k=…`) | 3 étapes (carte → panier → coordonnées) puis suivi ; catégories, fiches produit, configuration obligatoire des options, jeton de table vérifié, refus si place déjà commandée                                                                                                                    |
+| **Suivi client** (`#/suivi/...`)               | timeline Reçue → En préparation → Prête → Servie (mise à jour automatique 3 s), détail et tickets par poste, clé `k` dans l’URL                                                                                                                                                                  |
 
 ### 18.6 Mode hors ligne
 
@@ -1297,6 +1312,7 @@ npm run typecheck && npm run build
 **Tests d’isolation order** : 15/15 — prix imposés + `OrderCreated` ; validations canal/table/précommande ; refus 86 et produit inconnu ; idempotence `clientRequestId` ; workflow horodaté + transitions invalides ; KDS par poste et bascule automatique ; RBAC serveur/cuisinier/caissier ; remise motivée verrouillée après paiement ; POS partiel → total avec un seul `OrderPaid` et facture séquentielle ; clôture de caisse (écart, unicité) ; annulation motivée et libération de table ; cloisonnement A/B des listes, KDS et accès directs ; QR client avec jeton et suivi protégé ; export CSV + intégrité d’audit ; conflit de version explicite. Total 22 événements métier publiés pendant la suite.
 
 **Vérification navigateur (24/11/2026)** :
+
 - Connexion gérant avec MFA (TOTP) → espace `#/espace` ; onglets Commandes, KDS, Caisse visibles selon les permissions.
 - Composition serveur : place `TER-001` + « Brochettes de bœuf » → `CMD-2026-000008` créée et tickets cuisine/bar générés ; KDS « Commencer » → statut `en_preparation`.
 - POS : ouverture de session (fond 20 000 FCFA), encaissement espèces 3 000 FCFA → `Payée`, facture `FA-2026-000003`, reçu `REC-2026-000003`, session cohérente.
@@ -1317,18 +1333,18 @@ npm run typecheck && npm run build
 
 ### 19.1 Extensions de services (contrats consommés par la PWA)
 
-| Service | Route publique / authentifiée | Rôle |
-|---|---|---|
-| tenant | `GET /api/v1/public/establishments?q=&kind=&city=` | liste filtrable (recherche nom/cuisine/quartier), tri « populaire », sans authentification |
-| tenant | `GET /api/v1/public/establishments/:key` (slug ou id) | fiche : marque, photos, horaires, adresse, coordonnées, téléphone, sites |
-| floor | `GET /api/v1/public/tenants/:t/tables/:code` | résolution du QR : code normalisé en majuscules, 404 « Place introuvable. » |
-| floor | `GET /api/v1/public/tenants/:t/reservations/availability?date=&partySize=` | créneaux 30 min (capacité effective agrégée) + tables disponibles |
-| floor | `POST /api/v1/public/tenants/:t/reservations` | création (référence `RES-AAAA-000001`, `publicToken`, URL de suivi) |
-| floor | `GET /api/v1/public/tenants/:t/reservations/:id?k=` · `POST …/cancel` | suivi et annulation par jeton |
-| loyalty | `GET /api/v1/public/tenants/:t/loyalty` · `…/reviews` | programme (paliers, récompenses) et avis **approuvés uniquement** |
+| Service | Route publique / authentifiée                                                        | Rôle                                                                                              |
+| ------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| tenant  | `GET /api/v1/public/establishments?q=&kind=&city=`                                   | liste filtrable (recherche nom/cuisine/quartier), tri « populaire », sans authentification        |
+| tenant  | `GET /api/v1/public/establishments/:key` (slug ou id)                                | fiche : marque, photos, horaires, adresse, coordonnées, téléphone, sites                          |
+| floor   | `GET /api/v1/public/tenants/:t/tables/:code`                                         | résolution du QR : code normalisé en majuscules, 404 « Place introuvable. »                       |
+| floor   | `GET /api/v1/public/tenants/:t/reservations/availability?date=&partySize=`           | créneaux 30 min (capacité effective agrégée) + tables disponibles                                 |
+| floor   | `POST /api/v1/public/tenants/:t/reservations`                                        | création (référence `RES-AAAA-000001`, `publicToken`, URL de suivi)                               |
+| floor   | `GET /api/v1/public/tenants/:t/reservations/:id?k=` · `POST …/cancel`                | suivi et annulation par jeton                                                                     |
+| loyalty | `GET /api/v1/public/tenants/:t/loyalty` · `…/reviews`                                | programme (paliers, récompenses) et avis **approuvés uniquement**                                 |
 | loyalty | `GET /api/v1/me/loyalty` · `…/loyalty?tenantId=` · `POST …/claims` · `POST …/redeem` | solde, palier, historique (`at`), réclamation idempotente d’une commande payée, échange de points |
-| loyalty | `GET/POST/DELETE /api/v1/me/favorites[/:tenantId]` · `GET/POST /api/v1/me/reviews` | favoris (ajout idempotent) et avis en attente de modération |
-| loyalty | `GET /api/v1/tenants/:t/reviews` · `POST …/reviews/:id/moderate` | file de modération cloisonnée (gérant) |
+| loyalty | `GET/POST/DELETE /api/v1/me/favorites[/:tenantId]` · `GET/POST /api/v1/me/reviews`   | favoris (ajout idempotent) et avis en attente de modération                                       |
+| loyalty | `GET /api/v1/tenants/:t/reviews` · `POST …/reviews/:id/moderate`                     | file de modération cloisonnée (gérant)                                                            |
 
 **Événements** : loyalty consomme `OrderPaid` (`main.ts` → `handleLoyaltyEvent`) ; les points sont crédités **une seule fois par commande** (garde anti-doublon sur `orderId`) si l’événement porte `customerUserId`, avec multiplicateur de palier. Une commande payée au comptoir sans compte est réclamable ensuite via `POST /me/loyalty/claims` (vérification auprès de order-service, idempotence garantie). Aucune écriture dans les bases d’autrui.
 
@@ -1338,21 +1354,21 @@ npm run typecheck && npm run build
 
 ### 19.3 Écrans livrés
 
-| Route | Écran | Contenu |
-|---|---|---|
-| `#/` | Accueil | salutation, recherche, filtres Tout/Restaurants/Bars, QR, favoris, raccourcis (réservation, commandes, fidélité), encarts promo |
-| `#/recherche` | Découverte | recherche plein texte, filtre type, cartes établissement (photo, note, distance, tags, statut ouvert/fermé), carte géographique |
-| `#/e/:slug` | Fiche établissement | galerie, horaires, adresse/téléphone, avis, favori, CTA menu/réservation |
-| `#/e/:slug/menu` | Carte | catégories + filtres (végétarien, allergènes, disponibilité), fiches produit (photo, allergènes, variantes, options obligatoires), happy hour, menus composés |
-| `#/e/:slug/panier` | Panier | lignes éditables, canal (sur place/à emporter/livraison/précommande), note, sous-total |
-| `#/e/:slug/paiement` | Paiement | indicateur 3 étapes, coordonnées, « Payer au serveur/caisse » (commande envoyée au POS), Mobile Money « Bientôt disponible » |
-| `#/suivi/:tenantId/:orderId` | Suivi temps réel | timeline, paiement, tickets, points, notation |
-| `#/commandes` | Historique | onglets commandes / réservations, reçus, suivi |
-| `#/recu/:orderId` | Reçu numérique | détail, totaux, impression/PDF, lien de suivi |
-| `#/compte` | Compte | profil, favoris, mes avis, connexion OTP, langue, thème |
-| `#/scan` | Scan | caméra/QR + raccourcis de démonstration |
-| `#/e/:slug/reservation` | Réservation | date, heure, couverts, table précise optionnelle, coordonnées, suivi/annulation par jeton |
-| `#/e/:slug/fidelite` | Fidélité | solde, palier, progression, récompenses, historique |
+| Route                        | Écran               | Contenu                                                                                                                                                       |
+| ---------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `#/`                         | Accueil             | salutation, recherche, filtres Tout/Restaurants/Bars, QR, favoris, raccourcis (réservation, commandes, fidélité), encarts promo                               |
+| `#/recherche`                | Découverte          | recherche plein texte, filtre type, cartes établissement (photo, note, distance, tags, statut ouvert/fermé), carte géographique                               |
+| `#/e/:slug`                  | Fiche établissement | galerie, horaires, adresse/téléphone, avis, favori, CTA menu/réservation                                                                                      |
+| `#/e/:slug/menu`             | Carte               | catégories + filtres (végétarien, allergènes, disponibilité), fiches produit (photo, allergènes, variantes, options obligatoires), happy hour, menus composés |
+| `#/e/:slug/panier`           | Panier              | lignes éditables, canal (sur place/à emporter/livraison/précommande), note, sous-total                                                                        |
+| `#/e/:slug/paiement`         | Paiement            | indicateur 3 étapes, coordonnées, « Payer au serveur/caisse » (commande envoyée au POS), Mobile Money « Bientôt disponible »                                  |
+| `#/suivi/:tenantId/:orderId` | Suivi temps réel    | timeline, paiement, tickets, points, notation                                                                                                                 |
+| `#/commandes`                | Historique          | onglets commandes / réservations, reçus, suivi                                                                                                                |
+| `#/recu/:orderId`            | Reçu numérique      | détail, totaux, impression/PDF, lien de suivi                                                                                                                 |
+| `#/compte`                   | Compte              | profil, favoris, mes avis, connexion OTP, langue, thème                                                                                                       |
+| `#/scan`                     | Scan                | caméra/QR + raccourcis de démonstration                                                                                                                       |
+| `#/e/:slug/reservation`      | Réservation         | date, heure, couverts, table précise optionnelle, coordonnées, suivi/annulation par jeton                                                                     |
+| `#/e/:slug/fidelite`         | Fidélité            | solde, palier, progression, récompenses, historique                                                                                                           |
 
 ### 19.4 Design et PWA
 
@@ -1379,6 +1395,7 @@ npm run test:services  # 78 tests : identity 15, tenant 17, catalog 13, floor 13
 ```
 
 **Vérification navigateur (24/11/2026)** — parcours vérifiés par inspection DOM (captures indisponibles dans l’environnement) :
+
 - QR `LOME01-TER-001` → carte (bandeau table, thème Sahel Grill) → fiche « Poulet braisé » (variante + option obligatoire) → panier → paiement → commande `CMD-2026-000008` → suivi (étapes, badge Payée, réclamation de 10 points Bronze).
 - Réservation Le Baobab 20:00, 4 couverts, table `BAOB01-TER-001` → `RES-2026-0003` suivie puis annulable par jeton.
 
@@ -1390,17 +1407,17 @@ npm run test:services  # 78 tests : identity 15, tenant 17, catalog 13, floor 13
 
 ### 20.1 Entités (store en mémoire, isolé par `tenantId`)
 
-| Entité | Contenu | Notes d’isolation |
-|---|---|---|
-| `Transaction` | référence (`TMN_…`, `MOOV_…`, `CIN_…`), commande, moyen (`mobile_money`/`carte`/`especes`), fournisseur, montant, frais (`providerFeeXof`, `commissionXof`, `netXof`), `status`, `simulated`, remboursements, split, pourboires | toutes les routes exigent `:tenantId` **et** la permission correspondante ; une transaction d’un autre tenant renvoie 404 |
-| `Wallet` | `availableXof`, `lifetimeNetXof`, `settledXof` | un portefeuille par établissement, jamais exposé globalement |
-| `Settlement` | montant, mode (`instant`/`batch`), destination, statut (`en_attente`/`paye`/`rejete`), approbation plateforme | instantané : payé immédiatement ; lot : approbation super-admin requise |
-| `Refund` | montant, motif, auteur, statut, pro-rata des frais | partiel ou total ; le net remboursé est recalculé au prorata |
-| `Split` | parts (convives), statut, montant attendu | `POST /splits` refuse un total incohérent (422) |
-| `LedgerEntry` | lignes `{account, label, debitXof, creditXof}`, hash chaîné | partie double équilibrée à chaque écriture (vérifiée par `verifyAuditChain`) |
-| `Dispute` | transaction, motif, description, statut, résolution, remboursement éventuel | plateforme uniquement |
-| `FraudBlock` | règle (`plafond`/`velocite`/`echecs`), expiration, levée | blocage temporaire 15 min |
-| `ProviderHealth` | état par fournisseur | bascule de routage |
+| Entité           | Contenu                                                                                                                                                                                                                         | Notes d’isolation                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `Transaction`    | référence (`TMN_…`, `MOOV_…`, `CIN_…`), commande, moyen (`mobile_money`/`carte`/`especes`), fournisseur, montant, frais (`providerFeeXof`, `commissionXof`, `netXof`), `status`, `simulated`, remboursements, split, pourboires | toutes les routes exigent `:tenantId` **et** la permission correspondante ; une transaction d’un autre tenant renvoie 404 |
+| `Wallet`         | `availableXof`, `lifetimeNetXof`, `settledXof`                                                                                                                                                                                  | un portefeuille par établissement, jamais exposé globalement                                                              |
+| `Settlement`     | montant, mode (`instant`/`batch`), destination, statut (`en_attente`/`paye`/`rejete`), approbation plateforme                                                                                                                   | instantané : payé immédiatement ; lot : approbation super-admin requise                                                   |
+| `Refund`         | montant, motif, auteur, statut, pro-rata des frais                                                                                                                                                                              | partiel ou total ; le net remboursé est recalculé au prorata                                                              |
+| `Split`          | parts (convives), statut, montant attendu                                                                                                                                                                                       | `POST /splits` refuse un total incohérent (422)                                                                           |
+| `LedgerEntry`    | lignes `{account, label, debitXof, creditXof}`, hash chaîné                                                                                                                                                                     | partie double équilibrée à chaque écriture (vérifiée par `verifyAuditChain`)                                              |
+| `Dispute`        | transaction, motif, description, statut, résolution, remboursement éventuel                                                                                                                                                     | plateforme uniquement                                                                                                     |
+| `FraudBlock`     | règle (`plafond`/`velocite`/`echecs`), expiration, levée                                                                                                                                                                        | blocage temporaire 15 min                                                                                                 |
+| `ProviderHealth` | état par fournisseur                                                                                                                                                                                                            | bascule de routage                                                                                                        |
 
 ### 20.2 Adaptateurs et routage (`adapters.ts`)
 
@@ -1436,10 +1453,10 @@ npm run test:services  # 78 tests : identity 15, tenant 17, catalog 13, floor 13
 
 ### 20.8 Écrans
 
-| Espace | Contenu |
-|---|---|
+| Espace                                                 | Contenu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Gérant → **Paiements** (`payments:view`/`pos:operate`) | 4 indicateurs (volume du jour, en attente, commissions 30 j, solde portefeuille) ; portefeuille + formulaire de reversement (montant, instantané/lot, destination, note) + historique ; fournisseurs avec bascule de santé ; anti-fraude avec levée ; transactions filtrables (recherche, statut, moyen) avec actions contextuelles (sandbox confirmer/échouer/expirer, 3-DS, annuler, rembourser) ; exports CSV/Excel/PDF ; réconciliation (exécution, simulation d’écarts) ; journal comptable avec intégrité |
-| Super-admin → **Paiements** | volume confirmé, commissions + frais fournisseurs, dû aux établissements, litiges ouverts + blocages actifs ; reversements (approuver/rejeter) ; litiges (ouvrir, résoudre avec remboursement optionnel) ; dernières transactions ; intégrité du journal global |
+| Super-admin → **Paiements**                            | volume confirmé, commissions + frais fournisseurs, dû aux établissements, litiges ouverts + blocages actifs ; reversements (approuver/rejeter) ; litiges (ouvrir, résoudre avec remboursement optionnel) ; dernières transactions ; intégrité du journal global                                                                                                                                                                                                                                                 |
 
 Tous les libellés sont FR/EN (`payments.*`, `paymentsAdmin.*`), montants XOF, statuts colorés via le design system.
 
@@ -1455,6 +1472,7 @@ npm run test:services  # 95 tests : identity 15, tenant 17, catalog 13, floor 13
 `services/payment-service/src/tests/isolation.test.ts` (17 cas) couvre : accès croisés 403/404, routage et frais, bascule, confirmation + facture + portefeuille + journal équilibré, webhooks (signature, rejeu, inconnu), échec/expiration/annulation, remboursements (partiel/total/trop-perçu/en attente), split, pourboires, 3-DS, reversements (lot approuvé/instantané/trop-perçu), réconciliation propre et anomalique, anti-fraude (plafond, vélocité, levée), RBAC caissier, exports CSV/XLS/PDF, litiges + journal global équilibré, miroir caisse `OrderPaid` sans recrédit du portefeuille.
 
 **Vérification navigateur (25/11/2026)** — gérant Sahel Grill : écran Paiements (indicateurs, portefeuille 13 611 → 12 611 FCFA après reversement instantané de 1 000 FCFA, historique mis à jour), réconciliation équilibrée puis écarts simulés (ligne manquante `MOOV_A5A301E5DB`, orpheline `ORPHAN_20261125`), remboursement partiel de 1 000 FCFA (statut « Partiellement remboursée », portefeuille 11 644 FCFA, écriture de remboursement), bascule FR/EN. Super-admin : écran Paiements (20 500 FCFA confirmés, 441 FCFA de commissions, 11 644 FCFA dus, reversements avec approbation, litiges, intégrité du journal). Les actions financières d’écriture (création de paiement, approbation de reversement, ouverture de litige) n’ont pas été déclenchées depuis le navigateur — refus du garde-fou d’automatisation — ; elles restent couvertes par les tests de service.
+
 - Connexion OTP (code de démonstration), favoris, dépôt d’avis (en attente de modération), historique commandes/réservations, reçu numérique + impression, bascule clair/sombre, FR ↔ EN vérifiés dans les deux sens.
 - `typecheck` + `build` client verts (76 modules, 313 kB JS / 98 kB CSS), 78/78 tests d’isolation services verts.
 
@@ -1466,18 +1484,18 @@ npm run test:services  # 95 tests : identity 15, tenant 17, catalog 13, floor 13
 
 ### 21.1 Entités (store en mémoire, isolé par `tenantId`)
 
-| Service | Entité | Contenu | Notes d’isolation |
-|---|---|---|---|
-| staff | `Employee` | identité, poste, `roleCode`, contrat, embauche, salaire de base, coordonnées de paiement, documents, PIN, jeton QR, `userId` lié après activation | toutes les routes exigent `:tenantId` + permission `staff:view`/`staff:manage` ; un employé d’un autre tenant renvoie 404 |
-| staff | `Invitation` | canal `sms`/`email`, sentAt, expiresAt, acceptation | token à usage unique, renvoi possible (`resend`) |
-| staff | `Shift` | date, plage horaire, station (`salle`/`cuisine`/`bar`), statut `brouillon`/`publie` | publication → `ShiftPublished` |
-| staff | `SwapRequest` | shift, demandeur, remplaçant, statut | décision manager → `ShiftSwapDecided` |
-| staff | `LeaveRequest` | type, période, jours, motif, statut | décision → `LeaveDecided` |
-| staff | `AttendanceRecord` | pointage entrée/sortie, méthode `pin`/`qr`/`manuel`, minutes, géoloc `{lat,lng,withinFence}` | PIN 4 chiffres ou QR ; géofence optionnelle → alerte hors zone |
-| payroll | `PayrollSettings` | heures mensuelles, jours ouvrés, `rules[]` (libellé, code, type, base, mode, taux, plafond, tranches, imposable/déductible, référence légale) | preset fourni mais **entièrement modifiable** ; validation experte (`/settings/validate`) avant enregistrement |
-| payroll | `PayrollRun` | période, statut, préparateur/validateur/dates, instantané d’effectif, ajustements, bulletins, totaux, `locked`, `retentionBlocked`, `staleReason`, `payment` + `attempts` | un seul cycle par période ; verrouillé après versement |
-| payroll | `Payslip` | employé, base, heures, pourboires, composants détaillés (`operation`, `baseValue`, `capApplied`, imposable/déductible), net, envoi | PDF archivé (base64) et téléchargeable |
-| payroll | `PayrollAdjustment` | employé, type (`prime`/`retenue`/`avance`), libellé, montant, note | re-calcul immédiat du cycle |
+| Service | Entité              | Contenu                                                                                                                                                                   | Notes d’isolation                                                                                                         |
+| ------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| staff   | `Employee`          | identité, poste, `roleCode`, contrat, embauche, salaire de base, coordonnées de paiement, documents, PIN, jeton QR, `userId` lié après activation                         | toutes les routes exigent `:tenantId` + permission `staff:view`/`staff:manage` ; un employé d’un autre tenant renvoie 404 |
+| staff   | `Invitation`        | canal `sms`/`email`, sentAt, expiresAt, acceptation                                                                                                                       | token à usage unique, renvoi possible (`resend`)                                                                          |
+| staff   | `Shift`             | date, plage horaire, station (`salle`/`cuisine`/`bar`), statut `brouillon`/`publie`                                                                                       | publication → `ShiftPublished`                                                                                            |
+| staff   | `SwapRequest`       | shift, demandeur, remplaçant, statut                                                                                                                                      | décision manager → `ShiftSwapDecided`                                                                                     |
+| staff   | `LeaveRequest`      | type, période, jours, motif, statut                                                                                                                                       | décision → `LeaveDecided`                                                                                                 |
+| staff   | `AttendanceRecord`  | pointage entrée/sortie, méthode `pin`/`qr`/`manuel`, minutes, géoloc `{lat,lng,withinFence}`                                                                              | PIN 4 chiffres ou QR ; géofence optionnelle → alerte hors zone                                                            |
+| payroll | `PayrollSettings`   | heures mensuelles, jours ouvrés, `rules[]` (libellé, code, type, base, mode, taux, plafond, tranches, imposable/déductible, référence légale)                             | preset fourni mais **entièrement modifiable** ; validation experte (`/settings/validate`) avant enregistrement            |
+| payroll | `PayrollRun`        | période, statut, préparateur/validateur/dates, instantané d’effectif, ajustements, bulletins, totaux, `locked`, `retentionBlocked`, `staleReason`, `payment` + `attempts` | un seul cycle par période ; verrouillé après versement                                                                    |
+| payroll | `Payslip`           | employé, base, heures, pourboires, composants détaillés (`operation`, `baseValue`, `capApplied`, imposable/déductible), net, envoi                                        | PDF archivé (base64) et téléchargeable                                                                                    |
+| payroll | `PayrollAdjustment` | employé, type (`prime`/`retenue`/`avance`), libellé, montant, note                                                                                                        | re-calcul immédiat du cycle                                                                                               |
 
 ### 21.2 Moteur de calcul paramétrable (`rules.ts`)
 
@@ -1488,10 +1506,10 @@ npm run test:services  # 95 tests : identity 15, tenant 17, catalog 13, floor 13
 
 ### 21.3 Endpoints principaux
 
-| Service | Routes |
-|---|---|
-| staff | `GET /staff/summary`, `GET|POST /staff/employees`, `GET|PATCH /staff/employees/:id`, `POST /staff/employees/:id/documents`, `POST /staff/invitations`, `POST /staff/invitations/:token/accept|resend`, `GET|POST /staff/shifts`, `PATCH /staff/shifts/:id`, `POST /staff/shifts/:id/swap`, `GET /staff/swaps` + `POST /staff/swaps/:id/decide`, `GET|POST /staff/leaves` + `POST /staff/leaves/:id/decide`, `POST /staff/absences`, `GET /staff/attendance`, `POST /staff/attendance/clock` + `/attendance/:id/clock-out`, `GET /staff/performance`, `GET|PUT /staff/settings`, `GET /staff/audit`, `GET /internal/…/staff/payroll-input` |
-| payroll | `GET /payroll/summary`, `GET|PUT|POST /payroll/settings` (+ `/validate`, `/reset`), `GET|POST /payroll/runs`, `GET|PATCH /payroll/runs/:id`, `POST …/recalculate`, `POST …/validate`, `POST …/pay`, `GET …/batches`, `POST …/bulletins/send`, `GET …/bulletins/:employeeId/pdf`, `GET …/exports/:format` (`csv`, `xls`, `pdf`, `rules.csv`), `GET /payroll/audit` |
+| Service | Routes                       |
+| ------- | ---------------------------- |
+| staff   | `GET /staff/summary`, `GET   | POST /staff/employees`, `GET | PATCH /staff/employees/:id`, `POST /staff/employees/:id/documents`, `POST /staff/invitations`, `POST /staff/invitations/:token/accept | resend`, `GET             | POST /staff/shifts`, `PATCH /staff/shifts/:id`, `POST /staff/shifts/:id/swap`, `GET /staff/swaps`+`POST /staff/swaps/:id/decide`, `GET                                                                                                         | POST /staff/leaves`+`POST /staff/leaves/:id/decide`, `POST /staff/absences`, `GET /staff/attendance`, `POST /staff/attendance/clock`+`/attendance/:id/clock-out`, `GET /staff/performance`, `GET | PUT /staff/settings`, `GET /staff/audit`, `GET /internal/…/staff/payroll-input` |
+| payroll | `GET /payroll/summary`, `GET | PUT                          | POST /payroll/settings`(+`/validate`, `/reset`), `GET                                                                                 | POST /payroll/runs`, `GET | PATCH /payroll/runs/:id`, `POST …/recalculate`, `POST …/validate`, `POST …/pay`, `GET …/batches`, `POST …/bulletins/send`, `GET …/bulletins/:employeeId/pdf`, `GET …/exports/:format` (`csv`, `xls`, `pdf`, `rules.csv`), `GET /payroll/audit` |
 
 RBAC : `staff:view|staff:manage` (équipe), `payroll:view|prepare|approve|pay` (paie), `report:export` (exports). Le gérant cumule ; le manager de salle a `staff:view` sans `staff:manage` ; le comptable `payroll:view` + `payroll:prepare` ne peut ni valider ni payer.
 
@@ -1512,10 +1530,10 @@ RBAC : `staff:view|staff:manage` (équipe), `payroll:view|prepare|approve|pay` (
 
 ### 21.6 Écrans
 
-| Espace | Contenu |
-|---|---|
+| Espace                             | Contenu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Gérant → **Équipe** (`staff:view`) | Indicateurs (effectif, présents, shifts de la semaine, alertes) ; liste des employés avec fiche latérale (identité, contrat, salaire, paiement, documents) + création/édition ; invitations SMS/e-mail (lien + expiration, renvoi, acceptation) ; planning hebdomadaire par station avec publication et échange de shifts (demande + décision manager) ; congés (demande + décision) ; absences ; pointage (PIN/QR, horloge, géofence, sortie) ; performances par serveur (ventes, commandes, tables, pourboires) ; journal d’audit |
-| Gérant → **Paie** (`payroll:view`) | Indicateurs (effectif dernier cycle, net du cycle courant, cycles, dernier versement) ; cycles (création, ouverture, recalcul, validation, versement, envoi des bulletins, tentatives de paiement) ; détail du calcul par bulletin (composants, base, opération, montant, plafond) et variables du mois ; exports CSV/Excel/PDF/règles ; paramétrage des règles (édition complète, tranches, activation, validation experte, preset) ; journal d’audit avec intégrité de chaîne |
+| Gérant → **Paie** (`payroll:view`) | Indicateurs (effectif dernier cycle, net du cycle courant, cycles, dernier versement) ; cycles (création, ouverture, recalcul, validation, versement, envoi des bulletins, tentatives de paiement) ; détail du calcul par bulletin (composants, base, opération, montant, plafond) et variables du mois ; exports CSV/Excel/PDF/règles ; paramétrage des règles (édition complète, tranches, activation, validation experte, preset) ; journal d’audit avec intégrité de chaîne                                                     |
 
 Tous les libellés FR/EN (`staff.*`, `payroll.*`), montants XOF (`formatXof`), dates localisées, statuts colorés via le design system ; navigation conditionnée par permissions (onglets masqués sinon, écran « Accès refusé » en cas d’accès direct).
 
@@ -1544,15 +1562,15 @@ npm run test:services  # 117 tests : identity 15, tenant 17, catalog 13, floor 1
 
 **Entités** (toutes préfixées `tenantId`)
 
-| Entité | Contenu | Règles |
-|---|---|---|
-| `StockItem` | SKU, nom, catégorie, unité (`kg/g/l/cl/pcs/btl`), quantité, seuil, coût unitaire (CUMP), emplacement (`reserve/cuisine/bar`), fournisseur | modifications de prix et de seuil journalisées |
-| `Recipe` / `RecipeLine` | produit du catalogue, lignes ingrédient + quantité, coût matière, marge, taux de marge, `maxProducible` | unicité produit par tenant ; coût recalculé quand un prix d’article change |
-| `StockMovement` | type `in/out/adjust/waste`, quantité, coût unitaire, référence, motif | CUMP recalculé sur les entrées ; pertes déduites du stock |
-| `Supplier` | nom, contact, téléphone, catégories, actif | — |
-| `PurchaseOrder` / `PurchaseLine` | fournisseur, lignes, total, statut, réception | réception idempotente → mouvements `in` + CUMP |
-| `InventoryCount` / `CountLine` | inventaire physique par article, écart, statut | validation unique → ajustements `adjust` |
-| `InventoryEvent` | acteur, action, cible, date, hash précédent | chaîne d’audit immuable par tenant |
+| Entité                           | Contenu                                                                                                                                   | Règles                                                                     |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `StockItem`                      | SKU, nom, catégorie, unité (`kg/g/l/cl/pcs/btl`), quantité, seuil, coût unitaire (CUMP), emplacement (`reserve/cuisine/bar`), fournisseur | modifications de prix et de seuil journalisées                             |
+| `Recipe` / `RecipeLine`          | produit du catalogue, lignes ingrédient + quantité, coût matière, marge, taux de marge, `maxProducible`                                   | unicité produit par tenant ; coût recalculé quand un prix d’article change |
+| `StockMovement`                  | type `in/out/adjust/waste`, quantité, coût unitaire, référence, motif                                                                     | CUMP recalculé sur les entrées ; pertes déduites du stock                  |
+| `Supplier`                       | nom, contact, téléphone, catégories, actif                                                                                                | —                                                                          |
+| `PurchaseOrder` / `PurchaseLine` | fournisseur, lignes, total, statut, réception                                                                                             | réception idempotente → mouvements `in` + CUMP                             |
+| `InventoryCount` / `CountLine`   | inventaire physique par article, écart, statut                                                                                            | validation unique → ajustements `adjust`                                   |
+| `InventoryEvent`                 | acteur, action, cible, date, hash précédent                                                                                               | chaîne d’audit immuable par tenant                                         |
 
 **Endpoints** — `GET /inventory/summary`, `GET|POST /inventory/items`, `GET|PATCH /inventory/items/:id`, `GET|POST /inventory/movements`, `POST /inventory/waste`, `GET|POST /inventory/recipes`, `GET|PATCH /inventory/recipes/:id`, `GET /inventory/recipes/:id/cost`, `GET|POST /inventory/suppliers`, `GET|PATCH /inventory/suppliers/:id`, `GET|POST /inventory/purchase-orders`, `POST /inventory/purchase-orders/:id/receive`, `GET|POST /inventory/counts`, `POST /inventory/counts/:id/validate`, `GET /inventory/alerts`, `GET /inventory/audit`. Interne : `GET /internal/.../inventory/availability`, `GET /internal/.../inventory/cogs`.
 
@@ -1592,11 +1610,11 @@ npm run test:services  # 117 tests : identity 15, tenant 17, catalog 13, floor 1
 
 ### 22.5 Écrans gérant (design system appliqué)
 
-| Onglet | Contenu |
-|---|---|
+| Onglet                                                     | Contenu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Stocks** (`inventory:view`, écriture `inventory:manage`) | Vue d’ensemble (articles suivis, sous seuil, valeur du stock, pertes 30 j), alertes avec seuils, suggestions de réassort chiffrées ; articles (recherche, filtre catégorie, statut OK/sous seuil, création, édition) ; mouvements filtrables (entrée/sortie/ajustement/perte) avec saisie et déclaration de perte ; fiches techniques (coût matière, marge, taux, producibilité, création avec lignes d’ingrédients) ; fournisseurs ; commandes d’achat avec réception ; inventaires (comptage par article, validation) ; journal d’audit avec intégrité de chaîne |
-| **Marketing** (`loyalty:view`, écriture `loyalty:manage`) | Vue d’ensemble (membres, points en circulation, promotions actives, codes actifs, avis à modérer), niveaux et récompenses ; promotions (création, activation/désactivation) ; codes promo avec limites et utilisations ; campagnes (audience par segment, message avec compteur, envoi, annulation) ; avis (filtres par statut, étoiles, modération, réponse publique) ; journal d’audit |
-| **Rapports** (`report:view`, export `report:export`) | Filtres période (7/30/90 j ou dates), site ; exports CSV/Excel/PDF ; sections Tableau de bord (CA, commandes, panier moyen, marge, occupation, série quotidienne, top produits, heures de pointe, mix paiements/canaux), Ventes (agrégation jour/mois avec TVA, remboursements, net, totaux), Produits (COGS, marge, remises, pertes, classement), Occupation (capacité, couverts, réservations, no-shows, occupation live), Finances (TVA, masse salariale, snapshots stock), Avis (distribution et statuts), Audit (chaîne d’intégrité) |
+| **Marketing** (`loyalty:view`, écriture `loyalty:manage`)  | Vue d’ensemble (membres, points en circulation, promotions actives, codes actifs, avis à modérer), niveaux et récompenses ; promotions (création, activation/désactivation) ; codes promo avec limites et utilisations ; campagnes (audience par segment, message avec compteur, envoi, annulation) ; avis (filtres par statut, étoiles, modération, réponse publique) ; journal d’audit                                                                                                                                                                           |
+| **Rapports** (`report:view`, export `report:export`)       | Filtres période (7/30/90 j ou dates), site ; exports CSV/Excel/PDF ; sections Tableau de bord (CA, commandes, panier moyen, marge, occupation, série quotidienne, top produits, heures de pointe, mix paiements/canaux), Ventes (agrégation jour/mois avec TVA, remboursements, net, totaux), Produits (COGS, marge, remises, pertes, classement), Occupation (capacité, couverts, réservations, no-shows, occupation live), Finances (TVA, masse salariale, snapshots stock), Avis (distribution et statuts), Audit (chaîne d’intégrité)                          |
 
 Libellés FR/EN complets (`stocks.*`, `marketing.*`, `reports.*`), montants XOF, dates localisées, badges de statut sémantiques, états vides et squelettes, navigation conditionnée par permission (onglet masqué sinon, écran « Accès refusé » en cas d’accès direct). Les onglets sont ajoutés à la barre inférieure mobile.
 
@@ -1622,34 +1640,34 @@ npm run typecheck && npm run build -w @resto-hub/web
 
 ### 23.1 Entités et projections (toutes en mémoire, préfixées par leur portée)
 
-| Entité | Contenu | Règles |
-|---|---|---|
-| `DirectoryEntry` | établissement, plan (`starter/pro/enterprise`), statut, ville, contacts, date de création, essai | alimentée par `TenantApplication*`, `TenantSuspended/Reactivated` ; jamais modifiée par un autre service |
-| `TransactionEntry` | type `payment/refund/failed/settlement/subscription`, montant, commission, moyen, fournisseur, référence | projection en lecture seule ; aucune donnée de carte |
-| `CommissionEntry` | tenant, fournisseur, moyen, montant encaissé, commission, net, date | calculée sur `PaymentConfirmed`, idempotente par paiement |
-| `DisputeProjection` | litige (commande, motif, montant, statut, résolution) | alimentée par `DisputeOpened/Resolved` |
-| `ServiceHealth` | URL, statut `up/down/unknown`, latence, échantillons (200 max), contrôles/échecs consécutifs | jamais lue depuis un autre domaine, uniquement par sonde HTTP |
-| `PlatformAlert` | sévérité `info/warning/critical`, type, message, service, statut `open/acknowledged/resolved` | résolution automatique sur retour à la normale |
-| `TechnicalLog` | niveau, service, message, horodatage | ingestion interne + événements de supervision |
-| `PlatformSettings` | langues et langue par défaut, pays actifs (devise, indicatif, taxe), taxes (taux, périmètre), fournisseurs (canaux, priorité, activation), support, fuseau, devise de référence | validée côté serveur à chaque écriture |
+| Entité              | Contenu                                                                                                                                                                         | Règles                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `DirectoryEntry`    | établissement, plan (`starter/pro/enterprise`), statut, ville, contacts, date de création, essai                                                                                | alimentée par `TenantApplication*`, `TenantSuspended/Reactivated` ; jamais modifiée par un autre service |
+| `TransactionEntry`  | type `payment/refund/failed/settlement/subscription`, montant, commission, moyen, fournisseur, référence                                                                        | projection en lecture seule ; aucune donnée de carte                                                     |
+| `CommissionEntry`   | tenant, fournisseur, moyen, montant encaissé, commission, net, date                                                                                                             | calculée sur `PaymentConfirmed`, idempotente par paiement                                                |
+| `DisputeProjection` | litige (commande, motif, montant, statut, résolution)                                                                                                                           | alimentée par `DisputeOpened/Resolved`                                                                   |
+| `ServiceHealth`     | URL, statut `up/down/unknown`, latence, échantillons (200 max), contrôles/échecs consécutifs                                                                                    | jamais lue depuis un autre domaine, uniquement par sonde HTTP                                            |
+| `PlatformAlert`     | sévérité `info/warning/critical`, type, message, service, statut `open/acknowledged/resolved`                                                                                   | résolution automatique sur retour à la normale                                                           |
+| `TechnicalLog`      | niveau, service, message, horodatage                                                                                                                                            | ingestion interne + événements de supervision                                                            |
+| `PlatformSettings`  | langues et langue par défaut, pays actifs (devise, indicatif, taxe), taxes (taux, périmètre), fournisseurs (canaux, priorité, activation), support, fuseau, devise de référence | validée côté serveur à chaque écriture                                                                   |
 
 ### 23.2 API (`/api/v1/platform`, permissions `platform:*`)
 
-| Méthode et route | Permission | Usage |
-|---|---|---|
-| `GET /dashboard` | `logs:view` **ou** `establishments:review` **ou** `settings:manage` **ou** `operate` | synthèse établissements, finances, opérations |
-| `GET /establishments` (`status`, `plan`, `q`) | `establishments:review` | portefeuille + volumes/commissions 30 j et litiges ouverts par établissement |
-| `GET /establishments/:tenantId` | `establishments:review` | fiche détaillée (transactions, litiges, alertes) |
-| `GET /commissions?days=7\|30\|90` | `finance:view` | résumé, regroupements établissement/fournisseur/moyen/jour, dernières commissions |
-| `GET /transactions?kind&tenantId&limit` | `finance:view` | journal des transactions agrégées |
-| `GET /disputes?status` | `finance:view` | litiges projetés |
-| `GET /supervision` | `logs:view` | services, alertes, journaux, métriques, événements récents, audit |
-| `POST /supervision/check` | `operate` | sonde immédiate des 12 services, audité (`supervision.checked`) |
-| `PATCH /supervision/alerts/:id` (`acknowledge\|resolve`) | `operate` | traitement d’alerte, audité, `409` si déjà résolue |
-| `GET /supervision/logs?level&service&limit` | `logs:view` | journaux filtrés (`400` si niveau inconnu) |
-| `POST /internal/logs` | clé interne | ingestion de journaux par les autres services (`201`) |
-| `GET /settings` · `PUT /settings` | `settings:manage` | lecture et écriture validée ; publie `PlatformSettingsUpdated` |
-| `GET /audit?limit` | `settings:manage` ou `logs:view` | entrées + état de la chaîne |
+| Méthode et route                                         | Permission                                                                           | Usage                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `GET /dashboard`                                         | `logs:view` **ou** `establishments:review` **ou** `settings:manage` **ou** `operate` | synthèse établissements, finances, opérations                                     |
+| `GET /establishments` (`status`, `plan`, `q`)            | `establishments:review`                                                              | portefeuille + volumes/commissions 30 j et litiges ouverts par établissement      |
+| `GET /establishments/:tenantId`                          | `establishments:review`                                                              | fiche détaillée (transactions, litiges, alertes)                                  |
+| `GET /commissions?days=7\|30\|90`                        | `finance:view`                                                                       | résumé, regroupements établissement/fournisseur/moyen/jour, dernières commissions |
+| `GET /transactions?kind&tenantId&limit`                  | `finance:view`                                                                       | journal des transactions agrégées                                                 |
+| `GET /disputes?status`                                   | `finance:view`                                                                       | litiges projetés                                                                  |
+| `GET /supervision`                                       | `logs:view`                                                                          | services, alertes, journaux, métriques, événements récents, audit                 |
+| `POST /supervision/check`                                | `operate`                                                                            | sonde immédiate des 12 services, audité (`supervision.checked`)                   |
+| `PATCH /supervision/alerts/:id` (`acknowledge\|resolve`) | `operate`                                                                            | traitement d’alerte, audité, `409` si déjà résolue                                |
+| `GET /supervision/logs?level&service&limit`              | `logs:view`                                                                          | journaux filtrés (`400` si niveau inconnu)                                        |
+| `POST /internal/logs`                                    | clé interne                                                                          | ingestion de journaux par les autres services (`201`)                             |
+| `GET /settings` · `PUT /settings`                        | `settings:manage`                                                                    | lecture et écriture validée ; publie `PlatformSettingsUpdated`                    |
+| `GET /audit?limit`                                       | `settings:manage` ou `logs:view`                                                     | entrées + état de la chaîne                                                       |
 
 Toute route applique `ensurePlatform` : un jeton de tenant reçoit `403 platform_scope_denied`, un appel anonyme `401`. Le rôle `support` peut consulter mais pas opérer ni modifier les paramètres.
 
@@ -1670,22 +1688,22 @@ Validation serveur : langues limitées à `fr/en` (au moins une, langue par déf
 
 ### 23.6 Durcissement transverse (service-kit, donc les 13 services)
 
-| Mesure | Implémentation |
-|---|---|
-| Limitation de débit | 600 requêtes/min par IP et par route (configurable, désactivable) ; `429 rate_limited` + `retry-after` ; `/health` exempté ; purge des compteurs expirés |
-| Sonde standard | `GET /health` sur chaque service (`{ service, status, uptimeSeconds, now }`) même si aucune route n’est déclarée |
-| En-têtes de sécurité | `x-content-type-options: nosniff`, `x-frame-options: DENY`, `referrer-policy: no-referrer` |
-| Validation d’entrée | helpers typés (`requireString`, `requireEnum`, `requireArray`, `optionalEmail`, `asObject`) rejetant en `422` avec message explicite |
-| Secrets | clés internes et secrets fournisseurs exclusivement via variables d’environnement ; aucune donnée carte |
-| Webhooks | signature HMAC obligatoire (`x-restohub-signature`) et idempotence, y compris pour les passerelles de paiement et SMS |
+| Mesure               | Implémentation                                                                                                                                           |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Limitation de débit  | 600 requêtes/min par IP et par route (configurable, désactivable) ; `429 rate_limited` + `retry-after` ; `/health` exempté ; purge des compteurs expirés |
+| Sonde standard       | `GET /health` sur chaque service (`{ service, status, uptimeSeconds, now }`) même si aucune route n’est déclarée                                         |
+| En-têtes de sécurité | `x-content-type-options: nosniff`, `x-frame-options: DENY`, `referrer-policy: no-referrer`                                                               |
+| Validation d’entrée  | helpers typés (`requireString`, `requireEnum`, `requireArray`, `optionalEmail`, `asObject`) rejetant en `422` avec message explicite                     |
+| Secrets              | clés internes et secrets fournisseurs exclusivement via variables d’environnement ; aucune donnée carte                                                  |
+| Webhooks             | signature HMAC obligatoire (`x-restohub-signature`) et idempotence, y compris pour les passerelles de paiement et SMS                                    |
 
 ### 23.7 Écrans back-office (design system appliqué)
 
-| Onglet | Contenu | États couverts |
-|---|---|---|
-| **Commissions** | Sélecteur 7/30/90 j, 4 indicateurs (volume, commissions + taux, net, panier moyen), graphique quotidien, trois tableaux de regroupement (établissement, fournisseur, moyen traduit), dernières commissions, actualisation | squelette, erreur avec reprise, liste vide, libellés d’énumération lisibles |
-| **Supervision** | Services (état en direct, latence, disponibilité, contrôles/échecs, dernier contrôle), alertes avec acquittement/résolution, flux d’événements, journaux filtrables par niveau, audit + intégrité de chaîne, vérification immédiate, rafraîchissement 30 s | badge live, sévérités/statuts colorés, actions réservées à `platform:operate`, erreurs et vides |
-| **Paramètres globaux** | Langues + langue par défaut, support/localisation, pays activables, taxes éditables, fournisseurs activables, journal d’audit | état « modifications non enregistrées », enregistrement en cours, toast, erreur de validation visible, rechargement, boutons `aria-pressed` |
+| Onglet                 | Contenu                                                                                                                                                                                                                                                    | États couverts                                                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Commissions**        | Sélecteur 7/30/90 j, 4 indicateurs (volume, commissions + taux, net, panier moyen), graphique quotidien, trois tableaux de regroupement (établissement, fournisseur, moyen traduit), dernières commissions, actualisation                                  | squelette, erreur avec reprise, liste vide, libellés d’énumération lisibles                                                                 |
+| **Supervision**        | Services (état en direct, latence, disponibilité, contrôles/échecs, dernier contrôle), alertes avec acquittement/résolution, flux d’événements, journaux filtrables par niveau, audit + intégrité de chaîne, vérification immédiate, rafraîchissement 30 s | badge live, sévérités/statuts colorés, actions réservées à `platform:operate`, erreurs et vides                                             |
+| **Paramètres globaux** | Langues + langue par défaut, support/localisation, pays activables, taxes éditables, fournisseurs activables, journal d’audit                                                                                                                              | état « modifications non enregistrées », enregistrement en cours, toast, erreur de validation visible, rechargement, boutons `aria-pressed` |
 
 Le sous-titre de l’en-tête est désormais contextuel par onglet ; libellés FR/EN complets (`adminCommissions.*`, `adminSupervision.*`, `adminSettings.*`) ; les trois onglets sont présents dans la navigation latérale (« Exploitation ») et la barre inférieure mobile.
 
@@ -1729,11 +1747,11 @@ npm run typecheck && npm run build -w @resto-hub/web
 
 ### 24.1 `packages/shared-contracts` — source unique des contrats
 
-| Élément | Contenu |
-| --- | --- |
-| `events.ts` | `DOMAIN_EVENTS` (60 noms), dont les 9 événements imposés ; `DomainEventEnvelope` (`id`, `type`, `tenantId`, `occurredAt`, `payload`) ; `isDomainEventName`, `isDomainEventEnvelope` |
-| `dto.ts` | `TABLE_STATUSES` (6), `ORDER_STATUSES` (5), `PAYMENT_METHODS` (3), `TRANSACTION_STATUSES` (7), `DISPUTE_STATUSES` (4), `SUPPORTED_LOCALES` (`fr`/`en`), `DEFAULT_CURRENCY` (`XOF`), `MoneyXof`, `Paginated<T>` |
-| `tests/contracts.test.ts` | 5 tests : registre sans doublon, 9 événements requis présents, **chaque événement requis réellement publié dans `services/*/src`**, 6 statuts de table exacts, validateur d'enveloppe |
+| Élément                   | Contenu                                                                                                                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `events.ts`               | `DOMAIN_EVENTS` (60 noms), dont les 9 événements imposés ; `DomainEventEnvelope` (`id`, `type`, `tenantId`, `occurredAt`, `payload`) ; `isDomainEventName`, `isDomainEventEnvelope`                            |
+| `dto.ts`                  | `TABLE_STATUSES` (6), `ORDER_STATUSES` (5), `PAYMENT_METHODS` (3), `TRANSACTION_STATUSES` (7), `DISPUTE_STATUSES` (4), `SUPPORTED_LOCALES` (`fr`/`en`), `DEFAULT_CURRENCY` (`XOF`), `MoneyXof`, `Paginated<T>` |
+| `tests/contracts.test.ts` | 5 tests : registre sans doublon, 9 événements requis présents, **chaque événement requis réellement publié dans `services/*/src`**, 6 statuts de table exacts, validateur d'enveloppe                          |
 
 - Les enums dupliqués ont été remplacés par les contrats dans **floor-service** (`TABLE_STATUSES`), **order-service** (`ORDER_STATUSES`, `PAYMENT_METHODS`) et **payment-service** (`TRANSACTION_STATUSES`, `DISPUTE_STATUSES`).
 - `service-kit` dépend désormais de `shared-contracts` : la route `POST /internal/events` rejette en **400 `invalid_event`** toute enveloppe hors contrat (type inconnu, `tenantId` non conforme, `occurredAt` illisible, `payload` non objet). Les 56 noms réellement émis par les services sont tous déclarés (vérifié automatiquement) — aucun test n'a dû être adapté.
@@ -1759,12 +1777,12 @@ Vérification navigateur (serveurs Vite de dev) : accueil web et PWA client rend
 
 `docker-compose.yml` (racine) + `infra/` :
 
-| Service | Image | Ports | Rôle |
-| --- | --- | --- | --- |
-| `postgres` | `postgres:16-alpine` | 5432 | base `resto_identity`, scripts `infra/postgres/init.sql` et mot de passe applicatif |
-| `redis` | `redis:7-alpine` | 6379 | file BullMQ / cache (AOF activé, mot de passe requis) |
-| `minio` | `minio/minio` | 9000/9001 | stockage S3 compatible (console 9001) |
-| `minio-init` | `minio/mc` | — | crée le bucket `resto-hub-media` de façon idempotente |
+| Service      | Image                | Ports     | Rôle                                                                                |
+| ------------ | -------------------- | --------- | ----------------------------------------------------------------------------------- |
+| `postgres`   | `postgres:16-alpine` | 5432      | base `resto_identity`, scripts `infra/postgres/init.sql` et mot de passe applicatif |
+| `redis`      | `redis:7-alpine`     | 6379      | file BullMQ / cache (AOF activé, mot de passe requis)                               |
+| `minio`      | `minio/minio`        | 9000/9001 | stockage S3 compatible (console 9001)                                               |
+| `minio-init` | `minio/mc`           | —         | crée le bucket `resto-hub-media` de façon idempotente                               |
 
 - Secrets exclusivement par variables (`RESTO_DB_PASSWORD`, `RESTO_APP_PASSWORD`, `RESTO_REDIS_PASSWORD`, `MINIO_ROOT_*`) ; modèle dans `infra/.env.example`, `.env` ignoré par Git.
 - `scripts/db.mjs` : `db:start`, `db:stop`, `db:reset`, `db:logs`, `db:psql`, `db:test`. Sans Docker, `db:start` s'arrête avec un message explicite.
@@ -1780,29 +1798,29 @@ Privilèges minimaux : `SELECT` sur `tenants`, `SELECT/INSERT/UPDATE` sur `users
 
 `infra/postgres/rls-test.mjs` — **10 tests, 10/10**, exécutés sur PostgreSQL 19 compilé en WASM (PGlite 0.6, sans Docker) :
 
-| # | Vérification | Résultat |
-| --- | --- | --- |
-| 1 | `resto_app` : `rolsuper=false`, `rolbypassrls=false` | ✅ |
-| 2 | RLS activée **et** forcée sur les 3 tables | ✅ |
-| 3 | Sans contexte tenant : 0 ligne lisible, insertion refusée (fail-closed) | ✅ |
-| 4 | Tenant A → 2 utilisateurs ; tenant B → 1 (aucun débordement) | ✅ |
-| 5 | Lecture ciblée de l'utilisateur B depuis A → 0 ligne | ✅ |
-| 6 | Insertion inter-tenant refusée (`WITH CHECK`), `UPDATE` croisé → 0 ligne, donnée B intacte | ✅ |
-| 7 | `tenants` : un tenant ne lit que sa fiche | ✅ |
-| 8 | `audit_log` : insertion contextualisée OK ; `UPDATE`/`DELETE` refusés par privilèges puis par trigger (y compris en superutilisateur) | ✅ |
-| 9 | Aucun privilège DDL pour `resto_app` (`CREATE TABLE` → permission denied) | ✅ |
-| 10 | Un superutilisateur voit les 3 lignes malgré la RLS → le rôle dédié est obligatoire | ✅ |
+| #   | Vérification                                                                                                                          | Résultat |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 1   | `resto_app` : `rolsuper=false`, `rolbypassrls=false`                                                                                  | ✅       |
+| 2   | RLS activée **et** forcée sur les 3 tables                                                                                            | ✅       |
+| 3   | Sans contexte tenant : 0 ligne lisible, insertion refusée (fail-closed)                                                               | ✅       |
+| 4   | Tenant A → 2 utilisateurs ; tenant B → 1 (aucun débordement)                                                                          | ✅       |
+| 5   | Lecture ciblée de l'utilisateur B depuis A → 0 ligne                                                                                  | ✅       |
+| 6   | Insertion inter-tenant refusée (`WITH CHECK`), `UPDATE` croisé → 0 ligne, donnée B intacte                                            | ✅       |
+| 7   | `tenants` : un tenant ne lit que sa fiche                                                                                             | ✅       |
+| 8   | `audit_log` : insertion contextualisée OK ; `UPDATE`/`DELETE` refusés par privilèges puis par trigger (y compris en superutilisateur) | ✅       |
+| 9   | Aucun privilège DDL pour `resto_app` (`CREATE TABLE` → permission denied)                                                             | ✅       |
+| 10  | Un superutilisateur voit les 3 lignes malgré la RLS → le rôle dédié est obligatoire                                                   | ✅       |
 
 ### 24.5 Qualité : lint, couverture, CI, OpenAPI
 
 - **ESLint 9 (flat config)** : `@eslint/js` + `typescript-eslint` (recommandé) + `eslint-plugin-react-hooks` (règles de hooks en `error`, `exhaustive-deps` en `warning`) ; `no-control-regex` désactivé uniquement, avec justification, sur l'assainisseur PDF. Nettoyage de 28 symboles morts (imports, variables, helper). Résultat : **0 erreur**, 5 avertissements `exhaustive-deps` hérités assumés.
 - **Couverture** (`npm run test:coverage`, c8 sur `services/*/dist`, tests exclus) :
 
-| Indicateur | Mesure | Seuil CI |
-| --- | --- | --- |
-| Lignes / instructions | **83,86 %** (19 190 / 22 883) | 70 % |
-| Fonctions | **90,75 %** (766 / 844) | 70 % |
-| Branches | 69,27 % (2 943 / 4 248) | 60 % (plancher prudent, objectif 70 %) |
+| Indicateur            | Mesure                        | Seuil CI                               |
+| --------------------- | ----------------------------- | -------------------------------------- |
+| Lignes / instructions | **83,86 %** (19 190 / 22 883) | 70 %                                   |
+| Fonctions             | **90,75 %** (766 / 844)       | 70 %                                   |
+| Branches              | 69,27 % (2 943 / 4 248)       | 60 % (plancher prudent, objectif 70 %) |
 
 - **CI GitHub Actions** (`.github/workflows/ci.yml`, push `main`/`develop` + PR) : `npm ci` → lint → typecheck → build web/PWA → tests contrats & jetons → tests services + couverture → tests RLS → vérification OpenAPI.
 - **OpenAPI 3.1 généré** (`npm run openapi`) : `docs/openapi/<service>.json` pour les 13 services — **318 routes** extraites des tables de routes (y compris les constantes `TABLE.*` d'identity-service), avec `bearerAuth`, `x-internal-key`, tags `authenticated`/`public`/`internal`, schéma d'erreur commun et index de ports. `npm run openapi:check` échoue si la doc dérive du code. La migration NestJS remplacera ce générateur par l'export natif, schémas de requête/réponse inclus.

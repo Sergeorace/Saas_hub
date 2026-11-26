@@ -42,7 +42,10 @@ export function navigate(path: string, options: { replace?: boolean } = {}) {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
-export function withQuery(path: string, query: Record<string, string | number | undefined | null>): string {
+export function withQuery(
+  path: string,
+  query: Record<string, string | number | undefined | null>,
+): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (value !== undefined && value !== null && value !== '') params.set(key, String(value));
@@ -64,7 +67,10 @@ export function adoptLegacyPaths() {
     const key = params.get('k') ?? '';
     window.history.replaceState(null, '', `/`);
     navigate(
-      withQuery(`/e/${encodeURIComponent(table[1])}/menu`, { table: decodeURIComponent(table[2]), k: key }),
+      withQuery(`/e/${encodeURIComponent(table[1])}/menu`, {
+        table: decodeURIComponent(table[2]),
+        k: key,
+      }),
       { replace: true },
     );
     return;
@@ -93,7 +99,9 @@ export function adoptLegacyPaths() {
   }
 }
 
-export function parseTableQr(raw: string): { tenantKey: string; code: string; token: string } | null {
+export function parseTableQr(
+  raw: string,
+): { tenantKey: string; code: string; token: string } | null {
   const value = raw.trim();
   if (!value) return null;
   try {

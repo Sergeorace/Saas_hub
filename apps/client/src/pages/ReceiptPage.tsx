@@ -18,7 +18,11 @@ export default function ReceiptPage({ orderId }: { orderId: string }) {
               <Icon name="receipt" />
             </span>
             <h2>{t('receipt.notFound')}</h2>
-            <button type="button" className="rh-client-btn rh-client-btn--primary" onClick={() => navigate('/commandes')}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--primary"
+              onClick={() => navigate('/commandes')}
+            >
               {t('orders.title')}
             </button>
           </div>
@@ -40,7 +44,9 @@ export default function ReceiptPage({ orderId }: { orderId: string }) {
               <strong>{order.tenantName}</strong>
               <span>{t('receipt.digital')}</span>
             </div>
-            <span className={`rh-client-pill ${paid ? 'rh-client-pill--success' : 'rh-client-pill--warning'}`}>
+            <span
+              className={`rh-client-pill ${paid ? 'rh-client-pill--success' : 'rh-client-pill--warning'}`}
+            >
               {paid ? t('tracking.paid') : t('tracking.unpaid')}
             </span>
           </header>
@@ -97,13 +103,21 @@ export default function ReceiptPage({ orderId }: { orderId: string }) {
         </article>
 
         <div className="rh-receipt__actions">
-          <button type="button" className="rh-client-btn rh-client-btn--primary rh-client-btn--block" onClick={() => window.print()}>
+          <button
+            type="button"
+            className="rh-client-btn rh-client-btn--primary rh-client-btn--block"
+            onClick={() => window.print()}
+          >
             <Icon name="download" size="sm" /> {t('receipt.print')}
           </button>
           <button
             type="button"
             className="rh-client-btn rh-client-btn--ghost rh-client-btn--block"
-            onClick={() => navigate(`/suivi/${order.tenantId}/${order.orderId}?k=${encodeURIComponent(order.trackingToken)}`)}
+            onClick={() =>
+              navigate(
+                `/suivi/${order.tenantId}/${order.orderId}?k=${encodeURIComponent(order.trackingToken)}`,
+              )
+            }
           >
             <Icon name="arrow-right" size="sm" /> {t('tracking.title')}
           </button>

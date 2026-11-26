@@ -41,7 +41,9 @@ export function assert(condition: unknown, message: string): asserts condition {
 
 export function assertEqual<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) {
-    throw new Error(`${message} (attendu : ${JSON.stringify(expected)}, obtenu : ${JSON.stringify(actual)})`);
+    throw new Error(
+      `${message} (attendu : ${JSON.stringify(expected)}, obtenu : ${JSON.stringify(actual)})`,
+    );
   }
 }
 
@@ -53,7 +55,10 @@ export function assertStatus(result: ApiResult, expected: number, label: string)
   }
 }
 
-export async function waitFor(condition: () => boolean | Promise<boolean>, timeoutMs = 2000): Promise<void> {
+export async function waitFor(
+  condition: () => boolean | Promise<boolean>,
+  timeoutMs = 2000,
+): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await condition()) return;
@@ -88,6 +93,8 @@ export async function runTests(title: string, cases: TestCase[]): Promise<void> 
     }
   }
   const passed = executed - failures;
-  console.log(`\n${failures === 0 ? 'SUCCÈS' : 'ÉCHEC'} — ${passed}/${executed} tests d'isolation réussis.`);
+  console.log(
+    `\n${failures === 0 ? 'SUCCÈS' : 'ÉCHEC'} — ${passed}/${executed} tests d'isolation réussis.`,
+  );
   if (failures > 0) process.exitCode = 1;
 }

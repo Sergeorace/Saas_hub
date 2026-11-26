@@ -21,9 +21,18 @@ const bus = createEventBus({
   subscribers: config.eventSubscribers,
 });
 
-const order: ServiceClient = createServiceClient({ baseUrl: config.orderUrl, internalKey: config.internalKey });
-const inventory: ServiceClient = createServiceClient({ baseUrl: config.inventoryUrl, internalKey: config.internalKey });
-const floor: ServiceClient = createServiceClient({ baseUrl: config.floorUrl, internalKey: config.internalKey });
+const order: ServiceClient = createServiceClient({
+  baseUrl: config.orderUrl,
+  internalKey: config.internalKey,
+});
+const inventory: ServiceClient = createServiceClient({
+  baseUrl: config.inventoryUrl,
+  internalKey: config.internalKey,
+});
+const floor: ServiceClient = createServiceClient({
+  baseUrl: config.floorUrl,
+  internalKey: config.internalKey,
+});
 
 const options = {
   store,

@@ -124,10 +124,15 @@ export function ledgerBalances(ledger: Ledger, tenantId?: string): LedgerBalance
   });
 }
 
-export function verifyLedger(ledger: Ledger): { ok: boolean; entries: number; brokenAt: string | null } {
+export function verifyLedger(ledger: Ledger): {
+  ok: boolean;
+  entries: number;
+  brokenAt: string | null;
+} {
   let previous = 'genesis';
   for (const entry of ledger.entries) {
-    if (entry.prevHash !== previous) return { ok: false, entries: ledger.entries.length, brokenAt: entry.id };
+    if (entry.prevHash !== previous)
+      return { ok: false, entries: ledger.entries.length, brokenAt: entry.id };
     const canonical = JSON.stringify({
       id: entry.id,
       tenantId: entry.tenantId,
@@ -138,7 +143,8 @@ export function verifyLedger(ledger: Ledger): { ok: boolean; entries: number; br
       prevHash: entry.prevHash,
     });
     const expected = createHash('sha256').update(canonical).digest('hex');
-    if (expected !== entry.hash) return { ok: false, entries: ledger.entries.length, brokenAt: entry.id };
+    if (expected !== entry.hash)
+      return { ok: false, entries: ledger.entries.length, brokenAt: entry.id };
     const { debit, credit } = totals(entry.lines);
     if (debit !== credit) return { ok: false, entries: ledger.entries.length, brokenAt: entry.id };
     previous = entry.hash;

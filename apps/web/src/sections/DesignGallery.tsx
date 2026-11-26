@@ -221,15 +221,24 @@ export function DesignGallery() {
                   <CardHeader title={t('design.fieldsTitle')} />
                   <CardBody>
                     <div className="gallery__fields">
-                      <Input label={fields.name} hint={fields.hint} placeholder={fields.namePlaceholder} />
-                      <Input label={fields.search} leadingIcon="search" placeholder={fields.search} />
+                      <Input
+                        label={fields.name}
+                        hint={fields.hint}
+                        placeholder={fields.namePlaceholder}
+                      />
+                      <Input
+                        label={fields.search}
+                        leadingIcon="search"
+                        placeholder={fields.search}
+                      />
                       <Select
                         label={fields.filter}
                         options={[
                           { value: 'all', label: fields.allStatutes },
                           ...TABLE_STATUS_ORDER.map((status) => ({
                             value: status,
-                            label: TABLE_STATUS_META[status][locale === 'fr' ? 'labelFr' : 'labelEn'],
+                            label:
+                              TABLE_STATUS_META[status][locale === 'fr' ? 'labelFr' : 'labelEn'],
                           })),
                         ]}
                       />
@@ -251,7 +260,18 @@ export function DesignGallery() {
                         {t('design.badgePremium')}
                       </Badge>
                       {palette
-                        .filter((item) => ['Succès', 'Alerte', 'Erreur', 'Info', 'Success', 'Warning', 'Danger', 'Info'].includes(item.label))
+                        .filter((item) =>
+                          [
+                            'Succès',
+                            'Alerte',
+                            'Erreur',
+                            'Info',
+                            'Success',
+                            'Warning',
+                            'Danger',
+                            'Info',
+                          ].includes(item.label),
+                        )
                         .map((item) => (
                           <Badge
                             key={item.label}
@@ -299,8 +319,18 @@ export function DesignGallery() {
                                 label: t('design.sidebarLabel'),
                                 items: [
                                   { id: 'dashboard', label: navLabels.dashboard, icon: 'home' },
-                                  { id: 'floor', label: navLabels.floor, icon: 'grid', active: true },
-                                  { id: 'orders', label: navLabels.orders, icon: 'receipt', badge: 4 },
+                                  {
+                                    id: 'floor',
+                                    label: navLabels.floor,
+                                    icon: 'grid',
+                                    active: true,
+                                  },
+                                  {
+                                    id: 'orders',
+                                    label: navLabels.orders,
+                                    icon: 'receipt',
+                                    badge: 4,
+                                  },
                                   { id: 'menu', label: navLabels.menu, icon: 'utensils' },
                                   { id: 'staff', label: navLabels.staff, icon: 'users' },
                                   { id: 'reports', label: navLabels.reports, icon: 'chart' },
@@ -313,7 +343,9 @@ export function DesignGallery() {
                                 <Avatar name="Akouvi D." />
                                 <div>
                                   <div className="rh-sidebar__user-name">Akouvi D.</div>
-                                  <div className="rh-sidebar__user-role">{t('design.roleName')}</div>
+                                  <div className="rh-sidebar__user-role">
+                                    {t('design.roleName')}
+                                  </div>
                                 </div>
                               </div>
                             }
@@ -341,7 +373,12 @@ export function DesignGallery() {
                               <BottomNav
                                 ariaLabel={t('design.bottomLabel')}
                                 items={[
-                                  { id: 'floor', label: bottomLabels.floor, icon: 'grid', active: true },
+                                  {
+                                    id: 'floor',
+                                    label: bottomLabels.floor,
+                                    icon: 'grid',
+                                    active: true,
+                                  },
                                   { id: 'orders', label: bottomLabels.orders, icon: 'receipt' },
                                   { id: 'kds', label: bottomLabels.kds, icon: 'chef' },
                                   { id: 'stats', label: bottomLabels.stats, icon: 'chart' },
@@ -384,7 +421,10 @@ export function DesignGallery() {
                 </Card>
 
                 <Card>
-                  <CardHeader title={t('design.skeletonTitle')} subtitle={t('design.skeletonSub')} />
+                  <CardHeader
+                    title={t('design.skeletonTitle')}
+                    subtitle={t('design.skeletonSub')}
+                  />
                   <CardBody>
                     <div className="skeleton-demo">
                       <div className="skeleton-demo__row">

@@ -38,7 +38,11 @@ import {
 
 export interface StaffAppOptions {
   store: StaffStore;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 function isoNow(): string {
@@ -74,7 +78,11 @@ function serializeLeave(store: StaffStore, leave: LeaveRequest) {
 
 function findOpenAttendance(store: StaffStore, tenantId: string, employeeId: string, date: string) {
   return [...store.attendance.values()].find(
-    (record) => record.tenantId === tenantId && record.employeeId === employeeId && record.date === date && !record.clockOut,
+    (record) =>
+      record.tenantId === tenantId &&
+      record.employeeId === employeeId &&
+      record.date === date &&
+      !record.clockOut,
   );
 }
 
@@ -83,13 +91,16 @@ function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: 
   const rad = (value: number) => (value * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat);
   const dLng = rad(b.lng - a.lng);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
   return Math.round(2 * R * Math.asin(Math.sqrt(h)));
 }
 
 function periodRange(period: string): { start: string; end: string } {
   if (!/^\d{4}-\d{2}$/.test(period)) {
-    throw HttpError.unprocessable('validation_error', 'Période attendue au format AAAA-MM.', { field: 'period' });
+    throw HttpError.unprocessable('validation_error', 'Période attendue au format AAAA-MM.', {
+      field: 'period',
+    });
   }
   const [year, month] = period.split('-').map(Number);
   const start = `${period}-01`;
@@ -107,15 +118,23 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'staff:view');
-        const employees = [...store.employees.values()].filter((employee) => employee.tenantId === tenantId);
+        const employees = [...store.employees.values()].filter(
+          (employee) => employee.tenantId === tenantId,
+        );
         const today = todayString();
-        const shiftsToday = [...store.shifts.values()].filter((shift) => shift.tenantId === tenantId && shift.date === today);
+        const shiftsToday = [...store.shifts.values()].filter(
+          (shift) => shift.tenantId === tenantId && shift.date === today,
+        );
         const attendanceToday = [...store.attendance.values()].filter(
           (record) => record.tenantId === tenantId && record.date === today,
         );
         const leaves = [...store.leaves.values()].filter((leave) => leave.tenantId === tenantId);
-        const swaps = [...store.swaps.values()].filter((swap) => swap.tenantId === tenantId && swap.status === 'en_attente');
-        const performance = [...store.performance.values()].filter((record) => record.tenantId === tenantId);
+        const swaps = [...store.swaps.values()].filter(
+          (swap) => swap.tenantId === tenantId && swap.status === 'en_attente',
+        );
+        const performance = [...store.performance.values()].filter(
+          (record) => record.tenantId === tenantId,
+        );
         return {
           body: {
             tenantId,
@@ -128,7 +147,9 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
             today: {
               date: today,
               shifts: shiftsToday.length,
-              present: attendanceToday.filter((record) => !record.clockOut).length + attendanceToday.filter((record) => record.clockOut).length,
+              present:
+                attendanceToday.filter((record) => !record.clockOut).length +
+                attendanceToday.filter((record) => record.clockOut).length,
               stillClockedIn: attendanceToday.filter((record) => !record.clockOut).length,
             },
             pending: {
@@ -155,7 +176,13 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const items = [...store.employees.values()]
           .filter((employee) => employee.tenantId === tenantId)
           .filter((employee) => !statusFilter || employee.status === statusFilter)
-          .filter((employee) => !query || `${employee.name} ${employee.jobTitle} ${employee.email ?? ''}`.toLowerCase().includes(query))
+          .filter(
+            (employee) =>
+              !query ||
+              `${employee.name} ${employee.jobTitle} ${employee.email ?? ''}`
+                .toLowerCase()
+                .includes(query),
+          )
           .sort((left, right) => left.name.localeCompare(right.name))
           .map(serializeEmployee);
         return { body: { tenantId, items, count: items.length } };
@@ -177,11 +204,17 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           email: optionalEmail(body) ?? null,
           jobTitle: requireString(body, 'jobTitle', { min: 2, max: 60 }),
           roleCode: optionalString(body, 'roleCode', { max: 40 }) ?? 'waiter',
-          contractType: body.contractType ? requireEnum(body, 'contractType', CONTRACT_TYPES) : ('cdi' as ContractType),
+          contractType: body.contractType
+            ? requireEnum(body, 'contractType', CONTRACT_TYPES)
+            : ('cdi' as ContractType),
           hireDate: optionalString(body, 'hireDate', { max: 10 }) ?? todayString(),
-          baseSalaryXof: typeof body.baseSalaryXof === 'number' ? Math.round(body.baseSalaryXof) : 0,
-          paymentMethod: body.paymentMethod ? requireEnum(body, 'paymentMethod', PAYMENT_METHODS) : ('mobile_money' as StaffPaymentMethod),
-          paymentDestination: optionalString(body, 'paymentDestination', { max: 120 }) ?? 'Mobile Money',
+          baseSalaryXof:
+            typeof body.baseSalaryXof === 'number' ? Math.round(body.baseSalaryXof) : 0,
+          paymentMethod: body.paymentMethod
+            ? requireEnum(body, 'paymentMethod', PAYMENT_METHODS)
+            : ('mobile_money' as StaffPaymentMethod),
+          paymentDestination:
+            optionalString(body, 'paymentDestination', { max: 120 }) ?? 'Mobile Money',
           documents: [],
           status: 'actif',
           pin: newPin(),
@@ -191,7 +224,10 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           updatedAt: now,
           activatedAt: now,
         };
-        if (employee.baseSalaryXof < 0) throw HttpError.unprocessable('validation_error', 'Salaire de base invalide.', { field: 'baseSalaryXof' });
+        if (employee.baseSalaryXof < 0)
+          throw HttpError.unprocessable('validation_error', 'Salaire de base invalide.', {
+            field: 'baseSalaryXof',
+          });
         store.employees.set(employee.id, employee);
         store.recordAudit({
           tenantId,
@@ -201,7 +237,12 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           targetId: employee.id,
           meta: { name: employee.name, roleCode: employee.roleCode },
         });
-        await publish('StaffUpdated', tenantId, { tenantId, employeeId: employee.id, action: 'created', at: now });
+        await publish('StaffUpdated', tenantId, {
+          tenantId,
+          employeeId: employee.id,
+          action: 'created',
+          at: now,
+        });
         return { status: 201, body: { employee: serializeEmployee(employee) } };
       },
     },
@@ -212,7 +253,8 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'staff:view');
         const employee = store.employees.get(ctx.params.id ?? '');
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const performance = getPerformance(store, tenantId, employee.id);
         const attendance = [...store.attendance.values()]
           .filter((record) => record.tenantId === tenantId && record.employeeId === employee.id)
@@ -238,22 +280,31 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'staff:manage');
         const employee = store.employees.get(ctx.params.id ?? '');
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const body = asObject(ctx.body);
-        if (body.name !== undefined) employee.name = requireString(body, 'name', { min: 2, max: 80 });
+        if (body.name !== undefined)
+          employee.name = requireString(body, 'name', { min: 2, max: 80 });
         if (body.phone !== undefined) employee.phone = requirePhone(body, 'phone');
         if (body.email !== undefined) employee.email = optionalEmail(body) ?? null;
-        if (body.jobTitle !== undefined) employee.jobTitle = requireString(body, 'jobTitle', { min: 2, max: 60 });
-        if (body.roleCode !== undefined) employee.roleCode = requireString(body, 'roleCode', { max: 40 });
-        if (body.contractType !== undefined) employee.contractType = requireEnum(body, 'contractType', CONTRACT_TYPES);
-        if (body.hireDate !== undefined) employee.hireDate = requireString(body, 'hireDate', { max: 10 });
+        if (body.jobTitle !== undefined)
+          employee.jobTitle = requireString(body, 'jobTitle', { min: 2, max: 60 });
+        if (body.roleCode !== undefined)
+          employee.roleCode = requireString(body, 'roleCode', { max: 40 });
+        if (body.contractType !== undefined)
+          employee.contractType = requireEnum(body, 'contractType', CONTRACT_TYPES);
+        if (body.hireDate !== undefined)
+          employee.hireDate = requireString(body, 'hireDate', { max: 10 });
         if (body.baseSalaryXof !== undefined) {
           if (typeof body.baseSalaryXof !== 'number' || body.baseSalaryXof < 0) {
-            throw HttpError.unprocessable('validation_error', 'Salaire de base invalide.', { field: 'baseSalaryXof' });
+            throw HttpError.unprocessable('validation_error', 'Salaire de base invalide.', {
+              field: 'baseSalaryXof',
+            });
           }
           employee.baseSalaryXof = Math.round(body.baseSalaryXof);
         }
-        if (body.paymentMethod !== undefined) employee.paymentMethod = requireEnum(body, 'paymentMethod', PAYMENT_METHODS);
+        if (body.paymentMethod !== undefined)
+          employee.paymentMethod = requireEnum(body, 'paymentMethod', PAYMENT_METHODS);
         if (body.paymentDestination !== undefined) {
           employee.paymentDestination = requireString(body, 'paymentDestination', { max: 120 });
         }
@@ -270,7 +321,12 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           targetId: employee.id,
           meta: { fields: Object.keys(body) },
         });
-        await publish('StaffUpdated', tenantId, { tenantId, employeeId: employee.id, action: 'updated', at: employee.updatedAt });
+        await publish('StaffUpdated', tenantId, {
+          tenantId,
+          employeeId: employee.id,
+          action: 'updated',
+          at: employee.updatedAt,
+        });
         return { body: { employee: serializeEmployee(employee) } };
       },
     },
@@ -281,7 +337,8 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'staff:manage');
         const employee = store.employees.get(ctx.params.id ?? '');
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const body = asObject(ctx.body);
         const document = {
           id: newId('doc'),
@@ -386,17 +443,26 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
       handler: async (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         const invitation = store.invitations.get(ctx.params.token ?? '');
-        if (!invitation || invitation.tenantId !== tenantId) throw HttpError.notFound('Invitation introuvable.');
-        if (invitation.acceptedAt) throw HttpError.conflict('invitation_already_used', 'Cette invitation a déjà été acceptée.');
+        if (!invitation || invitation.tenantId !== tenantId)
+          throw HttpError.notFound('Invitation introuvable.');
+        if (invitation.acceptedAt)
+          throw HttpError.conflict(
+            'invitation_already_used',
+            'Cette invitation a déjà été acceptée.',
+          );
         if (new Date(invitation.expiresAt).getTime() < Date.now()) {
           throw HttpError.unprocessable('invitation_expired', 'Cette invitation a expiré.');
         }
         const employee = store.employees.get(invitation.employeeId);
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const body = ctx.body ? asObject(ctx.body) : {};
         if (body.pin !== undefined) {
           const pin = String(body.pin);
-          if (!/^\d{4}$/.test(pin)) throw HttpError.unprocessable('validation_error', 'Le PIN doit contenir 4 chiffres.', { field: 'pin' });
+          if (!/^\d{4}$/.test(pin))
+            throw HttpError.unprocessable('validation_error', 'Le PIN doit contenir 4 chiffres.', {
+              field: 'pin',
+            });
           employee.pin = pin;
         }
         const now = isoNow();
@@ -423,8 +489,13 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'staff:manage');
         const invitation = store.invitations.get(ctx.params.token ?? '');
-        if (!invitation || invitation.tenantId !== tenantId) throw HttpError.notFound('Invitation introuvable.');
-        if (invitation.acceptedAt) throw HttpError.conflict('invitation_already_used', 'Cette invitation a déjà été acceptée.');
+        if (!invitation || invitation.tenantId !== tenantId)
+          throw HttpError.notFound('Invitation introuvable.');
+        if (invitation.acceptedAt)
+          throw HttpError.conflict(
+            'invitation_already_used',
+            'Cette invitation a déjà été acceptée.',
+          );
         invitation.sentAt = isoNow();
         invitation.expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
         store.recordAudit({
@@ -465,13 +536,19 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const body = asObject(ctx.body);
         const employeeId = requireString(body, 'employeeId', { max: 60 });
         const employee = store.employees.get(employeeId);
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const date = requireString(body, 'date', { max: 10 });
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', { field: 'date' });
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+          throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', {
+            field: 'date',
+          });
         const start = requireString(body, 'start', { max: 5 });
         const end = requireString(body, 'end', { max: 5 });
         if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end) || end <= start) {
-          throw HttpError.unprocessable('validation_error', 'Plage horaire invalide.', { field: 'start' });
+          throw HttpError.unprocessable('validation_error', 'Plage horaire invalide.', {
+            field: 'start',
+          });
         }
         const overlap = [...store.shifts.values()].find(
           (shift) =>
@@ -482,7 +559,8 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
             start < shift.end &&
             end > shift.start,
         );
-        if (overlap) throw HttpError.conflict('shift_overlap', 'Ce créneau chevauche un shift existant.');
+        if (overlap)
+          throw HttpError.conflict('shift_overlap', 'Ce créneau chevauche un shift existant.');
         const now = isoNow();
         const shift: Shift = {
           id: newId('shf'),
@@ -507,7 +585,13 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           meta: { employeeId, date, start, end, station: shift.station },
         });
         if (shift.status === 'publie') {
-          await publish('ShiftPublished', tenantId, { tenantId, shiftId: shift.id, employeeId, date, at: now });
+          await publish('ShiftPublished', tenantId, {
+            tenantId,
+            shiftId: shift.id,
+            employeeId,
+            date,
+            at: now,
+          });
         }
         return { status: 201, body: { shift: serializeShift(store, shift) } };
       },
@@ -523,9 +607,14 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const body = asObject(ctx.body);
         if (body.start !== undefined) shift.start = requireString(body, 'start', { max: 5 });
         if (body.end !== undefined) shift.end = requireString(body, 'end', { max: 5 });
-        if (shift.end <= shift.start) throw HttpError.unprocessable('validation_error', 'Plage horaire invalide.', { field: 'end' });
-        if (body.station !== undefined) shift.station = requireEnum(body, 'station', SHIFT_STATIONS);
-        if (body.note !== undefined) shift.note = optionalString(body, 'note', { max: 160 }) ?? null;
+        if (shift.end <= shift.start)
+          throw HttpError.unprocessable('validation_error', 'Plage horaire invalide.', {
+            field: 'end',
+          });
+        if (body.station !== undefined)
+          shift.station = requireEnum(body, 'station', SHIFT_STATIONS);
+        if (body.note !== undefined)
+          shift.note = optionalString(body, 'note', { max: 160 }) ?? null;
         if (body.status !== undefined) shift.status = requireEnum(body, 'status', SHIFT_STATUSES);
         shift.updatedAt = isoNow();
         store.recordAudit({
@@ -537,7 +626,13 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           meta: { status: shift.status },
         });
         if (shift.status === 'publie') {
-          await publish('ShiftPublished', tenantId, { tenantId, shiftId: shift.id, employeeId: shift.employeeId, date: shift.date, at: shift.updatedAt });
+          await publish('ShiftPublished', tenantId, {
+            tenantId,
+            shiftId: shift.id,
+            employeeId: shift.employeeId,
+            date: shift.date,
+            at: shift.updatedAt,
+          });
         }
         return { body: { shift: serializeShift(store, shift) } };
       },
@@ -553,9 +648,14 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const body = asObject(ctx.body);
         const toEmployeeId = requireString(body, 'toEmployeeId', { max: 60 });
         const target = store.employees.get(toEmployeeId);
-        if (!target || target.tenantId !== tenantId) throw HttpError.notFound('Employé cible introuvable.');
+        if (!target || target.tenantId !== tenantId)
+          throw HttpError.notFound('Employé cible introuvable.');
         if (toEmployeeId === shift.employeeId) {
-          throw HttpError.unprocessable('validation_error', 'Le shift appartient déjà à cet employé.', { field: 'toEmployeeId' });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Le shift appartient déjà à cet employé.',
+            { field: 'toEmployeeId' },
+          );
         }
         const now = isoNow();
         const swap: SwapRequest = {
@@ -602,8 +702,10 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'staff:manage');
         const swap = store.swaps.get(ctx.params.id ?? '');
-        if (!swap || swap.tenantId !== tenantId) throw HttpError.notFound('Demande d’échange introuvable.');
-        if (swap.status !== 'en_attente') throw HttpError.conflict('swap_already_decided', 'Cette demande a déjà été traitée.');
+        if (!swap || swap.tenantId !== tenantId)
+          throw HttpError.notFound('Demande d’échange introuvable.');
+        if (swap.status !== 'en_attente')
+          throw HttpError.conflict('swap_already_decided', 'Cette demande a déjà été traitée.');
         const body = asObject(ctx.body);
         const decision = requireEnum(body, 'decision', ['approuve', 'refuse'] as const);
         const shift = store.shifts.get(swap.shiftId);
@@ -648,10 +750,20 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           .filter((leave) => !statusFilter || leave.status === statusFilter)
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map((leave) => serializeLeave(store, leave));
-        return { body: { tenantId, items, counts: {
-          en_attente: [...store.leaves.values()].filter((leave) => leave.tenantId === tenantId && leave.status === 'en_attente').length,
-          approuve: [...store.leaves.values()].filter((leave) => leave.tenantId === tenantId && leave.status === 'approuve').length,
-        } } };
+        return {
+          body: {
+            tenantId,
+            items,
+            counts: {
+              en_attente: [...store.leaves.values()].filter(
+                (leave) => leave.tenantId === tenantId && leave.status === 'en_attente',
+              ).length,
+              approuve: [...store.leaves.values()].filter(
+                (leave) => leave.tenantId === tenantId && leave.status === 'approuve',
+              ).length,
+            },
+          },
+        };
       },
     },
     {
@@ -663,13 +775,19 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const body = asObject(ctx.body);
         const employeeId = requireString(body, 'employeeId', { max: 60 });
         const employee = store.employees.get(employeeId);
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const from = requireString(body, 'from', { max: 10 });
         const to = requireString(body, 'to', { max: 10 });
         if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || to < from) {
-          throw HttpError.unprocessable('validation_error', 'Période de congé invalide.', { field: 'from' });
+          throw HttpError.unprocessable('validation_error', 'Période de congé invalide.', {
+            field: 'from',
+          });
         }
-        const days = Math.max(1, Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000) + 1);
+        const days = Math.max(
+          1,
+          Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000) + 1,
+        );
         const now = isoNow();
         const leave: LeaveRequest = {
           id: newId('lea'),
@@ -704,8 +822,10 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'staff:manage');
         const leave = store.leaves.get(ctx.params.id ?? '');
-        if (!leave || leave.tenantId !== tenantId) throw HttpError.notFound('Demande de congé introuvable.');
-        if (leave.status !== 'en_attente') throw HttpError.conflict('leave_already_decided', 'Cette demande a déjà été traitée.');
+        if (!leave || leave.tenantId !== tenantId)
+          throw HttpError.notFound('Demande de congé introuvable.');
+        if (leave.status !== 'en_attente')
+          throw HttpError.conflict('leave_already_decided', 'Cette demande a déjà été traitée.');
         const body = asObject(ctx.body);
         const decision = requireEnum(body, 'decision', ['approuve', 'refuse'] as const);
         leave.status = decision;
@@ -740,13 +860,25 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const body = asObject(ctx.body);
         const employeeId = requireString(body, 'employeeId', { max: 60 });
         const employee = store.employees.get(employeeId);
-        if (!employee || employee.tenantId !== tenantId) throw HttpError.notFound('Employé introuvable.');
+        if (!employee || employee.tenantId !== tenantId)
+          throw HttpError.notFound('Employé introuvable.');
         const date = requireString(body, 'date', { max: 10 });
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', { field: 'date' });
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+          throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', {
+            field: 'date',
+          });
         const existing = [...store.leaves.values()].find(
-          (leave) => leave.tenantId === tenantId && leave.employeeId === employeeId && leave.type === 'absence' && leave.from === date,
+          (leave) =>
+            leave.tenantId === tenantId &&
+            leave.employeeId === employeeId &&
+            leave.type === 'absence' &&
+            leave.from === date,
         );
-        if (existing) throw HttpError.conflict('absence_exists', 'Une absence est déjà enregistrée pour cette date.');
+        if (existing)
+          throw HttpError.conflict(
+            'absence_exists',
+            'Une absence est déjà enregistrée pour cette date.',
+          );
         const now = isoNow();
         const leave: LeaveRequest = {
           id: newId('lea'),
@@ -800,7 +932,9 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const pin = optionalString(body, 'pin', { max: 4 });
         const qrToken = optionalString(body, 'qrToken', { max: 40 });
         if (!pin && !qrToken) {
-          throw HttpError.unprocessable('validation_error', 'PIN ou badge QR requis.', { field: 'pin' });
+          throw HttpError.unprocessable('validation_error', 'PIN ou badge QR requis.', {
+            field: 'pin',
+          });
         }
         const employee = [...store.employees.values()].find(
           (candidate) =>
@@ -809,24 +943,37 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
             ((pin && candidate.pin === pin) || (qrToken && candidate.qrToken === qrToken)),
         );
         if (!employee) {
-          throw HttpError.unprocessable('badge_invalid', 'PIN ou badge invalide.', { field: 'pin' });
+          throw HttpError.unprocessable('badge_invalid', 'PIN ou badge invalide.', {
+            field: 'pin',
+          });
         }
         const date = todayString();
         if (findOpenAttendance(store, tenantId, employee.id, date)) {
-          throw HttpError.conflict('already_clocked_in', 'Un pointage est déjà ouvert pour aujourd’hui.');
+          throw HttpError.conflict(
+            'already_clocked_in',
+            'Un pointage est déjà ouvert pour aujourd’hui.',
+          );
         }
         let location: AttendanceRecord['location'] = null;
         const geofence = store.geofences.get(tenantId);
         if (geofence) {
           if (typeof body.lat !== 'number' || typeof body.lng !== 'number') {
-            throw HttpError.unprocessable('geolocation_required', 'La géolocalisation est requise pour ce pointage.', { field: 'lat' });
+            throw HttpError.unprocessable(
+              'geolocation_required',
+              'La géolocalisation est requise pour ce pointage.',
+              { field: 'lat' },
+            );
           }
           const distance = distanceMeters(geofence, { lat: body.lat, lng: body.lng });
           if (distance > geofence.radiusM) {
-            throw HttpError.unprocessable('outside_geofence', 'Pointage hors du périmètre autorisé.', {
-              distanceM: Math.round(distance),
-              radiusM: geofence.radiusM,
-            });
+            throw HttpError.unprocessable(
+              'outside_geofence',
+              'Pointage hors du périmètre autorisé.',
+              {
+                distanceM: Math.round(distance),
+                radiusM: geofence.radiusM,
+              },
+            );
           }
           location = { lat: body.lat, lng: body.lng, withinFence: true };
         } else if (typeof body.lat === 'number' && typeof body.lng === 'number') {
@@ -873,8 +1020,10 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'staff:manage');
         const record = store.attendance.get(ctx.params.id ?? '');
-        if (!record || record.tenantId !== tenantId) throw HttpError.notFound('Pointage introuvable.');
-        if (record.clockOut) throw HttpError.conflict('already_clocked_out', 'Ce pointage est déjà clôturé.');
+        if (!record || record.tenantId !== tenantId)
+          throw HttpError.notFound('Pointage introuvable.');
+        if (record.clockOut)
+          throw HttpError.conflict('already_clocked_out', 'Ce pointage est déjà clôturé.');
         record.clockOut = isoNow();
         record.minutesWorked = minutesBetween(record.clockIn, record.clockOut);
         store.recordAudit({
@@ -959,13 +1108,29 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
           store.geofences.delete(tenantId);
         } else {
           const geofence = asObject(body.geofence);
-          if (typeof geofence.lat !== 'number' || typeof geofence.lng !== 'number' || typeof geofence.radiusM !== 'number') {
-            throw HttpError.unprocessable('validation_error', 'Géofence invalide (lat, lng, radiusM).', { field: 'geofence' });
+          if (
+            typeof geofence.lat !== 'number' ||
+            typeof geofence.lng !== 'number' ||
+            typeof geofence.radiusM !== 'number'
+          ) {
+            throw HttpError.unprocessable(
+              'validation_error',
+              'Géofence invalide (lat, lng, radiusM).',
+              { field: 'geofence' },
+            );
           }
           if (geofence.radiusM < 20 || geofence.radiusM > 5000) {
-            throw HttpError.unprocessable('validation_error', 'Rayon de géofence attendu entre 20 et 5000 m.', { field: 'geofence.radiusM' });
+            throw HttpError.unprocessable(
+              'validation_error',
+              'Rayon de géofence attendu entre 20 et 5000 m.',
+              { field: 'geofence.radiusM' },
+            );
           }
-          store.geofences.set(tenantId, { lat: geofence.lat, lng: geofence.lng, radiusM: geofence.radiusM });
+          store.geofences.set(tenantId, {
+            lat: geofence.lat,
+            lng: geofence.lng,
+            radiusM: geofence.radiusM,
+          });
         }
         store.recordAudit({
           tenantId,
@@ -984,7 +1149,10 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'staff:view');
-        const entries = store.audit.filter((entry) => entry.tenantId === tenantId).slice(-100).reverse();
+        const entries = store.audit
+          .filter((entry) => entry.tenantId === tenantId)
+          .slice(-100)
+          .reverse();
         return {
           body: {
             tenantId,
@@ -1006,7 +1174,11 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
         const period = ctx.query.get('period') ?? todayString().slice(0, 7);
         const { start, end } = periodRange(period);
         const employees = [...store.employees.values()]
-          .filter((employee) => employee.tenantId === tenantId && (employee.status === 'actif' || employee.status === 'suspendu'))
+          .filter(
+            (employee) =>
+              employee.tenantId === tenantId &&
+              (employee.status === 'actif' || employee.status === 'suspendu'),
+          )
           .map((employee) => {
             const records = [...store.attendance.values()].filter(
               (record) =>
@@ -1017,7 +1189,10 @@ export function buildStaffApp(options: StaffAppOptions): Route[] {
                 record.clockOut !== null,
             );
             const totalMinutes = records.reduce((sum, record) => sum + record.minutesWorked, 0);
-            const overtimeMinutes = records.reduce((sum, record) => sum + Math.max(0, record.minutesWorked - 480), 0);
+            const overtimeMinutes = records.reduce(
+              (sum, record) => sum + Math.max(0, record.minutesWorked - 480),
+              0,
+            );
             const leaves = [...store.leaves.values()].filter(
               (leave) =>
                 leave.tenantId === tenantId &&
@@ -1087,7 +1262,9 @@ export function handleStaffEvent(
       '';
     if (!candidateId) return;
     const employee = [...store.employees.values()].find(
-      (candidate) => candidate.tenantId === tenantId && (candidate.id === candidateId || candidate.userId === candidateId),
+      (candidate) =>
+        candidate.tenantId === tenantId &&
+        (candidate.id === candidateId || candidate.userId === candidateId),
     );
     if (!employee) return;
     const amount =
@@ -1100,7 +1277,8 @@ export function handleStaffEvent(
     const record = getPerformance(store, tenantId, employee.id);
     record.salesXof += amount;
     record.orders += 1;
-    if (typeof event.payload.tableCode === 'string' && event.payload.tableCode) record.tablesServed += 1;
+    if (typeof event.payload.tableCode === 'string' && event.payload.tableCode)
+      record.tablesServed += 1;
     record.updatedAt = isoNow();
     store.handledOrders.add(`${tenantId}::${orderId}`);
     return;
@@ -1108,7 +1286,8 @@ export function handleStaffEvent(
   if (event.type === 'TipDistributed') {
     const allocations = Array.isArray(event.payload.allocations) ? event.payload.allocations : [];
     for (const item of allocations) {
-      const allocation = typeof item === 'object' && item ? (item as Record<string, unknown>) : null;
+      const allocation =
+        typeof item === 'object' && item ? (item as Record<string, unknown>) : null;
       if (!allocation) continue;
       const staffId = typeof allocation.staffId === 'string' ? allocation.staffId : '';
       const amount = typeof allocation.amountXof === 'number' ? allocation.amountXof : 0;
@@ -1116,7 +1295,9 @@ export function handleStaffEvent(
       const key = `${tenantId}::${staffId}::${typeof event.payload.transactionId === 'string' ? event.payload.transactionId : ''}::${amount}`;
       if (store.handledTips.has(key)) continue;
       const employee = [...store.employees.values()].find(
-        (candidate) => candidate.tenantId === tenantId && (candidate.id === staffId || candidate.userId === staffId),
+        (candidate) =>
+          candidate.tenantId === tenantId &&
+          (candidate.id === staffId || candidate.userId === staffId),
       );
       if (!employee) continue;
       const record = getPerformance(store, tenantId, employee.id);

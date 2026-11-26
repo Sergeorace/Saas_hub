@@ -16,7 +16,11 @@ const INTERNAL_KEY = 'test-internal-key';
 const SAHEL = 'tnt_sahelgrill';
 const BAOBAB = 'tnt_baobab';
 
-function claims(sub: string, name: string, tenantPermissions: Record<string, string[]>): AuthClaims {
+function claims(
+  sub: string,
+  name: string,
+  tenantPermissions: Record<string, string[]>,
+): AuthClaims {
   return {
     sub,
     sid: `ses_${sub}`,
@@ -41,7 +45,9 @@ async function main() {
   };
   const ownerSahel = register(
     'token-owner-sahel',
-    claims('usr_owner_sahel', 'Gérant Sahel', { [SAHEL]: ['staff:view', 'staff:manage', 'payroll:view'] }),
+    claims('usr_owner_sahel', 'Gérant Sahel', {
+      [SAHEL]: ['staff:view', 'staff:manage', 'payroll:view'],
+    }),
   );
   const ownerBaobab = register(
     'token-owner-baobab',
@@ -82,17 +88,35 @@ async function main() {
           own.body.items.every((employee: { tenantId: string }) => employee.tenantId === SAHEL),
           'Aucun employé d’un autre établissement',
         );
-        const cross = await api(base, 'GET', `/api/v1/tenants/${SAHEL}/staff/employees`, undefined, {
-          token: ownerBaobab,
-        });
+        const cross = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${SAHEL}/staff/employees`,
+          undefined,
+          {
+            token: ownerBaobab,
+          },
+        );
         assertStatus(cross, 403, 'Accès croisé refusé');
-        const foreignEmployee = await api(base, 'GET', `/api/v1/tenants/${BAOBAB}/staff/employees/emp_akouvi`, undefined, {
-          token: ownerBaobab,
-        });
+        const foreignEmployee = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${BAOBAB}/staff/employees/emp_akouvi`,
+          undefined,
+          {
+            token: ownerBaobab,
+          },
+        );
         assertStatus(foreignEmployee, 404, 'Employé hors tenant invisible');
-        const wrongTenantPath = await api(base, 'GET', `/api/v1/tenants/${SAHEL}/staff/employees/emp_ama`, undefined, {
-          token: ownerSahel,
-        });
+        const wrongTenantPath = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${SAHEL}/staff/employees/emp_ama`,
+          undefined,
+          {
+            token: ownerSahel,
+          },
+        );
         assertStatus(wrongTenantPath, 404, 'Employé d’un autre tenant introuvable');
       },
     },
@@ -147,12 +171,21 @@ async function main() {
         assertStatus(document, 201, 'Document ajouté');
         assertEqual(document.body.employee.documents.length, 1, 'Un document');
 
-        const detail = await api(base, 'GET', `/api/v1/tenants/${SAHEL}/staff/employees/${employeeId}`, undefined, {
-          token: ownerSahel,
-        });
+        const detail = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${SAHEL}/staff/employees/${employeeId}`,
+          undefined,
+          {
+            token: ownerSahel,
+          },
+        );
         assertStatus(detail, 200, 'Fiche employé');
         assertEqual(detail.body.performance.salesXof, 0, 'Aucune vente initiale');
-        assert(published.some((event) => event.type === 'StaffUpdated'), 'StaffUpdated publié');
+        assert(
+          published.some((event) => event.type === 'StaffUpdated'),
+          'StaffUpdated publié',
+        );
       },
     },
     {
@@ -175,24 +208,51 @@ async function main() {
         assertEqual(invite.body.invitation.channel, 'email', 'Canal e-mail');
         assertEqual(invite.body.employee.status, 'invite', 'Statut invité');
         const token = invite.body.invitation.token as string;
-        assert(published.some((event) => event.type === 'StaffInvited'), 'StaffInvited publié');
+        assert(
+          published.some((event) => event.type === 'StaffInvited'),
+          'StaffInvited publié',
+        );
 
-        const crossAccept = await api(base, 'POST', `/api/v1/tenants/${BAOBAB}/staff/invitations/${token}/accept`, {});
+        const crossAccept = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${BAOBAB}/staff/invitations/${token}/accept`,
+          {},
+        );
         assertStatus(crossAccept, 404, 'Invitation inaccessible depuis un autre tenant');
 
-        const accepted = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/invitations/${token}/accept`, {
-          pin: '8642',
-        });
+        const accepted = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${SAHEL}/staff/invitations/${token}/accept`,
+          {
+            pin: '8642',
+          },
+        );
         assertStatus(accepted, 200, 'Invitation acceptée');
         assertEqual(accepted.body.employee.status, 'actif', 'Employé activé');
-        assert(published.some((event) => event.type === 'StaffActivated'), 'StaffActivated publié');
+        assert(
+          published.some((event) => event.type === 'StaffActivated'),
+          'StaffActivated publié',
+        );
 
-        const reused = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/invitations/${token}/accept`, {});
+        const reused = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${SAHEL}/staff/invitations/${token}/accept`,
+          {},
+        );
         assertStatus(reused, 409, 'Invitation non réutilisable');
 
-        const resend = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/invitations/${token}/resend`, undefined, {
-          token: ownerSahel,
-        });
+        const resend = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${SAHEL}/staff/invitations/${token}/resend`,
+          undefined,
+          {
+            token: ownerSahel,
+          },
+        );
         assertStatus(resend, 409, 'Renvoi impossible après acceptation');
       },
     },
@@ -204,11 +264,21 @@ async function main() {
           base,
           'POST',
           `/api/v1/tenants/${SAHEL}/staff/shifts`,
-          { employeeId: 'emp_yawa', date, start: '08:00', end: '14:00', station: 'caisse', status: 'publie' },
+          {
+            employeeId: 'emp_yawa',
+            date,
+            start: '08:00',
+            end: '14:00',
+            station: 'caisse',
+            status: 'publie',
+          },
           { token: ownerSahel },
         );
         assertStatus(first, 201, 'Shift créé');
-        assert(published.some((event) => event.type === 'ShiftPublished'), 'ShiftPublished publié');
+        assert(
+          published.some((event) => event.type === 'ShiftPublished'),
+          'ShiftPublished publié',
+        );
         const overlap = await api(
           base,
           'POST',
@@ -252,7 +322,13 @@ async function main() {
           base,
           'POST',
           `/api/v1/tenants/${SAHEL}/staff/leaves`,
-          { employeeId: 'emp_kossi', type: 'sans_solde', from: '2026-12-01', to: '2026-12-03', reason: 'Voyage' },
+          {
+            employeeId: 'emp_kossi',
+            type: 'sans_solde',
+            from: '2026-12-01',
+            to: '2026-12-03',
+            reason: 'Voyage',
+          },
           { token: ownerSahel },
         );
         assertStatus(leave, 201, 'Congé demandé');
@@ -265,7 +341,10 @@ async function main() {
           { token: ownerSahel },
         );
         assertStatus(decide, 200, 'Congé approuvé');
-        assert(published.some((event) => event.type === 'LeaveDecided'), 'LeaveDecided publié');
+        assert(
+          published.some((event) => event.type === 'LeaveDecided'),
+          'LeaveDecided publié',
+        );
 
         const absence = await api(
           base,
@@ -288,14 +367,26 @@ async function main() {
     {
       name: 'Pointage : PIN, anti-double, QR, géofence et clôture',
       run: async () => {
-        const wrong = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, { pin: '0000' });
+        const wrong = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, {
+          pin: '0000',
+        });
         assertStatus(wrong, 422, 'PIN inconnu refusé');
         assertEqual(wrong.body.error.code, 'badge_invalid', 'Code badge_invalid');
 
-        const clockIn = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, { pin: '5678' });
+        const clockIn = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, {
+          pin: '5678',
+        });
         assertStatus(clockIn, 201, 'Pointage entrée PIN');
-        assert(published.some((event) => event.type === 'AttendanceClocked'), 'AttendanceClocked publié');
-        const duplicate = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, { pin: '5678' });
+        assert(
+          published.some((event) => event.type === 'AttendanceClocked'),
+          'AttendanceClocked publié',
+        );
+        const duplicate = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${SAHEL}/staff/attendance/clock`,
+          { pin: '5678' },
+        );
         assertStatus(duplicate, 409, 'Double pointage refusé');
 
         const settings = await api(
@@ -306,7 +397,9 @@ async function main() {
           { token: ownerSahel },
         );
         assertStatus(settings, 200, 'Géofence configurée');
-        const noGeo = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, { pin: '2345' });
+        const noGeo = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, {
+          pin: '2345',
+        });
         assertStatus(noGeo, 422, 'Géolocalisation requise');
         assertEqual(noGeo.body.error.code, 'geolocation_required', 'Code geolocation_required');
         const outside = await api(base, 'POST', `/api/v1/tenants/${SAHEL}/staff/attendance/clock`, {
@@ -351,29 +444,46 @@ async function main() {
     {
       name: 'Performances : OrderPaid et pourboires attribués une seule fois',
       run: async () => {
-        const before = await api(base, 'GET', `/api/v1/tenants/${SAHEL}/staff/performance`, undefined, {
-          token: ownerSahel,
-        });
+        const before = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${SAHEL}/staff/performance`,
+          undefined,
+          {
+            token: ownerSahel,
+          },
+        );
         assertStatus(before, 200, 'Performances');
-        const akouviBefore = before.body.items.find((item: { employeeId: string }) => item.employeeId === 'emp_akouvi');
+        const akouviBefore = before.body.items.find(
+          (item: { employeeId: string }) => item.employeeId === 'emp_akouvi',
+        );
         handleStaffEvent(store, SAHEL, {
           type: 'OrderPaid',
-          payload: { tenantId: SAHEL, orderId: 'ord_test_1', waiterId: 'emp_akouvi', totalXof: 14500, tableCode: 'T12' },
+          payload: {
+            tenantId: SAHEL,
+            orderId: 'ord_test_1',
+            waiterId: 'emp_akouvi',
+            totalXof: 14500,
+            tableCode: 'T12',
+          },
         });
         handleStaffEvent(store, SAHEL, {
           type: 'OrderPaid',
-          payload: { tenantId: SAHEL, orderId: 'ord_test_1', waiterId: 'emp_akouvi', totalXof: 14500, tableCode: 'T12' },
+          payload: {
+            tenantId: SAHEL,
+            orderId: 'ord_test_1',
+            waiterId: 'emp_akouvi',
+            totalXof: 14500,
+            tableCode: 'T12',
+          },
         });
         handleStaffEvent(store, BAOBAB, {
           type: 'OrderPaid',
-          payload: { tenantId: BAOBAB, orderId: 'ord_test_2', waiterId: 'emp_akouvi', totalXof: 99000 },
-        });
-        handleStaffEvent(store, SAHEL, {
-          type: 'TipDistributed',
           payload: {
-            tenantId: SAHEL,
-            transactionId: 'tx_tip_1',
-            allocations: [{ staffId: 'emp_akouvi', amountXof: 1500 }],
+            tenantId: BAOBAB,
+            orderId: 'ord_test_2',
+            waiterId: 'emp_akouvi',
+            totalXof: 99000,
           },
         });
         handleStaffEvent(store, SAHEL, {
@@ -384,21 +494,52 @@ async function main() {
             allocations: [{ staffId: 'emp_akouvi', amountXof: 1500 }],
           },
         });
-        const after = await api(base, 'GET', `/api/v1/tenants/${SAHEL}/staff/performance`, undefined, {
-          token: ownerSahel,
+        handleStaffEvent(store, SAHEL, {
+          type: 'TipDistributed',
+          payload: {
+            tenantId: SAHEL,
+            transactionId: 'tx_tip_1',
+            allocations: [{ staffId: 'emp_akouvi', amountXof: 1500 }],
+          },
         });
-        const akouviAfter = after.body.items.find((item: { employeeId: string }) => item.employeeId === 'emp_akouvi');
-        assertEqual(akouviAfter.salesXof - akouviBefore.salesXof, 14500, 'Vente comptée une seule fois');
+        const after = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${SAHEL}/staff/performance`,
+          undefined,
+          {
+            token: ownerSahel,
+          },
+        );
+        const akouviAfter = after.body.items.find(
+          (item: { employeeId: string }) => item.employeeId === 'emp_akouvi',
+        );
+        assertEqual(
+          akouviAfter.salesXof - akouviBefore.salesXof,
+          14500,
+          'Vente comptée une seule fois',
+        );
         assertEqual(akouviAfter.orders - akouviBefore.orders, 1, 'Commande comptée une seule fois');
-        assertEqual(akouviAfter.tablesServed - akouviBefore.tablesServed, 1, 'Table servie comptée');
+        assertEqual(
+          akouviAfter.tablesServed - akouviBefore.tablesServed,
+          1,
+          'Table servie comptée',
+        );
         assertEqual(akouviAfter.tipsXof - akouviBefore.tipsXof, 1500, 'Pourboire idempotent');
       },
     },
     {
       name: 'Paie : entrées internes réservées au service et calcul des heures',
       run: async () => {
-        const forbidden = await api(base, 'GET', `/internal/tenants/${SAHEL}/staff/payroll-input?period=${todayString().slice(0, 7)}`);
-        assert(forbidden.status === 401 || forbidden.status === 403, 'Accès interne refusé sans clé');
+        const forbidden = await api(
+          base,
+          'GET',
+          `/internal/tenants/${SAHEL}/staff/payroll-input?period=${todayString().slice(0, 7)}`,
+        );
+        assert(
+          forbidden.status === 401 || forbidden.status === 403,
+          'Accès interne refusé sans clé',
+        );
         const internal = await api(
           base,
           'GET',
@@ -407,12 +548,16 @@ async function main() {
           { internalKey: INTERNAL_KEY },
         );
         assertStatus(internal, 200, 'Entrées de paie');
-        const akouvi = internal.body.employees.find((employee: { employeeId: string }) => employee.employeeId === 'emp_akouvi');
+        const akouvi = internal.body.employees.find(
+          (employee: { employeeId: string }) => employee.employeeId === 'emp_akouvi',
+        );
         assert(akouvi.daysPresent >= 10, 'Jours pointés');
         assert(akouvi.overtimeHours > 0, 'Heures supplémentaires détectées');
         assertEqual(akouvi.baseSalaryXof, 140000, 'Salaire de base');
         assert(
-          internal.body.employees.every((employee: { employeeId: string }) => employee.employeeId !== 'emp_ama'),
+          internal.body.employees.every(
+            (employee: { employeeId: string }) => employee.employeeId !== 'emp_ama',
+          ),
           'Aucun employé d’un autre tenant',
         );
       },

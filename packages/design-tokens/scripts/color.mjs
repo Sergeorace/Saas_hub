@@ -1,5 +1,6 @@
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
-const RGB = /^rgba?\(\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/i;
+const RGB =
+  /^rgba?\(\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/i;
 
 export function parseColor(input) {
   if (typeof input !== 'string') throw new Error(`Couleur invalide : ${String(input)}`);
@@ -7,7 +8,11 @@ export function parseColor(input) {
   const hex = value.match(HEX);
   if (hex) {
     let body = hex[1];
-    if (body.length === 3) body = body.split('').map((char) => char + char).join('');
+    if (body.length === 3)
+      body = body
+        .split('')
+        .map((char) => char + char)
+        .join('');
     const r = parseInt(body.slice(0, 2), 16);
     const g = parseInt(body.slice(2, 4), 16);
     const b = parseInt(body.slice(4, 6), 16);
@@ -16,7 +21,12 @@ export function parseColor(input) {
   }
   const rgb = value.match(RGB);
   if (rgb) {
-    const alpha = rgb[4] === undefined ? 1 : rgb[4].endsWith('%') ? Number(rgb[4].slice(0, -1)) / 100 : Number(rgb[4]);
+    const alpha =
+      rgb[4] === undefined
+        ? 1
+        : rgb[4].endsWith('%')
+          ? Number(rgb[4].slice(0, -1)) / 100
+          : Number(rgb[4]);
     return { r: Number(rgb[1]), g: Number(rgb[2]), b: Number(rgb[3]), a: alpha };
   }
   throw new Error(`Couleur non prise en charge : ${value}`);

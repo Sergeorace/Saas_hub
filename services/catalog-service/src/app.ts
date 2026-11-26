@@ -39,7 +39,11 @@ import { nowIso as isoNow } from '@resto-hub/service-kit';
 export interface CatalogAppOptions {
   store: CatalogStore;
   timeZone: string;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 const HTTPS_URL = /^https:\/\/[^\s]{4,500}$/i;
@@ -77,7 +81,9 @@ function isoDate(source: Record<string, unknown>, field: string): string {
   const raw = requireString(source, field, { max: 40 });
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une date ISO.`, { field });
+    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une date ISO.`, {
+      field,
+    });
   }
   return date.toISOString();
 }
@@ -91,12 +97,18 @@ function urls(source: Record<string, unknown>, field: string, max: number): stri
   const value = source[field];
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.length > max) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » accepte ${max} URL maximum.`, { field });
+    throw HttpError.unprocessable('validation_error', `« ${field} » accepte ${max} URL maximum.`, {
+      field,
+    });
   }
   return value.map((entry) => {
     const url = String(entry ?? '').trim();
     if (!HTTPS_URL.test(url)) {
-      throw HttpError.unprocessable('validation_error', `Chaque « ${field} » doit être une URL HTTPS.`, { field });
+      throw HttpError.unprocessable(
+        'validation_error',
+        `Chaque « ${field} » doit être une URL HTTPS.`,
+        { field },
+      );
     }
     return url;
   });
@@ -106,7 +118,9 @@ function allergens(source: Record<string, unknown>): Allergen[] {
   const value = source.allergens;
   if (value === undefined) return [];
   if (!Array.isArray(value)) {
-    throw HttpError.unprocessable('validation_error', '« allergens » doit être une liste.', { field: 'allergens' });
+    throw HttpError.unprocessable('validation_error', '« allergens » doit être une liste.', {
+      field: 'allergens',
+    });
   }
   return value.map((entry) => {
     if (typeof entry !== 'string' || !(ALLERGENS as readonly string[]).includes(entry)) {
@@ -122,16 +136,22 @@ function variants(source: Record<string, unknown>): ProductVariant[] {
   const value = source.variants;
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.length > 10) {
-    throw HttpError.unprocessable('validation_error', '« variants » accepte 10 variantes maximum.', {
-      field: 'variants',
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      '« variants » accepte 10 variantes maximum.',
+      {
+        field: 'variants',
+      },
+    );
   }
   const seen = new Set<string>();
   return value.map((entry) => {
     const item = asObject(entry);
     const name = requireString(item, 'name', { min: 1, max: 60 });
     if (seen.has(name.toLowerCase())) {
-      throw HttpError.unprocessable('validation_error', 'Variantes en double.', { field: 'variants' });
+      throw HttpError.unprocessable('validation_error', 'Variantes en double.', {
+        field: 'variants',
+      });
     }
     seen.add(name.toLowerCase());
     return {
@@ -146,20 +166,28 @@ function parseOptionGroups(source: Record<string, unknown>): ProductOptionGroup[
   const value = source.options;
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.length > 8) {
-    throw HttpError.unprocessable('validation_error', '« options » accepte 8 groupes maximum.', { field: 'options' });
+    throw HttpError.unprocessable('validation_error', '« options » accepte 8 groupes maximum.', {
+      field: 'options',
+    });
   }
   return value.map((entry) => {
     const group = asObject(entry);
     const choicesValue = group.choices;
     if (!Array.isArray(choicesValue) || choicesValue.length === 0 || choicesValue.length > 15) {
-      throw HttpError.unprocessable('validation_error', 'Chaque groupe doit contenir 1 à 15 choix.', {
-        field: 'options',
-      });
+      throw HttpError.unprocessable(
+        'validation_error',
+        'Chaque groupe doit contenir 1 à 15 choix.',
+        {
+          field: 'options',
+        },
+      );
     }
     const minSelect = optionalInt(group, 'minSelect', { min: 0, max: 15 }) ?? 0;
     const maxSelect = optionalInt(group, 'maxSelect', { min: 1, max: 15 }) ?? 1;
     if (minSelect > maxSelect || maxSelect > choicesValue.length) {
-      throw HttpError.unprocessable('validation_error', 'Sélections min/max incohérentes.', { field: 'options' });
+      throw HttpError.unprocessable('validation_error', 'Sélections min/max incohérentes.', {
+        field: 'options',
+      });
     }
     return {
       id: optionalString(group, 'id', { max: 64 }) ?? newCatalogId('opt'),
@@ -172,7 +200,8 @@ function parseOptionGroups(source: Record<string, unknown>): ProductOptionGroup[
         return {
           id: optionalString(item, 'id', { max: 64 }) ?? newCatalogId('cho'),
           name: requireString(item, 'name', { min: 1, max: 60 }),
-          priceDeltaXof: optionalInt(item, 'priceDeltaXof', { min: -5_000_000, max: 5_000_000 }) ?? 0,
+          priceDeltaXof:
+            optionalInt(item, 'priceDeltaXof', { min: -5_000_000, max: 5_000_000 }) ?? 0,
         };
       }),
     };
@@ -191,9 +220,13 @@ function priceRules(source: Record<string, unknown>): PriceRule[] {
     const rule = asObject(entry);
     const days = rule.days;
     if (!Array.isArray(days) || days.length === 0) {
-      throw HttpError.unprocessable('validation_error', 'Chaque plage doit préciser au moins un jour.', {
-        field: 'priceRules',
-      });
+      throw HttpError.unprocessable(
+        'validation_error',
+        'Chaque plage doit préciser au moins un jour.',
+        {
+          field: 'priceRules',
+        },
+      );
     }
     const normalized = days.map((day) => {
       if (typeof day !== 'string' || !(DAY_KEYS as readonly string[]).includes(day)) {
@@ -206,7 +239,9 @@ function priceRules(source: Record<string, unknown>): PriceRule[] {
     const start = requireString(rule, 'start', { max: 5 });
     const end = requireString(rule, 'end', { max: 5 });
     if (!HHMM.test(start) || !HHMM.test(end) || start === end) {
-      throw HttpError.unprocessable('validation_error', 'Horaires HH:MM invalides.', { field: 'priceRules' });
+      throw HttpError.unprocessable('validation_error', 'Horaires HH:MM invalides.', {
+        field: 'priceRules',
+      });
     }
     return {
       id: optionalString(rule, 'id', { max: 64 }) ?? newCatalogId('rule'),
@@ -221,7 +256,8 @@ function priceRules(source: Record<string, unknown>): PriceRule[] {
 
 function requireCategory(store: CatalogStore, tenantId: string, id: string): CatalogCategory {
   const category = store.categories.get(id);
-  if (!category || category.tenantId !== tenantId) throw HttpError.notFound('Catégorie introuvable.');
+  if (!category || category.tenantId !== tenantId)
+    throw HttpError.notFound('Catégorie introuvable.');
   return category;
 }
 
@@ -235,17 +271,24 @@ function requireProduct(store: CatalogStore, tenantId: string, id: string): Cata
 
 function requireMenu(store: CatalogStore, tenantId: string, id: string): ComposedMenu {
   const menu = store.menus.get(id);
-  if (!menu || menu.tenantId !== tenantId || menu.deletedAt) throw HttpError.notFound('Menu introuvable.');
+  if (!menu || menu.tenantId !== tenantId || menu.deletedAt)
+    throw HttpError.notFound('Menu introuvable.');
   return menu;
 }
 
 function requirePromotion(store: CatalogStore, tenantId: string, id: string): Promotion {
   const promotion = store.promotions.get(id);
-  if (!promotion || promotion.tenantId !== tenantId) throw HttpError.notFound('Promotion introuvable.');
+  if (!promotion || promotion.tenantId !== tenantId)
+    throw HttpError.notFound('Promotion introuvable.');
   return promotion;
 }
 
-function nameTaken(store: CatalogStore, tenantId: string, name: string, exceptId?: string): boolean {
+function nameTaken(
+  store: CatalogStore,
+  tenantId: string,
+  name: string,
+  exceptId?: string,
+): boolean {
   return [...store.categories.values()].some(
     (category) =>
       category.tenantId === tenantId &&
@@ -254,9 +297,15 @@ function nameTaken(store: CatalogStore, tenantId: string, name: string, exceptId
   );
 }
 
-function promoCodeTaken(store: CatalogStore, tenantId: string, code: string, exceptId?: string): boolean {
+function promoCodeTaken(
+  store: CatalogStore,
+  tenantId: string,
+  code: string,
+  exceptId?: string,
+): boolean {
   return [...store.promotions.values()].some(
-    (promotion) => promotion.tenantId === tenantId && promotion.id !== exceptId && promotion.code === code,
+    (promotion) =>
+      promotion.tenantId === tenantId && promotion.id !== exceptId && promotion.code === code,
   );
 }
 
@@ -272,7 +321,15 @@ function viewProduct(store: CatalogStore, product: CatalogProduct, at: Date, tim
     station: product.station,
     basePriceXof: product.basePriceXof,
     effectivePriceXof: effectivePrice(product, at, timeZone),
-    activePriceRule: rule ? { id: rule.id, label: rule.label, start: rule.start, end: rule.end, priceXof: rule.priceXof } : null,
+    activePriceRule: rule
+      ? {
+          id: rule.id,
+          label: rule.label,
+          start: rule.start,
+          end: rule.end,
+          priceXof: rule.priceXof,
+        }
+      : null,
     variants: product.variants,
     options: product.options,
     priceRules: product.priceRules,
@@ -300,7 +357,10 @@ function publicProduct(product: CatalogProduct, at: Date, timeZone: string) {
   };
 }
 
-function tenantOf(ctx: RequestContext, permission: string): { tenantId: string; claims: AuthClaims } {
+function tenantOf(
+  ctx: RequestContext,
+  permission: string,
+): { tenantId: string; claims: AuthClaims } {
   const tenantId = ctx.params.tenantId ?? '';
   const claims = requireTenantPermission(ctx.auth, tenantId, permission);
   return { tenantId, claims };
@@ -352,11 +412,16 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
               .sort((a, b) => a.name.localeCompare(b.name)),
             menus: [...store.menus.values()]
               .filter((menu) => menu.tenantId === tenantId && !menu.deletedAt)
-              .map((menu) => ({ ...menu, items: menu.items.map((item) => ({
-                ...item,
-                name: store.products.get(item.productId)?.name ?? 'Produit supprimé',
-              })) })),
-            promotions: [...store.promotions.values()].filter((promotion) => promotion.tenantId === tenantId),
+              .map((menu) => ({
+                ...menu,
+                items: menu.items.map((item) => ({
+                  ...item,
+                  name: store.products.get(item.productId)?.name ?? 'Produit supprimé',
+                })),
+              })),
+            promotions: [...store.promotions.values()].filter(
+              (promotion) => promotion.tenantId === tenantId,
+            ),
           },
         };
       },
@@ -383,7 +448,12 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const now = isoNow();
         const position =
           optionalInt(body, 'position', { min: 0, max: 999 }) ??
-          Math.max(0, ...[...store.categories.values()].filter((c) => c.tenantId === tenantId).map((c) => c.position)) + 1;
+          Math.max(
+            0,
+            ...[...store.categories.values()]
+              .filter((c) => c.tenantId === tenantId)
+              .map((c) => c.position),
+          ) + 1;
         const category: CatalogCategory = {
           id: newCatalogId('cat'),
           tenantId,
@@ -431,12 +501,19 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'catalog:manage');
         const category = requireCategory(store, tenantId, ctx.params.id);
         const used = [...store.products.values()].filter(
-          (product) => product.tenantId === tenantId && !product.deletedAt && product.categoryId === category.id,
+          (product) =>
+            product.tenantId === tenantId &&
+            !product.deletedAt &&
+            product.categoryId === category.id,
         );
         if (used.length > 0) {
-          throw HttpError.conflict('category_not_empty', 'Déplacez ou archivez d’abord les produits de cette catégorie.', {
-            products: used.length,
-          });
+          throw HttpError.conflict(
+            'category_not_empty',
+            'Déplacez ou archivez d’abord les produits de cette catégorie.',
+            {
+              products: used.length,
+            },
+          );
         }
         store.categories.delete(category.id);
         store.recordAudit({
@@ -469,7 +546,8 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
           description: optionalString(body, 'description', { max: 500 }),
           photos: urls(body, 'photos', 6),
           allergens: allergens(body),
-          station: body.station === undefined ? 'cuisine' : requireEnum(body, 'station', PRODUCT_STATIONS),
+          station:
+            body.station === undefined ? 'cuisine' : requireEnum(body, 'station', PRODUCT_STATIONS),
           basePriceXof: requireInt(body, 'basePriceXof', { min: 0 }),
           variants: variants(body),
           options: parseOptionGroups(body),
@@ -496,7 +574,10 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
           name,
           priceXof: product.basePriceXof,
         });
-        return { status: 201, body: { product: viewProduct(store, product, new Date(), timeZone) } };
+        return {
+          status: 201,
+          body: { product: viewProduct(store, product, new Date(), timeZone) },
+        };
       },
     },
     {
@@ -508,7 +589,9 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const body = asObject(ctx.body);
         const before = {
           basePriceXof: product.basePriceXof,
-          variants: product.variants.map((variant) => `${variant.id}:${variant.priceXof}`).join(','),
+          variants: product.variants
+            .map((variant) => `${variant.id}:${variant.priceXof}`)
+            .join(','),
           priceRules: product.priceRules.map((rule) => `${rule.id}:${rule.priceXof}`).join(','),
         };
         if (body.categoryId !== undefined) {
@@ -516,7 +599,8 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
           requireCategory(store, tenantId, categoryId);
           product.categoryId = categoryId;
         }
-        if (body.name !== undefined) product.name = requireString(body, 'name', { min: 2, max: 80 });
+        if (body.name !== undefined)
+          product.name = requireString(body, 'name', { min: 2, max: 80 });
         if (body.description !== undefined) {
           product.description = optionalString(body, 'description', { max: 500 });
         }
@@ -534,8 +618,10 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         product.updatedAt = isoNow();
         const priceChanged =
           before.basePriceXof !== product.basePriceXof ||
-          before.variants !== product.variants.map((variant) => `${variant.id}:${variant.priceXof}`).join(',') ||
-          before.priceRules !== product.priceRules.map((rule) => `${rule.id}:${rule.priceXof}`).join(',');
+          before.variants !==
+            product.variants.map((variant) => `${variant.id}:${variant.priceXof}`).join(',') ||
+          before.priceRules !==
+            product.priceRules.map((rule) => `${rule.id}:${rule.priceXof}`).join(',');
         if (priceChanged) {
           store.recordAudit({
             tenantId,
@@ -547,8 +633,12 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
               before,
               after: {
                 basePriceXof: product.basePriceXof,
-                variants: product.variants.map((variant) => `${variant.id}:${variant.priceXof}`).join(','),
-                priceRules: product.priceRules.map((rule) => `${rule.id}:${rule.priceXof}`).join(','),
+                variants: product.variants
+                  .map((variant) => `${variant.id}:${variant.priceXof}`)
+                  .join(','),
+                priceRules: product.priceRules
+                  .map((rule) => `${rule.id}:${rule.priceXof}`)
+                  .join(','),
               },
             },
           });
@@ -569,7 +659,11 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const claims = ctx.auth;
         if (!claims) throw HttpError.unauthorized();
         if (!canAny(claims, tenantId, ['catalog:availability', 'catalog:manage'])) {
-          throw new HttpError(403, 'tenant_scope_denied', "Vous n'avez pas accès à cet établissement.");
+          throw new HttpError(
+            403,
+            'tenant_scope_denied',
+            "Vous n'avez pas accès à cet établissement.",
+          );
         }
         const product = requireProduct(store, tenantId, ctx.params.id);
         const body = asObject(ctx.body);
@@ -642,7 +736,10 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
           updatedAt: now,
         };
         store.menus.set(menu.id, menu);
-        await notify(tenantId, 'menu', menu.id, 'created', { name: menu.name, priceXof: menu.priceXof });
+        await notify(tenantId, 'menu', menu.id, 'created', {
+          name: menu.name,
+          priceXof: menu.priceXof,
+        });
         return { status: 201, body: { menu } };
       },
     },
@@ -654,13 +751,17 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const menu = requireMenu(store, tenantId, ctx.params.id);
         const body = asObject(ctx.body);
         if (body.name !== undefined) menu.name = requireString(body, 'name', { min: 2, max: 80 });
-        if (body.description !== undefined) menu.description = optionalString(body, 'description', { max: 400 });
+        if (body.description !== undefined)
+          menu.description = optionalString(body, 'description', { max: 400 });
         const price = optionalInt(body, 'priceXof', { min: 1 });
         if (price !== undefined) menu.priceXof = price;
         if (body.items !== undefined) menu.items = parseMenuItems(store, tenantId, body);
         if (body.active !== undefined) menu.active = body.active === true;
         menu.updatedAt = isoNow();
-        await notify(tenantId, 'menu', menu.id, 'updated', { name: menu.name, priceXof: menu.priceXof });
+        await notify(tenantId, 'menu', menu.id, 'updated', {
+          name: menu.name,
+          priceXof: menu.priceXof,
+        });
         return { body: { menu } };
       },
     },
@@ -699,13 +800,18 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const { tenantId } = tenantOf(ctx, 'catalog:manage');
         const promotion = requirePromotion(store, tenantId, ctx.params.id);
         const body = asObject(ctx.body);
-        if (body.name !== undefined) promotion.name = requireString(body, 'name', { min: 2, max: 80 });
+        if (body.name !== undefined)
+          promotion.name = requireString(body, 'name', { min: 2, max: 80 });
         if (body.code !== undefined) {
           const code = optionalString(body, 'code', { max: 20 })?.toUpperCase();
           if (code && !PROMO_CODE.test(code)) {
-            throw HttpError.unprocessable('validation_error', 'Code promotionnel : 4 à 20 caractères A-Z/0-9.', {
-              field: 'code',
-            });
+            throw HttpError.unprocessable(
+              'validation_error',
+              'Code promotionnel : 4 à 20 caractères A-Z/0-9.',
+              {
+                field: 'code',
+              },
+            );
           }
           if (code && promoCodeTaken(store, tenantId, code, promotion.id)) {
             throw HttpError.conflict('promo_code_conflict', 'Ce code promotionnel existe déjà.');
@@ -715,12 +821,15 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         if (body.type !== undefined) promotion.type = parsePromotionType(body);
         if (body.value !== undefined) promotion.value = parsePromotionValue(body);
         if (body.scope !== undefined) promotion.scope = parsePromotionScope(body);
-        if (body.targetId !== undefined) promotion.targetId = optionalString(body, 'targetId', { max: 64 });
+        if (body.targetId !== undefined)
+          promotion.targetId = optionalString(body, 'targetId', { max: 64 });
         validatePromotionTarget(store, tenantId, promotion.scope, promotion.targetId);
         if (body.startsAt !== undefined) promotion.startsAt = isoDate(body, 'startsAt');
         if (body.endsAt !== undefined) promotion.endsAt = isoDate(body, 'endsAt');
         if (promotion.startsAt >= promotion.endsAt) {
-          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', { field: 'endsAt' });
+          throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', {
+            field: 'endsAt',
+          });
         }
         if (body.active !== undefined) promotion.active = body.active === true;
         promotion.updatedAt = isoNow();
@@ -813,7 +922,9 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const at = new Date();
         const products = [...store.products.values()]
-          .filter((product) => product.tenantId === tenantId && !product.deletedAt && product.active)
+          .filter(
+            (product) => product.tenantId === tenantId && !product.deletedAt && product.active,
+          )
           .map((product) => ({
             id: product.id,
             name: product.name,
@@ -840,11 +951,15 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
         return {
           body: {
             tenantId,
-            categories: [...store.categories.values()].filter((category) => category.tenantId === tenantId).length,
+            categories: [...store.categories.values()].filter(
+              (category) => category.tenantId === tenantId,
+            ).length,
             products: products.length,
             active: products.filter((product) => product.active).length,
             unavailable: products.filter((product) => !product.availability.available).length,
-            menus: [...store.menus.values()].filter((menu) => menu.tenantId === tenantId && !menu.deletedAt).length,
+            menus: [...store.menus.values()].filter(
+              (menu) => menu.tenantId === tenantId && !menu.deletedAt,
+            ).length,
             promotions: [...store.promotions.values()].filter(
               (promotion) => promotion.tenantId === tenantId && promotion.active,
             ).length,
@@ -869,7 +984,9 @@ function parseMenuItems(store: CatalogStore, tenantId: string, body: Record<stri
     const quantity = optionalInt(item, 'quantity', { min: 1, max: 20 }) ?? 1;
     const variantId = optionalString(item, 'variantId', { max: 64 });
     if (variantId && !product.variants.some((variant) => variant.id === variantId)) {
-      throw HttpError.unprocessable('validation_error', 'Variante inconnue pour ce produit.', { field: 'items' });
+      throw HttpError.unprocessable('validation_error', 'Variante inconnue pour ce produit.', {
+        field: 'items',
+      });
     }
     return { productId, quantity, ...(variantId ? { variantId } : {}) };
   });
@@ -877,16 +994,22 @@ function parseMenuItems(store: CatalogStore, tenantId: string, body: Record<stri
 
 function parsePromotionType(body: Record<string, unknown>): PromotionType {
   if (body.type !== 'percent' && body.type !== 'amount') {
-    throw HttpError.unprocessable('validation_error', '« type » doit être percent ou amount.', { field: 'type' });
+    throw HttpError.unprocessable('validation_error', '« type » doit être percent ou amount.', {
+      field: 'type',
+    });
   }
   return body.type;
 }
 
 function parsePromotionScope(body: Record<string, unknown>): PromotionScope {
   if (body.scope !== 'all' && body.scope !== 'category' && body.scope !== 'product') {
-    throw HttpError.unprocessable('validation_error', '« scope » doit être all, category ou product.', {
-      field: 'scope',
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      '« scope » doit être all, category ou product.',
+      {
+        field: 'scope',
+      },
+    );
   }
   return body.scope;
 }
@@ -894,9 +1017,13 @@ function parsePromotionScope(body: Record<string, unknown>): PromotionScope {
 function parsePromotionValue(body: Record<string, unknown>): number {
   const value = requireInt(body, 'value', { min: 1, max: 1_000_000 });
   if (body.type === 'percent' && value > 100) {
-    throw HttpError.unprocessable('validation_error', 'Une remise en pourcentage ne dépasse pas 100.', {
-      field: 'value',
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Une remise en pourcentage ne dépasse pas 100.',
+      {
+        field: 'value',
+      },
+    );
   }
   return value;
 }
@@ -909,21 +1036,33 @@ function validatePromotionTarget(
 ) {
   if (scope === 'all') return;
   if (!targetId) {
-    throw HttpError.unprocessable('validation_error', '« targetId » est requis pour ce périmètre.', {
-      field: 'targetId',
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      '« targetId » est requis pour ce périmètre.',
+      {
+        field: 'targetId',
+      },
+    );
   }
   if (scope === 'category') requireCategory(store, tenantId, targetId);
   else requireProduct(store, tenantId, targetId);
 }
 
-function buildPromotion(store: CatalogStore, tenantId: string, body: Record<string, unknown>): Promotion {
+function buildPromotion(
+  store: CatalogStore,
+  tenantId: string,
+  body: Record<string, unknown>,
+): Promotion {
   const name = requireString(body, 'name', { min: 2, max: 80 });
   const code = optionalString(body, 'code', { max: 20 })?.toUpperCase();
   if (code && !PROMO_CODE.test(code)) {
-    throw HttpError.unprocessable('validation_error', 'Code promotionnel : 4 à 20 caractères A-Z/0-9.', {
-      field: 'code',
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Code promotionnel : 4 à 20 caractères A-Z/0-9.',
+      {
+        field: 'code',
+      },
+    );
   }
   if (code && promoCodeTaken(store, tenantId, code)) {
     throw HttpError.conflict('promo_code_conflict', 'Ce code promotionnel existe déjà.');
@@ -935,7 +1074,9 @@ function buildPromotion(store: CatalogStore, tenantId: string, body: Record<stri
   const startsAt = isoDate(body, 'startsAt');
   const endsAt = isoDate(body, 'endsAt');
   if (startsAt >= endsAt) {
-    throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', { field: 'endsAt' });
+    throw HttpError.unprocessable('validation_error', 'La fin doit suivre le début.', {
+      field: 'endsAt',
+    });
   }
   return {
     id: newCatalogId('promo'),

@@ -1,6 +1,20 @@
 import { useMemo, useState } from 'react';
-import { Icon, Skeleton, formatDate, formatNumber, formatXof, useI18n, useToast } from '@resto-hub/design-system';
-import { ApiError, accountApi, publicApi, type LoyaltyAccount, type LoyaltyProgram } from '../lib/api';
+import {
+  Icon,
+  Skeleton,
+  formatDate,
+  formatNumber,
+  formatXof,
+  useI18n,
+  useToast,
+} from '@resto-hub/design-system';
+import {
+  ApiError,
+  accountApi,
+  publicApi,
+  type LoyaltyAccount,
+  type LoyaltyProgram,
+} from '../lib/api';
 import { useEstablishment } from '../lib/hooks';
 import { useTenantTheme } from '../lib/tenantTheme';
 import { useSession } from '../lib/session';
@@ -14,13 +28,20 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
   const toast = useToast();
   const { data, loading } = useEstablishment(slug);
   const establishment = data?.establishment;
-  useTenantTheme(establishment ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor } : null);
+  useTenantTheme(
+    establishment
+      ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor }
+      : null,
+  );
   const { user } = useSession();
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
 
   const program = useAsync<{ tenantId: string; program: LoyaltyProgram }>(
-    () => (establishment ? publicApi.loyaltyProgram(establishment.id) : Promise.reject(new Error('tenant'))),
+    () =>
+      establishment
+        ? publicApi.loyaltyProgram(establishment.id)
+        : Promise.reject(new Error('tenant')),
     [establishment?.id],
   );
   const account = useAsync<{ account: LoyaltyAccount; program: LoyaltyProgram } | null>(
@@ -29,7 +50,14 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
   );
 
   const paidOrders = useMemo(
-    () => (establishment ? listOrders().filter((order) => order.tenantId === establishment.id && order.paymentStatus === 'payee').slice(0, 6) : []),
+    () =>
+      establishment
+        ? listOrders()
+            .filter(
+              (order) => order.tenantId === establishment.id && order.paymentStatus === 'payee',
+            )
+            .slice(0, 6)
+        : [],
     [establishment?.id],
   );
 
@@ -73,7 +101,12 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
     } catch (caught) {
       const code = caught instanceof ApiError ? caught.code : '';
       toast.push({
-        title: code === 'order_not_paid' ? t('loyalty.orderNotPaid') : code === 'order_not_found' ? t('loyalty.orderNotFound') : t('common.error'),
+        title:
+          code === 'order_not_paid'
+            ? t('loyalty.orderNotPaid')
+            : code === 'order_not_found'
+              ? t('loyalty.orderNotFound')
+              : t('common.error'),
         tone: 'warning',
       });
     } finally {
@@ -86,11 +119,18 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
     setBusy(rewardId);
     try {
       const result = await accountApi.redeem(establishment.id, rewardId);
-      toast.push({ title: t('loyalty.redeemed', { label }), description: t('loyalty.pointsShort', { points: result.account.points }), tone: 'success' });
+      toast.push({
+        title: t('loyalty.redeemed', { label }),
+        description: t('loyalty.pointsShort', { points: result.account.points }),
+        tone: 'success',
+      });
       account.reload();
     } catch (caught) {
       const code = caught instanceof ApiError ? caught.code : '';
-      toast.push({ title: code === 'insufficient_points' ? t('loyalty.insufficient') : t('common.error'), tone: 'warning' });
+      toast.push({
+        title: code === 'insufficient_points' ? t('loyalty.insufficient') : t('common.error'),
+        tone: 'warning',
+      });
     } finally {
       setBusy(null);
     }
@@ -98,7 +138,12 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
 
   return (
     <div className="rh-client-screen">
-      <ClientHeader title={t('loyalty.title')} subtitle={establishment.brandName} back={`/e/${establishment.slug}`} logo={establishment.logoUrl} />
+      <ClientHeader
+        title={t('loyalty.title')}
+        subtitle={establishment.brandName}
+        back={`/e/${establishment.slug}`}
+        logo={establishment.logoUrl}
+      />
       <main className="rh-client-page rh-client-page--flush">
         <section className="rh-loyalty-hero">
           <span className="rh-loyalty-hero__brand">
@@ -111,8 +156,14 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
                 <span>{t('loyalty.points')}</span>
               </div>
               <div className="rh-loyalty-hero__tier">
-                <span className="rh-client-pill rh-client-pill--info">{t('account.tier', { tier: current.tier.label })}</span>
-                <span>{t('loyalty.multiplier', { value: formatNumber(current.tier.multiplier, locale) })}</span>
+                <span className="rh-client-pill rh-client-pill--info">
+                  {t('account.tier', { tier: current.tier.label })}
+                </span>
+                <span>
+                  {t('loyalty.multiplier', {
+                    value: formatNumber(current.tier.multiplier, locale),
+                  })}
+                </span>
               </div>
               <div className="rh-loyalty-progress">
                 <div className="rh-loyalty-progress__bar">
@@ -124,14 +175,25 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
                     }}
                   />
                 </div>
-                <p>{current.nextTier ? t('loyalty.nextTier', { points: current.nextTier.pointsNeeded, tier: current.nextTier.label }) : t('loyalty.maxTier')}</p>
+                <p>
+                  {current.nextTier
+                    ? t('loyalty.nextTier', {
+                        points: current.nextTier.pointsNeeded,
+                        tier: current.nextTier.label,
+                      })
+                    : t('loyalty.maxTier')}
+                </p>
               </div>
             </>
           ) : (
             <div className="rh-loyalty-hero__guest">
               <strong>{t('loyalty.empty')}</strong>
               <p>{t('loyalty.signIn')}</p>
-              <button type="button" className="rh-client-btn rh-client-btn--primary" onClick={() => navigate('/compte')}>
+              <button
+                type="button"
+                className="rh-client-btn rh-client-btn--primary"
+                onClick={() => navigate('/compte')}
+              >
                 <Icon name="smartphone" size="sm" /> {t('common.login')}
               </button>
             </div>
@@ -142,14 +204,19 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
           <section className="rh-client-card">
             <h2>{t('loyalty.program')}</h2>
             <p className="rh-client-hint">
-              <Icon name="zap" size="sm" /> {t('loyalty.perXof', { points: 1, amount: formatXof(rules.pointsPerXof, locale) })}
+              <Icon name="zap" size="sm" />{' '}
+              {t('loyalty.perXof', { points: 1, amount: formatXof(rules.pointsPerXof, locale) })}
             </p>
             <div className="rh-loyalty-tiers">
               {rules.tiers.map((tier) => (
-                <div key={tier.code} className={`rh-loyalty-tier${current?.tier.code === tier.code ? ' is-current' : ''}`}>
+                <div
+                  key={tier.code}
+                  className={`rh-loyalty-tier${current?.tier.code === tier.code ? ' is-current' : ''}`}
+                >
                   <strong>{tier.label}</strong>
                   <span>
-                    {formatNumber(tier.minLifetimePoints)} pts · × {formatNumber(tier.multiplier, locale)}
+                    {formatNumber(tier.minLifetimePoints)} pts · ×{' '}
+                    {formatNumber(tier.multiplier, locale)}
                   </span>
                 </div>
               ))}
@@ -224,7 +291,9 @@ export default function LoyaltyPage({ slug }: { slug: string }) {
               <ul className="rh-loyalty-history">
                 {[...current.history].reverse().map((entry) => (
                   <li key={entry.id}>
-                    <span className={`rh-loyalty-history__badge rh-loyalty-history__badge--${entry.type}`}>
+                    <span
+                      className={`rh-loyalty-history__badge rh-loyalty-history__badge--${entry.type}`}
+                    >
                       <Icon name={entry.type === 'redeem' ? 'gift' : 'sparkles'} size="sm" />
                     </span>
                     <div>

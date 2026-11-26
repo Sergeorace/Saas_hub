@@ -1,10 +1,4 @@
-import {
-  Icon,
-  TABLE_STATUS_META,
-  TABLE_STATUS_ORDER,
-  cx,
-  useI18n,
-} from '@resto-hub/design-system';
+import { Icon, TABLE_STATUS_META, TABLE_STATUS_ORDER, cx, useI18n } from '@resto-hub/design-system';
 import type { TableInfo } from '../data/types';
 
 export function FloorPreview({

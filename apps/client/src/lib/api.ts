@@ -213,7 +213,12 @@ export interface PhoneChallenge {
 
 export interface MeResult {
   user: ClientUser;
-  claims: { platformRoles: string[]; platformPermissions: string[]; tenantPermissions: Record<string, string[]>; mfa: boolean };
+  claims: {
+    platformRoles: string[];
+    platformPermissions: string[];
+    tenantPermissions: Record<string, string[]>;
+    mfa: boolean;
+  };
   mfaPolicyRequired: boolean;
 }
 
@@ -315,8 +320,20 @@ export interface LoyaltyAccount {
 }
 
 export type Allergen =
-  | 'gluten' | 'crustaces' | 'oeufs' | 'poisson' | 'arachides' | 'soja' | 'lait'
-  | 'fruits_a_coque' | 'celeri' | 'moutarde' | 'sesame' | 'sulfites' | 'lupin' | 'mollusques';
+  | 'gluten'
+  | 'crustaces'
+  | 'oeufs'
+  | 'poisson'
+  | 'arachides'
+  | 'soja'
+  | 'lait'
+  | 'fruits_a_coque'
+  | 'celeri'
+  | 'moutarde'
+  | 'sesame'
+  | 'sulfites'
+  | 'lupin'
+  | 'mollusques';
 
 export interface ProductVariant {
   id: string;
@@ -367,7 +384,13 @@ export interface PublicMenuPayload {
   generatedAt: string;
   categories: Array<{ id: string; name: string; products: PublicMenuProduct[] }>;
   menus: ComposedMenu[];
-  promotions: Array<{ id: string; name: string; code?: string; type: 'percent' | 'amount'; value: number }>;
+  promotions: Array<{
+    id: string;
+    name: string;
+    code?: string;
+    type: 'percent' | 'amount';
+    value: number;
+  }>;
 }
 
 export type ReservationStatus = 'confirmee' | 'installee' | 'annulee' | 'no_show';
@@ -484,7 +507,9 @@ export const publicApi = {
       { token: null },
     ),
   menu: (tenantId: string) =>
-    catalog<PublicMenuPayload>('GET', `/api/v1/public/tenants/${tenantId}/menu`, undefined, { token: null }),
+    catalog<PublicMenuPayload>('GET', `/api/v1/public/tenants/${tenantId}/menu`, undefined, {
+      token: null,
+    }),
   reviews: (tenantId: string, limit = 20) =>
     loyalty<{ tenantId: string; aggregate: ReviewAggregate; items: Review[]; generatedAt: string }>(
       'GET',
@@ -500,9 +525,14 @@ export const publicApi = {
       { token: null },
     ),
   table: (tenantId: string, code: string) =>
-    floor<PublicTable>('GET', `/api/v1/public/tenants/${tenantId}/tables/${encodeURIComponent(code)}`, undefined, {
-      token: null,
-    }),
+    floor<PublicTable>(
+      'GET',
+      `/api/v1/public/tenants/${tenantId}/tables/${encodeURIComponent(code)}`,
+      undefined,
+      {
+        token: null,
+      },
+    ),
   reservationAvailability: (tenantId: string, date: string, partySize: number) =>
     floor<ReservationAvailability>(
       'GET',
@@ -512,7 +542,15 @@ export const publicApi = {
     ),
   createReservation: (
     tenantId: string,
-    input: { date: string; time: string; partySize: number; customerName: string; customerPhone: string; note?: string; tableId?: string },
+    input: {
+      date: string;
+      time: string;
+      partySize: number;
+      customerName: string;
+      customerPhone: string;
+      note?: string;
+      tableId?: string;
+    },
   ) =>
     floor<{ reservation: Reservation; publicToken: string; trackUrl: string }>(
       'POST',
@@ -551,21 +589,31 @@ export const publicApi = {
 };
 
 export const authApi = {
-  phoneStart: (phone: string) => identity<PhoneChallenge>('POST', '/api/v1/auth/phone/start', { phone }),
+  phoneStart: (phone: string) =>
+    identity<PhoneChallenge>('POST', '/api/v1/auth/phone/start', { phone }),
   phoneVerify: (challengeId: string, code: string, name?: string) =>
     identity<TokenBundle>('POST', '/api/v1/auth/phone/verify', { challengeId, code, name }),
   me: () => identity<MeResult>('GET', '/api/v1/auth/me'),
-  logout: (refreshToken: string) => identity<{ ok: true }>('POST', '/api/v1/auth/logout', { refreshToken }),
+  logout: (refreshToken: string) =>
+    identity<{ ok: true }>('POST', '/api/v1/auth/logout', { refreshToken }),
 };
 
 export const accountApi = {
-  favorites: () => loyalty<{ items: Array<{ tenantId: string; addedAt: string }> }>('GET', '/api/v1/me/favorites'),
+  favorites: () =>
+    loyalty<{ items: Array<{ tenantId: string; addedAt: string }> }>('GET', '/api/v1/me/favorites'),
   addFavorite: (tenantId: string) =>
-    loyalty<{ favorite: { tenantId: string; addedAt: string }; alreadySaved: boolean }>('POST', '/api/v1/me/favorites', {
-      tenantId,
-    }),
+    loyalty<{ favorite: { tenantId: string; addedAt: string }; alreadySaved: boolean }>(
+      'POST',
+      '/api/v1/me/favorites',
+      {
+        tenantId,
+      },
+    ),
   removeFavorite: (tenantId: string) =>
-    loyalty<{ removed: boolean; tenantId: string }>('DELETE', `/api/v1/me/favorites/${encodeURIComponent(tenantId)}`),
+    loyalty<{ removed: boolean; tenantId: string }>(
+      'DELETE',
+      `/api/v1/me/favorites/${encodeURIComponent(tenantId)}`,
+    ),
   myReviews: (tenantId?: string) =>
     loyalty<{ items: Review[] }>(
       'GET',
@@ -578,7 +626,8 @@ export const accountApi = {
       'GET',
       `/api/v1/me/loyalty?tenantId=${encodeURIComponent(tenantId)}`,
     ),
-  myLoyalty: () => loyalty<{ items: LoyaltyAccount[]; program: LoyaltyProgram }>('GET', '/api/v1/me/loyalty'),
+  myLoyalty: () =>
+    loyalty<{ items: LoyaltyAccount[]; program: LoyaltyProgram }>('GET', '/api/v1/me/loyalty'),
   claim: (tenantId: string, orderId: string) =>
     loyalty<{ alreadyCredited?: boolean; account: LoyaltyAccount; entry: LoyaltyHistoryEntry }>(
       'POST',
@@ -586,10 +635,14 @@ export const accountApi = {
       { tenantId, orderId },
     ),
   redeem: (tenantId: string, rewardId: string) =>
-    loyalty<{ account: LoyaltyAccount; entry: LoyaltyHistoryEntry }>('POST', '/api/v1/me/loyalty/redeem', {
-      tenantId,
-      rewardId,
-    }),
+    loyalty<{ account: LoyaltyAccount; entry: LoyaltyHistoryEntry }>(
+      'POST',
+      '/api/v1/me/loyalty/redeem',
+      {
+        tenantId,
+        rewardId,
+      },
+    ),
 };
 
 export function errorMessage(error: unknown): string {

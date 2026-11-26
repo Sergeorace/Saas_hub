@@ -28,16 +28,25 @@ import { type HealthCheckResult } from './supervision.js';
 
 export interface PlatformAdminAppOptions {
   store: PlatformAdminStore;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown> | void;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown> | void;
   checkServices?: () => Promise<HealthCheckResult[]>;
 }
 
 function ensurePlatform(claims: AuthClaims | undefined, permissions: string[]): AuthClaims {
   if (!claims) throw HttpError.unauthorized();
   if (!permissions.some((permission) => claims.platformPermissions.includes(permission))) {
-    throw new HttpError(403, 'platform_scope_denied', 'Permission plateforme requise pour cette opération.', {
-      required: permissions,
-    });
+    throw new HttpError(
+      403,
+      'platform_scope_denied',
+      'Permission plateforme requise pour cette opération.',
+      {
+        required: permissions,
+      },
+    );
   }
   return claims;
 }
@@ -110,7 +119,10 @@ function validateTaxes(value: unknown): TaxSetting[] {
     }
     const scope = row.scope;
     if (scope !== 'sales' && scope !== 'payroll' && scope !== 'service') {
-      throw HttpError.unprocessable('validation_error', `Périmètre de taxe invalide (${String(scope)}).`);
+      throw HttpError.unprocessable(
+        'validation_error',
+        `Périmètre de taxe invalide (${String(scope)}).`,
+      );
     }
     return {
       code: requireString(row, 'code', { min: 2, max: 40 }),
@@ -124,7 +136,10 @@ function validateTaxes(value: unknown): TaxSetting[] {
 
 function validateProviders(value: unknown): ProviderSetting[] {
   if (!Array.isArray(value) || value.length === 0) {
-    throw HttpError.unprocessable('validation_error', 'Au moins un fournisseur de paiement est requis.');
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Au moins un fournisseur de paiement est requis.',
+    );
   }
   const providers = value.map((entry, index) => {
     let row: Record<string, unknown>;
@@ -186,7 +201,12 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
       method: 'GET',
       path: '/api/v1/platform/dashboard',
       handler: (ctx) => {
-        ensurePlatform(ctx.auth, ['platform:logs:view', 'platform:establishments:review', 'platform:settings:manage', 'platform:operate']);
+        ensurePlatform(ctx.auth, [
+          'platform:logs:view',
+          'platform:establishments:review',
+          'platform:settings:manage',
+          'platform:operate',
+        ]);
         return {
           body: {
             ...dashboardSnapshot(store),
@@ -212,7 +232,9 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
           .filter((tenant) => (plan ? tenant.plan === plan : true))
           .filter((tenant) => {
             if (!search) return true;
-            return `${tenant.brandName} ${tenant.slug} ${tenant.tenantId}`.toLowerCase().includes(search);
+            return `${tenant.brandName} ${tenant.slug} ${tenant.tenantId}`
+              .toLowerCase()
+              .includes(search);
           })
           .map((tenant) => {
             const commissions = store.commissions.filter(
@@ -238,7 +260,8 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
       handler: (ctx) => {
         ensurePlatform(ctx.auth, ['platform:establishments:review', 'platform:operate']);
         const entry = store.directory.get(ctx.params.tenantId);
-        if (!entry) throw HttpError.notFound('Établissement introuvable dans l’annuaire plateforme.');
+        if (!entry)
+          throw HttpError.notFound('Établissement introuvable dans l’annuaire plateforme.');
         const transactions = store.transactions
           .filter((transaction) => transaction.tenantId === entry.tenantId)
           .sort((a, b) => (a.at < b.at ? 1 : -1))
@@ -253,7 +276,11 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
       method: 'GET',
       path: '/api/v1/platform/commissions',
       handler: (ctx) => {
-        ensurePlatform(ctx.auth, ['platform:disputes:manage', 'platform:operate', 'platform:settings:manage']);
+        ensurePlatform(ctx.auth, [
+          'platform:disputes:manage',
+          'platform:operate',
+          'platform:settings:manage',
+        ]);
         const days = parseDays(ctx.query.get('days'));
         const fromIso = isoDaysAgo(days);
         const toIso = nowIso();
@@ -278,7 +305,9 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
               tenant: commissionGroups(store, fromIso, toIso, 'tenant'),
               provider: commissionGroups(store, fromIso, toIso, 'provider'),
               method: commissionGroups(store, fromIso, toIso, 'method'),
-              day: commissionGroups(store, fromIso, toIso, 'day').sort((a, b) => (a.key < b.key ? -1 : 1)),
+              day: commissionGroups(store, fromIso, toIso, 'day').sort((a, b) =>
+                a.key < b.key ? -1 : 1,
+              ),
             },
             transactions: entries.slice(0, 40),
           },
@@ -289,7 +318,11 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
       method: 'GET',
       path: '/api/v1/platform/transactions',
       handler: (ctx) => {
-        ensurePlatform(ctx.auth, ['platform:disputes:manage', 'platform:operate', 'platform:logs:view']);
+        ensurePlatform(ctx.auth, [
+          'platform:disputes:manage',
+          'platform:operate',
+          'platform:logs:view',
+        ]);
         const kind = ctx.query.get('kind');
         const tenantId = ctx.query.get('tenantId');
         const limit = Math.min(200, Math.max(1, Number(ctx.query.get('limit') ?? 50) || 50));
@@ -305,7 +338,11 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
       method: 'GET',
       path: '/api/v1/platform/disputes',
       handler: (ctx) => {
-        ensurePlatform(ctx.auth, ['platform:disputes:manage', 'platform:operate', 'platform:logs:view']);
+        ensurePlatform(ctx.auth, [
+          'platform:disputes:manage',
+          'platform:operate',
+          'platform:logs:view',
+        ]);
         const status = ctx.query.get('status');
         const items = [...store.disputes.values()]
           .filter((dispute) => (status ? dispute.status === status : true))
@@ -344,9 +381,8 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
             metrics: {
               eventsReceived: store.metrics.eventsReceived,
               eventsByType: store.metrics.eventsByType,
-              events24h: store.metrics.recentEvents.filter(
-                (event) => event.at >= isoDaysAgo(1),
-              ).length,
+              events24h: store.metrics.recentEvents.filter((event) => event.at >= isoDaysAgo(1))
+                .length,
               recentEvents: store.metrics.recentEvents.slice(-12).reverse(),
               checkedAt: nowIso(),
             },
@@ -445,7 +481,10 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
         const level = requireEnum(body, 'level', ['debug', 'info', 'warn', 'error'] as const);
         const service = requireString(body, 'service', { min: 2, max: 80 });
         const message = requireString(body, 'message', { min: 1, max: 500 });
-        const meta = body.meta && typeof body.meta === 'object' ? (body.meta as Record<string, unknown>) : null;
+        const meta =
+          body.meta && typeof body.meta === 'object'
+            ? (body.meta as Record<string, unknown>)
+            : null;
         const entry = store.log(level, service, message, meta);
         return { status: 201, body: { log: entry } };
       },
@@ -467,7 +506,10 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
         const languages = validateLanguages(body);
         const defaultLanguage = requireEnum(body, 'defaultLanguage', ['fr', 'en'] as const);
         if (!languages.includes(defaultLanguage)) {
-          throw HttpError.unprocessable('validation_error', 'La langue par défaut doit être activée.');
+          throw HttpError.unprocessable(
+            'validation_error',
+            'La langue par défaut doit être activée.',
+          );
         }
         const supportEmail = requireString(body, 'supportEmail', { min: 5, max: 120 });
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail)) {
@@ -481,7 +523,10 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
         const taxCodes = new Set(taxes.map((tax) => tax.code));
         for (const country of countries) {
           if (!taxCodes.has(country.defaultTaxCode)) {
-            throw HttpError.unprocessable('validation_error', `Taxe par défaut inconnue pour ${country.code}.`);
+            throw HttpError.unprocessable(
+              'validation_error',
+              `Taxe par défaut inconnue pour ${country.code}.`,
+            );
           }
         }
 
@@ -505,7 +550,9 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
           countries: JSON.stringify(previous.countries) !== JSON.stringify(settings.countries),
           taxes: JSON.stringify(previous.taxes) !== JSON.stringify(settings.taxes),
           providers: JSON.stringify(previous.providers) !== JSON.stringify(settings.providers),
-          support: previous.supportEmail !== settings.supportEmail || previous.supportPhone !== settings.supportPhone,
+          support:
+            previous.supportEmail !== settings.supportEmail ||
+            previous.supportPhone !== settings.supportPhone,
           timezone: previous.timezone !== settings.timezone,
           defaultLanguage: previous.defaultLanguage !== settings.defaultLanguage,
         };
@@ -532,9 +579,15 @@ export function buildPlatformAdminApp(options: PlatformAdminAppOptions): Route[]
       method: 'GET',
       path: '/api/v1/platform/audit',
       handler: (ctx) => {
-        ensurePlatform(ctx.auth, ['platform:logs:view', 'platform:operate', 'platform:settings:manage']);
+        ensurePlatform(ctx.auth, [
+          'platform:logs:view',
+          'platform:operate',
+          'platform:settings:manage',
+        ]);
         const limit = Math.min(500, Math.max(1, Number(ctx.query.get('limit') ?? 100) || 100));
-        const entries = [...store.audit].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, limit);
+        const entries = [...store.audit]
+          .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+          .slice(0, limit);
         return {
           body: {
             entries,

@@ -257,7 +257,9 @@ const paths: Record<string, ReactNode> = {
       <circle cx="19" cy="12" r="1" />
     </>
   ),
-  refresh: <path d="M20 7v5h-5M4 17v-5h5M6.1 9a7.5 7.5 0 0 1 12.2-2L20 9M4 15l1.7 2a7.5 7.5 0 0 0 12.2-2" />,
+  refresh: (
+    <path d="M20 7v5h-5M4 17v-5h5M6.1 9a7.5 7.5 0 0 1 12.2-2L20 9M4 15l1.7 2a7.5 7.5 0 0 0 12.2-2" />
+  ),
   play: <path d="M8 5.5v13l11-6.5z" />,
   pin: (
     <>
@@ -294,7 +296,12 @@ export function Icon({ name, size = 'md', className, strokeWidth = 1.75, ...rest
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={cx('rh-icon', size === 'sm' && 'rh-icon--sm', size === 'lg' && 'rh-icon--lg', className)}
+      className={cx(
+        'rh-icon',
+        size === 'sm' && 'rh-icon--sm',
+        size === 'lg' && 'rh-icon--lg',
+        className,
+      )}
       {...rest}
     >
       {paths[name] ?? paths['info']}

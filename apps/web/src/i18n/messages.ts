@@ -36,8 +36,7 @@ const fr: Messages = {
     titleA: 'Le hub qui fait',
     titleAccent: 'tourner',
     titleB: 'votre restaurant.',
-    lead:
-      "Commandes, salle, caisse, équipes et paiements Mobile Money — réunis dans une plateforme pensée pour les restaurants et bars d'Afrique de l'Ouest.",
+    lead: "Commandes, salle, caisse, équipes et paiements Mobile Money — réunis dans une plateforme pensée pour les restaurants et bars d'Afrique de l'Ouest.",
     primaryCta: 'Demander une démo',
     secondaryCta: 'Explorer le produit',
     note: 'Sans engagement · Mise en route accompagnée · Support en français',
@@ -57,7 +56,7 @@ const fr: Messages = {
       covers: 'couverts',
       waiter: 'Serveur',
       bill: 'Addition en cours',
-      selectHint: "Touchez une table pour afficher son détail.",
+      selectHint: 'Touchez une table pour afficher son détail.',
       table: 'Table',
       zones: { room: 'Salle', terrace: 'Terrasse', bar: 'Bar' },
     },
@@ -65,8 +64,7 @@ const fr: Messages = {
   cockpit: {
     eyebrow: 'Cockpit gérant',
     title: 'Tout votre établissement, sur un seul écran.',
-    lead:
-      "Chiffre d'affaires, occupation, commandes et paie : les bonnes décisions se prennent au service, pas le lendemain.",
+    lead: "Chiffre d'affaires, occupation, commandes et paie : les bonnes décisions se prennent au service, pas le lendemain.",
     kpiRevenue: "Chiffre d'affaires du jour",
     kpiAverage: 'Panier moyen',
     kpiTickets: 'Tickets encaissés',
@@ -99,7 +97,7 @@ const fr: Messages = {
     payrollAmount: '2 840 000 FCFA',
     payrollBatch: '12 bulletins préparés',
     payrollStepPrepared: 'Préparée par la comptable',
-    payrollStepApproved: "Approbation du gérant requise",
+    payrollStepApproved: 'Approbation du gérant requise',
     payrollPreparedMeta: 'Akouvi D. · 19:12',
     payrollApproveMeta: 'Signature électronique attendue',
     payrollAction: 'Approuver le lot',
@@ -114,8 +112,7 @@ const fr: Messages = {
   services: {
     eyebrow: 'Architecture microservices',
     title: '13 services indépendants. Un seul contrat de confiance.',
-    lead:
-      "Chaque domaine possède ses données, son API et ses événements. Aucun service ne lit la base d'un autre : tout passe par l'API ou le bus d'événements.",
+    lead: "Chaque domaine possède ses données, son API et ses événements. Aucun service ne lit la base d'un autre : tout passe par l'API ou le bus d'événements.",
     items: [
       {
         key: 'identity',
@@ -130,8 +127,7 @@ const fr: Messages = {
       {
         key: 'tenant',
         name: 'tenant-service',
-        description:
-          'Établissements, KYC/KYB, multi-sites, personnalisation et abonnements SaaS.',
+        description: 'Établissements, KYC/KYB, multi-sites, personnalisation et abonnements SaaS.',
         icon: 'settings',
         port: '4002',
         group: 'core',
@@ -150,8 +146,7 @@ const fr: Messages = {
       {
         key: 'floor',
         name: 'floor-service',
-        description:
-          'Zones, plan de salle, QR codes, statuts temps réel et réservations.',
+        description: 'Zones, plan de salle, QR codes, statuts temps réel et réservations.',
         icon: 'grid',
         port: '4004',
         group: 'core',
@@ -219,8 +214,7 @@ const fr: Messages = {
       {
         key: 'notification',
         name: 'notification-service',
-        description:
-          'Push, SMS, e-mail et notifications temps réel salle, cuisine, bar et caisse.',
+        description: 'Push, SMS, e-mail et notifications temps réel salle, cuisine, bar et caisse.',
         icon: 'bell',
         port: '4011',
         group: 'growth',
@@ -261,8 +255,7 @@ const fr: Messages = {
   journeys: {
     eyebrow: 'Parcours',
     title: 'Pensé terrain, du QR code à la paie.',
-    lead:
-      'Trois parcours critiques, mesurés en gestes : le client commande sans attendre, le serveur va vite, le gérant configure sans informaticien.',
+    lead: 'Trois parcours critiques, mesurés en gestes : le client commande sans attendre, le serveur va vite, le gérant configure sans informaticien.',
     stepsLabel: 'Étapes',
     metricLabel: 'Objectif',
     items: [
@@ -324,9 +317,8 @@ const fr: Messages = {
   },
   payments: {
     eyebrow: 'Paiements',
-    title: "Tous les moyens de paiement de la région, un seul agrégateur.",
-    lead:
-      "Routage intelligent, bascule automatique, webhooks signés et idempotents, réconciliation quotidienne et journal comptable en partie double.",
+    title: 'Tous les moyens de paiement de la région, un seul agrégateur.',
+    lead: 'Routage intelligent, bascule automatique, webhooks signés et idempotents, réconciliation quotidienne et journal comptable en partie double.',
     providers: [
       { name: 'TMoney', note: 'Mobile Money · Togo' },
       { name: 'Moov Money', note: 'Mobile Money · Togo' },
@@ -360,14 +352,12 @@ const fr: Messages = {
       },
     ],
     flow: ['Client paie', 'Routage PSP', 'Webhook signé', 'Grand livre'],
-    note:
-      'Aucun numéro de carte stocké · secrets en variables d’environnement · signatures HMAC vérifiées côté serveur.',
+    note: 'Aucun numéro de carte stocké · secrets en variables d’environnement · signatures HMAC vérifiées côté serveur.',
   },
   design: {
     eyebrow: 'Design system',
     title: 'Une identité chaleureuse, un système rigoureux.',
-    lead:
-      'Tokens à trois niveaux, composants accessibles, thèmes clair et sombre — surchargés par l’identité de chaque établissement.',
+    lead: 'Tokens à trois niveaux, composants accessibles, thèmes clair et sombre — surchargés par l’identité de chaque établissement.',
     tenantTitle: 'Thème par établissement',
     tenantSub:
       'Le logo et les couleurs de l’établissement surchargent l’espace client, sans jamais casser les contrastes.',
@@ -610,8 +600,7 @@ const en: Messages = {
     titleA: 'The hub that keeps',
     titleAccent: 'your restaurant',
     titleB: 'running.',
-    lead:
-      'Orders, floor, POS, teams and Mobile Money payments — in one platform built for West African restaurants and bars.',
+    lead: 'Orders, floor, POS, teams and Mobile Money payments — in one platform built for West African restaurants and bars.',
     primaryCta: 'Book a demo',
     secondaryCta: 'Explore the product',
     note: 'No commitment · Guided onboarding · French & English support',
@@ -639,8 +628,7 @@ const en: Messages = {
   cockpit: {
     eyebrow: 'Manager cockpit',
     title: 'Your whole establishment on one screen.',
-    lead:
-      'Revenue, occupancy, orders and payroll: decisions happen during service, not the next day.',
+    lead: 'Revenue, occupancy, orders and payroll: decisions happen during service, not the next day.',
     kpiRevenue: 'Revenue today',
     kpiAverage: 'Average ticket',
     kpiTickets: 'Tickets paid',
@@ -688,8 +676,7 @@ const en: Messages = {
   services: {
     eyebrow: 'Microservices architecture',
     title: '13 independent services. One contract of trust.',
-    lead:
-      "Each domain owns its data, API and events. No service reads another's database: everything goes through APIs or the event bus.",
+    lead: "Each domain owns its data, API and events. No service reads another's database: everything goes through APIs or the event bus.",
     items: [
       {
         key: 'identity',
@@ -713,8 +700,7 @@ const en: Messages = {
       {
         key: 'catalog',
         name: 'catalog-service',
-        description:
-          'Products, variants, options, combo menus, time-based pricing and promotions.',
+        description: 'Products, variants, options, combo menus, time-based pricing and promotions.',
         icon: 'utensils',
         port: '4003',
         group: 'core',
@@ -732,8 +718,7 @@ const en: Messages = {
       {
         key: 'order',
         name: 'order-service',
-        description:
-          'Carts, orders, status workflow, KDS, tickets and offline-capable POS.',
+        description: 'Carts, orders, status workflow, KDS, tickets and offline-capable POS.',
         icon: 'receipt',
         port: '4005',
         group: 'core',
@@ -772,8 +757,7 @@ const en: Messages = {
       {
         key: 'inventory',
         name: 'inventory-service',
-        description:
-          'Stock, recipes, alert thresholds, stocktakes, waste and suppliers.',
+        description: 'Stock, recipes, alert thresholds, stocktakes, waste and suppliers.',
         icon: 'box',
         port: '4009',
         group: 'people',
@@ -791,8 +775,7 @@ const en: Messages = {
       {
         key: 'notification',
         name: 'notification-service',
-        description:
-          'Push, SMS, email and real-time alerts for floor, kitchen, bar and POS.',
+        description: 'Push, SMS, email and real-time alerts for floor, kitchen, bar and POS.',
         icon: 'bell',
         port: '4011',
         group: 'growth',
@@ -832,8 +815,7 @@ const en: Messages = {
   journeys: {
     eyebrow: 'Journeys',
     title: 'Built for the floor, from QR code to payroll.',
-    lead:
-      'Three critical journeys, measured in gestures: guests order without waiting, waiters move fast, managers configure without IT.',
+    lead: 'Three critical journeys, measured in gestures: guests order without waiting, waiters move fast, managers configure without IT.',
     stepsLabel: 'Steps',
     metricLabel: 'Target',
     items: [
@@ -891,8 +873,7 @@ const en: Messages = {
   payments: {
     eyebrow: 'Payments',
     title: 'Every regional payment method, one aggregator.',
-    lead:
-      'Smart routing, automatic failover, signed idempotent webhooks, daily reconciliation and a double-entry ledger.',
+    lead: 'Smart routing, automatic failover, signed idempotent webhooks, daily reconciliation and a double-entry ledger.',
     providers: [
       { name: 'TMoney', note: 'Mobile Money · Togo' },
       { name: 'Moov Money', note: 'Mobile Money · Togo' },
@@ -926,14 +907,12 @@ const en: Messages = {
       },
     ],
     flow: ['Guest pays', 'PSP routing', 'Signed webhook', 'Ledger'],
-    note:
-      'No card numbers stored · secrets in environment variables · HMAC signatures verified server-side.',
+    note: 'No card numbers stored · secrets in environment variables · HMAC signatures verified server-side.',
   },
   design: {
     eyebrow: 'Design system',
     title: 'A warm identity, a rigorous system.',
-    lead:
-      'Three-layer tokens, accessible components, light and dark themes — overridden by each establishment’s identity.',
+    lead: 'Three-layer tokens, accessible components, light and dark themes — overridden by each establishment’s identity.',
     tenantTitle: 'Per-establishment theme',
     tenantSub:
       'The establishment’s logo and colours override the guest space without ever breaking contrast.',
@@ -1147,6 +1126,32 @@ const en: Messages = {
 };
 
 export const messages = {
-  fr: { ...fr, ...frStep1, ...frStep2, ...frStep3, ...frPayments, ...frPaymentsAdmin, ...frStaff, ...frPayroll, ...frInventory, ...frMarketing, ...frReports, ...frPlatform },
-  en: { ...en, ...enStep1, ...enStep2, ...enStep3, ...enPayments, ...enPaymentsAdmin, ...enStaff, ...enPayroll, ...enInventory, ...enMarketing, ...enReports, ...enPlatform },
+  fr: {
+    ...fr,
+    ...frStep1,
+    ...frStep2,
+    ...frStep3,
+    ...frPayments,
+    ...frPaymentsAdmin,
+    ...frStaff,
+    ...frPayroll,
+    ...frInventory,
+    ...frMarketing,
+    ...frReports,
+    ...frPlatform,
+  },
+  en: {
+    ...en,
+    ...enStep1,
+    ...enStep2,
+    ...enStep3,
+    ...enPayments,
+    ...enPaymentsAdmin,
+    ...enStaff,
+    ...enPayroll,
+    ...enInventory,
+    ...enMarketing,
+    ...enReports,
+    ...enPlatform,
+  },
 };
