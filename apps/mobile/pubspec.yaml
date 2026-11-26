@@ -1,0 +1,22 @@
+name: resto_hub_mobile
+description: RESTO-HUB — thème Flutter et application mobile (en préparation).
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  # Polices Fraunces / Inter / JetBrains Mono : ajouter les fichiers dans assets/fonts
+  # puis déclarer la section `fonts:` ici avant la mise en production.
