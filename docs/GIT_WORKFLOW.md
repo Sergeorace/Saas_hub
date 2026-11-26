@@ -78,11 +78,13 @@ Un tag annoté clôt chaque étape validée :
 | `v0.1.1-infra`           | incrément technique (hors étape produit) : contrats partagés, jetons, infra locale, RLS, CI, OpenAPI |
 | `v0.1.2-vitrine`         | incrément de design : refonte de la vitrine marketing selon la direction artistique Cravk            |
 | `v0.1.3-maquettes`       | incrément de design : navigation par ancres réparée et maquettes de téléphone réalistes et animées   |
+| `v0.1.4-bandeau`         | incrément de design : bandeau des établissements en défilement continu avec repli statique           |
 
 `v0.9.0-platform-admin` clôt le commit d'amorçage. `v0.1.1-infra` étiquette le merge du socle dans
 `develop`; les étapes 1–8 n'ont pas d'étiquette individuelle (import consolidé, voir §1).
 `v0.1.2-vitrine` étiquette la refonte Cravk de la page marketing (voir §8).
 `v0.1.3-maquettes` étiquette le correctif de navigation et les maquettes de téléphone (voir §9).
+`v0.1.4-bandeau` étiquette le bandeau défilant des établissements (voir §10).
 
 ## 6. Hygiène
 
@@ -156,3 +158,18 @@ rendues réalistes et animées.
 - Vérifications : `format:check`, `lint` (0 erreur), `typecheck` et `build` web ; captures 1440 px
   clair/sombre, 390 px et section parcours ; navigation testée au clic, au clavier et en retour
   arrière. Pas de dépôt distant ni `gh` : titres de PR préparés uniquement.
+
+## 10. Journal de l'étape « bandeau défilant »
+
+Le bandeau de confiance (« Plus de 1 000 établissements… ») défile désormais en continu.
+
+| Branche                  | Commits (message)                                                                              | Merge dans `develop` | Titre de PR préparé                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------ |
+| `design/landing-marquee` | `ce0731d` feat(web): bandeau-defilant - etablissements en marquee continue avec repli statique | `b27f6bd`            | `feat(web): bandeau-defilant - etablissements en defilement` |
+
+- `TrustStrip` duplique la liste pour une boucle sans saut (deux moitiés égales, translation
+  `-50 %` sur 42 s) ; la copie est `aria-hidden` et les entrées dupliquées ne sont pas annoncées.
+- Fondu latéral (`mask-image`), pause au survol et au focus clavier, repli statique centré sous
+  `prefers-reduced-motion` ; aucun débordement horizontal.
+- Vérifications : `format:check`, `lint` (0 erreur), `typecheck`, `build` web ; captures CDP 1029 px
+  clair, 390 px clair/sombre et émulation mouvement réduit. Tag : `v0.1.4-bandeau`.
