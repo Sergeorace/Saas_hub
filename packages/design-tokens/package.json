@@ -1,0 +1,19 @@
+{
+  "name": "@resto-hub/design-tokens",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "main": "src/tokens.ts",
+  "types": "src/tokens.ts",
+  "exports": {
+    ".": "./src/tokens.ts",
+    "./tokens.css": "./tokens.css",
+    "./tokens.json": "./tokens.json"
+  },
+  "scripts": {
+    "build": "node scripts/generate.mjs",
+    "check": "node scripts/generate.mjs --check",
+    "test": "node scripts/generate.mjs --check && node --test tests/tokens.test.mjs",
+    "contrast": "node scripts/contrast.mjs"
+  }
+}
