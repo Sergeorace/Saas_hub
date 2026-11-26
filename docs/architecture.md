@@ -1998,3 +1998,31 @@ npm run build          # web
 Captures CDP (Chrome headless) en clair, sombre, anglais et menu mobile : héros, récit, paiements,
 témoignages, bandeau application et pied de page. Journal et étiquette :
 `docs/GIT_WORKFLOW.md` §8, tag `v0.1.2-vitrine`.
+
+### 26.5 Navigation par ancres (`fix/web/landing-anchors`)
+
+`parse()` du routeur expose `isAnchor` (chemin ne commençant pas par `/`) ; `App` conserve la
+landing montée et calcule `pagePath` pour le titre et le `switch`. `scrollToSection(id)` remplace
+l'URL via `history.replaceState` puis `scrollIntoView({ block: 'start' })`, sans remonter en haut.
+L'écouteur de clic est délégué sur la landing (bouton gauche, sans modificateur, hors `#/…`), le
+scroll-spy du header s'appuie sur un écouteur `scroll` limité par `requestAnimationFrame`, et
+`#main, .site [id] { scroll-margin-top: 0 }` neutralise le double décalage hérité de `base.css`.
+Routes, i18n et comptes de sections inchangés ; vérifié au clic, au clavier et via l'historique.
+
+### 26.6 Maquettes de téléphone (`design/landing-devices`)
+
+- `ClientPhone` (héros) et l'aperçu du parcours client (`Journeys`, `.phone-demo`) partagent une
+  même grammaire de châssis : coque titane en dégradé, touches latérales (alimentation, volume),
+  Dynamic Island avec lentille, reflet diagonal d'écran (`mix-blend-mode: screen`), barre d'accueil
+  et liseré lumineux en mode sombre. L'écran est légèrement incliné (`perspective` + `rotate*`) et
+  se redresse au survol.
+- `DeviceStatus` (`apps/web/src/components/DeviceStatus.tsx`) rend les icônes système (réseau,
+  Wi-Fi, batterie) en SVG héritant de `currentColor`, injectées dans la barre d'état des deux
+  maquettes.
+- Animations décoratives : `cphone-float` (flottement du cadre), `cphone-bob` (badge « en cuisine »
+  et ticket `OrderPaid`), `cphone-pulse` (point « live »), `cphone-progress` (barre de suivi) et
+  `cphone-shine` (balayage des visuels). Toutes sont désactivées par
+  `prefers-reduced-motion: reduce`.
+- Mobile : ≤ 760 px, inclinaison supprimée, overlays flottants masqués, taille d'écran ajustée ;
+  aucun débordement à 390 px. Captures 1440 px clair/sombre, 390 px et section parcours.
+  Journal : `docs/GIT_WORKFLOW.md` §9.

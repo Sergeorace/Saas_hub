@@ -133,3 +133,24 @@ Refonte de la page marketing à partir de la référence Dribbble
   namespace `payments` restant réservé à l'espace gérant.
 - Vérifications : `format:check`, `lint` (0 erreur), `typecheck` et `build` web ; captures clair,
   sombre, mobile 390 px et anglais ; aucun débordement horizontal à 1440 px ni 390 px.
+
+## 9. Journal de l'étape « navigation et téléphones de la vitrine »
+
+Deux correctifs successifs sur la vitrine : liens d'ancre réparés, puis maquettes de téléphone
+rendues réalistes et animées.
+
+| Branche                   | Commits (message)                                                                                   | Merge dans `develop` | Titre de PR préparé                                                  |
+| ------------------------- | --------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------- |
+| `fix/web/landing-anchors` | `2753b70` fix(web): navigation - ancres de section sans remount ni retour en haut                   | `d441b26`            | `fix(web): navigation - ancres de section de la vitrine`             |
+| `design/landing-devices`  | `5176460` feat(web): telephones-realistes - cadres appuyes, statuts systeme et animations discretes | `59e7e7b`            | `feat(web): telephones-realistes - maquettes de telephone realistes` |
+
+- Navigation : `#section` est désormais traité comme une ancre (`isAnchor`) et non comme une route ;
+  défilement via `scrollToSection` (`history.replaceState` + `scrollIntoView`), écouteur délégué,
+  lien actif calculé au défilement (rAF) ; les routes `#/…` restent inchangées.
+- Téléphones : châssis titane avec touches latérales, Dynamic Island, reflet d'écran, icônes de
+  statut SVG (`DeviceStatus`), barre d'accueil ; animations `cphone-float`, `cphone-bob`,
+  `cphone-pulse`, `cphone-progress`, `cphone-shine`, toutes neutralisées par
+  `prefers-reduced-motion: reduce`.
+- Vérifications : `format:check`, `lint` (0 erreur), `typecheck` et `build` web ; captures 1440 px
+  clair/sombre, 390 px et section parcours ; navigation testée au clic, au clavier et en retour
+  arrière. Pas de dépôt distant ni `gh` : titres de PR préparés uniquement.
