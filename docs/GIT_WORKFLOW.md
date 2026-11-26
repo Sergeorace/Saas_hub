@@ -77,10 +77,12 @@ Un tag annoté clôt chaque étape validée :
 | `v0.9.0-platform-admin`  | platform-admin-service, sécurité et finition                                                         |
 | `v0.1.1-infra`           | incrément technique (hors étape produit) : contrats partagés, jetons, infra locale, RLS, CI, OpenAPI |
 | `v0.1.2-vitrine`         | incrément de design : refonte de la vitrine marketing selon la direction artistique Cravk            |
+| `v0.1.3-maquettes`       | incrément de design : navigation par ancres réparée et maquettes de téléphone réalistes et animées   |
 
 `v0.9.0-platform-admin` clôt le commit d'amorçage. `v0.1.1-infra` étiquette le merge du socle dans
 `develop`; les étapes 1–8 n'ont pas d'étiquette individuelle (import consolidé, voir §1).
 `v0.1.2-vitrine` étiquette la refonte Cravk de la page marketing (voir §8).
+`v0.1.3-maquettes` étiquette le correctif de navigation et les maquettes de téléphone (voir §9).
 
 ## 6. Hygiène
 
