@@ -1946,3 +1946,55 @@ npm run test:coverage       # seuils c8
 npm run db:test             # RLS PostgreSQL (PGlite)
 npm run openapi:check       # 13 services à jour
 ```
+
+## 26. Direction artistique — vitrine Cravk (`design/landing-cravk`)
+
+La page marketing publique d'`apps/web` a été restylée d'après la référence Dribbble
+« Cravk – Food Delivery App Landing Page » (uixelias). L'application (connexion, inscription,
+back-office, espace gérant, design system, PWA client) conserve ses tokens et ses composants : la
+refonte ne touche que la vitrine et n'introduit aucun contrat d'API nouveau.
+
+### 26.1 Couche de style dédiée
+
+| Élément         | Emplacement                                          | Rôle                                                                                                                                                                                                   |
+| --------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Feuille vitrine | `apps/web/src/styles/site-cravk.css` (~2 000 lignes) | préfixes `.chero/.cnav/.cstory/...` et variables locales `--lv-*` (canvas, panel, ink, muted, soft, line, accent, accent-soft, sand, tan, radius, font, ring) ; surchargées sous `[data-theme='dark']` |
+| Jetons de page  | `:root` de la feuille                                | `--lv-canvas:#ededeb`, `--lv-accent:#bb3618` en clair ; `--lv-canvas:#131211`, `--lv-accent:#ff8a4c` en sombre — sans modifier `tokens.css`                                                            |
+| Typographie     | `apps/web/index.html`                                | Plus Jakarta Sans (400–800, italique) chargée en complément des polices du design system, réservée aux sections vitrine                                                                                |
+| Média           | `apps/web/public/marketing/`                         | `hero-chicken.webp`, `hero-chicken-thumb.webp`, `dish-potatoes.webp`, `kitchen-chef.webp` (recadré en portrait pour l'arche)                                                                           |
+
+### 26.2 Sections et navigation
+
+- Navigation flottante noire en pilule (`.cnav`) avec liens `#story`, `#product`, `#services`,
+  `#pricing`, CTA orange `#/connexion`/`#contact`, sélecteur FR/EN et bascule de thème ;
+  scroll-spy `IntersectionObserver` (`aria-current`), menu mobile `Échap`, outils (langue/thème/
+  connexion) dans le tiroir.
+- Héros (`.chero`) : titre 3 lignes avec ligne intermédiaire atténuée et étoile SVG, deux CTA,
+  trio d'arguments, aperçu téléphone du parcours client (`ClientPhone`, `aria-hidden`) avec carte
+  « en cuisine » et ticket flottants.
+- Bandeau de confiance (`TrustStrip`), récit d'établissement en arche (`Story`), témoignage client
+  (`Testimonials`), bandeau « application » (`FinalCta`) et pied de page (`SiteFooter`).
+- Les sections produit existantes (cockpit, services, parcours, paiements, vitrine design system,
+  tarifs) restent inchangées et conservent leurs ancres et routes.
+
+### 26.3 Internationalisation et accessibilité
+
+- Nouveau namespace `landing.*` dans `apps/web/src/i18n/landing.ts`, fusionné par `messages.ts`
+  en FR (défaut) et EN ; le namespace `payments` est réservé à l'espace gérant et les contenus de
+  la section paiements utilisent désormais `paymentsShowcase`.
+- Contrastes AA (clair et sombre), cibles ≥ 44 px, focus visibles, images décoratives `alt=""`,
+  animations `lv-rise`/`lv-spin` désactivées par `prefers-reduced-motion`, aucun débordement
+  horizontal à 1440 px ni 390 px.
+
+### 26.4 Vérifications
+
+```bash
+npm run format:check   # Prettier
+npm run lint           # 0 erreur (5 avertissements historiques)
+npm run typecheck      # web
+npm run build          # web
+```
+
+Captures CDP (Chrome headless) en clair, sombre, anglais et menu mobile : héros, récit, paiements,
+témoignages, bandeau application et pied de page. Journal et étiquette :
+`docs/GIT_WORKFLOW.md` §8, tag `v0.1.2-vitrine`.
