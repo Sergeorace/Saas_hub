@@ -32,7 +32,10 @@ const running = await startServer(
         providerKeys: config.providerKeys,
         webhookSecrets: config.webhookSecrets,
         deps: {
-          tenant: createServiceClient({ baseUrl: config.tenantUrl, internalKey: config.internalKey }),
+          tenant: createServiceClient({
+            baseUrl: config.tenantUrl,
+            internalKey: config.internalKey,
+          }),
           order: createServiceClient({ baseUrl: config.orderUrl, internalKey: config.internalKey }),
         },
         publish: (type, tenantId, payload) => bus.publish(type, tenantId, payload),

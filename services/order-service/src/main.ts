@@ -19,7 +19,8 @@ const bus = createEventBus({
   subscribers: config.eventSubscribers,
 });
 
-const client = (baseUrl: string) => createServiceClient({ baseUrl, internalKey: config.internalKey });
+const client = (baseUrl: string) =>
+  createServiceClient({ baseUrl, internalKey: config.internalKey });
 
 const running = await startServer(
   {

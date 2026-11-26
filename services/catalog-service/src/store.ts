@@ -212,7 +212,11 @@ export function activePriceRule(
   });
 }
 
-export function effectivePrice(product: CatalogProduct, at: Date, timeZone = 'Africa/Lome'): number {
+export function effectivePrice(
+  product: CatalogProduct,
+  at: Date,
+  timeZone = 'Africa/Lome',
+): number {
   return activePriceRule(product, at, timeZone)?.priceXof ?? product.basePriceXof;
 }
 
@@ -223,7 +227,13 @@ export function activePromotions(promotions: Promotion[], at: Date): Promotion[]
   );
 }
 
-function hoursRule(id: string, days: DayKey[], start: string, end: string, priceXof: number): PriceRule {
+function hoursRule(
+  id: string,
+  days: DayKey[],
+  start: string,
+  end: string,
+  priceXof: number,
+): PriceRule {
   return { id, label: 'Happy hour', days, start, end, priceXof };
 }
 
@@ -234,15 +244,58 @@ export function seedCatalogDemo(store: CatalogStore): void {
   const actor = 'usr_demo_seed';
 
   const categories: CatalogCategory[] = [
-    { id: 'cat_sg_entrees', tenantId, name: 'Entrées', position: 1, active: true, createdAt: now, updatedAt: now },
-    { id: 'cat_sg_grillades', tenantId, name: 'Grillades', position: 2, active: true, createdAt: now, updatedAt: now },
-    { id: 'cat_sg_plats', tenantId, name: 'Plats', position: 3, active: true, createdAt: now, updatedAt: now },
-    { id: 'cat_sg_boissons', tenantId, name: 'Boissons', position: 4, active: true, createdAt: now, updatedAt: now },
-    { id: 'cat_sg_desserts', tenantId, name: 'Desserts', position: 5, active: true, createdAt: now, updatedAt: now },
+    {
+      id: 'cat_sg_entrees',
+      tenantId,
+      name: 'Entrées',
+      position: 1,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'cat_sg_grillades',
+      tenantId,
+      name: 'Grillades',
+      position: 2,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'cat_sg_plats',
+      tenantId,
+      name: 'Plats',
+      position: 3,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'cat_sg_boissons',
+      tenantId,
+      name: 'Boissons',
+      position: 4,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'cat_sg_desserts',
+      tenantId,
+      name: 'Desserts',
+      position: 5,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
   ];
   for (const category of categories) store.categories.set(category.id, category);
 
-  const product = (input: Partial<CatalogProduct> & Pick<CatalogProduct, 'id' | 'name' | 'categoryId' | 'basePriceXof'>): CatalogProduct => ({
+  const product = (
+    input: Partial<CatalogProduct> &
+      Pick<CatalogProduct, 'id' | 'name' | 'categoryId' | 'basePriceXof'>,
+  ): CatalogProduct => ({
     tenantId,
     description: undefined,
     photos: [],
@@ -315,7 +368,15 @@ export function seedCatalogDemo(store: CatalogStore): void {
         { id: 'var_sg_bissap_classique', name: 'Classique', priceXof: 2000 },
         { id: 'var_sg_bissap_grand', name: 'Grand', priceXof: 3500 },
       ],
-      priceRules: [hoursRule('rule_sg_bissap_hh', ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'], '17:00', '19:00', 1500)],
+      priceRules: [
+        hoursRule(
+          'rule_sg_bissap_hh',
+          ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'],
+          '17:00',
+          '19:00',
+          1500,
+        ),
+      ],
     }),
     product({
       id: 'prd_sg_biere',
@@ -323,7 +384,15 @@ export function seedCatalogDemo(store: CatalogStore): void {
       categoryId: 'cat_sg_boissons',
       station: 'bar',
       basePriceXof: 1500,
-      priceRules: [hoursRule('rule_sg_biere_hh', ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'], '17:00', '19:00', 1000)],
+      priceRules: [
+        hoursRule(
+          'rule_sg_biere_hh',
+          ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'],
+          '17:00',
+          '19:00',
+          1000,
+        ),
+      ],
     }),
     product({
       id: 'prd_sg_salade',
@@ -390,14 +459,54 @@ export function seedCatalogDemo(store: CatalogStore): void {
     {
       tenantId: 'tnt_baobab',
       prefix: 'bb',
-      categories: [['cocktails', 'Cocktails'], ['street', 'Street food'], ['bieres', 'Bières & jus']],
+      categories: [
+        ['cocktails', 'Cocktails'],
+        ['street', 'Street food'],
+        ['bieres', 'Bières & jus'],
+      ],
       items: [
-        { id: 'cocktail', name: 'Cocktail Baobab', categoryIndex: 0, priceXof: 3000, description: 'Rhum ambré, hibiscus, citron vert et gingembre.', station: 'bar', photoSeed: 'rh-baobab-cocktail' },
-        { id: 'mojito', name: 'Mojito maison', categoryIndex: 0, priceXof: 2500, description: 'Menthe fraîche, citron vert, sirop de canne.', station: 'bar' },
-        { id: 'brochettes', name: 'Brochettes de poulet', categoryIndex: 1, priceXof: 2500, description: 'Poulet mariné, sauce arachide maison.', allergens: ['arachides'] },
-        { id: 'tacos', name: 'Tacos poisson', categoryIndex: 1, priceXof: 3000, description: 'Galette, poisson frit, légumes croquants.', allergens: ['gluten', 'poisson'] },
+        {
+          id: 'cocktail',
+          name: 'Cocktail Baobab',
+          categoryIndex: 0,
+          priceXof: 3000,
+          description: 'Rhum ambré, hibiscus, citron vert et gingembre.',
+          station: 'bar',
+          photoSeed: 'rh-baobab-cocktail',
+        },
+        {
+          id: 'mojito',
+          name: 'Mojito maison',
+          categoryIndex: 0,
+          priceXof: 2500,
+          description: 'Menthe fraîche, citron vert, sirop de canne.',
+          station: 'bar',
+        },
+        {
+          id: 'brochettes',
+          name: 'Brochettes de poulet',
+          categoryIndex: 1,
+          priceXof: 2500,
+          description: 'Poulet mariné, sauce arachide maison.',
+          allergens: ['arachides'],
+        },
+        {
+          id: 'tacos',
+          name: 'Tacos poisson',
+          categoryIndex: 1,
+          priceXof: 3000,
+          description: 'Galette, poisson frit, légumes croquants.',
+          allergens: ['gluten', 'poisson'],
+        },
         { id: 'biere', name: 'Bière locale', categoryIndex: 2, priceXof: 1500, station: 'bar' },
-        { id: 'gingembre', name: 'Jus de gingembre', categoryIndex: 2, priceXof: 1500, station: 'bar', description: 'Pressé du jour, sans sucre ajouté.' },
+        {
+          id: 'gingembre',
+          name: 'Jus de gingembre',
+          categoryIndex: 2,
+          priceXof: 1500,
+          station: 'bar',
+          description: 'Pressé du jour, sans sucre ajouté.',
+        },
       ],
       menuName: 'Planche apéro duo',
       menuPriceXof: 6500,
@@ -409,13 +518,52 @@ export function seedCatalogDemo(store: CatalogStore): void {
     {
       tenantId: 'tnt_lagune',
       prefix: 'lg',
-      categories: [['entrees', 'Entrées'], ['poissons', 'Poissons & fruits de mer'], ['desserts', 'Desserts']],
+      categories: [
+        ['entrees', 'Entrées'],
+        ['poissons', 'Poissons & fruits de mer'],
+        ['desserts', 'Desserts'],
+      ],
       items: [
-        { id: 'papaye', name: 'Salade de papaye verte', categoryIndex: 0, priceXof: 2500, description: 'Papaye verte, cacahuètes torréfiées, citron vert.', allergens: ['arachides'], photoSeed: 'rh-lagune-table' },
-        { id: 'capitaine', name: 'Capitaine grillé', categoryIndex: 1, priceXof: 6000, description: 'Capitaine entier braisé, attiéké et sauce tomate.', allergens: ['poisson'] },
-        { id: 'crevettes', name: 'Crevettes sautées', categoryIndex: 1, priceXof: 5500, description: 'Crevettes roses, ail et beurre citronné.', allergens: ['crustaces', 'lait'] },
-        { id: 'riz', name: 'Riz coco', categoryIndex: 1, priceXof: 2000, description: 'Riz parfumé au lait de coco.' },
-        { id: 'coco', name: 'Coco glacé', categoryIndex: 2, priceXof: 2000, description: 'Glace coco servie dans sa noix.', allergens: ['lait'] },
+        {
+          id: 'papaye',
+          name: 'Salade de papaye verte',
+          categoryIndex: 0,
+          priceXof: 2500,
+          description: 'Papaye verte, cacahuètes torréfiées, citron vert.',
+          allergens: ['arachides'],
+          photoSeed: 'rh-lagune-table',
+        },
+        {
+          id: 'capitaine',
+          name: 'Capitaine grillé',
+          categoryIndex: 1,
+          priceXof: 6000,
+          description: 'Capitaine entier braisé, attiéké et sauce tomate.',
+          allergens: ['poisson'],
+        },
+        {
+          id: 'crevettes',
+          name: 'Crevettes sautées',
+          categoryIndex: 1,
+          priceXof: 5500,
+          description: 'Crevettes roses, ail et beurre citronné.',
+          allergens: ['crustaces', 'lait'],
+        },
+        {
+          id: 'riz',
+          name: 'Riz coco',
+          categoryIndex: 1,
+          priceXof: 2000,
+          description: 'Riz parfumé au lait de coco.',
+        },
+        {
+          id: 'coco',
+          name: 'Coco glacé',
+          categoryIndex: 2,
+          priceXof: 2000,
+          description: 'Glace coco servie dans sa noix.',
+          allergens: ['lait'],
+        },
         { id: 'ananas', name: "Jus d'ananas", categoryIndex: 2, priceXof: 1500, station: 'bar' },
       ],
       menuName: 'Menu Lagune',
@@ -469,7 +617,10 @@ export function seedCatalogDemo(store: CatalogStore): void {
       name: extra.menuName,
       description: 'Sélection de la maison, boisson incluse.',
       priceXof: extra.menuPriceXof,
-      items: extra.menuItems.map((entry) => ({ productId: `prd_${extra.prefix}_${entry.id}`, quantity: 1 })),
+      items: extra.menuItems.map((entry) => ({
+        productId: `prd_${extra.prefix}_${entry.id}`,
+        quantity: 1,
+      })),
       active: true,
       createdAt: now,
       updatedAt: now,

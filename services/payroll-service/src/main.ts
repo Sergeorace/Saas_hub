@@ -32,7 +32,10 @@ const running = await startServer(
       ...buildPayrollApp({
         store,
         staff: createServiceClient({ baseUrl: config.staffUrl, internalKey: config.internalKey }),
-        payment: createServiceClient({ baseUrl: config.paymentUrl, internalKey: config.internalKey }),
+        payment: createServiceClient({
+          baseUrl: config.paymentUrl,
+          internalKey: config.internalKey,
+        }),
         tenant: createServiceClient({ baseUrl: config.tenantUrl, internalKey: config.internalKey }),
         publish: (type, tenantId, payload) => bus.publish(type, tenantId, payload),
       }),

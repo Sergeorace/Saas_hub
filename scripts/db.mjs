@@ -8,7 +8,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const command = process.argv[2] ?? 'help';
 
 function dockerAvailable() {
-  const probe = spawnSync('docker', ['compose', 'version'], { stdio: 'ignore', shell: process.platform === 'win32' });
+  const probe = spawnSync('docker', ['compose', 'version'], {
+    stdio: 'ignore',
+    shell: process.platform === 'win32',
+  });
   return probe.status === 0;
 }
 
@@ -38,7 +41,9 @@ function compose(args) {
 
 function warnEnv() {
   if (!existsSync(join(root, '.env'))) {
-    console.warn('⚠  .env absent : copiez infra/.env.example vers .env avant de démarrer les conteneurs.');
+    console.warn(
+      '⚠  .env absent : copiez infra/.env.example vers .env avant de démarrer les conteneurs.',
+    );
   }
 }
 
@@ -62,9 +67,13 @@ switch (command) {
     compose(['exec', 'postgres', 'psql', '-U', 'resto_hub', '-d', 'resto_identity']);
     break;
   case 'test': {
-    const result = spawnSync(process.execPath, ['--test', join(root, 'infra/postgres/rls-test.mjs')], {
-      stdio: 'inherit',
-    });
+    const result = spawnSync(
+      process.execPath,
+      ['--test', join(root, 'infra/postgres/rls-test.mjs')],
+      {
+        stdio: 'inherit',
+      },
+    );
     process.exit(result.status ?? 1);
     break;
   }

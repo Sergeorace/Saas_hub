@@ -25,18 +25,20 @@ export function Logo({ withWordmark = true, tag, inverse, className, size = 34 }
         focusable="false"
       >
         <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id={gradientId}
+            x1="0"
+            y1="0"
+            x2="40"
+            y2="40"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop stopColor="#F97316" />
             <stop offset="1" stopColor="#B23A0F" />
           </linearGradient>
         </defs>
         <rect width="40" height="40" rx="12" fill={`url(#${gradientId})`} />
-        <path
-          d="M13 11v18M27 11v18"
-          stroke="#FFF7ED"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
+        <path d="M13 11v18M27 11v18" stroke="#FFF7ED" strokeWidth="3" strokeLinecap="round" />
         <circle cx="20" cy="20" r="6.5" fill="none" stroke="#FFF7ED" strokeWidth="2.6" />
         <circle cx="20" cy="20" r="1.8" fill="#FDBA74" />
       </svg>

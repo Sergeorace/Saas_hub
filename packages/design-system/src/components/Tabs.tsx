@@ -21,7 +21,14 @@ export interface TabsProps {
 export const tabDomId = (group: string, id: string) => `${group}-tab-${id}`;
 export const panelDomId = (group: string, id: string) => `${group}-panel-${id}`;
 
-export function Tabs({ items, value, onChange, ariaLabel, variant = 'pill', className }: TabsProps) {
+export function Tabs({
+  items,
+  value,
+  onChange,
+  ariaLabel,
+  variant = 'pill',
+  className,
+}: TabsProps) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const group = `tabs-${items.map((item) => item.id).join('-')}`;
 

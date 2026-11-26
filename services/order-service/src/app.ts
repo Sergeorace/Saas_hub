@@ -46,7 +46,11 @@ export interface OrderAppOptions {
     floor: Pick<ServiceClient, 'get' | 'post'>;
     tenant: Pick<ServiceClient, 'get'>;
   };
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 interface PricingProduct {
@@ -105,9 +109,13 @@ function requireInt(
   const min = opts.min ?? 0;
   const max = opts.max ?? 1_000_000;
   if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être un entier entre ${min} et ${max}.`, {
-      field,
-    });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `« ${field} » doit être un entier entre ${min} et ${max}.`,
+      {
+        field,
+      },
+    );
   }
   return value;
 }
@@ -121,7 +129,10 @@ function optionalInt(
   return requireInt(source, field, opts);
 }
 
-function tenantOf(ctx: RequestContext, permission: string): { tenantId: string; claims: AuthClaims } {
+function tenantOf(
+  ctx: RequestContext,
+  permission: string,
+): { tenantId: string; claims: AuthClaims } {
   const tenantId = ctx.params.tenantId ?? '';
   const claims = requireTenantPermission(ctx.auth, tenantId, permission);
   return { tenantId, claims };
@@ -243,21 +254,31 @@ function publicView(store: OrderStore, order: Order) {
 }
 
 function listSummary(orders: Order[]) {
-  const byStatus: Record<string, number> = { recue: 0, en_preparation: 0, prete: 0, servie: 0, annulee: 0 };
+  const byStatus: Record<string, number> = {
+    recue: 0,
+    en_preparation: 0,
+    prete: 0,
+    servie: 0,
+    annulee: 0,
+  };
   let unpaidXof = 0;
   let paidTodayXof = 0;
   const today = new Date().toISOString().slice(0, 10);
   for (const order of orders) {
     byStatus[order.status] = (byStatus[order.status] ?? 0) + 1;
-    if (order.status !== 'annulee' && order.paymentStatus !== 'payee') unpaidXof += order.totalXof - paidXof(order);
-    if (order.paymentStatus === 'payee' && (order.receiptIssuedAt ?? '').slice(0, 10) === today) paidTodayXof += order.totalXof;
+    if (order.status !== 'annulee' && order.paymentStatus !== 'payee')
+      unpaidXof += order.totalXof - paidXof(order);
+    if (order.paymentStatus === 'payee' && (order.receiptIssuedAt ?? '').slice(0, 10) === today)
+      paidTodayXof += order.totalXof;
   }
   return {
     total: orders.length,
     byStatus,
     unpaidXof,
     paidTodayXof,
-    open: orders.filter((order) => ['recue', 'en_preparation', 'prete', 'servie'].includes(order.status)).length,
+    open: orders.filter((order) =>
+      ['recue', 'en_preparation', 'prete', 'servie'].includes(order.status),
+    ).length,
   };
 }
 
@@ -265,7 +286,9 @@ function parseItems(body: Record<string, unknown>): LineInput[] {
   const raw = requireArray(body, 'items', 60);
   return raw.map((entry, index) => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-      throw HttpError.unprocessable('validation_error', `Article ${index + 1} invalide.`, { index });
+      throw HttpError.unprocessable('validation_error', `Article ${index + 1} invalide.`, {
+        index,
+      });
     }
     const item = entry as Record<string, unknown>;
     const productId = requireString(item, 'productId', { max: 64 });
@@ -274,12 +297,21 @@ function parseItems(body: Record<string, unknown>): LineInput[] {
     const notes = optionalString(item, 'notes', { max: 140 });
     let optionChoiceIds: string[] = [];
     if (item.optionChoiceIds !== undefined) {
-      if (!Array.isArray(item.optionChoiceIds) || item.optionChoiceIds.some((id) => typeof id !== 'string')) {
-        throw HttpError.unprocessable('validation_error', `Options invalides pour l’article ${index + 1}.`, { index });
+      if (
+        !Array.isArray(item.optionChoiceIds) ||
+        item.optionChoiceIds.some((id) => typeof id !== 'string')
+      ) {
+        throw HttpError.unprocessable(
+          'validation_error',
+          `Options invalides pour l’article ${index + 1}.`,
+          { index },
+        );
       }
       optionChoiceIds = [...new Set(item.optionChoiceIds as string[])];
       if (optionChoiceIds.length > 30) {
-        throw HttpError.unprocessable('validation_error', 'Trop d’options sélectionnées.', { field: 'optionChoiceIds' });
+        throw HttpError.unprocessable('validation_error', 'Trop d’options sélectionnées.', {
+          field: 'optionChoiceIds',
+        });
       }
     }
     return { productId, quantity, variantId, optionChoiceIds, notes };
@@ -290,29 +322,43 @@ function priceLines(items: LineInput[], pricing: Map<string, PricingProduct>): O
   return items.map((item) => {
     const product = pricing.get(item.productId);
     if (!product) {
-      throw HttpError.unprocessable('unknown_product', 'Un article du panier n’existe plus ou appartient à un autre établissement.', {
-        productId: item.productId,
-      });
+      throw HttpError.unprocessable(
+        'unknown_product',
+        'Un article du panier n’existe plus ou appartient à un autre établissement.',
+        {
+          productId: item.productId,
+        },
+      );
     }
     if (!product.available) {
-      throw HttpError.conflict('product_unavailable', `« ${product.name} » est en rupture (86) et ne peut plus être commandé.`, {
-        productId: product.id,
-      });
+      throw HttpError.conflict(
+        'product_unavailable',
+        `« ${product.name} » est en rupture (86) et ne peut plus être commandé.`,
+        {
+          productId: product.id,
+        },
+      );
     }
     let base = product.priceXof;
     let variantName: string | undefined;
     if (item.variantId) {
       const variant = product.variants.find((entry) => entry.id === item.variantId);
       if (!variant) {
-        throw HttpError.unprocessable('unknown_variant', `Variante inconnue pour « ${product.name} ».`, {
-          productId: product.id,
-          variantId: item.variantId,
-        });
+        throw HttpError.unprocessable(
+          'unknown_variant',
+          `Variante inconnue pour « ${product.name} ».`,
+          {
+            productId: product.id,
+            variantId: item.variantId,
+          },
+        );
       }
       base = variant.priceXof;
       variantName = variant.name;
     }
-    const allChoices = new Map(product.options.flatMap((group) => group.choices).map((choice) => [choice.id, choice]));
+    const allChoices = new Map(
+      product.options.flatMap((group) => group.choices).map((choice) => [choice.id, choice]),
+    );
     const unknownOptions = item.optionChoiceIds.filter((id) => !allChoices.has(id));
     if (unknownOptions.length > 0) {
       throw HttpError.unprocessable('unknown_option', `Option inconnue pour « ${product.name} ».`, {
@@ -324,10 +370,14 @@ function priceLines(items: LineInput[], pricing: Map<string, PricingProduct>): O
     for (const group of product.options) {
       const chosen = group.choices.filter((choice) => item.optionChoiceIds.includes(choice.id));
       if (group.required && chosen.length < Math.max(1, group.minSelect)) {
-        throw HttpError.unprocessable('option_required', `Choisissez « ${group.name} » pour « ${product.name} ».`, {
-          productId: product.id,
-          group: group.name,
-        });
+        throw HttpError.unprocessable(
+          'option_required',
+          `Choisissez « ${group.name} » pour « ${product.name} ».`,
+          {
+            productId: product.id,
+            group: group.name,
+          },
+        );
       }
       if (chosen.length > group.maxSelect) {
         throw HttpError.unprocessable('option_limit', `Trop de choix pour « ${group.name} ».`, {
@@ -360,7 +410,8 @@ function priceLines(items: LineInput[], pricing: Map<string, PricingProduct>): O
 function kdsPayload(store: OrderStore, tenantId: string, station: Station | 'all') {
   const now = Date.now();
   const active = [...store.orders.values()].filter(
-    (order) => order.tenantId === tenantId && ['recue', 'en_preparation', 'prete'].includes(order.status),
+    (order) =>
+      order.tenantId === tenantId && ['recue', 'en_preparation', 'prete'].includes(order.status),
   );
   const tickets = [...store.tickets.values()]
     .filter((ticket) => {
@@ -380,7 +431,10 @@ function kdsPayload(store: OrderStore, tenantId: string, station: Station | 'all
           quantity: line.quantity,
           notes: line.notes,
         }));
-      const ageSeconds = Math.max(0, Math.round((now - new Date(order.createdAt).getTime()) / 1000));
+      const ageSeconds = Math.max(
+        0,
+        Math.round((now - new Date(order.createdAt).getTime()) / 1000),
+      );
       return {
         id: ticket.id,
         orderId: order.id,
@@ -414,13 +468,18 @@ function kdsPayload(store: OrderStore, tenantId: string, station: Station | 'all
 }
 
 function currentSession(store: OrderStore, tenantId: string): CashSession | undefined {
-  return [...store.sessions.values()].find((session) => session.tenantId === tenantId && session.status === 'ouverte');
+  return [...store.sessions.values()].find(
+    (session) => session.tenantId === tenantId && session.status === 'ouverte',
+  );
 }
 
 function sessionReport(store: OrderStore, session: CashSession) {
-  const payments = [...store.payments.values()].filter((payment) => payment.sessionId === session.id);
+  const payments = [...store.payments.values()].filter(
+    (payment) => payment.sessionId === session.id,
+  );
   const byMethod: Record<string, number> = { especes: 0, mobile_money: 0, carte: 0 };
-  for (const payment of payments) byMethod[payment.method] = (byMethod[payment.method] ?? 0) + payment.amountXof;
+  for (const payment of payments)
+    byMethod[payment.method] = (byMethod[payment.method] ?? 0) + payment.amountXof;
   const collected = payments.reduce((sum, payment) => sum + payment.amountXof, 0);
   return {
     ...session,
@@ -446,7 +505,11 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       );
     } catch (error) {
       if (error instanceof HttpError) throw error;
-      throw new HttpError(503, 'catalog_unavailable', 'Le catalogue est momentanément indisponible.');
+      throw new HttpError(
+        503,
+        'catalog_unavailable',
+        'Le catalogue est momentanément indisponible.',
+      );
     }
     return new Map((response.products ?? []).map((product) => [product.id, product]));
   };
@@ -479,37 +542,57 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       );
     } catch (error) {
       if (error instanceof HttpError && error.status === 404) {
-        throw HttpError.unprocessable('unknown_table', 'Cette place n’existe pas dans le plan de salle.', { tableCode: code });
+        throw HttpError.unprocessable(
+          'unknown_table',
+          'Cette place n’existe pas dans le plan de salle.',
+          { tableCode: code },
+        );
       }
       throw error;
     }
-    if (!response.table) throw HttpError.unprocessable('unknown_table', 'Place introuvable.', { tableCode: code });
+    if (!response.table)
+      throw HttpError.unprocessable('unknown_table', 'Place introuvable.', { tableCode: code });
     return response.table;
   };
 
   const attachTable = async (tenantId: string, tableCode: string, orderId: string) => {
     try {
-      await deps.floor.post(`/internal/tenants/${tenantId}/floor/tables/${encodeURIComponent(tableCode)}/order`, {
-        orderId,
-      });
+      await deps.floor.post(
+        `/internal/tenants/${tenantId}/floor/tables/${encodeURIComponent(tableCode)}/order`,
+        {
+          orderId,
+        },
+      );
     } catch (error) {
       if (error instanceof HttpError && error.status < 500) throw error;
-      throw new HttpError(503, 'floor_unavailable', 'Le plan de salle est momentanément indisponible.');
+      throw new HttpError(
+        503,
+        'floor_unavailable',
+        'Le plan de salle est momentanément indisponible.',
+      );
     }
   };
 
   const releaseTable = async (tenantId: string, tableCode: string, orderId: string) => {
     try {
-      await deps.floor.post(`/internal/tenants/${tenantId}/floor/tables/${encodeURIComponent(tableCode)}/release`, {
-        orderId,
-        to: 'libre',
-      });
+      await deps.floor.post(
+        `/internal/tenants/${tenantId}/floor/tables/${encodeURIComponent(tableCode)}/release`,
+        {
+          orderId,
+          to: 'libre',
+        },
+      );
     } catch {
       /* la libération de la place ne doit jamais bloquer l’annulation */
     }
   };
 
-  const emitStatus = async (order: Order, from: string, actorId: string, extra: Record<string, unknown> = {}) => {
+  const emitStatus = async (
+    order: Order,
+    from: string,
+    actorId: string,
+    extra: Record<string, unknown> = {},
+  ) => {
     await publish('OrderStatusChanged', order.tenantId, {
       tenantId: order.tenantId,
       orderId: order.id,
@@ -552,14 +635,22 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       };
     }
     if (source === 'client' && !customer) {
-      throw HttpError.unprocessable('customer_required', 'Renseignez votre nom pour suivre la commande.', {
-        field: 'customer.name',
-      });
+      throw HttpError.unprocessable(
+        'customer_required',
+        'Renseignez votre nom pour suivre la commande.',
+        {
+          field: 'customer.name',
+        },
+      );
     }
     if (source === 'client' && !customer?.phone) {
-      throw HttpError.unprocessable('customer_required', 'Renseignez un numéro de téléphone pour être prévenu.', {
-        field: 'customer.phone',
-      });
+      throw HttpError.unprocessable(
+        'customer_required',
+        'Renseignez un numéro de téléphone pour être prévenu.',
+        {
+          field: 'customer.phone',
+        },
+      );
     }
 
     let scheduledFor: string | undefined;
@@ -567,9 +658,13 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       const raw = requireString(body, 'scheduledFor', { max: 40 });
       const date = new Date(raw);
       if (Number.isNaN(date.getTime()) || date.getTime() < Date.now() + 5 * 60_000) {
-        throw HttpError.unprocessable('invalid_schedule', 'La précommande doit être planifiée au moins 5 minutes à l’avance.', {
-          field: 'scheduledFor',
-        });
+        throw HttpError.unprocessable(
+          'invalid_schedule',
+          'La précommande doit être planifiée au moins 5 minutes à l’avance.',
+          {
+            field: 'scheduledFor',
+          },
+        );
       }
       scheduledFor = date.toISOString();
     }
@@ -581,32 +676,51 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
           field: 'customer.address',
         });
       }
-      deliveryFee = source === 'staff' ? optionalInt(body, 'deliveryFeeXof', { min: 0, max: 10_000 }) ?? 1_000 : 1_000;
+      deliveryFee =
+        source === 'staff'
+          ? (optionalInt(body, 'deliveryFeeXof', { min: 0, max: 10_000 }) ?? 1_000)
+          : 1_000;
     }
 
     let table: TableRef | undefined;
     const tableCode = optionalString(body, 'tableCode', { max: 40 });
     if (channel === 'sur_place') {
       if (!tableCode) {
-        throw HttpError.unprocessable('table_required', 'Scannez le QR de la table ou choisissez une place.', {
-          field: 'tableCode',
-        });
+        throw HttpError.unprocessable(
+          'table_required',
+          'Scannez le QR de la table ou choisissez une place.',
+          {
+            field: 'tableCode',
+          },
+        );
       }
       table = await lookupTable(tenantId, tableCode, source === 'client' ? input.tableToken : null);
       if (table.mergedIntoCode) {
-        throw HttpError.conflict('table_merged', `Cette place est fusionnée : utilisez ${table.mergedIntoCode}.`, {
-          primaryTableCode: table.mergedIntoCode,
-        });
+        throw HttpError.conflict(
+          'table_merged',
+          `Cette place est fusionnée : utilisez ${table.mergedIntoCode}.`,
+          {
+            primaryTableCode: table.mergedIntoCode,
+          },
+        );
       }
       if (source === 'client' && table.orderId) {
-        throw HttpError.conflict('table_busy', 'Cette table a déjà une commande en cours. Appelez un serveur.', {
-          tableCode: table.code,
-        });
+        throw HttpError.conflict(
+          'table_busy',
+          'Cette table a déjà une commande en cours. Appelez un serveur.',
+          {
+            tableCode: table.code,
+          },
+        );
       }
     } else if (tableCode) {
-      throw HttpError.unprocessable('validation_error', 'Le mode choisi ne doit pas référencer de table.', {
-        field: 'tableCode',
-      });
+      throw HttpError.unprocessable(
+        'validation_error',
+        'Le mode choisi ne doit pas référencer de table.',
+        {
+          field: 'tableCode',
+        },
+      );
     }
 
     const pricing = await pricingFor(tenantId);
@@ -693,13 +807,17 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         let orders = [...store.orders.values()].filter((order) => order.tenantId === tenantId);
         if (status && status !== 'all') {
           if (!(ORDER_STATUSES as readonly string[]).includes(status)) {
-            throw HttpError.unprocessable('validation_error', 'Statut de filtre invalide.', { field: 'status' });
+            throw HttpError.unprocessable('validation_error', 'Statut de filtre invalide.', {
+              field: 'status',
+            });
           }
           orders = orders.filter((order) => order.status === status);
         }
         if (channel && channel !== 'all') {
           if (!(ORDER_CHANNELS as readonly string[]).includes(channel)) {
-            throw HttpError.unprocessable('validation_error', 'Canal de filtre invalide.', { field: 'channel' });
+            throw HttpError.unprocessable('validation_error', 'Canal de filtre invalide.', {
+              field: 'channel',
+            });
           }
           orders = orders.filter((order) => order.channel === channel);
         }
@@ -716,7 +834,9 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
           body: {
             tenantId,
             generatedAt: isoNow(),
-            summary: listSummary([...store.orders.values()].filter((order) => order.tenantId === tenantId)),
+            summary: listSummary(
+              [...store.orders.values()].filter((order) => order.tenantId === tenantId),
+            ),
             items: orders.slice(0, limit).map((order) => serializeOrder(store, order)),
           },
         };
@@ -751,7 +871,9 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const fromTime = from ? new Date(from).getTime() : Date.now() - 24 * 3600_000;
         const toTime = to ? new Date(to).getTime() : Date.now() + 3600_000;
         if (Number.isNaN(fromTime) || Number.isNaN(toTime)) {
-          throw HttpError.unprocessable('validation_error', 'Bornes de date invalides.', { field: 'from' });
+          throw HttpError.unprocessable('validation_error', 'Bornes de date invalides.', {
+            field: 'from',
+          });
         }
         const rows = [...store.orders.values()]
           .filter((order) => order.tenantId === tenantId)
@@ -866,12 +988,19 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         let tenantName = 'Établissement';
         let tenantAddress: string | undefined;
         try {
-          const summary = await deps.tenant.get<{ brandName?: string }>(`/internal/tenants/${tenantId}/summary`);
+          const summary = await deps.tenant.get<{ brandName?: string }>(
+            `/internal/tenants/${tenantId}/summary`,
+          );
           tenantName = summary.brandName ?? tenantName;
         } catch {
           tenantAddress = undefined;
         }
-        const pdf = await buildReceiptPdf({ order, tenantName, tenantAddress, printedAt: isoNow() });
+        const pdf = await buildReceiptPdf({
+          order,
+          tenantName,
+          tenantAddress,
+          printedAt: isoNow(),
+        });
         return {
           raw: {
             data: Buffer.from(pdf),
@@ -890,24 +1019,36 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const body = asObject(ctx.body);
         const target = requireEnum(body, 'status', ORDER_STATUSES);
         if (target === 'annulee') {
-          throw HttpError.unprocessable('use_cancel_endpoint', 'Utilisez l’annulation motivée dédiée.', {
-            endpoint: 'POST /orders/:id/cancel',
-          });
+          throw HttpError.unprocessable(
+            'use_cancel_endpoint',
+            'Utilisez l’annulation motivée dédiée.',
+            {
+              endpoint: 'POST /orders/:id/cancel',
+            },
+          );
         }
         if (target === order.status) {
           return { body: { order: serializeOrder(store, order), unchanged: true } };
         }
         const expectedVersion = optionalInt(body, 'expectedVersion', { min: 1 });
         if (expectedVersion !== undefined && expectedVersion !== order.version) {
-          throw HttpError.conflict('version_conflict', 'La commande a été modifiée entre-temps. Rechargez-la.', {
-            current: serializeOrder(store, order),
-          });
+          throw HttpError.conflict(
+            'version_conflict',
+            'La commande a été modifiée entre-temps. Rechargez-la.',
+            {
+              current: serializeOrder(store, order),
+            },
+          );
         }
         if (!STATUS_TRANSITIONS[order.status].includes(target)) {
-          throw HttpError.conflict('invalid_transition', `Passage « ${order.status} → ${target} » interdit.`, {
-            from: order.status,
-            to: target,
-          });
+          throw HttpError.conflict(
+            'invalid_transition',
+            `Passage « ${order.status} → ${target} » interdit.`,
+            {
+              from: order.status,
+              to: target,
+            },
+          );
         }
         const from = order.status;
         const now = isoNow();
@@ -948,12 +1089,20 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
           throw HttpError.conflict('already_cancelled', 'Cette commande est déjà annulée.');
         }
         if (order.status === 'servie') {
-          throw HttpError.conflict('already_served', 'Une commande servie ne peut plus être annulée : procédez à un remboursement.', {
-            paid: order.paymentStatus === 'payee',
-          });
+          throw HttpError.conflict(
+            'already_served',
+            'Une commande servie ne peut plus être annulée : procédez à un remboursement.',
+            {
+              paid: order.paymentStatus === 'payee',
+            },
+          );
         }
         if (order.paymentStatus === 'payee' && !canAny(claims, tenantId, ['payment:refund'])) {
-          throw new HttpError(403, 'refund_validation_required', 'Une commande payée exige la validation remboursement du gérant.');
+          throw new HttpError(
+            403,
+            'refund_validation_required',
+            'Une commande payée exige la validation remboursement du gérant.',
+          );
         }
         const from = order.status;
         const now = isoNow();
@@ -987,12 +1136,19 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'order:discount');
         const order = requireOrder(store, tenantId, ctx.params.id ?? '');
         const body = asObject(ctx.body);
-        if (order.status === 'annulee') throw HttpError.conflict('order_cancelled', 'Commande annulée.');
+        if (order.status === 'annulee')
+          throw HttpError.conflict('order_cancelled', 'Commande annulée.');
         if (order.payments.length > 0) {
-          throw HttpError.conflict('payments_started', 'Des paiements ont déjà été encaissés : la remise est verrouillée.');
+          throw HttpError.conflict(
+            'payments_started',
+            'Des paiements ont déjà été encaissés : la remise est verrouillée.',
+          );
         }
         const type = requireEnum(body, 'type', ['percent', 'amount'] as const);
-        const value = requireInt(body, 'value', { min: 1, max: type === 'percent' ? 100 : 1_000_000 });
+        const value = requireInt(body, 'value', {
+          min: 1,
+          max: type === 'percent' ? 100 : 1_000_000,
+        });
         const reason = requireString(body, 'reason', { min: 3, max: 120 });
         order.discount = {
           type,
@@ -1023,8 +1179,13 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'pos:operate');
         const order = requireOrder(store, tenantId, ctx.params.id ?? '');
         const body = asObject(ctx.body);
-        if (order.status === 'annulee') throw HttpError.conflict('order_cancelled', 'Commande annulée : aucun encaissement possible.');
-        if (order.paymentStatus === 'payee') throw HttpError.conflict('already_paid', 'Cette commande est déjà entièrement payée.');
+        if (order.status === 'annulee')
+          throw HttpError.conflict(
+            'order_cancelled',
+            'Commande annulée : aucun encaissement possible.',
+          );
+        if (order.paymentStatus === 'payee')
+          throw HttpError.conflict('already_paid', 'Cette commande est déjà entièrement payée.');
         const method = requireEnum(body, 'method', PAYMENT_METHODS) as PaymentMethod;
         const remaining = order.totalXof - paidXof(order);
         const amount = requireInt(body, 'amountXof', { min: 1, max: remaining });
@@ -1107,7 +1268,8 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       handler: async (ctx) => {
         const { tenantId, claims } = tenantOf(ctx, 'order:update');
         const ticket = store.tickets.get(ctx.params.id ?? '');
-        if (!ticket || ticket.tenantId !== tenantId) throw HttpError.notFound('Ticket introuvable.');
+        if (!ticket || ticket.tenantId !== tenantId)
+          throw HttpError.notFound('Ticket introuvable.');
         const order = requireOrder(store, tenantId, ticket.orderId);
         if (order.status === 'annulee' || order.status === 'servie') {
           throw HttpError.conflict('order_closed', 'Commande déjà clôturée sur ce poste.');
@@ -1127,7 +1289,10 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         } else if (target === 'prete' && ticket.status !== 'prete') {
           ticket.status = 'prete';
         } else if (ticket.status === 'prete' && target === 'en_preparation') {
-          throw HttpError.conflict('invalid_transition', 'Un ticket prêt ne peut pas revenir en préparation.');
+          throw HttpError.conflict(
+            'invalid_transition',
+            'Un ticket prêt ne peut pas revenir en préparation.',
+          );
         }
         ticket.updatedAt = now;
         ticket.updatedBy = claims.sub;
@@ -1214,9 +1379,13 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'pos:operate');
         const body = asObject(ctx.body);
         if (currentSession(store, tenantId)) {
-          throw HttpError.conflict('session_already_open', 'Une caisse est déjà ouverte pour cet établissement.');
+          throw HttpError.conflict(
+            'session_already_open',
+            'Une caisse est déjà ouverte pour cet établissement.',
+          );
         }
-        const openingFloatXof = optionalInt(body, 'openingFloatXof', { min: 0, max: 5_000_000 }) ?? 0;
+        const openingFloatXof =
+          optionalInt(body, 'openingFloatXof', { min: 0, max: 5_000_000 }) ?? 0;
         const now = isoNow();
         const session: CashSession = {
           id: newOrderId('csh'),
@@ -1244,12 +1413,16 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       handler: async (ctx) => {
         const { tenantId, claims } = tenantOf(ctx, 'pos:close');
         const session = currentSession(store, tenantId);
-        if (!session) throw HttpError.conflict('session_not_open', 'Aucune caisse ouverte à clôturer.');
+        if (!session)
+          throw HttpError.conflict('session_not_open', 'Aucune caisse ouverte à clôturer.');
         const body = asObject(ctx.body);
         const countedXof = requireInt(body, 'countedXof', { min: 0, max: 50_000_000 });
         const notes = optionalString(body, 'notes', { max: 300 });
-        const payments = [...store.payments.values()].filter((payment) => payment.sessionId === session.id);
-        const expectedXof = session.openingFloatXof + payments.reduce((sum, payment) => sum + payment.amountXof, 0);
+        const payments = [...store.payments.values()].filter(
+          (payment) => payment.sessionId === session.id,
+        );
+        const expectedXof =
+          session.openingFloatXof + payments.reduce((sum, payment) => sum + payment.amountXof, 0);
         const now = isoNow();
         session.status = 'cloturee';
         session.closedBy = claims.sub;
@@ -1264,7 +1437,12 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
           action: 'pos.session.closed',
           targetType: 'cash_session',
           targetId: session.id,
-          meta: { expectedXof, countedXof, differenceXof: session.differenceXof, payments: payments.length },
+          meta: {
+            expectedXof,
+            countedXof,
+            differenceXof: session.differenceXof,
+            payments: payments.length,
+          },
         });
         return { body: { session: serializeSession(store, session) } };
       },
@@ -1279,9 +1457,13 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const channel = body.channel;
         const tableToken = optionalString(body, 'tableToken', { max: 120 }) ?? null;
         if (channel === 'sur_place' && !tableToken) {
-          throw HttpError.unprocessable('table_token_required', 'Scannez le QR de votre table pour commander.', {
-            field: 'tableToken',
-          });
+          throw HttpError.unprocessable(
+            'table_token_required',
+            'Scannez le QR de votre table pour commander.',
+            {
+              field: 'tableToken',
+            },
+          );
         }
         const result = await createOrder({
           tenantId,
@@ -1307,7 +1489,8 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         const order = store.orders.get(ctx.params.id ?? '');
-        if (!order || order.tenantId !== tenantId) throw HttpError.notFound('Commande introuvable.');
+        if (!order || order.tenantId !== tenantId)
+          throw HttpError.notFound('Commande introuvable.');
         const key = ctx.query.get('k') ?? '';
         if (!key || key !== order.publicToken) throw HttpError.forbidden('Lien de suivi invalide.');
         return { body: { order: publicView(store, order) } };
@@ -1321,7 +1504,10 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const order = requireOrder(store, tenantId, ctx.params.orderId ?? '');
         const body = asObject(ctx.body);
-        const method = requireEnum(body, 'method', ['mobile_money', 'carte'] as const) as PaymentMethod;
+        const method = requireEnum(body, 'method', [
+          'mobile_money',
+          'carte',
+        ] as const) as PaymentMethod;
         const reference = requireString(body, 'reference', { min: 3, max: 120 });
         const provider = requireString(body, 'provider', { min: 2, max: 40 });
         const existing = order.payments.find((payment) => payment.reference === reference);
@@ -1343,7 +1529,10 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
           };
         }
         if (order.status === 'annulee') {
-          throw HttpError.conflict('order_cancelled', 'Commande annulée : aucun encaissement possible.');
+          throw HttpError.conflict(
+            'order_cancelled',
+            'Commande annulée : aucun encaissement possible.',
+          );
         }
         if (order.paymentStatus === 'payee') {
           throw HttpError.conflict('already_paid', 'Cette commande est déjà entièrement payée.');
@@ -1428,7 +1617,8 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         const order = store.orders.get(ctx.params.orderId ?? '');
-        if (!order || order.tenantId !== tenantId) throw HttpError.notFound('Commande introuvable.');
+        if (!order || order.tenantId !== tenantId)
+          throw HttpError.notFound('Commande introuvable.');
         const lastPayment = order.payments[order.payments.length - 1];
         return {
           body: {
@@ -1447,7 +1637,7 @@ export function buildOrderApp(options: OrderAppOptions): Route[] {
               totalXof: order.totalXof,
               invoiceNumber: order.invoiceNumber ?? null,
               createdAt: order.createdAt,
-              paidAt: order.paymentStatus === 'payee' ? lastPayment?.at ?? order.updatedAt : null,
+              paidAt: order.paymentStatus === 'payee' ? (lastPayment?.at ?? order.updatedAt) : null,
               lines: order.lines.map((line) => ({
                 id: line.id,
                 productId: line.productId,

@@ -59,7 +59,13 @@ export function ClientHeader({
             type="button"
             className="rh-chrome-btn rh-chrome-btn--round"
             aria-label="Retour"
-            onClick={() => (back === true ? (window.history.length > 1 ? window.history.back() : navigate('/')) : navigate(goBack))}
+            onClick={() =>
+              back === true
+                ? window.history.length > 1
+                  ? window.history.back()
+                  : navigate('/')
+                : navigate(goBack)
+            }
           >
             <Icon name="arrow-left" size="sm" />
           </button>
@@ -86,14 +92,35 @@ export function ClientBottomBar({ active }: { active: string }) {
   const { t, locale } = useI18n();
   const items: NavItem[] = [
     { id: 'home', label: t('nav.home'), icon: 'home', href: '#/', active: active === 'home' },
-    { id: 'explore', label: t('nav.explore'), icon: 'search', href: '#/recherche', active: active === 'explore' },
+    {
+      id: 'explore',
+      label: t('nav.explore'),
+      icon: 'search',
+      href: '#/recherche',
+      active: active === 'explore',
+    },
     { id: 'scan', label: t('nav.scan'), icon: 'scan', href: '#/scan', active: active === 'scan' },
-    { id: 'orders', label: t('nav.orders'), icon: 'receipt', href: '#/commandes', active: active === 'orders' },
-    { id: 'account', label: t('nav.account'), icon: 'users', href: '#/compte', active: active === 'account' },
+    {
+      id: 'orders',
+      label: t('nav.orders'),
+      icon: 'receipt',
+      href: '#/commandes',
+      active: active === 'orders',
+    },
+    {
+      id: 'account',
+      label: t('nav.account'),
+      icon: 'users',
+      href: '#/compte',
+      active: active === 'account',
+    },
   ];
   return (
     <div className="rh-client-bottom">
-      <BottomNav items={items} ariaLabel={locale === 'fr' ? 'Navigation de l’application cliente' : 'Guest app navigation'} />
+      <BottomNav
+        items={items}
+        ariaLabel={locale === 'fr' ? 'Navigation de l’application cliente' : 'Guest app navigation'}
+      />
     </div>
   );
 }
@@ -131,7 +158,15 @@ export function PageLoading({ rows = 3 }: { rows?: number }) {
   );
 }
 
-export function ErrorPanel({ message, onRetry, retryLabel }: { message: string; onRetry?: () => void; retryLabel: string }) {
+export function ErrorPanel({
+  message,
+  onRetry,
+  retryLabel,
+}: {
+  message: string;
+  onRetry?: () => void;
+  retryLabel: string;
+}) {
   return (
     <div className="rh-client-page">
       <div className="rh-client-error">
@@ -149,6 +184,12 @@ export function ErrorPanel({ message, onRetry, retryLabel }: { message: string; 
   );
 }
 
-export function StatusPill({ tone, children }: { tone: 'neutral' | 'success' | 'warning' | 'danger' | 'info'; children: ReactNode }) {
+export function StatusPill({
+  tone,
+  children,
+}: {
+  tone: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+  children: ReactNode;
+}) {
   return <span className={cx('rh-client-pill', `rh-client-pill--${tone}`)}>{children}</span>;
 }

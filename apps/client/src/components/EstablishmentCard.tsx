@@ -45,14 +45,32 @@ export function EstablishmentCard({
   const href = `/e/${encodeURIComponent(establishment.slug || establishment.id)}`;
   return (
     <article className={cx('rh-place-card', compact && 'rh-place-card--compact')}>
-      <a className="rh-place-card__link" href={`#${href}`} onClick={(event) => { event.preventDefault(); navigate(href); }}>
+      <a
+        className="rh-place-card__link"
+        href={`#${href}`}
+        onClick={(event) => {
+          event.preventDefault();
+          navigate(href);
+        }}
+      >
         <div className="rh-place-card__media">
-          <CoverImage src={establishment.photos[0]} alt={establishment.brandName} seed={establishment.brandName} />
+          <CoverImage
+            src={establishment.photos[0]}
+            alt={establishment.brandName}
+            seed={establishment.brandName}
+          />
           <div className="rh-place-card__badges">
-            <span className={cx('rh-client-pill', open ? 'rh-client-pill--success' : 'rh-client-pill--neutral')}>
+            <span
+              className={cx(
+                'rh-client-pill',
+                open ? 'rh-client-pill--success' : 'rh-client-pill--neutral',
+              )}
+            >
               {open ? t('common.open') : t('common.closed')}
             </span>
-            <span className="rh-place-card__kind">{t(`establishment.${kindKey(establishment.kind)}`)}</span>
+            <span className="rh-place-card__kind">
+              {t(`establishment.${kindKey(establishment.kind)}`)}
+            </span>
           </div>
         </div>
         <div className="rh-place-card__body">
@@ -66,7 +84,9 @@ export function EstablishmentCard({
               </span>
             )}
           </div>
-          {establishment.description && <p className="rh-place-card__desc">{establishment.description}</p>}
+          {establishment.description && (
+            <p className="rh-place-card__desc">{establishment.description}</p>
+          )}
           <div className="rh-place-card__meta">
             <span>
               {shortAddress(establishment) || establishment.primarySite?.address || 'Lomé'}

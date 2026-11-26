@@ -154,7 +154,8 @@
   color: inherit;
   cursor: pointer;
   min-height: 44px;
-  transition: background var(--duration-fast) var(--ease-standard),
+  transition:
+    background var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -268,7 +269,8 @@
   font-weight: 600;
   font-size: var(--text-sm);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-standard),
+  transition:
+    background var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard);
 }
 
@@ -414,9 +416,7 @@
 /* ---- Inscription -------------------------------------------------------- */
 .reg-page {
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 100% 0%, var(--primary-soft), transparent 38%),
-    var(--bg);
+  background: radial-gradient(circle at 100% 0%, var(--primary-soft), transparent 38%), var(--bg);
   display: flex;
   flex-direction: column;
 }
@@ -698,7 +698,8 @@
   color: var(--ink);
   cursor: pointer;
   min-height: 132px;
-  transition: border-color var(--duration-fast) var(--ease-standard),
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
     box-shadow var(--duration-fast) var(--ease-standard),
     transform var(--duration-fast) var(--ease-standard);
 }
@@ -710,7 +711,9 @@
 
 .reg-plan.is-selected {
   border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary), var(--shadow-sm);
+  box-shadow:
+    0 0 0 1px var(--primary),
+    var(--shadow-sm);
   background: var(--primary-soft);
 }
 
@@ -1284,9 +1287,7 @@
   display: grid;
   place-items: center;
   padding: var(--space-6);
-  background:
-    radial-gradient(circle at 80% 0%, var(--primary-soft), transparent 40%),
-    var(--bg);
+  background: radial-gradient(circle at 80% 0%, var(--primary-soft), transparent 40%), var(--bg);
 }
 
 .console-gate > * {
@@ -1397,7 +1398,8 @@
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-standard),
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard),
     background var(--duration-fast) var(--ease-standard);
 }
@@ -1825,8 +1827,11 @@
   padding: var(--space-4);
   display: grid;
   gap: var(--space-2);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--preview-primary, var(--primary)) 14%, var(--surface)) 0%, var(--surface) 65%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--preview-primary, var(--primary)) 14%, var(--surface)) 0%,
+    var(--surface) 65%
+  );
 }
 
 .ws-preview__hero > span {

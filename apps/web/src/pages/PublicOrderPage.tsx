@@ -57,7 +57,8 @@ function unitPrice(product: PublicMenuProduct, variantId?: string, choices: stri
   return base + extra;
 }
 
-const TABLE_TOKEN_KEY = (tenantId: string, code: string) => `restohub.tableToken.${tenantId}.${code}`;
+const TABLE_TOKEN_KEY = (tenantId: string, code: string) =>
+  `restohub.tableToken.${tenantId}.${code}`;
 
 export function PublicTablePage({
   tenantId,
@@ -130,7 +131,9 @@ export function PublicTablePage({
     setCart((current) => {
       const existing = current.find((line) => line.key === key);
       if (existing) {
-        return current.map((line) => (line.key === key ? { ...line, quantity: line.quantity + 1 } : line));
+        return current.map((line) =>
+          line.key === key ? { ...line, quantity: line.quantity + 1 } : line,
+        );
       }
       return [
         ...current,
@@ -187,7 +190,11 @@ export function PublicTablePage({
       const trackingKey = new URL(result.trackingUrl).searchParams.get('k') ?? '';
       navigate(`/suivi/${tenantId}/${result.order.id}?k=${encodeURIComponent(trackingKey)}`);
     } catch (cause) {
-      toast.push({ title: t('publicOrder.error'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('publicOrder.error'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -196,7 +203,12 @@ export function PublicTablePage({
   if (loading) {
     return (
       <div className="pub-page">
-        <Card><CardBody><SkeletonText lines={8} /><p className="console-muted">{t('publicOrder.loading')}</p></CardBody></Card>
+        <Card>
+          <CardBody>
+            <SkeletonText lines={8} />
+            <p className="console-muted">{t('publicOrder.loading')}</p>
+          </CardBody>
+        </Card>
       </div>
     );
   }
@@ -206,7 +218,14 @@ export function PublicTablePage({
       <div className="pub-page">
         <Card>
           <CardBody>
-            <EmptyState icon="alert" title={t('publicOrder.error')} description={error ?? ''} action={<Button onClick={() => window.location.reload()}>{t('publicOrder.retry')}</Button>} />
+            <EmptyState
+              icon="alert"
+              title={t('publicOrder.error')}
+              description={error ?? ''}
+              action={
+                <Button onClick={() => window.location.reload()}>{t('publicOrder.retry')}</Button>
+              }
+            />
           </CardBody>
         </Card>
       </div>
@@ -220,7 +239,9 @@ export function PublicTablePage({
           <span className="pub-head__mark">RH</span>
           <div>
             <strong>RESTO-HUB</strong>
-            <span>{t('publicOrder.table')} {tableCode}</span>
+            <span>
+              {t('publicOrder.table')} {tableCode}
+            </span>
           </div>
         </div>
         <Badge tone={tableBusy ? 'warning' : 'success'} dot>
@@ -243,11 +264,20 @@ export function PublicTablePage({
             <p>{t('publicOrder.secureNote')}</p>
           </div>
           <div className="pub-cats" role="group" aria-label={t('publicOrder.menuTitle')}>
-            <button type="button" className={category === 'all' ? 'pub-chip is-active' : 'pub-chip'} onClick={() => setCategory('all')}>
+            <button
+              type="button"
+              className={category === 'all' ? 'pub-chip is-active' : 'pub-chip'}
+              onClick={() => setCategory('all')}
+            >
               {t('publicOrder.allCategories')}
             </button>
             {menu.categories.map((entry) => (
-              <button key={entry.id} type="button" className={category === entry.id ? 'pub-chip is-active' : 'pub-chip'} onClick={() => setCategory(entry.id)}>
+              <button
+                key={entry.id}
+                type="button"
+                className={category === entry.id ? 'pub-chip is-active' : 'pub-chip'}
+                onClick={() => setCategory(entry.id)}
+              >
                 {entry.name}
               </button>
             ))}
@@ -256,7 +286,11 @@ export function PublicTablePage({
             {products.map((product) => (
               <article key={product.id} className="pub-product">
                 <div className="pub-product__media" aria-hidden="true">
-                  {product.photos[0] ? <img src={product.photos[0]} alt="" /> : <span>{product.name.slice(0, 2).toUpperCase()}</span>}
+                  {product.photos[0] ? (
+                    <img src={product.photos[0]} alt="" />
+                  ) : (
+                    <span>{product.name.slice(0, 2).toUpperCase()}</span>
+                  )}
                 </div>
                 <div className="pub-product__body">
                   <strong>{product.name}</strong>
@@ -268,17 +302,22 @@ export function PublicTablePage({
                   iconLeft="plus"
                   disabled={tableBusy}
                   onClick={() => {
-                    if (product.variants.length > 0 || product.options.length > 0) setConfig(product);
+                    if (product.variants.length > 0 || product.options.length > 0)
+                      setConfig(product);
                     else addProduct(product);
                   }}
                 >
-                  {product.variants.length > 0 || product.options.length > 0 ? t('publicOrder.configure') : t('publicOrder.addToCart')}
+                  {product.variants.length > 0 || product.options.length > 0
+                    ? t('publicOrder.configure')
+                    : t('publicOrder.addToCart')}
                 </Button>
               </article>
             ))}
           </div>
           <div className="pub-cartbar">
-            <span>{count} × {t('publicOrder.cartTitle')} · <strong>{formatXof(total, locale)}</strong></span>
+            <span>
+              {count} × {t('publicOrder.cartTitle')} · <strong>{formatXof(total, locale)}</strong>
+            </span>
             <Button disabled={cart.length === 0 || tableBusy} onClick={() => setStep('cart')}>
               {t('publicOrder.seeCart')}
             </Button>
@@ -288,10 +327,25 @@ export function PublicTablePage({
 
       {step === 'cart' && (
         <Card>
-          <CardHeader title={t('publicOrder.cartTitle')} action={<Button size="sm" variant="ghost" onClick={() => setStep('menu')}>{t('publicOrder.back')}</Button>} />
+          <CardHeader
+            title={t('publicOrder.cartTitle')}
+            action={
+              <Button size="sm" variant="ghost" onClick={() => setStep('menu')}>
+                {t('publicOrder.back')}
+              </Button>
+            }
+          />
           <CardBody>
             {cart.length === 0 ? (
-              <EmptyState icon="utensils" title={t('publicOrder.cartEmpty')} action={<Button size="sm" onClick={() => setStep('menu')}>{t('publicOrder.menuTitle')}</Button>} />
+              <EmptyState
+                icon="utensils"
+                title={t('publicOrder.cartEmpty')}
+                action={
+                  <Button size="sm" onClick={() => setStep('menu')}>
+                    {t('publicOrder.menuTitle')}
+                  </Button>
+                }
+              />
             ) : (
               <>
                 <ul className="ord-cart__lines">
@@ -300,14 +354,28 @@ export function PublicTablePage({
                       <div>
                         <strong>{line.productName}</strong>
                         {(line.variantName || line.optionNames.length > 0) && (
-                          <span>{[line.variantName, ...line.optionNames].filter(Boolean).join(' · ')}</span>
+                          <span>
+                            {[line.variantName, ...line.optionNames].filter(Boolean).join(' · ')}
+                          </span>
                         )}
                         <em>{formatXof(line.unitPriceXof, locale)}</em>
                       </div>
                       <div className="ord-qty">
-                        <button type="button" aria-label="−" onClick={() => setQuantity(line.key, -1)}>−</button>
+                        <button
+                          type="button"
+                          aria-label="−"
+                          onClick={() => setQuantity(line.key, -1)}
+                        >
+                          −
+                        </button>
                         <span>{line.quantity}</span>
-                        <button type="button" aria-label="+" onClick={() => setQuantity(line.key, 1)}>+</button>
+                        <button
+                          type="button"
+                          aria-label="+"
+                          onClick={() => setQuantity(line.key, 1)}
+                        >
+                          +
+                        </button>
                       </div>
                     </li>
                   ))}
@@ -330,7 +398,11 @@ export function PublicTablePage({
           <CardHeader
             title={t('publicOrder.checkoutTitle')}
             subtitle={`${count} ${t('publicOrder.cartTitle').toLowerCase()} · ${formatXof(total, locale)}`}
-            action={<Button size="sm" variant="ghost" onClick={() => setStep('cart')}>{t('publicOrder.back')}</Button>}
+            action={
+              <Button size="sm" variant="ghost" onClick={() => setStep('cart')}>
+                {t('publicOrder.back')}
+              </Button>
+            }
           />
           <CardBody>
             <div className="pub-form">
@@ -389,7 +461,11 @@ function PublicConfigModal({
   const { t, locale } = useI18n();
   const [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [choices, setChoices] = useState<string[]>(() =>
-    product.options.flatMap((group) => (group.required ? group.choices.slice(0, Math.max(1, group.minSelect)).map((choice) => choice.id) : [])),
+    product.options.flatMap((group) =>
+      group.required
+        ? group.choices.slice(0, Math.max(1, group.minSelect)).map((choice) => choice.id)
+        : [],
+    ),
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -399,7 +475,8 @@ function PublicConfigModal({
     setChoices((current) => {
       const inGroup = current.filter((id) => group.choices.some((choice) => choice.id === id));
       if (inGroup.includes(choiceId)) return current.filter((id) => id !== choiceId);
-      if (group.maxSelect === 1) return [...current.filter((id) => !inGroup.includes(id)), choiceId];
+      if (group.maxSelect === 1)
+        return [...current.filter((id) => !inGroup.includes(id)), choiceId];
       if (inGroup.length >= group.maxSelect) return current;
       return [...current, choiceId];
     });
@@ -425,8 +502,12 @@ function PublicConfigModal({
       closeLabel={t('meta.close')}
       footer={
         <div className="ord-composer__footer-actions">
-          <Button variant="ghost" onClick={onClose}>{t('publicOrder.back')}</Button>
-          <Button iconLeft="plus" onClick={confirm}>{t('publicOrder.addToCart')}</Button>
+          <Button variant="ghost" onClick={onClose}>
+            {t('publicOrder.back')}
+          </Button>
+          <Button iconLeft="plus" onClick={confirm}>
+            {t('publicOrder.addToCart')}
+          </Button>
         </div>
       }
     >
@@ -435,8 +516,18 @@ function PublicConfigModal({
           <fieldset className="ord-config__group">
             <legend>{t('publicOrder.variant')}</legend>
             {product.variants.map((variant) => (
-              <label key={variant.id} className={variant.id === variantId ? 'ord-config__option is-active' : 'ord-config__option'}>
-                <input type="radio" name={`variant-${product.id}`} checked={variant.id === variantId} onChange={() => setVariantId(variant.id)} />
+              <label
+                key={variant.id}
+                className={
+                  variant.id === variantId ? 'ord-config__option is-active' : 'ord-config__option'
+                }
+              >
+                <input
+                  type="radio"
+                  name={`variant-${product.id}`}
+                  checked={variant.id === variantId}
+                  onChange={() => setVariantId(variant.id)}
+                />
                 <span>{variant.name}</span>
                 <em>{formatXof(variant.priceXof, locale)}</em>
               </label>
@@ -447,10 +538,19 @@ function PublicConfigModal({
           <fieldset key={group.id} className="ord-config__group">
             <legend>
               {group.name}
-              {group.required && <span className="ord-config__required"> {t('publicOrder.required')}</span>}
+              {group.required && (
+                <span className="ord-config__required"> {t('publicOrder.required')}</span>
+              )}
             </legend>
             {group.choices.map((choice) => (
-              <label key={choice.id} className={choices.includes(choice.id) ? 'ord-config__option is-active' : 'ord-config__option'}>
+              <label
+                key={choice.id}
+                className={
+                  choices.includes(choice.id)
+                    ? 'ord-config__option is-active'
+                    : 'ord-config__option'
+                }
+              >
                 <input
                   type={group.maxSelect === 1 ? 'radio' : 'checkbox'}
                   name={`group-${group.id}`}
@@ -458,12 +558,18 @@ function PublicConfigModal({
                   onChange={() => toggle(group.id, choice.id)}
                 />
                 <span>{choice.name}</span>
-                <em>{choice.priceDeltaXof ? `+${formatXof(choice.priceDeltaXof, locale)}` : '—'}</em>
+                <em>
+                  {choice.priceDeltaXof ? `+${formatXof(choice.priceDeltaXof, locale)}` : '—'}
+                </em>
               </label>
             ))}
           </fieldset>
         ))}
-        {error && <p className="auth-error" role="alert">{error}</p>}
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     </Modal>
   );
@@ -511,7 +617,11 @@ export function PublicTrackingPage({
   if (loading) {
     return (
       <div className="pub-page">
-        <Card><CardBody><SkeletonText lines={6} /></CardBody></Card>
+        <Card>
+          <CardBody>
+            <SkeletonText lines={6} />
+          </CardBody>
+        </Card>
       </div>
     );
   }
@@ -521,7 +631,14 @@ export function PublicTrackingPage({
       <div className="pub-page">
         <Card>
           <CardBody>
-            <EmptyState icon="alert" title={t('publicOrder.invalidLink')} description={error ?? ''} action={<Button onClick={() => window.location.reload()}>{t('publicOrder.retry')}</Button>} />
+            <EmptyState
+              icon="alert"
+              title={t('publicOrder.invalidLink')}
+              description={error ?? ''}
+              action={
+                <Button onClick={() => window.location.reload()}>{t('publicOrder.retry')}</Button>
+              }
+            />
           </CardBody>
         </Card>
       </div>
@@ -556,10 +673,22 @@ export function PublicTrackingPage({
           <span className="pub-head__mark">RH</span>
           <div>
             <strong>{t('publicOrder.trackingTitle')}</strong>
-            <span>{t('publicOrder.orderNumber')} {order.number}{order.tableCode ? ` · ${order.tableCode}` : ''}</span>
+            <span>
+              {t('publicOrder.orderNumber')} {order.number}
+              {order.tableCode ? ` · ${order.tableCode}` : ''}
+            </span>
           </div>
         </div>
-        <Badge tone={order.status === 'annulee' ? 'danger' : order.status === 'servie' ? 'neutral' : 'success'} live>
+        <Badge
+          tone={
+            order.status === 'annulee'
+              ? 'danger'
+              : order.status === 'servie'
+                ? 'neutral'
+                : 'success'
+          }
+          live
+        >
           {t(`publicOrder.${statusKey}`)}
         </Badge>
       </header>
@@ -572,9 +701,12 @@ export function PublicTrackingPage({
               const done = reached.has(status);
               const entry = order.timeline.find((item) => item.status === status);
               const label =
-                status === 'recue' ? t('publicOrder.statusRecue')
-                  : status === 'en_preparation' ? t('publicOrder.statusEnPreparation')
-                    : status === 'prete' ? t('publicOrder.statusPrete')
+                status === 'recue'
+                  ? t('publicOrder.statusRecue')
+                  : status === 'en_preparation'
+                    ? t('publicOrder.statusEnPreparation')
+                    : status === 'prete'
+                      ? t('publicOrder.statusPrete')
                       : t('publicOrder.statusServie');
               return (
                 <li key={status} className={done ? 'is-done' : undefined}>
@@ -589,7 +721,9 @@ export function PublicTrackingPage({
             {order.status === 'annulee' && (
               <li className="is-canceled">
                 <span className="pub-steps__dot" aria-hidden="true" />
-                <div><strong>{t('publicOrder.statusAnnulee')}</strong></div>
+                <div>
+                  <strong>{t('publicOrder.statusAnnulee')}</strong>
+                </div>
               </li>
             )}
           </ol>
@@ -599,7 +733,10 @@ export function PublicTrackingPage({
               <li key={`${line.name}-${index}`}>
                 <span className="ord-lines__qty">{line.quantity}×</span>
                 <div className="ord-lines__body">
-                  <strong>{line.name}{line.variantName ? ` — ${line.variantName}` : ''}</strong>
+                  <strong>
+                    {line.name}
+                    {line.variantName ? ` — ${line.variantName}` : ''}
+                  </strong>
                 </div>
                 <strong className="ord-lines__total">{formatXof(line.lineTotalXof, locale)}</strong>
               </li>
@@ -622,14 +759,30 @@ export function PublicTrackingPage({
             {order.tickets.map((ticket) => (
               <div key={ticket.station} className={`ord-ticket ord-ticket--${ticket.status}`}>
                 <Badge tone={ticket.station === 'bar' ? 'info' : 'accent'}>
-                  {ticket.station === 'bar' ? t('publicOrder.stationBar') : t('publicOrder.stationCuisine')}
+                  {ticket.station === 'bar'
+                    ? t('publicOrder.stationBar')
+                    : t('publicOrder.stationCuisine')}
                 </Badge>
-                <span>{ticket.status === 'nouvelle' ? t('orders.ticketNouvelle') : ticket.status === 'prete' ? t('orders.ticketPrete') : t('orders.ticketEnPreparation')}</span>
+                <span>
+                  {ticket.status === 'nouvelle'
+                    ? t('orders.ticketNouvelle')
+                    : ticket.status === 'prete'
+                      ? t('orders.ticketPrete')
+                      : t('orders.ticketEnPreparation')}
+                </span>
               </div>
             ))}
           </div>
           {token && order.tableCode && (
-            <Button variant="outline" iconLeft="utensils" onClick={() => navigate(`/t/${tenantId}/${encodeURIComponent(order.tableCode!)}?k=${encodeURIComponent(token)}`)}>
+            <Button
+              variant="outline"
+              iconLeft="utensils"
+              onClick={() =>
+                navigate(
+                  `/t/${tenantId}/${encodeURIComponent(order.tableCode!)}?k=${encodeURIComponent(token)}`,
+                )
+              }
+            >
               {t('publicOrder.orderAgain')}
             </Button>
           )}

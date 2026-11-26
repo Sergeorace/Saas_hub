@@ -1,7 +1,17 @@
 import { buildAuditEntry, newId, nowIso, type AuditEntry } from '@resto-hub/service-kit';
-import { DISPUTE_STATUSES, TRANSACTION_STATUSES, type DisputeStatus, type TransactionStatus } from '@resto-hub/shared-contracts';
+import {
+  DISPUTE_STATUSES,
+  TRANSACTION_STATUSES,
+  type DisputeStatus,
+  type TransactionStatus,
+} from '@resto-hub/shared-contracts';
 import { appendEntry, createLedger, type Ledger } from './ledger.js';
-import { getProvider, type PaymentMethod, type ProviderId, type RoutingDecision } from './providers.js';
+import {
+  getProvider,
+  type PaymentMethod,
+  type ProviderId,
+  type RoutingDecision,
+} from './providers.js';
 
 export { DISPUTE_STATUSES, TRANSACTION_STATUSES, type DisputeStatus, type TransactionStatus };
 
@@ -217,7 +227,11 @@ export function getWallet(store: PaymentStore, tenantId: string): Wallet {
   return wallet;
 }
 
-export function feeBreakdown(amountXof: number, providerFeeXof: number, plan: string): FeeBreakdown {
+export function feeBreakdown(
+  amountXof: number,
+  providerFeeXof: number,
+  plan: string,
+): FeeBreakdown {
   const commissionPercent = PLAN_COMMISSION[plan] ?? PLAN_COMMISSION.pro;
   const commissionXof = Math.round((amountXof * commissionPercent) / 100);
   return {
@@ -254,10 +268,25 @@ export function bookConfirmation(store: PaymentStore, transaction: PaymentTransa
     memo: `Encaissement ${transaction.providerReference}`,
     reference: transaction.id,
     lines: [
-      { account: 'provider_receivable', label: `Créance ${transaction.provider}`, debitXof: amountXof, creditXof: 0 },
-      { account: 'provider_fee_payable', label: 'Frais fournisseur à régler', debitXof: 0, creditXof: fees.providerFeeXof },
+      {
+        account: 'provider_receivable',
+        label: `Créance ${transaction.provider}`,
+        debitXof: amountXof,
+        creditXof: 0,
+      },
+      {
+        account: 'provider_fee_payable',
+        label: 'Frais fournisseur à régler',
+        debitXof: 0,
+        creditXof: fees.providerFeeXof,
+      },
       { account: 'tenant_wallet', label: 'Net établissement', debitXof: 0, creditXof: fees.netXof },
-      { account: 'platform_commission', label: `Commission ${fees.commissionPercent} %`, debitXof: 0, creditXof: fees.commissionXof },
+      {
+        account: 'platform_commission',
+        label: `Commission ${fees.commissionPercent} %`,
+        debitXof: 0,
+        creditXof: fees.commissionXof,
+      },
     ],
   });
   const wallet = getWallet(store, transaction.tenantId);
@@ -282,9 +311,24 @@ export function bookRefund(
     reference: transaction.id,
     lines: [
       { account: 'tenant_wallet', label: 'Net repris', debitXof: reverseNet, creditXof: 0 },
-      { account: 'platform_commission', label: 'Commission reprise', debitXof: reverseCommission, creditXof: 0 },
-      { account: 'refund_clearing', label: 'Frais fournisseur non récupérés', debitXof: feeShare, creditXof: 0 },
-      { account: 'provider_refund_payable', label: 'Remboursement à reverser', debitXof: 0, creditXof: refund.amountXof },
+      {
+        account: 'platform_commission',
+        label: 'Commission reprise',
+        debitXof: reverseCommission,
+        creditXof: 0,
+      },
+      {
+        account: 'refund_clearing',
+        label: 'Frais fournisseur non récupérés',
+        debitXof: feeShare,
+        creditXof: 0,
+      },
+      {
+        account: 'provider_refund_payable',
+        label: 'Remboursement à reverser',
+        debitXof: 0,
+        creditXof: refund.amountXof,
+      },
     ],
   });
   const wallet = getWallet(store, transaction.tenantId);
@@ -301,8 +345,18 @@ export function bookSettlement(store: PaymentStore, settlement: Settlement, acto
     memo: `Reversement ${settlement.id}`,
     reference: settlement.id,
     lines: [
-      { account: 'tenant_wallet', label: 'Net reversé', debitXof: settlement.amountXof, creditXof: 0 },
-      { account: 'cash', label: 'Paiement établissement', debitXof: 0, creditXof: settlement.amountXof },
+      {
+        account: 'tenant_wallet',
+        label: 'Net reversé',
+        debitXof: settlement.amountXof,
+        creditXof: 0,
+      },
+      {
+        account: 'cash',
+        label: 'Paiement établissement',
+        debitXof: 0,
+        creditXof: settlement.amountXof,
+      },
     ],
   });
   const wallet = getWallet(store, settlement.tenantId);
@@ -318,7 +372,11 @@ export function bookSettlement(store: PaymentStore, settlement: Settlement, acto
     action: 'settlement.paid',
     targetType: 'settlement',
     targetId: settlement.id,
-    meta: { amountXof: settlement.amountXof, mode: settlement.mode, destination: settlement.destination },
+    meta: {
+      amountXof: settlement.amountXof,
+      mode: settlement.mode,
+      destination: settlement.destination,
+    },
   });
 }
 
@@ -334,8 +392,18 @@ export function bookDisbursement(
     memo: input.memo ?? `Décaissement ${input.reference}`,
     reference: input.reference,
     lines: [
-      { account: 'tenant_wallet', label: 'Décaissement portefeuille', debitXof: input.totalXof, creditXof: 0 },
-      { account: 'salary_payable', label: 'Salaires/payouts à régler', debitXof: 0, creditXof: input.totalXof },
+      {
+        account: 'tenant_wallet',
+        label: 'Décaissement portefeuille',
+        debitXof: input.totalXof,
+        creditXof: 0,
+      },
+      {
+        account: 'salary_payable',
+        label: 'Salaires/payouts à régler',
+        debitXof: 0,
+        creditXof: input.totalXof,
+      },
     ],
   });
   wallet.availableXof -= input.totalXof;
@@ -401,13 +469,23 @@ export function runReconciliation(
 
   if (injectAnomalies && statement.length > 0) {
     statement.shift();
-    if (statement.length > 0) statement[0] = { ...statement[0], amountXof: statement[0].amountXof + 500 };
-    statement.push({ provider: 'tmoney', reference: `ORPHAN_${date.replace(/-/g, '')}`, amountXof: 7500, netXof: 7387 });
+    if (statement.length > 0)
+      statement[0] = { ...statement[0], amountXof: statement[0].amountXof + 500 };
+    statement.push({
+      provider: 'tmoney',
+      reference: `ORPHAN_${date.replace(/-/g, '')}`,
+      amountXof: 7500,
+      netXof: 7387,
+    });
   }
 
-  const byReference = new Map(confirmed.map((transaction) => [transaction.providerReference, transaction]));
+  const byReference = new Map(
+    confirmed.map((transaction) => [transaction.providerReference, transaction]),
+  );
   const missingInStatement = confirmed
-    .filter((transaction) => !statement.some((row) => row.reference === transaction.providerReference))
+    .filter(
+      (transaction) => !statement.some((row) => row.reference === transaction.providerReference),
+    )
     .map((transaction) => transaction.providerReference);
   const amountMismatches: ReconciliationRun['amountMismatches'] = [];
   const orphanRows: ReconciliationRun['orphanRows'] = [];
@@ -415,7 +493,11 @@ export function runReconciliation(
   for (const row of statement) {
     const transaction = byReference.get(row.reference);
     if (!transaction) {
-      orphanRows.push({ provider: row.provider, reference: row.reference, amountXof: row.amountXof });
+      orphanRows.push({
+        provider: row.provider,
+        reference: row.reference,
+        amountXof: row.amountXof,
+      });
       continue;
     }
     if (row.amountXof !== transaction.amountXof) {
@@ -438,7 +520,8 @@ export function runReconciliation(
     missingInStatement,
     amountMismatches,
     orphanRows,
-    balanced: missingInStatement.length === 0 && amountMismatches.length === 0 && orphanRows.length === 0,
+    balanced:
+      missingInStatement.length === 0 && amountMismatches.length === 0 && orphanRows.length === 0,
     actorId,
   };
   store.reconciliations.push(run);
@@ -448,7 +531,13 @@ export function runReconciliation(
     action: 'reconciliation.run',
     targetType: 'reconciliation',
     targetId: run.id,
-    meta: { date, balanced: run.balanced, missing: missingInStatement.length, mismatches: amountMismatches.length, orphan: orphanRows.length },
+    meta: {
+      date,
+      balanced: run.balanced,
+      missing: missingInStatement.length,
+      mismatches: amountMismatches.length,
+      orphan: orphanRows.length,
+    },
   });
   return run;
 }
@@ -466,7 +555,11 @@ export const FRAUD_LIMITS = {
   blockMs: 15 * 60 * 1000,
 };
 
-export function activeBlock(store: PaymentStore, tenantId: string, userId: string): FraudBlock | null {
+export function activeBlock(
+  store: PaymentStore,
+  tenantId: string,
+  userId: string,
+): FraudBlock | null {
   const now = Date.now();
   for (const block of store.fraudBlocks.values()) {
     if (block.tenantId !== tenantId || block.userId !== userId) continue;
@@ -621,9 +714,21 @@ export function serializeSplit(store: PaymentStore, split: SplitGroup) {
       provider: transaction?.provider ?? null,
     };
   });
-  const confirmedParts = parts.filter((part) => part.status === 'confirmee' || part.status === 'remboursee_partielle' || part.status === 'remboursee').length;
-  const failedParts = parts.filter((part) => part.status === 'echouee' || part.status === 'expiree' || part.status === 'annulee').length;
-  const status = confirmedParts === parts.length ? 'confirmee' : failedParts > 0 ? 'echec_partiel' : 'en_attente';
+  const confirmedParts = parts.filter(
+    (part) =>
+      part.status === 'confirmee' ||
+      part.status === 'remboursee_partielle' ||
+      part.status === 'remboursee',
+  ).length;
+  const failedParts = parts.filter(
+    (part) => part.status === 'echouee' || part.status === 'expiree' || part.status === 'annulee',
+  ).length;
+  const status =
+    confirmedParts === parts.length
+      ? 'confirmee'
+      : failedParts > 0
+        ? 'echec_partiel'
+        : 'en_attente';
   return {
     id: split.id,
     tenantId: split.tenantId,
@@ -631,7 +736,9 @@ export function serializeSplit(store: PaymentStore, split: SplitGroup) {
     totalXof: split.totalXof,
     tipXof: split.tipXof,
     status,
-    confirmedXof: parts.filter((part) => part.status === 'confirmee').reduce((sum, part) => sum + part.amountXof, 0),
+    confirmedXof: parts
+      .filter((part) => part.status === 'confirmee')
+      .reduce((sum, part) => sum + part.amountXof, 0),
     parts,
     createdAt: split.createdAt,
   };
@@ -683,7 +790,9 @@ export function seedPaymentDemo(store: PaymentStore, tenantId = 'tnt_sahelgrill'
         chosen: providerId,
         reason: 'données de démonstration',
         switched: false,
-        candidates: [{ provider: providerId, label: provider.label, feeXof: quote.feeXof, available: true }],
+        candidates: [
+          { provider: providerId, label: provider.label, feeXof: quote.feeXof, available: true },
+        ],
       },
       instructions: initiated.instructions,
       requires3ds: false,

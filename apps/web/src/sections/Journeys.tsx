@@ -1,12 +1,4 @@
-import {
-  Badge,
-  BottomNav,
-  Button,
-  Icon,
-  Logo,
-  formatXof,
-  useI18n,
-} from '@resto-hub/design-system';
+import { Badge, BottomNav, Button, Icon, Logo, formatXof, useI18n } from '@resto-hub/design-system';
 import type { DemoMenuItem, JourneyItem } from '../data/types';
 
 interface JourneyDemo {
@@ -102,9 +94,7 @@ export function Journeys() {
                             <strong>{item.name}</strong>
                             <span>{item.meta}</span>
                           </div>
-                          <span className="phone-demo__price">
-                            {formatXof(item.price, locale)}
-                          </span>
+                          <span className="phone-demo__price">{formatXof(item.price, locale)}</span>
                         </li>
                       ))}
                     </ul>

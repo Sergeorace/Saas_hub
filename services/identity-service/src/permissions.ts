@@ -78,9 +78,24 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     jobTitle: 'manager_salle',
     requiresMfa: false,
     permissions: [
-      'tenant:view', 'floor:view', 'floor:manage', 'floor:status', 'order:view', 'order:create', 'order:update', 'order:cancel',
-      'order:discount', 'catalog:view', 'team:view', 'staff:view', 'report:view', 'audit:view', 'loyalty:view', 'loyalty:manage',
-      'notification:view', 'notification:manage',
+      'tenant:view',
+      'floor:view',
+      'floor:manage',
+      'floor:status',
+      'order:view',
+      'order:create',
+      'order:update',
+      'order:cancel',
+      'order:discount',
+      'catalog:view',
+      'team:view',
+      'staff:view',
+      'report:view',
+      'audit:view',
+      'loyalty:view',
+      'loyalty:manage',
+      'notification:view',
+      'notification:manage',
     ],
   },
   {
@@ -89,7 +104,16 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     description: 'Prend les commandes et suit les tables dont il a la charge.',
     jobTitle: 'serveur',
     requiresMfa: false,
-    permissions: ['tenant:view', 'floor:view', 'floor:status', 'order:view', 'order:create', 'order:update', 'pos:operate', 'catalog:view'],
+    permissions: [
+      'tenant:view',
+      'floor:view',
+      'floor:status',
+      'order:view',
+      'order:create',
+      'order:update',
+      'pos:operate',
+      'catalog:view',
+    ],
   },
   {
     code: 'cashier',
@@ -97,7 +121,15 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     description: 'Encaisse, clôture la caisse et suit les paiements.',
     jobTitle: 'caissier',
     requiresMfa: false,
-    permissions: ['tenant:view', 'order:view', 'order:update', 'pos:operate', 'pos:close', 'payment:view', 'report:view'],
+    permissions: [
+      'tenant:view',
+      'order:view',
+      'order:update',
+      'pos:operate',
+      'pos:close',
+      'payment:view',
+      'report:view',
+    ],
   },
   {
     code: 'cook',
@@ -105,7 +137,14 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     description: 'Consulte le KDS et fait avancer le statut des plats.',
     jobTitle: 'cuisinier',
     requiresMfa: false,
-    permissions: ['tenant:view', 'order:view', 'order:update', 'catalog:view', 'catalog:availability', 'inventory:view'],
+    permissions: [
+      'tenant:view',
+      'order:view',
+      'order:update',
+      'catalog:view',
+      'catalog:availability',
+      'inventory:view',
+    ],
   },
   {
     code: 'bartender',
@@ -113,7 +152,14 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     description: 'Gère le bar : commandes, stock de boissons et disponibilité des produits.',
     jobTitle: 'barman',
     requiresMfa: false,
-    permissions: ['tenant:view', 'order:view', 'order:update', 'catalog:view', 'catalog:availability', 'inventory:view'],
+    permissions: [
+      'tenant:view',
+      'order:view',
+      'order:update',
+      'catalog:view',
+      'catalog:availability',
+      'inventory:view',
+    ],
   },
   {
     code: 'driver',
@@ -130,8 +176,16 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     jobTitle: 'comptable',
     requiresMfa: false,
     permissions: [
-      'tenant:view', 'subscription:view', 'report:view', 'report:export', 'payment:view', 'payroll:view',
-      'payroll:prepare', 'inventory:view', 'audit:view', 'team:view',
+      'tenant:view',
+      'subscription:view',
+      'report:view',
+      'report:export',
+      'payment:view',
+      'payroll:view',
+      'payroll:prepare',
+      'inventory:view',
+      'audit:view',
+      'team:view',
     ],
   },
 ];
@@ -171,8 +225,10 @@ export function isValidPermission(value: string): value is Permission {
   return (PERMISSIONS as readonly string[]).includes(value);
 }
 
-export const TENANT_JOB_TITLES = ROLE_TEMPLATES.filter((role) => role.code !== 'owner').map((role) => ({
-  code: role.jobTitle,
-  label: role.name,
-  requiresMfa: role.requiresMfa,
-}));
+export const TENANT_JOB_TITLES = ROLE_TEMPLATES.filter((role) => role.code !== 'owner').map(
+  (role) => ({
+    code: role.jobTitle,
+    label: role.name,
+    requiresMfa: role.requiresMfa,
+  }),
+);

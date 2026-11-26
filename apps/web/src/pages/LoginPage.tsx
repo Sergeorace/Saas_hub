@@ -47,7 +47,12 @@ export function LoginPage() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [recoveryMode, setRecoveryMode] = useState(false);
-  const [errors, setErrors] = useState<{ form?: string; code?: string; email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{
+    form?: string;
+    code?: string;
+    email?: string;
+    password?: string;
+  }>({});
   const [pending, setPending] = useState<string | null>(null);
 
   useEffect(() => {
@@ -75,7 +80,12 @@ export function LoginPage() {
       setPending('mfa');
       try {
         const enrollment = await identityApi.mfaEnroll(result.ticket);
-        setPhase({ kind: 'mfa-setup', ticket: result.ticket, secret: enrollment.secret, otpauthUrl: enrollment.otpauthUrl });
+        setPhase({
+          kind: 'mfa-setup',
+          ticket: result.ticket,
+          secret: enrollment.secret,
+          otpauthUrl: enrollment.otpauthUrl,
+        });
       } catch (error) {
         setErrors({ form: errorMessage(error) });
       } finally {
@@ -121,7 +131,11 @@ export function LoginPage() {
     setErrors({});
     setPending('phone-verify');
     try {
-      const result = await identityApi.phoneVerify(phase.challengeId, code.trim(), name.trim() || undefined);
+      const result = await identityApi.phoneVerify(
+        phase.challengeId,
+        code.trim(),
+        name.trim() || undefined,
+      );
       await handleLoginResult(result);
     } catch (error) {
       setErrors({ form: errorMessage(error) });
@@ -282,7 +296,11 @@ export function LoginPage() {
                     onChange={(event) => setPassword(event.target.value)}
                     required
                   />
-                  {errors.form && <p className="auth-error" role="alert">{errors.form}</p>}
+                  {errors.form && (
+                    <p className="auth-error" role="alert">
+                      {errors.form}
+                    </p>
+                  )}
                   <Button type="submit" size="lg" fullWidth loading={pending === 'email'}>
                     {pending === 'email' ? t('auth.loggingIn') : t('auth.login')}
                   </Button>
@@ -307,7 +325,11 @@ export function LoginPage() {
                         onChange={(event) => setName(event.target.value)}
                         autoComplete="name"
                       />
-                      {errors.form && <p className="auth-error" role="alert">{errors.form}</p>}
+                      {errors.form && (
+                        <p className="auth-error" role="alert">
+                          {errors.form}
+                        </p>
+                      )}
                       <Button type="submit" size="lg" fullWidth loading={pending === 'phone-start'}>
                         {t('auth.sendCode')}
                       </Button>
@@ -334,8 +356,18 @@ export function LoginPage() {
                         onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
                         required
                       />
-                      {errors.form && <p className="auth-error" role="alert">{errors.form}</p>}
-                      <Button type="submit" size="lg" fullWidth loading={pending === 'phone-verify'} disabled={code.length < 4}>
+                      {errors.form && (
+                        <p className="auth-error" role="alert">
+                          {errors.form}
+                        </p>
+                      )}
+                      <Button
+                        type="submit"
+                        size="lg"
+                        fullWidth
+                        loading={pending === 'phone-verify'}
+                        disabled={code.length < 4}
+                      >
                         {t('auth.verify')}
                       </Button>
                       <Button type="button" variant="ghost" size="sm" onClick={reset}>
@@ -346,27 +378,40 @@ export function LoginPage() {
                 </>
               )}
 
-              <div className="auth-divider"><span>{t('auth.or')}</span></div>
+              <div className="auth-divider">
+                <span>{t('auth.or')}</span>
+              </div>
               <div className="auth-social">
-                <Button variant="outline" iconLeft="globe" onClick={() => socialLogin('google')} loading={pending === 'google'}>
+                <Button
+                  variant="outline"
+                  iconLeft="globe"
+                  onClick={() => socialLogin('google')}
+                  loading={pending === 'google'}
+                >
                   Google
                 </Button>
-                <Button variant="outline" iconLeft="smartphone" onClick={() => socialLogin('apple')} loading={pending === 'apple'}>
+                <Button
+                  variant="outline"
+                  iconLeft="smartphone"
+                  onClick={() => socialLogin('apple')}
+                  loading={pending === 'apple'}
+                >
                   Apple
                 </Button>
               </div>
               <p className="auth-hint">{t('auth.socialHint')}</p>
 
               <p className="auth-switch">
-                {t('auth.noAccount')}{' '}
-                <a href="#/inscription">{t('auth.createAccount')}</a>
+                {t('auth.noAccount')} <a href="#/inscription">{t('auth.createAccount')}</a>
               </p>
             </>
           )}
 
           {phase.kind === 'mfa-setup' && (
             <form className="auth-form" onSubmit={confirmMfaSetup} noValidate>
-              <Badge tone="warning" icon="shield">{t('auth.mfaRequired')}</Badge>
+              <Badge tone="warning" icon="shield">
+                {t('auth.mfaRequired')}
+              </Badge>
               <header className="auth-card__head">
                 <h2 className="auth-card__title">{t('auth.mfaSetupTitle')}</h2>
                 <p className="auth-card__lead">{t('auth.mfaSetupLead')}</p>
@@ -379,7 +424,9 @@ export function LoginPage() {
               <div className="auth-secret">
                 <span>{t('auth.mfaSecret')}</span>
                 <code>{phase.secret}</code>
-                <a href={phase.otpauthUrl} className="auth-secret__link">{t('auth.mfaOpen')}</a>
+                <a href={phase.otpauthUrl} className="auth-secret__link">
+                  {t('auth.mfaOpen')}
+                </a>
               </div>
               <Input
                 label={t('auth.mfaCodeLabel')}
@@ -392,8 +439,18 @@ export function LoginPage() {
                 error={errors.code}
                 required
               />
-              {errors.form && <p className="auth-error" role="alert">{errors.form}</p>}
-              <Button type="submit" size="lg" fullWidth loading={pending === 'mfa-confirm'} disabled={code.length !== 6}>
+              {errors.form && (
+                <p className="auth-error" role="alert">
+                  {errors.form}
+                </p>
+              )}
+              <Button
+                type="submit"
+                size="lg"
+                fullWidth
+                loading={pending === 'mfa-confirm'}
+                disabled={code.length !== 6}
+              >
                 {t('auth.mfaConfirm')}
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={reset}>
@@ -404,7 +461,9 @@ export function LoginPage() {
 
           {phase.kind === 'mfa-verify' && (
             <form className="auth-form" onSubmit={verifyMfa} noValidate>
-              <Badge tone="info" icon="lock">{t('auth.mfaVerifyBadge')}</Badge>
+              <Badge tone="info" icon="lock">
+                {t('auth.mfaVerifyBadge')}
+              </Badge>
               <header className="auth-card__head">
                 <h2 className="auth-card__title">{t('auth.mfaVerifyTitle')}</h2>
                 <p className="auth-card__lead">{t('auth.mfaVerifyLead')}</p>
@@ -418,12 +477,20 @@ export function LoginPage() {
                 className={recoveryMode ? undefined : 'rh-input--otp'}
                 value={code}
                 onChange={(event) =>
-                  setCode(recoveryMode ? event.target.value.toUpperCase() : event.target.value.replace(/\D/g, ''))
+                  setCode(
+                    recoveryMode
+                      ? event.target.value.toUpperCase()
+                      : event.target.value.replace(/\D/g, ''),
+                  )
                 }
                 error={errors.code}
                 required
               />
-              {errors.form && <p className="auth-error" role="alert">{errors.form}</p>}
+              {errors.form && (
+                <p className="auth-error" role="alert">
+                  {errors.form}
+                </p>
+              )}
               <Button type="submit" size="lg" fullWidth loading={pending === 'mfa-verify'}>
                 {t('auth.mfaVerify')}
               </Button>
@@ -444,7 +511,9 @@ export function LoginPage() {
 
           {phase.kind === 'recovery' && (
             <div className="auth-form">
-              <Badge tone="success" icon="check-circle">{t('auth.mfaEnabled')}</Badge>
+              <Badge tone="success" icon="check-circle">
+                {t('auth.mfaEnabled')}
+              </Badge>
               <header className="auth-card__head">
                 <h2 className="auth-card__title">{t('auth.recoveryTitle')}</h2>
                 <p className="auth-card__lead">{t('auth.recoveryLead')}</p>
@@ -471,7 +540,11 @@ export function LoginPage() {
                 fullWidth
                 onClick={() => {
                   void finish(phase.bundle, t('auth.success')).catch((error: unknown) => {
-                    toast.push({ title: t('auth.errorTitle'), description: errorMessage(error), tone: 'error' });
+                    toast.push({
+                      title: t('auth.errorTitle'),
+                      description: errorMessage(error),
+                      tone: 'error',
+                    });
                   });
                 }}
               >
@@ -487,12 +560,19 @@ export function LoginPage() {
   );
 }
 
-function TabsMode({ value, onChange }: { value: 'email' | 'phone'; onChange: (next: 'email' | 'phone') => void }) {
+function TabsMode({
+  value,
+  onChange,
+}: {
+  value: 'email' | 'phone';
+  onChange: (next: 'email' | 'phone') => void;
+}) {
   const { t } = useI18n();
-  const items: Array<{ value: 'email' | 'phone'; label: string; icon: 'receipt' | 'smartphone' }> = [
-    { value: 'email', label: t('auth.tabEmail'), icon: 'receipt' },
-    { value: 'phone', label: t('auth.tabPhone'), icon: 'smartphone' },
-  ];
+  const items: Array<{ value: 'email' | 'phone'; label: string; icon: 'receipt' | 'smartphone' }> =
+    [
+      { value: 'email', label: t('auth.tabEmail'), icon: 'receipt' },
+      { value: 'phone', label: t('auth.tabPhone'), icon: 'smartphone' },
+    ];
   return (
     <div className="auth-mode" role="tablist" aria-label={t('auth.title')}>
       {items.map((item) => (

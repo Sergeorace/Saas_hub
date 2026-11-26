@@ -20,7 +20,8 @@ export const frPayroll: Messages = {
     statNone: 'Aucun cycle pour l’instant',
     prepare: 'Préparer la paie',
     prepareTitle: 'Nouveau cycle de paie',
-    prepareHint: 'Le calcul est effectué depuis le pointage et les plannings du service Équipe, puis figé dans un instantané.',
+    prepareHint:
+      'Le calcul est effectué depuis le pointage et les plannings du service Équipe, puis figé dans un instantané.',
     period: 'Période',
     notes: 'Note interne (optionnel)',
     createRun: 'Calculer le cycle',
@@ -83,7 +84,8 @@ export const frPayroll: Messages = {
     showTrace: 'Voir le calcul',
     hideTrace: 'Masquer le calcul',
     adjustmentsTitle: 'Variables du mois',
-    adjustmentsHint: 'Primes, retenues et avances saisies par le préparateur. Le calcul est rejoué immédiatement.',
+    adjustmentsHint:
+      'Primes, retenues et avances saisies par le préparateur. Le calcul est rejoué immédiatement.',
     addAdjustment: 'Ajouter une variable',
     adjEmployee: 'Collaborateur',
     adjType: 'Type',
@@ -124,7 +126,8 @@ export const frPayroll: Messages = {
     exportRules: 'Règles (CSV expert)',
     exportDone: 'Export généré.',
     settingsTitle: 'Paramétrage de la paie',
-    settingsHint: 'Toutes les règles sont paramétrables et validables par un expert-comptable : aucun taux n’est codé en dur.',
+    settingsHint:
+      'Toutes les règles sont paramétrables et validables par un expert-comptable : aucun taux n’est codé en dur.',
     monthlyHours: 'Heures mensuelles de référence',
     workingDays: 'Jours ouvrés par mois',
     rulesTitle: 'Règles de calcul',
@@ -219,7 +222,8 @@ export const enPayroll: Messages = {
     statNone: 'No cycle yet',
     prepare: 'Prepare payroll',
     prepareTitle: 'New payroll cycle',
-    prepareHint: 'Computation uses attendance and schedules from the Team service, then freezes them in a snapshot.',
+    prepareHint:
+      'Computation uses attendance and schedules from the Team service, then freezes them in a snapshot.',
     period: 'Period',
     notes: 'Internal note (optional)',
     createRun: 'Compute cycle',
@@ -282,7 +286,8 @@ export const enPayroll: Messages = {
     showTrace: 'Show computation',
     hideTrace: 'Hide computation',
     adjustmentsTitle: 'Monthly variables',
-    adjustmentsHint: 'Bonuses, deductions and advances entered by the preparer. The computation runs immediately.',
+    adjustmentsHint:
+      'Bonuses, deductions and advances entered by the preparer. The computation runs immediately.',
     addAdjustment: 'Add variable',
     adjEmployee: 'Employee',
     adjType: 'Type',
@@ -323,7 +328,8 @@ export const enPayroll: Messages = {
     exportRules: 'Rules (expert CSV)',
     exportDone: 'Export generated.',
     settingsTitle: 'Payroll configuration',
-    settingsHint: 'Every rule is configurable and auditable by an accountant: no rate is hard-coded.',
+    settingsHint:
+      'Every rule is configurable and auditable by an accountant: no rate is hard-coded.',
     monthlyHours: 'Reference monthly hours',
     workingDays: 'Working days per month',
     rulesTitle: 'Calculation rules',

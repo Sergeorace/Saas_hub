@@ -128,7 +128,8 @@ export const frStaff: Messages = {
     cancel: 'Annuler',
     close: 'Fermer',
     inviteTitle: 'Inviter un collaborateur',
-    inviteHint: 'Un lien sécurisé est envoyé par SMS ou e-mail. L’employé définit son PIN en l’acceptant.',
+    inviteHint:
+      'Un lien sécurisé est envoyé par SMS ou e-mail. L’employé définit son PIN en l’acceptant.',
     inviteChannel: 'Canal d’envoi',
     channelSms: 'SMS',
     channelEmail: 'E-mail',
@@ -185,7 +186,8 @@ export const frStaff: Messages = {
     clockIn: 'Pointer l’arrivée',
     clockOut: 'Pointer le départ',
     clockTitle: 'Pointage par PIN',
-    clockHint: 'Le collaborateur saisit son PIN à 4 chiffres. La géolocalisation est requise si un géofence est actif.',
+    clockHint:
+      'Le collaborateur saisit son PIN à 4 chiffres. La géolocalisation est requise si un géofence est actif.',
     pin: 'PIN (4 chiffres)',
     pinDemo: 'PIN de démonstration : 1234 (Akouvi), 2345 (Kossi), 3456 (Sena)…',
     useLocation: 'Envoyer ma position',
@@ -212,7 +214,8 @@ export const frStaff: Messages = {
     disableGeofence: 'Désactiver',
     geofenceSaved: 'Paramètre de pointage enregistré.',
     performanceHeading: 'Ventes par serveur',
-    performanceHint: 'Alimenté par les événements OrderPaid et TipDistributed, dédupliqués par commande.',
+    performanceHint:
+      'Alimenté par les événements OrderPaid et TipDistributed, dédupliqués par commande.',
     averageTicket: 'Ticket moyen',
     performanceEmpty: 'Aucune vente attribuée pour l’instant.',
     auditTitle: 'Journal d’audit',
@@ -356,7 +359,8 @@ export const enStaff: Messages = {
     cancel: 'Cancel',
     close: 'Close',
     inviteTitle: 'Invite a team member',
-    inviteHint: 'A secure link is sent by SMS or email. The employee sets their PIN when accepting.',
+    inviteHint:
+      'A secure link is sent by SMS or email. The employee sets their PIN when accepting.',
     inviteChannel: 'Delivery channel',
     channelSms: 'SMS',
     channelEmail: 'Email',
@@ -413,7 +417,8 @@ export const enStaff: Messages = {
     clockIn: 'Clock in',
     clockOut: 'Clock out',
     clockTitle: 'PIN clock-in',
-    clockHint: 'The employee enters their 4-digit PIN. Geolocation is required when a geofence is active.',
+    clockHint:
+      'The employee enters their 4-digit PIN. Geolocation is required when a geofence is active.',
     pin: 'PIN (4 digits)',
     pinDemo: 'Demo PINs: 1234 (Akouvi), 2345 (Kossi), 3456 (Sena)…',
     useLocation: 'Send my position',

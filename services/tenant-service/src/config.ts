@@ -30,7 +30,10 @@ export function loadTenantConfig(): TenantConfig {
     identityUrl: process.env.IDENTITY_URL ?? 'http://127.0.0.1:4001',
     catalogUrl: process.env.CATALOG_URL ?? 'http://127.0.0.1:4003',
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
-    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     billingWebhookSecret,
     demoBilling: envFlag('DEMO_BILLING', !production),
     trialDays: Number(process.env.TRIAL_DAYS ?? 14),

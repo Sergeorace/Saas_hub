@@ -85,7 +85,8 @@ export interface Payslip {
   pdf: PdfArchive | null;
 }
 
-export type RunStatus = 'brouillon' | 'preparee' | 'validee' | 'en_cours' | 'reussi' | 'echoue' | 'a_rejouer';
+export type RunStatus =
+  'brouillon' | 'preparee' | 'validee' | 'en_cours' | 'reussi' | 'echoue' | 'a_rejouer';
 export type PaymentStatus = 'en_cours' | 'reussi' | 'echoue' | 'a_rejouer';
 
 export interface PaymentAttempt {
@@ -131,7 +132,12 @@ export interface PayrollRun {
   adjustments: PayrollAdjustment[];
   totals: RunTotals;
   snapshot: { employees: StaffPayrollEmployee[]; settings: PayrollSettings; fetchedAt: string };
-  payment: { reference: string; status: PaymentStatus; attemptedAt: string; message: string } | null;
+  payment: {
+    reference: string;
+    status: PaymentStatus;
+    attemptedAt: string;
+    message: string;
+  } | null;
   attempts: PaymentAttempt[];
 }
 
@@ -190,9 +196,11 @@ export function previousPeriod(): string {
 
 export function periodLabel(period: string): string {
   const [year, month] = period.split('-').map(Number);
-  return new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
-    new Date(Date.UTC(year, month - 1, 1)),
-  );
+  return new Intl.DateTimeFormat('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
 }
 
 export function computeSums(payslips: Payslip[]): RunTotals {
@@ -230,7 +238,9 @@ export function buildPayslip(
   let retenues = computation.retenuesXof;
   let avances = computation.avancesXof;
 
-  for (const adjustment of adjustments.filter((entry) => entry.employeeId === employee.employeeId)) {
+  for (const adjustment of adjustments.filter(
+    (entry) => entry.employeeId === employee.employeeId,
+  )) {
     components.push({
       ruleId: adjustment.id,
       code: `AJUST_${adjustment.type.toUpperCase()}`,
@@ -255,7 +265,10 @@ export function buildPayslip(
     }
   }
 
-  const net = Math.max(0, Math.round(brut - computation.cotisationsXof - retenues - computation.impotsXof - avances));
+  const net = Math.max(
+    0,
+    Math.round(brut - computation.cotisationsXof - retenues - computation.impotsXof - avances),
+  );
   return {
     employeeId: employee.employeeId,
     name: employee.name,
@@ -354,34 +367,104 @@ export function seedPayrollDemo(store: PayrollStore): void {
   settings.updatedBy = 'usr_demo_seed';
   const employees: StaffPayrollEmployee[] = [
     {
-      employeeId: 'emp_akouvi', name: 'Akouvi Mensah', jobTitle: 'Serveur', roleCode: 'waiter', contractType: 'cdi',
-      hireDate: '2023-02-14', baseSalaryXof: 140000, paymentMethod: 'mobile_money', paymentDestination: 'TMoney 90 12 34 56',
-      daysPresent: 22, minutesWorked: 10725, hoursWorked: 178.75, overtimeMinutes: 405, overtimeHours: 6.75,
-      unpaidLeaveDays: 1, paidLeaveDays: 0, tipsXof: 9500, salesXof: 4120000,
+      employeeId: 'emp_akouvi',
+      name: 'Akouvi Mensah',
+      jobTitle: 'Serveur',
+      roleCode: 'waiter',
+      contractType: 'cdi',
+      hireDate: '2023-02-14',
+      baseSalaryXof: 140000,
+      paymentMethod: 'mobile_money',
+      paymentDestination: 'TMoney 90 12 34 56',
+      daysPresent: 22,
+      minutesWorked: 10725,
+      hoursWorked: 178.75,
+      overtimeMinutes: 405,
+      overtimeHours: 6.75,
+      unpaidLeaveDays: 1,
+      paidLeaveDays: 0,
+      tipsXof: 9500,
+      salesXof: 4120000,
     },
     {
-      employeeId: 'emp_kossi', name: 'Kossi Adjo', jobTitle: 'Cuisinier', roleCode: 'cook', contractType: 'cdi',
-      hireDate: '2022-08-01', baseSalaryXof: 160000, paymentMethod: 'mobile_money', paymentDestination: 'Moov Money 96 55 44 33',
-      daysPresent: 23, minutesWorked: 11040, hoursWorked: 184, overtimeMinutes: 0, overtimeHours: 0,
-      unpaidLeaveDays: 0, paidLeaveDays: 0, tipsXof: 900, salesXof: 0,
+      employeeId: 'emp_kossi',
+      name: 'Kossi Adjo',
+      jobTitle: 'Cuisinier',
+      roleCode: 'cook',
+      contractType: 'cdi',
+      hireDate: '2022-08-01',
+      baseSalaryXof: 160000,
+      paymentMethod: 'mobile_money',
+      paymentDestination: 'Moov Money 96 55 44 33',
+      daysPresent: 23,
+      minutesWorked: 11040,
+      hoursWorked: 184,
+      overtimeMinutes: 0,
+      overtimeHours: 0,
+      unpaidLeaveDays: 0,
+      paidLeaveDays: 0,
+      tipsXof: 900,
+      salesXof: 0,
     },
     {
-      employeeId: 'emp_sena', name: 'Sena Amah', jobTitle: 'Barman', roleCode: 'bartender', contractType: 'cdi',
-      hireDate: '2024-01-09', baseSalaryXof: 150000, paymentMethod: 'bank', paymentDestination: 'Compte BOA TG 000123',
-      daysPresent: 21, minutesWorked: 10080, hoursWorked: 168, overtimeMinutes: 0, overtimeHours: 0,
-      unpaidLeaveDays: 0, paidLeaveDays: 1, tipsXof: 6200, salesXof: 2980000,
+      employeeId: 'emp_sena',
+      name: 'Sena Amah',
+      jobTitle: 'Barman',
+      roleCode: 'bartender',
+      contractType: 'cdi',
+      hireDate: '2024-01-09',
+      baseSalaryXof: 150000,
+      paymentMethod: 'bank',
+      paymentDestination: 'Compte BOA TG 000123',
+      daysPresent: 21,
+      minutesWorked: 10080,
+      hoursWorked: 168,
+      overtimeMinutes: 0,
+      overtimeHours: 0,
+      unpaidLeaveDays: 0,
+      paidLeaveDays: 1,
+      tipsXof: 6200,
+      salesXof: 2980000,
     },
     {
-      employeeId: 'emp_yawa', name: 'Yawa Doe', jobTitle: 'Caissière', roleCode: 'cashier', contractType: 'cdi',
-      hireDate: '2023-11-02', baseSalaryXof: 155000, paymentMethod: 'mobile_money', paymentDestination: 'TMoney 90 77 88 99',
-      daysPresent: 22, minutesWorked: 10560, hoursWorked: 176, overtimeMinutes: 0, overtimeHours: 0,
-      unpaidLeaveDays: 0, paidLeaveDays: 0, tipsXof: 3100, salesXof: 1860000,
+      employeeId: 'emp_yawa',
+      name: 'Yawa Doe',
+      jobTitle: 'Caissière',
+      roleCode: 'cashier',
+      contractType: 'cdi',
+      hireDate: '2023-11-02',
+      baseSalaryXof: 155000,
+      paymentMethod: 'mobile_money',
+      paymentDestination: 'TMoney 90 77 88 99',
+      daysPresent: 22,
+      minutesWorked: 10560,
+      hoursWorked: 176,
+      overtimeMinutes: 0,
+      overtimeHours: 0,
+      unpaidLeaveDays: 0,
+      paidLeaveDays: 0,
+      tipsXof: 3100,
+      salesXof: 1860000,
     },
     {
-      employeeId: 'emp_komlan', name: 'Komlan Tetteh', jobTitle: 'Manager de salle', roleCode: 'floor_manager', contractType: 'cdi',
-      hireDate: '2021-05-17', baseSalaryXof: 280000, paymentMethod: 'bank', paymentDestination: 'Compte Ecobank TG 445566',
-      daysPresent: 23, minutesWorked: 11040, hoursWorked: 184, overtimeMinutes: 0, overtimeHours: 0,
-      unpaidLeaveDays: 0, paidLeaveDays: 0, tipsXof: 2400, salesXof: 1200000,
+      employeeId: 'emp_komlan',
+      name: 'Komlan Tetteh',
+      jobTitle: 'Manager de salle',
+      roleCode: 'floor_manager',
+      contractType: 'cdi',
+      hireDate: '2021-05-17',
+      baseSalaryXof: 280000,
+      paymentMethod: 'bank',
+      paymentDestination: 'Compte Ecobank TG 445566',
+      daysPresent: 23,
+      minutesWorked: 11040,
+      hoursWorked: 184,
+      overtimeMinutes: 0,
+      overtimeHours: 0,
+      unpaidLeaveDays: 0,
+      paidLeaveDays: 0,
+      tipsXof: 2400,
+      salesXof: 1200000,
     },
   ];
   const run = createRun({

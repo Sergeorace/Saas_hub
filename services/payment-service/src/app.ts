@@ -60,7 +60,11 @@ export interface PaymentAppOptions {
     tenant: Pick<ServiceClient, 'get'>;
     order: Pick<ServiceClient, 'get' | 'post'>;
   };
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 function isoNow(): string {
@@ -80,7 +84,11 @@ function requireInt(
   const min = opts.min ?? 0;
   const max = opts.max ?? 100_000_000;
   if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être un entier entre ${min} et ${max}.`, { field });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `« ${field} » doit être un entier entre ${min} et ${max}.`,
+      { field },
+    );
   }
   return value;
 }
@@ -94,7 +102,10 @@ function optionalInt(
   return requireInt(source, field, opts);
 }
 
-function tenantOf(ctx: RequestContext, permission: string): { tenantId: string; claims: AuthClaims } {
+function tenantOf(
+  ctx: RequestContext,
+  permission: string,
+): { tenantId: string; claims: AuthClaims } {
   const tenantId = ctx.params.tenantId ?? '';
   const claims = requireTenantPermission(ctx.auth, tenantId, permission);
   return { tenantId, claims };
@@ -124,7 +135,11 @@ interface OrderSnapshot {
   invoiceNumber: string | null;
 }
 
-async function fetchOrder(options: PaymentAppOptions, tenantId: string, orderId: string): Promise<OrderSnapshot> {
+async function fetchOrder(
+  options: PaymentAppOptions,
+  tenantId: string,
+  orderId: string,
+): Promise<OrderSnapshot> {
   try {
     const payload = await options.deps.order.get<{ order: OrderSnapshot }>(
       `/internal/tenants/${tenantId}/orders/${encodeURIComponent(orderId)}`,
@@ -137,7 +152,9 @@ async function fetchOrder(options: PaymentAppOptions, tenantId: string, orderId:
 
 async function tenantPlan(options: PaymentAppOptions, tenantId: string): Promise<string> {
   try {
-    const payload = await options.deps.tenant.get<{ plan?: string }>(`/internal/tenants/${tenantId}/summary`);
+    const payload = await options.deps.tenant.get<{ plan?: string }>(
+      `/internal/tenants/${tenantId}/summary`,
+    );
     return payload.plan ?? 'pro';
   } catch {
     return 'pro';
@@ -148,7 +165,12 @@ async function tenantPlan(options: PaymentAppOptions, tenantId: string): Promise
 /* Anti-fraude                                                         */
 /* ------------------------------------------------------------------ */
 
-function guardFraud(store: PaymentStore, tenantId: string, userId: string, amountXof: number): void {
+function guardFraud(
+  store: PaymentStore,
+  tenantId: string,
+  userId: string,
+  amountXof: number,
+): void {
   const block = activeBlock(store, tenantId, userId);
   if (block) {
     throw new HttpError(429, 'fraud_blocked', 'Paiements temporairement bloqués pour ce compte.', {
@@ -164,11 +186,16 @@ function guardFraud(store: PaymentStore, tenantId: string, userId: string, amoun
       rule: 'montant_max',
       reason: `Montant ${amountXof} XOF supérieur au plafond de ${FRAUD_LIMITS.maxAmountXof} XOF.`,
     });
-    throw new HttpError(429, 'fraud_blocked', 'Montant inhabituel : paiement bloqué temporairement.', {
-      blockId: raised.id,
-      rule: raised.rule,
-      expiresAt: raised.expiresAt,
-    });
+    throw new HttpError(
+      429,
+      'fraud_blocked',
+      'Montant inhabituel : paiement bloqué temporairement.',
+      {
+        blockId: raised.id,
+        rule: raised.rule,
+        expiresAt: raised.expiresAt,
+      },
+    );
   }
   const now = Date.now();
   const recent = [...store.transactions.values()].filter(
@@ -184,11 +211,16 @@ function guardFraud(store: PaymentStore, tenantId: string, userId: string, amoun
       rule: 'velocite',
       reason: `${recent.length} tentatives en moins de 10 minutes.`,
     });
-    throw new HttpError(429, 'fraud_blocked', 'Trop de tentatives de paiement : blocage temporaire.', {
-      blockId: raised.id,
-      rule: raised.rule,
-      expiresAt: raised.expiresAt,
-    });
+    throw new HttpError(
+      429,
+      'fraud_blocked',
+      'Trop de tentatives de paiement : blocage temporaire.',
+      {
+        blockId: raised.id,
+        rule: raised.rule,
+        expiresAt: raised.expiresAt,
+      },
+    );
   }
   const failures = [...store.transactions.values()].filter(
     (transaction) =>
@@ -211,10 +243,14 @@ function guardFraud(store: PaymentStore, tenantId: string, userId: string, amoun
     });
   }
   const confirmed = [...store.transactions.values()].filter(
-    (transaction) => transaction.tenantId === tenantId && transaction.source === 'agregateur' && transaction.status === 'confirmee',
+    (transaction) =>
+      transaction.tenantId === tenantId &&
+      transaction.source === 'agregateur' &&
+      transaction.status === 'confirmee',
   );
   if (confirmed.length >= 3) {
-    const average = confirmed.reduce((sum, transaction) => sum + transaction.amountXof, 0) / confirmed.length;
+    const average =
+      confirmed.reduce((sum, transaction) => sum + transaction.amountXof, 0) / confirmed.length;
     if (amountXof > 50_000 && amountXof > average * 4) {
       const raised = raiseBlock(store, {
         tenantId,
@@ -222,11 +258,16 @@ function guardFraud(store: PaymentStore, tenantId: string, userId: string, amoun
         rule: 'anomalie_montant',
         reason: `Montant ${amountXof} XOF très supérieur à la moyenne (${Math.round(average)} XOF).`,
       });
-      throw new HttpError(429, 'fraud_blocked', 'Montant atypique : vérification anti-fraude requise.', {
-        blockId: raised.id,
-        rule: raised.rule,
-        expiresAt: raised.expiresAt,
-      });
+      throw new HttpError(
+        429,
+        'fraud_blocked',
+        'Montant atypique : vérification anti-fraude requise.',
+        {
+          blockId: raised.id,
+          rule: raised.rule,
+          expiresAt: raised.expiresAt,
+        },
+      );
     }
   }
 }
@@ -261,16 +302,25 @@ function prepareIntent(options: PaymentAppOptions, input: IntentInput): PaymentT
     keys: routingKeys(options),
   });
   if (!decision.chosen) {
-    throw new HttpError(503, 'provider_unavailable', 'Aucun fournisseur disponible pour ce moyen de paiement.', {
-      candidates: decision.candidates,
-    });
+    throw new HttpError(
+      503,
+      'provider_unavailable',
+      'Aucun fournisseur disponible pour ce moyen de paiement.',
+      {
+        candidates: decision.candidates,
+      },
+    );
   }
   const chosen = decision.chosen;
   const quote = chosen.quote(input.amountXof);
   if (quote.feeXof >= input.amountXof) {
-    throw HttpError.unprocessable('amount_too_small', 'Montant insuffisant pour couvrir les frais du fournisseur.', {
-      feeXof: quote.feeXof,
-    });
+    throw HttpError.unprocessable(
+      'amount_too_small',
+      'Montant insuffisant pour couvrir les frais du fournisseur.',
+      {
+        feeXof: quote.feeXof,
+      },
+    );
   }
   const fees = feeBreakdown(input.amountXof, quote.feeXof, input.plan);
   const initiated = chosen.initiate({
@@ -281,9 +331,10 @@ function prepareIntent(options: PaymentAppOptions, input: IntentInput): PaymentT
     method: input.method,
   });
   const now = isoNow();
-  const tipAllocations = input.tipXof > 0 && input.tipStaffIds.length > 0
-    ? distributeTip(input.tipXof, input.tipStaffIds)
-    : [];
+  const tipAllocations =
+    input.tipXof > 0 && input.tipStaffIds.length > 0
+      ? distributeTip(input.tipXof, input.tipStaffIds)
+      : [];
   return {
     id: `txn_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
     tenantId: input.tenantId,
@@ -318,7 +369,10 @@ function prepareIntent(options: PaymentAppOptions, input: IntentInput): PaymentT
   };
 }
 
-function distributeTip(totalXof: number, staffIds: string[]): Array<{ staffId: string; amountXof: number }> {
+function distributeTip(
+  totalXof: number,
+  staffIds: string[],
+): Array<{ staffId: string; amountXof: number }> {
   const unique = [...new Set(staffIds)].slice(0, 10);
   const base = Math.floor(totalXof / unique.length);
   const remainder = totalXof - base * unique.length;
@@ -330,7 +384,8 @@ function distributeTip(totalXof: number, staffIds: string[]): Array<{ staffId: s
 
 function requireTransaction(store: PaymentStore, tenantId: string, id: string): PaymentTransaction {
   const transaction = store.transactions.get(id);
-  if (!transaction || transaction.tenantId !== tenantId) throw HttpError.notFound('Transaction introuvable.');
+  if (!transaction || transaction.tenantId !== tenantId)
+    throw HttpError.notFound('Transaction introuvable.');
   return transaction;
 }
 
@@ -357,12 +412,15 @@ async function finalizeConfirmation(
       const payload = await options.deps.order.post<{
         order: { number: string; invoiceNumber: string | null };
         replayed: boolean;
-      }>(`/internal/tenants/${transaction.tenantId}/orders/${encodeURIComponent(transaction.orderId)}/provider-payments`, {
-        amountXof: transaction.amountXof,
-        method: transaction.method,
-        provider: transaction.provider,
-        reference: `provider:${transaction.providerReference}`,
-      });
+      }>(
+        `/internal/tenants/${transaction.tenantId}/orders/${encodeURIComponent(transaction.orderId)}/provider-payments`,
+        {
+          amountXof: transaction.amountXof,
+          method: transaction.method,
+          provider: transaction.provider,
+          reference: `provider:${transaction.providerReference}`,
+        },
+      );
       transaction.orderNumber = payload.order.number;
       transaction.invoiceNumber = payload.order.invoiceNumber;
       orderSynced = true;
@@ -472,16 +530,24 @@ async function applyRefund(
   actorId: string,
 ): Promise<RefundRecord> {
   if (transaction.status !== 'confirmee' && transaction.status !== 'remboursee_partielle') {
-    throw HttpError.conflict('not_refundable', 'Seule une transaction confirmée peut être remboursée.');
+    throw HttpError.conflict(
+      'not_refundable',
+      'Seule une transaction confirmée peut être remboursée.',
+    );
   }
   const remaining = transaction.amountXof - transaction.refundedXof;
   if (amountXof < 1 || amountXof > remaining) {
-    throw HttpError.unprocessable('invalid_refund_amount', `Montant remboursable : 1 à ${remaining} XOF.`, {
-      remainingXof: remaining,
-    });
+    throw HttpError.unprocessable(
+      'invalid_refund_amount',
+      `Montant remboursable : 1 à ${remaining} XOF.`,
+      {
+        remainingXof: remaining,
+      },
+    );
   }
   const provider = getProvider(transaction.provider);
-  if (!provider) throw new HttpError(500, 'provider_missing', 'Fournisseur de paiement introuvable.');
+  if (!provider)
+    throw new HttpError(500, 'provider_missing', 'Fournisseur de paiement introuvable.');
   const providerRefund = provider.refund({ reference: transaction.providerReference, amountXof });
   const refund: RefundRecord = {
     id: `rfd_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
@@ -493,7 +559,8 @@ async function applyRefund(
   };
   transaction.refunds.push(refund);
   transaction.refundedXof += amountXof;
-  transaction.status = transaction.refundedXof >= transaction.amountXof ? 'remboursee' : 'remboursee_partielle';
+  transaction.status =
+    transaction.refundedXof >= transaction.amountXof ? 'remboursee' : 'remboursee_partielle';
   transaction.updatedAt = refund.at;
   bookRefund(options.store, transaction, refund);
   options.store.recordAudit({
@@ -502,7 +569,13 @@ async function applyRefund(
     action: 'payment.refunded',
     targetType: 'transaction',
     targetId: transaction.id,
-    meta: { refundId: refund.id, amountXof, reason, totalRefunded: transaction.refundedXof, providerReference: refund.providerReference },
+    meta: {
+      refundId: refund.id,
+      amountXof,
+      reason,
+      totalRefunded: transaction.refundedXof,
+      providerReference: refund.providerReference,
+    },
   });
   await options.publish('RefundIssued', transaction.tenantId, {
     tenantId: transaction.tenantId,
@@ -521,9 +594,20 @@ async function applyRefund(
 /* Webhooks signés                                                     */
 /* ------------------------------------------------------------------ */
 
-const WEBHOOK_TYPES = ['payment.confirmed', 'payment.failed', 'payment.expired', 'refund.confirmed'] as const;
+const WEBHOOK_TYPES = [
+  'payment.confirmed',
+  'payment.failed',
+  'payment.expired',
+  'refund.confirmed',
+] as const;
 
-function webhookCanonical(timestamp: string, eventId: string, type: string, reference: string, amount: number | undefined): string {
+function webhookCanonical(
+  timestamp: string,
+  eventId: string,
+  type: string,
+  reference: string,
+  amount: number | undefined,
+): string {
   return `${timestamp}.${eventId}.${type}.${reference}.${amount ?? ''}`;
 }
 
@@ -550,14 +634,20 @@ function filtersFrom(query: URLSearchParams) {
   };
 }
 
-function filteredTransactions(store: PaymentStore, tenantId: string, query: URLSearchParams): PaymentTransaction[] {
+function filteredTransactions(
+  store: PaymentStore,
+  tenantId: string,
+  query: URLSearchParams,
+): PaymentTransaction[] {
   const filters = filtersFrom(query);
   return [...store.transactions.values()]
     .filter((transaction) => transaction.tenantId === tenantId)
     .filter((transaction) => (filters.status ? transaction.status === filters.status : true))
     .filter((transaction) => (filters.method ? transaction.method === filters.method : true))
     .filter((transaction) => (filters.from ? transaction.createdAt >= filters.from : true))
-    .filter((transaction) => (filters.to ? transaction.createdAt <= `${filters.to}T23:59:59.999Z` : true))
+    .filter((transaction) =>
+      filters.to ? transaction.createdAt <= `${filters.to}T23:59:59.999Z` : true,
+    )
     .filter((transaction) => {
       if (!filters.q) return true;
       const haystack = [
@@ -568,7 +658,9 @@ function filteredTransactions(store: PaymentStore, tenantId: string, query: URLS
         transaction.provider,
         transaction.customerName ?? '',
         transaction.customerPhone ?? '',
-      ].join(' ').toLowerCase();
+      ]
+        .join(' ')
+        .toLowerCase();
       return haystack.includes(filters.q);
     })
     .sort((left, right) => (left.createdAt < right.createdAt ? 1 : -1))
@@ -580,10 +672,13 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
 
   const overview = (tenantId: string, plan: string) => {
     const wallet = getWallet(store, tenantId);
-    const transactions = [...store.transactions.values()].filter((transaction) => transaction.tenantId === tenantId);
+    const transactions = [...store.transactions.values()].filter(
+      (transaction) => transaction.tenantId === tenantId,
+    );
     const today = todayIso();
     const confirmedToday = transactions.filter(
-      (transaction) => transaction.status === 'confirmee' && transaction.confirmedAt?.slice(0, 10) === today,
+      (transaction) =>
+        transaction.status === 'confirmee' && transaction.confirmedAt?.slice(0, 10) === today,
     );
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
     const recent = transactions.filter((transaction) => transaction.createdAt >= thirtyDaysAgo);
@@ -591,11 +686,17 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
       (settlement) => settlement.tenantId === tenantId && settlement.status === 'en_attente',
     );
     const blocks = [...store.fraudBlocks.values()]
-      .filter((block) => block.tenantId === tenantId && !block.liftedAt && new Date(block.expiresAt).getTime() > Date.now())
+      .filter(
+        (block) =>
+          block.tenantId === tenantId &&
+          !block.liftedAt &&
+          new Date(block.expiresAt).getTime() > Date.now(),
+      )
       .map(serializeBlock);
-    const lastReconciliation = store.reconciliations
-      .filter((run) => run.tenantId === tenantId)
-      .sort((left, right) => (left.createdAt < right.createdAt ? 1 : -1))[0] ?? null;
+    const lastReconciliation =
+      store.reconciliations
+        .filter((run) => run.tenantId === tenantId)
+        .sort((left, right) => (left.createdAt < right.createdAt ? 1 : -1))[0] ?? null;
     const commissionPercent = feeBreakdown(0, 0, plan).commissionPercent;
     return {
       tenantId,
@@ -606,11 +707,20 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
       stats: {
         todayVolumeXof: confirmedToday.reduce((sum, transaction) => sum + transaction.amountXof, 0),
         todayCount: confirmedToday.length,
-        commission30dXof: recent.reduce((sum, transaction) => sum + transaction.fees.commissionXof, 0),
+        commission30dXof: recent.reduce(
+          (sum, transaction) => sum + transaction.fees.commissionXof,
+          0,
+        ),
         refundedXof: transactions.reduce((sum, transaction) => sum + transaction.refundedXof, 0),
-        pendingCount: transactions.filter((transaction) => transaction.status === 'en_attente').length,
-        failedCount: transactions.filter((transaction) => transaction.status === 'echouee' || transaction.status === 'expiree').length,
-        pendingSettlementsXof: pendingSettlements.reduce((sum, settlement) => sum + settlement.amountXof, 0),
+        pendingCount: transactions.filter((transaction) => transaction.status === 'en_attente')
+          .length,
+        failedCount: transactions.filter(
+          (transaction) => transaction.status === 'echouee' || transaction.status === 'expiree',
+        ).length,
+        pendingSettlementsXof: pendingSettlements.reduce(
+          (sum, settlement) => sum + settlement.amountXof,
+          0,
+        ),
         pendingSettlements: pendingSettlements.length,
       },
       activeBlocks: blocks,
@@ -701,15 +811,21 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         let order: OrderSnapshot | null = null;
         if (orderId) order = await fetchOrder(options, tenantId, orderId);
         const amountXof = order
-          ? optionalInt(body, 'amountXof', { min: 1, max: 10_000_000 }) ?? order.totalXof
+          ? (optionalInt(body, 'amountXof', { min: 1, max: 10_000_000 }) ?? order.totalXof)
           : requireInt(body, 'amountXof', { min: 100, max: 10_000_000 });
         guardFraud(store, tenantId, claims.sub, amountXof);
         const tipXof = optionalInt(body, 'tipXof', { min: 0, max: 500_000 }) ?? 0;
         if (tipXof > Math.floor(amountXof / 2)) {
-          throw HttpError.unprocessable('invalid_tip', 'Le pourboire ne peut pas dépasser la moitié du montant.');
+          throw HttpError.unprocessable(
+            'invalid_tip',
+            'Le pourboire ne peut pas dépasser la moitié du montant.',
+          );
         }
         const tipStaffIds = Array.isArray(body.tipStaffIds)
-          ? body.tipStaffIds.filter((value): value is string => typeof value === 'string').map((value) => value.trim()).filter(Boolean)
+          ? body.tipStaffIds
+              .filter((value): value is string => typeof value === 'string')
+              .map((value) => value.trim())
+              .filter(Boolean)
           : [];
         const plan = await tenantPlan(options, tenantId);
         const transaction = prepareIntent(options, {
@@ -778,7 +894,10 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'payment:manage');
         const transaction = requireTransaction(store, tenantId, ctx.params.id ?? '');
         if (transaction.status !== 'en_attente') {
-          throw HttpError.conflict('not_cancellable', 'Seule une transaction en attente peut être annulée.');
+          throw HttpError.conflict(
+            'not_cancellable',
+            'Seule une transaction en attente peut être annulée.',
+          );
         }
         transaction.status = 'annulee';
         transaction.failureReason = 'Annulée avant confirmation.';
@@ -838,7 +957,9 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         await failTransaction(
           options,
           transaction,
-          outcome === 'expire' ? 'Délai fournisseur dépassé.' : 'Paiement refusé par le fournisseur.',
+          outcome === 'expire'
+            ? 'Délai fournisseur dépassé.'
+            : 'Paiement refusé par le fournisseur.',
           claims.sub,
           outcome === 'expire' ? 'expiree' : 'echouee',
         );
@@ -870,7 +991,10 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const order = await fetchOrder(options, tenantId, orderId);
         const partsRaw = Array.isArray(body.parts) ? body.parts : [];
         if (partsRaw.length < 2 || partsRaw.length > 8) {
-          throw HttpError.unprocessable('invalid_parts', 'Le paiement fractionné exige 2 à 8 convives.');
+          throw HttpError.unprocessable(
+            'invalid_parts',
+            'Le paiement fractionné exige 2 à 8 convives.',
+          );
         }
         const plan = await tenantPlan(options, tenantId);
         const tipXof = optionalInt(body, 'tipXof', { min: 0, max: 200_000 }) ?? 0;
@@ -903,10 +1027,14 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
           );
         }
         if (totalXof !== order.totalXof) {
-          throw HttpError.unprocessable('split_mismatch', `La somme des parts (${totalXof}) doit égaler le total de la commande (${order.totalXof}).`, {
-            expectedXof: order.totalXof,
-            providedXof: totalXof,
-          });
+          throw HttpError.unprocessable(
+            'split_mismatch',
+            `La somme des parts (${totalXof}) doit égaler le total de la commande (${order.totalXof}).`,
+            {
+              expectedXof: order.totalXof,
+              providedXof: totalXof,
+            },
+          );
         }
         const split: SplitGroup = {
           id: splitId,
@@ -975,11 +1103,18 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const { tenantId, claims } = tenantOf(ctx, 'payment:manage');
         const body = asObject(ctx.body);
         const wallet = getWallet(store, tenantId);
-        const amountXof = requireInt(body, 'amountXof', { min: 100, max: Math.max(100, wallet.availableXof) });
+        const amountXof = requireInt(body, 'amountXof', {
+          min: 100,
+          max: Math.max(100, wallet.availableXof),
+        });
         if (amountXof > wallet.availableXof) {
-          throw HttpError.unprocessable('insufficient_wallet', 'Solde disponible insuffisant pour ce reversement.', {
-            availableXof: wallet.availableXof,
-          });
+          throw HttpError.unprocessable(
+            'insufficient_wallet',
+            'Solde disponible insuffisant pour ce reversement.',
+            {
+              availableXof: wallet.availableXof,
+            },
+          );
         }
         const mode = requireEnum(body, 'mode', SETTLEMENT_MODES);
         const destination = requireString(body, 'destination', { min: 3, max: 120 });
@@ -1026,7 +1161,10 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         }
         return {
           status: 201,
-          body: { settlement: serializeSettlement(settlement), wallet: serializeWallet(getWallet(store, tenantId)) },
+          body: {
+            settlement: serializeSettlement(settlement),
+            wallet: serializeWallet(getWallet(store, tenantId)),
+          },
         };
       },
     },
@@ -1052,7 +1190,9 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const body = ctx.body ? asObject(ctx.body) : {};
         const date = optionalString(body, 'date', { max: 10 }) ?? todayIso();
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-          throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', { field: 'date' });
+          throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', {
+            field: 'date',
+          });
         }
         const injectAnomalies = boolFlag(body.injectAnomalies);
         const run = runReconciliation(store, tenantId, date, injectAnomalies, claims.sub);
@@ -1176,7 +1316,9 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const items = filteredTransactions(store, tenantId, ctx.query);
         let tenantName = tenantId;
         try {
-          const summary = await options.deps.tenant.get<{ brandName?: string }>(`/internal/tenants/${tenantId}/summary`);
+          const summary = await options.deps.tenant.get<{ brandName?: string }>(
+            `/internal/tenants/${tenantId}/summary`,
+          );
           tenantName = summary.brandName ?? tenantId;
         } catch {
           /* nom technique conservé */
@@ -1234,7 +1376,11 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const timestamp = String(ctx.headers['x-restohub-timestamp'] ?? '');
         const signature = String(ctx.headers['x-restohub-signature'] ?? '');
         const timestampMs = Number(timestamp);
-        if (!timestamp || !Number.isFinite(timestampMs) || Math.abs(Date.now() - timestampMs) > 5 * 60 * 1000) {
+        if (
+          !timestamp ||
+          !Number.isFinite(timestampMs) ||
+          Math.abs(Date.now() - timestampMs) > 5 * 60 * 1000
+        ) {
           throw new HttpError(401, 'invalid_signature', 'Horodatage de webhook absent ou expiré.');
         }
         const canonical = webhookCanonical(timestamp, eventId, type, reference, amountXof);
@@ -1262,14 +1408,21 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
           return { status: 202, body: { ok: true, accepted: false, reason: 'unknown_reference' } };
         }
         if (type === 'payment.confirmed') {
-          const result = await finalizeConfirmation(options, transaction, `provider:${provider.id}`, 'webhook');
+          const result = await finalizeConfirmation(
+            options,
+            transaction,
+            `provider:${provider.id}`,
+            'webhook',
+          );
           return { body: { ok: true, transaction: serializeTransaction(transaction), ...result } };
         }
         if (type === 'payment.failed' || type === 'payment.expired') {
           await failTransaction(
             options,
             transaction,
-            type === 'payment.expired' ? 'Délai fournisseur dépassé.' : 'Paiement refusé par le fournisseur.',
+            type === 'payment.expired'
+              ? 'Délai fournisseur dépassé.'
+              : 'Paiement refusé par le fournisseur.',
             `provider:${provider.id}`,
             type === 'payment.expired' ? 'expiree' : 'echouee',
           );
@@ -1296,12 +1449,24 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
             transactions: transactions.length,
             confirmedCount: confirmed.length,
             volumeXof: confirmed.reduce((sum, transaction) => sum + transaction.amountXof, 0),
-            commissionXof: transactions.reduce((sum, transaction) => sum + transaction.fees.commissionXof, 0),
-            providerFeesXof: transactions.reduce((sum, transaction) => sum + transaction.fees.providerFeeXof, 0),
+            commissionXof: transactions.reduce(
+              (sum, transaction) => sum + transaction.fees.commissionXof,
+              0,
+            ),
+            providerFeesXof: transactions.reduce(
+              (sum, transaction) => sum + transaction.fees.providerFeeXof,
+              0,
+            ),
             walletLiabilityXof: wallets.reduce((sum, wallet) => sum + wallet.availableXof, 0),
-            settledXof: settlements.filter((settlement) => settlement.status === 'payee').reduce((sum, settlement) => sum + settlement.amountXof, 0),
-            pendingSettlements: settlements.filter((settlement) => settlement.status === 'en_attente').length,
-            openDisputes: disputes.filter((dispute) => dispute.status === 'ouverte' || dispute.status === 'en_examen').length,
+            settledXof: settlements
+              .filter((settlement) => settlement.status === 'payee')
+              .reduce((sum, settlement) => sum + settlement.amountXof, 0),
+            pendingSettlements: settlements.filter(
+              (settlement) => settlement.status === 'en_attente',
+            ).length,
+            openDisputes: disputes.filter(
+              (dispute) => dispute.status === 'ouverte' || dispute.status === 'en_examen',
+            ).length,
             activeBlocks: [...store.fraudBlocks.values()].filter(
               (block) => !block.liftedAt && new Date(block.expiresAt).getTime() > Date.now(),
             ).length,
@@ -1349,12 +1514,17 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const claims = requirePlatformPermission(ctx.auth, 'platform:operate');
         const settlement = store.settlements.get(ctx.params.id ?? '');
         if (!settlement) throw HttpError.notFound('Reversement introuvable.');
-        if (settlement.status !== 'en_attente') throw HttpError.conflict('settlement_closed', 'Ce reversement est déjà traité.');
+        if (settlement.status !== 'en_attente')
+          throw HttpError.conflict('settlement_closed', 'Ce reversement est déjà traité.');
         const wallet = getWallet(store, settlement.tenantId);
         if (settlement.amountXof > wallet.availableXof) {
-          throw HttpError.unprocessable('insufficient_wallet', 'Solde insuffisant pour approuver ce reversement.', {
-            availableXof: wallet.availableXof,
-          });
+          throw HttpError.unprocessable(
+            'insufficient_wallet',
+            'Solde insuffisant pour approuver ce reversement.',
+            {
+              availableXof: wallet.availableXof,
+            },
+          );
         }
         const body = ctx.body ? asObject(ctx.body) : {};
         settlement.note = optionalString(body, 'note', { max: 200 }) ?? settlement.note;
@@ -1376,7 +1546,8 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const claims = requirePlatformPermission(ctx.auth, 'platform:operate');
         const settlement = store.settlements.get(ctx.params.id ?? '');
         if (!settlement) throw HttpError.notFound('Reversement introuvable.');
-        if (settlement.status !== 'en_attente') throw HttpError.conflict('settlement_closed', 'Ce reversement est déjà traité.');
+        if (settlement.status !== 'en_attente')
+          throw HttpError.conflict('settlement_closed', 'Ce reversement est déjà traité.');
         const body = asObject(ctx.body);
         const reason = requireString(body, 'reason', { min: 3, max: 200 });
         settlement.status = 'rejetee';
@@ -1466,11 +1637,18 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const refundAmount = optionalInt(body, 'refundAmountXof', { min: 1, max: 10_000_000 });
         if (outcome === 'acceptee' && refundAmount) {
           const transaction = requireTransaction(store, dispute.tenantId, dispute.transactionId);
-          const refund = await applyRefund(options, transaction, refundAmount, `Litige ${dispute.id} : ${note ?? 'accepté'}`, claims.sub);
+          const refund = await applyRefund(
+            options,
+            transaction,
+            refundAmount,
+            `Litige ${dispute.id} : ${note ?? 'accepté'}`,
+            claims.sub,
+          );
           dispute.refundId = refund.id;
         }
         dispute.status = outcome === 'acceptee' ? 'resolue' : 'rejetee';
-        dispute.resolution = note ?? (outcome === 'acceptee' ? 'Litige accepté.' : 'Litige rejeté.');
+        dispute.resolution =
+          note ?? (outcome === 'acceptee' ? 'Litige accepté.' : 'Litige rejeté.');
         dispute.resolvedBy = claims.sub;
         dispute.resolvedAt = isoNow();
         store.recordAudit({
@@ -1519,29 +1697,47 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
         const reference = requireString(body, 'reference', { max: 80 });
         const items = Array.isArray(body.items) ? body.items : [];
         if (items.length === 0 || items.length > 200) {
-          throw HttpError.unprocessable('validation_error', 'Le décaissement doit contenir 1 à 200 lignes.', { field: 'items' });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Le décaissement doit contenir 1 à 200 lignes.',
+            { field: 'items' },
+          );
         }
         const lines = items.map((item, index) => {
           const line = asObject(item);
           const amountXof = line.amountXof;
           if (typeof amountXof !== 'number' || !Number.isInteger(amountXof) || amountXof <= 0) {
-            throw HttpError.unprocessable('validation_error', 'Montant de ligne invalide.', { field: `items[${index}].amountXof` });
+            throw HttpError.unprocessable('validation_error', 'Montant de ligne invalide.', {
+              field: `items[${index}].amountXof`,
+            });
           }
           const employeeId = optionalString(line, 'employeeId', { max: 60 }) ?? `line-${index + 1}`;
           const destination = optionalString(line, 'destination', { max: 120 }) ?? 'mobile_money';
-          return { employeeId, label: optionalString(line, 'label', { max: 120 }) ?? employeeId, amountXof, destination };
+          return {
+            employeeId,
+            label: optionalString(line, 'label', { max: 120 }) ?? employeeId,
+            amountXof,
+            destination,
+          };
         });
         const totalXof = lines.reduce((sum, line) => sum + line.amountXof, 0);
         const wallet = getWallet(store, tenantId);
         if (totalXof > wallet.availableXof) {
-          throw HttpError.unprocessable('wallet_insufficient', 'Solde du portefeuille insuffisant pour ce décaissement.', {
-            availableXof: wallet.availableXof,
-            requestedXof: totalXof,
-          });
+          throw HttpError.unprocessable(
+            'wallet_insufficient',
+            'Solde du portefeuille insuffisant pour ce décaissement.',
+            {
+              availableXof: wallet.availableXof,
+              requestedXof: totalXof,
+            },
+          );
         }
         const memo = optionalString(body, 'memo', { max: 140 });
         const updated = bookDisbursement(store, { tenantId, reference, totalXof, memo });
-        const actorId = typeof body.approvedBy === 'string' && body.approvedBy ? body.approvedBy : 'payroll-service';
+        const actorId =
+          typeof body.approvedBy === 'string' && body.approvedBy
+            ? body.approvedBy
+            : 'payroll-service';
         store.recordAudit({
           tenantId,
           actorId,
@@ -1584,7 +1780,9 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         const wallet = getWallet(store, tenantId);
-        const transactions = [...store.transactions.values()].filter((transaction) => transaction.tenantId === tenantId);
+        const transactions = [...store.transactions.values()].filter(
+          (transaction) => transaction.tenantId === tenantId,
+        );
         const confirmed = transactions.filter((transaction) => transaction.status === 'confirmee');
         return {
           body: {
@@ -1593,14 +1791,22 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
             transactions: transactions.length,
             confirmed: confirmed.length,
             volumeXof: confirmed.reduce((sum, transaction) => sum + transaction.amountXof, 0),
-            commissionXof: transactions.reduce((sum, transaction) => sum + transaction.fees.commissionXof, 0),
-            providerFeesXof: transactions.reduce((sum, transaction) => sum + transaction.fees.providerFeeXof, 0),
+            commissionXof: transactions.reduce(
+              (sum, transaction) => sum + transaction.fees.commissionXof,
+              0,
+            ),
+            providerFeesXof: transactions.reduce(
+              (sum, transaction) => sum + transaction.fees.providerFeeXof,
+              0,
+            ),
             pendingSettlements: [...store.settlements.values()].filter(
-              (settlement) => settlement.tenantId === tenantId && settlement.status === 'en_attente',
+              (settlement) =>
+                settlement.tenantId === tenantId && settlement.status === 'en_attente',
             ).length,
-            lastReconciliation: store.reconciliations
-              .filter((run) => run.tenantId === tenantId)
-              .sort((left, right) => (left.createdAt < right.createdAt ? 1 : -1))[0] ?? null,
+            lastReconciliation:
+              store.reconciliations
+                .filter((run) => run.tenantId === tenantId)
+                .sort((left, right) => (left.createdAt < right.createdAt ? 1 : -1))[0] ?? null,
             generatedAt: isoNow(),
           },
         };
@@ -1613,26 +1819,40 @@ export function buildPaymentApp(options: PaymentAppOptions): Route[] {
 /* Consommation d'événements (caisse)                                  */
 /* ------------------------------------------------------------------ */
 
-export function handlePaymentEvent(store: PaymentStore, tenantId: string, event: { type: string; payload: Record<string, unknown> }): void {
+export function handlePaymentEvent(
+  store: PaymentStore,
+  tenantId: string,
+  event: { type: string; payload: Record<string, unknown> },
+): void {
   if (event.type !== 'OrderPaid') return;
   const orderId = typeof event.payload.orderId === 'string' ? event.payload.orderId : '';
   if (!orderId) return;
-  const amountXof = typeof event.payload.totalXof === 'number'
-    ? event.payload.totalXof
-    : typeof event.payload.amountXof === 'number'
-      ? event.payload.amountXof
-      : 0;
+  const amountXof =
+    typeof event.payload.totalXof === 'number'
+      ? event.payload.totalXof
+      : typeof event.payload.amountXof === 'number'
+        ? event.payload.amountXof
+        : 0;
   if (amountXof <= 0) return;
   const at = typeof event.payload.at === 'string' ? event.payload.at : isoNow();
   const number = typeof event.payload.number === 'string' ? event.payload.number : orderId;
   const alreadyProvider = [...store.transactions.values()].some(
-    (transaction) => transaction.tenantId === tenantId && transaction.orderId === orderId && transaction.source === 'agregateur',
+    (transaction) =>
+      transaction.tenantId === tenantId &&
+      transaction.orderId === orderId &&
+      transaction.source === 'agregateur',
   );
   if (alreadyProvider) return;
-  const method = event.payload.method === 'mobile_money' || event.payload.method === 'carte' ? event.payload.method : 'especes';
+  const method =
+    event.payload.method === 'mobile_money' || event.payload.method === 'carte'
+      ? event.payload.method
+      : 'especes';
   if (method !== 'especes') return;
   const exists = [...store.transactions.values()].some(
-    (transaction) => transaction.tenantId === tenantId && transaction.source === 'caisse' && transaction.orderNumber === number,
+    (transaction) =>
+      transaction.tenantId === tenantId &&
+      transaction.source === 'caisse' &&
+      transaction.orderNumber === number,
   );
   if (exists) return;
   const transaction: PaymentTransaction = {
@@ -1655,13 +1875,19 @@ export function handlePaymentEvent(store: PaymentStore, tenantId: string, event:
     refundedXof: 0,
     tipXof: 0,
     tipAllocations: [],
-    routing: { chosen: 'caisse', reason: 'encaissement au comptoir', switched: false, candidates: [] },
+    routing: {
+      chosen: 'caisse',
+      reason: 'encaissement au comptoir',
+      switched: false,
+      candidates: [],
+    },
     instructions: '',
     requires3ds: false,
     threeDsUrl: null,
     actorId: 'order-service',
     simulated: false,
-    invoiceNumber: typeof event.payload.invoiceNumber === 'string' ? event.payload.invoiceNumber : null,
+    invoiceNumber:
+      typeof event.payload.invoiceNumber === 'string' ? event.payload.invoiceNumber : null,
     failureReason: null,
     createdAt: at,
     updatedAt: at,

@@ -69,14 +69,20 @@ export function transactionsCsv(items: PaymentTransaction[]): string {
 }
 
 function xmlEscape(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /** Classeur Excel (SpreadsheetML 2003, ouvert nativement par Excel). */
 export function transactionsXls(items: PaymentTransaction[], sheetName = 'Transactions'): string {
   const cell = (value: string, style?: string) =>
     `<Cell${style ? ` ss:StyleID="${style}"` : ''}><Data ss:Type="String">${xmlEscape(value)}</Data></Cell>`;
-  const headerRow = `<Row>${header().map((value) => cell(value, 'head')).join('')}</Row>`;
+  const headerRow = `<Row>${header()
+    .map((value) => cell(value, 'head'))
+    .join('')}</Row>`;
   const rows = items
     .map((transaction) => {
       const cells = row(transaction);
@@ -111,20 +117,36 @@ export async function transactionsPdf(
   const ink = rgb(0.12, 0.1, 0.09);
   const muted = rgb(0.42, 0.4, 0.38);
   const accent = rgb(0.76, 0.25, 0.05);
-  const xof = (value: number) => `${value.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ')} F CFA`;
+  const xof = (value: number) =>
+    `${value.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ')} F CFA`;
 
   let y = 560;
-  page.drawText('RESTO-HUB — Journal des transactions', { x: 40, y, size: 16, font: bold, color: ink });
+  page.drawText('RESTO-HUB — Journal des transactions', {
+    x: 40,
+    y,
+    size: 16,
+    font: bold,
+    color: ink,
+  });
   y -= 20;
-  page.drawText(`${meta.tenantName} · export du ${dateFr(meta.generatedAt)}`, { x: 40, y, size: 10, font, color: muted });
-  y -= 16;
-  page.drawText(`Solde disponible : ${xof(meta.walletAvailableXof)} · ${items.length} transaction(s)`, {
+  page.drawText(`${meta.tenantName} · export du ${dateFr(meta.generatedAt)}`, {
     x: 40,
     y,
     size: 10,
     font,
-    color: accent,
+    color: muted,
   });
+  y -= 16;
+  page.drawText(
+    `Solde disponible : ${xof(meta.walletAvailableXof)} · ${items.length} transaction(s)`,
+    {
+      x: 40,
+      y,
+      size: 10,
+      font,
+      color: accent,
+    },
+  );
   y -= 28;
 
   const columns: Array<{ label: string; x: number; width: number; align?: 'right' }> = [
@@ -143,7 +165,12 @@ export async function transactionsPdf(
     page.drawText(column.label, { x: column.x, y, size: 8, font: bold, color: muted });
   }
   y -= 6;
-  page.drawLine({ start: { x: 40, y }, end: { x: 802, y }, thickness: 0.6, color: rgb(0.8, 0.77, 0.74) });
+  page.drawLine({
+    start: { x: 40, y },
+    end: { x: 802, y },
+    thickness: 0.6,
+    color: rgb(0.8, 0.77, 0.74),
+  });
   y -= 14;
 
   for (const transaction of items.slice(0, 40)) {

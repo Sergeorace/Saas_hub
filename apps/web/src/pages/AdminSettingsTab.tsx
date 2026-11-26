@@ -47,7 +47,10 @@ export function AdminSettingsTab({ locale }: Props) {
     setError(null);
     setSaveError(null);
     try {
-      const [settingsResult, auditResult] = await Promise.all([platformAdminApi.settings(), platformAdminApi.audit(30)]);
+      const [settingsResult, auditResult] = await Promise.all([
+        platformAdminApi.settings(),
+        platformAdminApi.audit(30),
+      ]);
       setSettings(settingsResult.settings);
       setOriginal(JSON.stringify(settingsResult.settings));
       setAudit(settingsResult.audit);
@@ -63,7 +66,10 @@ export function AdminSettingsTab({ locale }: Props) {
     void load();
   }, [load]);
 
-  const dirty = useMemo(() => (settings ? JSON.stringify(settings) !== original : false), [settings, original]);
+  const dirty = useMemo(
+    () => (settings ? JSON.stringify(settings) !== original : false),
+    [settings, original],
+  );
 
   const patch = (updater: (current: PlatformSettingsData) => PlatformSettingsData) => {
     setSettings((current) => (current ? updater(current) : current));
@@ -80,7 +86,9 @@ export function AdminSettingsTab({ locale }: Props) {
       return {
         ...current,
         languages,
-        defaultLanguage: languages.includes(current.defaultLanguage) ? current.defaultLanguage : languages[0],
+        defaultLanguage: languages.includes(current.defaultLanguage)
+          ? current.defaultLanguage
+          : languages[0],
       };
     });
   };
@@ -146,7 +154,11 @@ export function AdminSettingsTab({ locale }: Props) {
     },
     { key: 'currency', header: t('adminSettings.colCurrency'), render: (row) => row.currency },
     { key: 'dial', header: t('adminSettings.colDial'), render: (row) => row.dialCode },
-    { key: 'tax', header: t('adminSettings.colDefaultTax'), render: (row) => <span className="console-muted">{row.defaultTaxCode}</span> },
+    {
+      key: 'tax',
+      header: t('adminSettings.colDefaultTax'),
+      render: (row) => <span className="console-muted">{row.defaultTaxCode}</span>,
+    },
     {
       key: 'active',
       header: t('adminSettings.colActive'),
@@ -230,7 +242,12 @@ export function AdminSettingsTab({ locale }: Props) {
       header: t('adminSettings.colChannels'),
       render: (row) => <span className="console-muted">{row.channels.join(' · ')}</span>,
     },
-    { key: 'priority', header: t('adminSettings.colPriority'), align: 'right', render: (row) => row.priority },
+    {
+      key: 'priority',
+      header: t('adminSettings.colPriority'),
+      align: 'right',
+      render: (row) => row.priority,
+    },
     {
       key: 'enabled',
       header: t('adminSettings.colActive'),
@@ -255,18 +272,29 @@ export function AdminSettingsTab({ locale }: Props) {
       render: (row) => (
         <div className="console-cell">
           <strong>{row.action}</strong>
-          <span>{row.targetType} · {row.targetId}</span>
+          <span>
+            {row.targetType} · {row.targetId}
+          </span>
         </div>
       ),
     },
-    { key: 'actor', header: t('adminSettings.colActor'), render: (row) => <span className="console-muted">{row.actorId}</span> },
+    {
+      key: 'actor',
+      header: t('adminSettings.colActor'),
+      render: (row) => <span className="console-muted">{row.actorId}</span>,
+    },
     {
       key: 'at',
       header: t('adminSettings.colAt'),
       align: 'right',
       render: (row) => (
         <span className="console-muted">
-          {formatDate(row.createdAt, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+          {formatDate(row.createdAt, locale, {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </span>
       ),
     },
@@ -290,7 +318,11 @@ export function AdminSettingsTab({ locale }: Props) {
             icon="alert"
             title={t('adminSettings.errorTitle')}
             description={error ?? t('adminSettings.loadError')}
-            action={<Button size="sm" variant="outline" onClick={() => void load()}>{t('adminSettings.reload')}</Button>}
+            action={
+              <Button size="sm" variant="outline" onClick={() => void load()}>
+                {t('adminSettings.reload')}
+              </Button>
+            }
           />
         </CardBody>
       </Card>
@@ -305,11 +337,21 @@ export function AdminSettingsTab({ locale }: Props) {
           subtitle={t('adminSettings.subtitle')}
           action={
             <div className="console-toolbar" style={{ margin: 0 }}>
-              {dirty && <Badge tone="warning" dot>{t('adminSettings.unsaved')}</Badge>}
+              {dirty && (
+                <Badge tone="warning" dot>
+                  {t('adminSettings.unsaved')}
+                </Badge>
+              )}
               <Button size="sm" variant="outline" iconLeft="refresh" onClick={() => void load()}>
                 {t('adminSettings.reload')}
               </Button>
-              <Button size="sm" iconLeft="check" onClick={() => void save()} loading={saving} disabled={!dirty}>
+              <Button
+                size="sm"
+                iconLeft="check"
+                onClick={() => void save()}
+                loading={saving}
+                disabled={!dirty}
+              >
                 {saving ? t('adminSettings.saving') : t('adminSettings.save')}
               </Button>
             </div>
@@ -317,15 +359,23 @@ export function AdminSettingsTab({ locale }: Props) {
         />
         <CardBody>
           <p className="console-muted">
-            {t('adminSettings.updatedAt')} : {formatDate(settings.updatedAt, locale)} · {t('adminSettings.updatedBy')} {settings.updatedBy}
+            {t('adminSettings.updatedAt')} : {formatDate(settings.updatedAt, locale)} ·{' '}
+            {t('adminSettings.updatedBy')} {settings.updatedBy}
           </p>
-          {saveError && <p className="auth-error" role="alert">{t('adminSettings.saveError')} — {saveError}</p>}
+          {saveError && (
+            <p className="auth-error" role="alert">
+              {t('adminSettings.saveError')} — {saveError}
+            </p>
+          )}
         </CardBody>
       </Card>
 
       <div className="console-2col">
         <Card>
-          <CardHeader title={t('adminSettings.languagesTitle')} subtitle={t('adminSettings.languagesHint')} />
+          <CardHeader
+            title={t('adminSettings.languagesTitle')}
+            subtitle={t('adminSettings.languagesHint')}
+          />
           <CardBody>
             <div className="console-toolbar" style={{ margin: 0 }}>
               {(['fr', 'en'] as const).map((language) => {
@@ -347,7 +397,10 @@ export function AdminSettingsTab({ locale }: Props) {
               label={t('adminSettings.defaultLanguage')}
               value={settings.defaultLanguage}
               onChange={(event) =>
-                patch((current) => ({ ...current, defaultLanguage: event.target.value as 'fr' | 'en' }))
+                patch((current) => ({
+                  ...current,
+                  defaultLanguage: event.target.value as 'fr' | 'en',
+                }))
               }
               options={settings.languages.map((language) => ({
                 value: language,
@@ -365,21 +418,32 @@ export function AdminSettingsTab({ locale }: Props) {
                 label={t('adminSettings.supportEmail')}
                 type="email"
                 value={settings.supportEmail}
-                onChange={(event) => patch((current) => ({ ...current, supportEmail: event.target.value }))}
+                onChange={(event) =>
+                  patch((current) => ({ ...current, supportEmail: event.target.value }))
+                }
               />
               <Input
                 label={t('adminSettings.supportPhone')}
                 type="tel"
                 value={settings.supportPhone}
-                onChange={(event) => patch((current) => ({ ...current, supportPhone: event.target.value }))}
+                onChange={(event) =>
+                  patch((current) => ({ ...current, supportPhone: event.target.value }))
+                }
               />
               <div className="console-2col">
                 <Input
                   label={t('adminSettings.timezone')}
                   value={settings.timezone}
-                  onChange={(event) => patch((current) => ({ ...current, timezone: event.target.value }))}
+                  onChange={(event) =>
+                    patch((current) => ({ ...current, timezone: event.target.value }))
+                  }
                 />
-                <Input label={t('adminSettings.currency')} value={settings.currency} readOnly disabled />
+                <Input
+                  label={t('adminSettings.currency')}
+                  value={settings.currency}
+                  readOnly
+                  disabled
+                />
               </div>
             </div>
           </CardBody>
@@ -387,23 +451,47 @@ export function AdminSettingsTab({ locale }: Props) {
       </div>
 
       <Card>
-        <CardHeader title={t('adminSettings.countriesTitle')} subtitle={t('adminSettings.countriesHint')} />
+        <CardHeader
+          title={t('adminSettings.countriesTitle')}
+          subtitle={t('adminSettings.countriesHint')}
+        />
         <CardBody>
-          <DataTable columns={countryColumns} rows={settings.countries} getRowId={(row) => row.code} caption={t('adminSettings.countriesTitle')} />
+          <DataTable
+            columns={countryColumns}
+            rows={settings.countries}
+            getRowId={(row) => row.code}
+            caption={t('adminSettings.countriesTitle')}
+          />
         </CardBody>
       </Card>
 
       <div className="console-2col">
         <Card>
-          <CardHeader title={t('adminSettings.taxesTitle')} subtitle={t('adminSettings.taxesHint')} />
+          <CardHeader
+            title={t('adminSettings.taxesTitle')}
+            subtitle={t('adminSettings.taxesHint')}
+          />
           <CardBody>
-            <DataTable columns={taxColumns} rows={settings.taxes} getRowId={(row) => row.code} caption={t('adminSettings.taxesTitle')} />
+            <DataTable
+              columns={taxColumns}
+              rows={settings.taxes}
+              getRowId={(row) => row.code}
+              caption={t('adminSettings.taxesTitle')}
+            />
           </CardBody>
         </Card>
         <Card>
-          <CardHeader title={t('adminSettings.providersTitle')} subtitle={t('adminSettings.providersHint')} />
+          <CardHeader
+            title={t('adminSettings.providersTitle')}
+            subtitle={t('adminSettings.providersHint')}
+          />
           <CardBody>
-            <DataTable columns={providerColumns} rows={settings.providers} getRowId={(row) => row.code} caption={t('adminSettings.providersTitle')} />
+            <DataTable
+              columns={providerColumns}
+              rows={settings.providers}
+              getRowId={(row) => row.code}
+              caption={t('adminSettings.providersTitle')}
+            />
           </CardBody>
         </Card>
       </div>
@@ -424,7 +512,12 @@ export function AdminSettingsTab({ locale }: Props) {
           {entries.length === 0 ? (
             <p className="console-muted">{t('adminSettings.auditEmpty')}</p>
           ) : (
-            <DataTable columns={auditColumns} rows={entries} getRowId={(row) => row.id} caption={t('adminSettings.auditTitle')} />
+            <DataTable
+              columns={auditColumns}
+              rows={entries}
+              getRowId={(row) => row.id}
+              caption={t('adminSettings.auditTitle')}
+            />
           )}
         </CardBody>
       </Card>

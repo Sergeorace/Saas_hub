@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Icon, Skeleton, cx, formatDate, formatTime, formatXof, useI18n, useToast } from '@resto-hub/design-system';
+import {
+  Icon,
+  Skeleton,
+  cx,
+  formatDate,
+  formatTime,
+  formatXof,
+  useI18n,
+  useToast,
+} from '@resto-hub/design-system';
 import { ApiError, accountApi, publicApi, type PublicOrder } from '../lib/api';
 import { getOrder, syncOrder } from '../lib/localStore';
 import { navigate } from '../lib/router';
@@ -11,7 +20,15 @@ import { StarRatingInput } from '../components/Stars';
 const POLL_MS = 6000;
 const STAGES = ['recue', 'en_preparation', 'prete', 'servie'] as const;
 
-export default function TrackingPage({ tenantId, orderId, token }: { tenantId: string; orderId: string; token: string }) {
+export default function TrackingPage({
+  tenantId,
+  orderId,
+  token,
+}: {
+  tenantId: string;
+  orderId: string;
+  token: string;
+}) {
   const { t, locale } = useI18n();
   const toast = useToast();
   const { user } = useSession();
@@ -41,11 +58,18 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
       if (previous && previous !== result.order.status) {
         const label = t(`tracking.${result.order.status}`);
         toast.push({
-          title: result.order.status === 'prete' ? `${t('tracking.prete')} · ${result.order.number}` : label,
+          title:
+            result.order.status === 'prete'
+              ? `${t('tracking.prete')} · ${result.order.number}`
+              : label,
           description: result.order.status === 'prete' ? t('tracking.notifyHint') : undefined,
           tone: result.order.status === 'annulee' ? 'error' : 'success',
         });
-        if (result.order.status === 'prete' && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        if (
+          result.order.status === 'prete' &&
+          typeof Notification !== 'undefined' &&
+          Notification.permission === 'granted'
+        ) {
           try {
             new Notification(`${t('tracking.prete')} · ${result.order.number}`, {
               body: `${local?.tenantName ?? ''} — ${t('tracking.notifyHint')}`,
@@ -59,7 +83,11 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
       }
       lastStatus.current = result.order.status;
     } catch (caught) {
-      setError(caught instanceof ApiError && caught.status === 404 ? t('tracking.notFound') : t('tracking.trackingInvalid'));
+      setError(
+        caught instanceof ApiError && caught.status === 404
+          ? t('tracking.notFound')
+          : t('tracking.trackingInvalid'),
+      );
     } finally {
       setLoading(false);
     }
@@ -83,7 +111,8 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
     const permission = await Notification.requestPermission();
     setNotifyState(permission);
     if (permission === 'granted') toast.push({ title: t('tracking.notifyOn'), tone: 'success' });
-    else if (permission === 'denied') toast.push({ title: t('tracking.notifyBlocked'), tone: 'warning' });
+    else if (permission === 'denied')
+      toast.push({ title: t('tracking.notifyBlocked'), tone: 'warning' });
   };
 
   const claimPoints = async () => {
@@ -99,7 +128,12 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
     } catch (caught) {
       const code = caught instanceof ApiError ? caught.code : '';
       toast.push({
-        title: code === 'order_not_paid' ? t('loyalty.orderNotPaid') : code === 'order_not_found' ? t('loyalty.orderNotFound') : t('common.error'),
+        title:
+          code === 'order_not_paid'
+            ? t('loyalty.orderNotPaid')
+            : code === 'order_not_found'
+              ? t('loyalty.orderNotFound')
+              : t('common.error'),
         tone: 'warning',
       });
     } finally {
@@ -110,7 +144,11 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
   const submitRating = async () => {
     if (rating < 1) return;
     try {
-      await accountApi.submitReview({ tenantId, rating, ...(comment.trim() ? { comment: comment.trim() } : {}) });
+      await accountApi.submitReview({
+        tenantId,
+        rating,
+        ...(comment.trim() ? { comment: comment.trim() } : {}),
+      });
       setRated(true);
       setReviewOpen(false);
       toast.push({ title: t('establishment.reviewThanks'), tone: 'success' });
@@ -142,7 +180,11 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
             </span>
             <h2>{t('tracking.notFound')}</h2>
             <p>{error ?? t('tracking.trackingInvalid')}</p>
-            <button type="button" className="rh-client-btn rh-client-btn--primary" onClick={() => navigate('/commandes')}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--primary"
+              onClick={() => navigate('/commandes')}
+            >
               {t('orders.title')}
             </button>
           </div>
@@ -151,10 +193,17 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
     );
   }
 
-  const cancelActive = order.status === 'servie' ? STAGES.length : STAGES.indexOf(order.status as (typeof STAGES)[number]);
+  const cancelActive =
+    order.status === 'servie'
+      ? STAGES.length
+      : STAGES.indexOf(order.status as (typeof STAGES)[number]);
   const paid = order.paymentStatus === 'payee';
   const canAddItems = Boolean(cart.tableToken && cart.tableCode);
-  const paidLabel = paid ? t('tracking.paid') : order.paymentStatus === 'partielle' ? t('tracking.partial') : t('tracking.unpaid');
+  const paidLabel = paid
+    ? t('tracking.paid')
+    : order.paymentStatus === 'partielle'
+      ? t('tracking.partial')
+      : t('tracking.unpaid');
 
   return (
     <div className="rh-client-screen">
@@ -170,17 +219,27 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
             <Icon name={order.status === 'annulee' ? 'x-circle' : 'clock'} size="sm" />
             {t(`tracking.${order.status}`)}
           </span>
-          <h1>{order.status === 'annulee' ? t('tracking.annulee') : order.status === 'prete' ? t('tracking.prete') : t(`tracking.${order.status}`)}</h1>
+          <h1>
+            {order.status === 'annulee'
+              ? t('tracking.annulee')
+              : order.status === 'prete'
+                ? t('tracking.prete')
+                : t(`tracking.${order.status}`)}
+          </h1>
           <p className="rh-client-muted">
             {order.tableCode ? `${t('tracking.table', { code: order.tableCode })} · ` : ''}
-            {t(`tracking.channel${order.channel === 'sur_place' ? 'SurPlace' : order.channel === 'a_emporter' ? 'Emporter' : order.channel === 'livraison' ? 'Livraison' : 'Precommande'}`)}
+            {t(
+              `tracking.channel${order.channel === 'sur_place' ? 'SurPlace' : order.channel === 'a_emporter' ? 'Emporter' : order.channel === 'livraison' ? 'Livraison' : 'Precommande'}`,
+            )}
           </p>
           {order.status !== 'annulee' && order.status !== 'servie' && (
             <p className="rh-tracking-hero__eta">
               <Icon name="flame" size="sm" /> {t('tracking.estimated')}
             </p>
           )}
-          {order.status === 'annulee' && <p className="rh-tracking-hero__hint">{t('tracking.cancelledHint')}</p>}
+          {order.status === 'annulee' && (
+            <p className="rh-tracking-hero__hint">{t('tracking.cancelledHint')}</p>
+          )}
         </section>
 
         {order.status !== 'annulee' && (
@@ -189,8 +248,17 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
               const reached = index <= cancelActive;
               const stamp = order.timeline.find((entry) => entry.status === stage)?.at;
               return (
-                <div key={stage} className={cx('rh-tracking-step', reached && 'is-reached', index === cancelActive && 'is-current')}>
-                  <span className="rh-tracking-step__dot">{reached ? <Icon name="check" size="sm" /> : index + 1}</span>
+                <div
+                  key={stage}
+                  className={cx(
+                    'rh-tracking-step',
+                    reached && 'is-reached',
+                    index === cancelActive && 'is-current',
+                  )}
+                >
+                  <span className="rh-tracking-step__dot">
+                    {reached ? <Icon name="check" size="sm" /> : index + 1}
+                  </span>
                   <div>
                     <strong>{t(`tracking.${stage}`)}</strong>
                     {stamp && <span>{formatTime(stamp, locale)}</span>}
@@ -239,7 +307,8 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
             <strong>{formatXof(order.totalXof, locale)}</strong>
           </div>
           <p className="rh-client-hint">
-            <Icon name="clock" size="sm" /> {formatDate(order.createdAt, locale)} · {t('tracking.footer')}
+            <Icon name="clock" size="sm" /> {formatDate(order.createdAt, locale)} ·{' '}
+            {t('tracking.footer')}
           </p>
         </section>
 
@@ -249,7 +318,11 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
               <strong>{t('tracking.notify')}</strong>
               <p>{t('tracking.notifyHint')}</p>
             </div>
-            <button type="button" className="rh-client-btn rh-client-btn--soft" onClick={enableNotifications}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--soft"
+              onClick={enableNotifications}
+            >
               <Icon name="bell" size="sm" /> {t('tracking.notify')}
             </button>
           </section>
@@ -259,7 +332,9 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
             <Icon name="bell" size="sm" /> {t('tracking.notifyOn')}
           </p>
         )}
-        {notifyState === 'denied' && <p className="rh-client-hint rh-client-hint--center">{t('tracking.notifyBlocked')}</p>}
+        {notifyState === 'denied' && (
+          <p className="rh-client-hint rh-client-hint--center">{t('tracking.notifyBlocked')}</p>
+        )}
 
         <section className="rh-track-actions">
           {canAddItems && order.status !== 'annulee' && (
@@ -267,7 +342,9 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
               type="button"
               className="rh-client-btn rh-client-btn--primary rh-client-btn--block"
               onClick={() =>
-                navigate(`/e/${local?.tenantSlug ?? tenantId}/menu?table=${encodeURIComponent(cart.tableCode ?? '')}&k=${encodeURIComponent(cart.tableToken ?? '')}`)
+                navigate(
+                  `/e/${local?.tenantSlug ?? tenantId}/menu?table=${encodeURIComponent(cart.tableCode ?? '')}&k=${encodeURIComponent(cart.tableToken ?? '')}`,
+                )
               }
             >
               <Icon name="plus" size="sm" /> {t('tracking.addItems')}
@@ -280,20 +357,33 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
               onClick={claimPoints}
               disabled={claiming || claimed}
             >
-              <Icon name="sparkles" size="sm" /> {claimed ? t('tracking.claimed') : t('tracking.claimPoints')}
+              <Icon name="sparkles" size="sm" />{' '}
+              {claimed ? t('tracking.claimed') : t('tracking.claimPoints')}
             </button>
           )}
           {!user && paid && (
-            <button type="button" className="rh-client-btn rh-client-btn--soft rh-client-btn--block" onClick={() => navigate('/compte')}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--soft rh-client-btn--block"
+              onClick={() => navigate('/compte')}
+            >
               <Icon name="sparkles" size="sm" /> {t('loyalty.signIn')}
             </button>
           )}
           <div className="rh-track-actions__row">
-            <button type="button" className="rh-client-btn rh-client-btn--ghost" onClick={() => navigate(`/recu/${order.id}`)}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--ghost"
+              onClick={() => navigate(`/recu/${order.id}`)}
+            >
               <Icon name="receipt" size="sm" /> {t('tracking.receipt')}
             </button>
             {order.status !== 'servie' && order.status !== 'annulee' && (
-              <button type="button" className="rh-client-btn rh-client-btn--ghost" onClick={() => void load()}>
+              <button
+                type="button"
+                className="rh-client-btn rh-client-btn--ghost"
+                onClick={() => void load()}
+              >
                 <Icon name="refresh" size="sm" /> {t('tracking.refresh')}
               </button>
             )}
@@ -319,12 +409,21 @@ export default function TrackingPage({ tenantId, orderId, token }: { tenantId: s
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
                 />
-                <button type="button" className="rh-client-btn rh-client-btn--primary" onClick={submitRating} disabled={rating < 1}>
+                <button
+                  type="button"
+                  className="rh-client-btn rh-client-btn--primary"
+                  onClick={submitRating}
+                  disabled={rating < 1}
+                >
                   {t('establishment.submitReview')}
                 </button>
               </div>
             ) : (
-              <button type="button" className="rh-client-btn rh-client-btn--soft" onClick={() => setReviewOpen(true)}>
+              <button
+                type="button"
+                className="rh-client-btn rh-client-btn--soft"
+                onClick={() => setReviewOpen(true)}
+              >
                 <Icon name="sparkles" size="sm" /> {t('tracking.rate')}
               </button>
             )}

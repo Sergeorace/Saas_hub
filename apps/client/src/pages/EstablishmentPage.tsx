@@ -13,9 +13,21 @@ import { accountApi, publicApi, type LoyaltyProgram, type ReviewAggregate } from
 import { useAsync, useEstablishment, useFavorites } from '../lib/hooks';
 import { useSession } from '../lib/session';
 import { useTenantTheme } from '../lib/tenantTheme';
-import { establishmentAddress, isOpenNow, kindKey, ratingLabel, telHref, todayLabelKeys } from '../lib/format';
+import {
+  establishmentAddress,
+  isOpenNow,
+  kindKey,
+  ratingLabel,
+  telHref,
+  todayLabelKeys,
+} from '../lib/format';
 import { navigate } from '../lib/router';
-import { ClientBottomBar, ClientHeader, PageLoading, SectionTitle } from '../components/ClientChrome';
+import {
+  ClientBottomBar,
+  ClientHeader,
+  PageLoading,
+  SectionTitle,
+} from '../components/ClientChrome';
 import { CoverImage } from '../components/EstablishmentCard';
 import { HeartIcon, StarRatingInput, Stars } from '../components/Stars';
 
@@ -27,7 +39,11 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
   const { data, loading, error, reload } = useEstablishment(slug);
   const establishment = data?.establishment;
 
-  useTenantTheme(establishment ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor } : null);
+  useTenantTheme(
+    establishment
+      ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor }
+      : null,
+  );
 
   const reviewsState = useAsync(async () => {
     if (!establishment) return null;
@@ -97,32 +113,51 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
 
   const onFavorite = async () => {
     if (!user) {
-      toast.push({ title: t('common.signInRequired'), description: t('establishment.favoriteLogin'), tone: 'info' });
+      toast.push({
+        title: t('common.signInRequired'),
+        description: t('establishment.favoriteLogin'),
+        tone: 'info',
+      });
       navigate('/compte');
       return;
     }
     const added = await toggle(establishment.id);
-    toast.push({ title: added ? t('establishment.favorited') : t('establishment.favorite'), tone: 'success' });
+    toast.push({
+      title: added ? t('establishment.favorited') : t('establishment.favorite'),
+      tone: 'success',
+    });
   };
 
   const submitReview = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!user) {
-      toast.push({ title: t('common.signInRequired'), description: t('establishment.reviewLogin'), tone: 'info' });
+      toast.push({
+        title: t('common.signInRequired'),
+        description: t('establishment.reviewLogin'),
+        tone: 'info',
+      });
       navigate('/compte');
       return;
     }
     if (rating < 1) return;
     setSubmitting(true);
     try {
-      await accountApi.submitReview({ tenantId: establishment.id, rating, comment: comment.trim() || undefined });
+      await accountApi.submitReview({
+        tenantId: establishment.id,
+        rating,
+        comment: comment.trim() || undefined,
+      });
       toast.push({ title: t('establishment.reviewThanks'), tone: 'success' });
       setComment('');
       setRating(0);
       myReviewState.reload();
       reviewsState.reload();
     } catch (caught) {
-      toast.push({ title: t('common.error'), description: caught instanceof Error ? caught.message : undefined, tone: 'error' });
+      toast.push({
+        title: t('common.error'),
+        description: caught instanceof Error ? caught.message : undefined,
+        tone: 'error',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -150,11 +185,21 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
 
       <main className="rh-client-page rh-client-page--flush">
         <section className="rh-tenant-hero">
-          <CoverImage src={gallery[0]} alt={establishment.brandName} seed={establishment.brandName} className="rh-tenant-hero__main" />
+          <CoverImage
+            src={gallery[0]}
+            alt={establishment.brandName}
+            seed={establishment.brandName}
+            className="rh-tenant-hero__main"
+          />
           <div className="rh-tenant-hero__overlay">
             <div className="rh-tenant-hero__headline">
               <h1>{establishment.brandName}</h1>
-              <span className={cx('rh-client-pill', open ? 'rh-client-pill--success' : 'rh-client-pill--neutral')}>
+              <span
+                className={cx(
+                  'rh-client-pill',
+                  open ? 'rh-client-pill--success' : 'rh-client-pill--neutral',
+                )}
+              >
                 {open ? t('common.open') : t('common.closed')}
               </span>
             </div>
@@ -162,7 +207,10 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
               {reviews && reviews.count > 0 ? (
                 <span>
                   <Stars value={reviews.average} size="sm" /> {ratingLabel(reviews.average)} ·{' '}
-                  {t('establishment.ratingCount', { rating: ratingLabel(reviews.average), count: reviews.count })}
+                  {t('establishment.ratingCount', {
+                    rating: ratingLabel(reviews.average),
+                    count: reviews.count,
+                  })}
                 </span>
               ) : (
                 <span>{t('establishment.noRating')}</span>
@@ -171,12 +219,21 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
             {gallery.length > 1 && (
               <div className="rh-tenant-hero__thumbs">
                 {gallery.slice(0, 3).map((photo, index) => (
-                  <button key={photo} type="button" onClick={() => setShowGallery(true)} aria-label={`${t('establishment.photos')} ${index + 1}`}>
+                  <button
+                    key={photo}
+                    type="button"
+                    onClick={() => setShowGallery(true)}
+                    aria-label={`${t('establishment.photos')} ${index + 1}`}
+                  >
                     <img src={photo} alt="" loading="lazy" />
                   </button>
                 ))}
                 {gallery.length > 3 && (
-                  <button type="button" className="rh-tenant-hero__more" onClick={() => setShowGallery(true)}>
+                  <button
+                    type="button"
+                    className="rh-tenant-hero__more"
+                    onClick={() => setShowGallery(true)}
+                  >
                     +{gallery.length - 3}
                   </button>
                 )}
@@ -186,8 +243,18 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
         </section>
 
         {showGallery && (
-          <div className="rh-gallery" role="dialog" aria-modal="true" aria-label={t('establishment.photos')}>
-            <button type="button" className="rh-gallery__close" onClick={() => setShowGallery(false)} aria-label={t('common.close')}>
+          <div
+            className="rh-gallery"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('establishment.photos')}
+          >
+            <button
+              type="button"
+              className="rh-gallery__close"
+              onClick={() => setShowGallery(false)}
+              aria-label={t('common.close')}
+            >
               <Icon name="x" />
             </button>
             <div className="rh-gallery__grid">
@@ -201,7 +268,11 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
         <p className="rh-tenant-desc">{establishment.description}</p>
 
         <div className="rh-tenant-cta">
-          <button type="button" className="rh-client-btn rh-client-btn--primary" onClick={() => navigate(`/e/${establishment.slug}/menu`)}>
+          <button
+            type="button"
+            className="rh-client-btn rh-client-btn--primary"
+            onClick={() => navigate(`/e/${establishment.slug}/menu`)}
+          >
             <Icon name="utensils" size="sm" /> {t('establishment.menu')}
           </button>
           <button
@@ -220,7 +291,9 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
             </span>
             <div>
               <strong>{t('establishment.address')}</strong>
-              <span>{establishmentAddress(establishment) || establishment.primarySite?.address}</span>
+              <span>
+                {establishmentAddress(establishment) || establishment.primarySite?.address}
+              </span>
               {establishment.siteCount > 1 && (
                 <em>{t('establishment.sites', { count: establishment.siteCount })}</em>
               )}
@@ -248,7 +321,11 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
                 {hours.map(({ dayKey, entry, isToday }) => (
                   <li key={dayKey} className={cx(isToday && 'is-today')}>
                     <span>{t(`days.${dayKey}`)}</span>
-                    <span>{entry && !entry.closed ? `${entry.open} – ${entry.close}` : t('common.closed')}</span>
+                    <span>
+                      {entry && !entry.closed
+                        ? `${entry.open} – ${entry.close}`
+                        : t('common.closed')}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -280,13 +357,22 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
         )}
 
         <section>
-          <SectionTitle title={t('establishment.reviewsTitle')} subtitle={reviews && reviews.count > 0 ? `${ratingLabel(reviews.average)} / 5 · ${formatNumber(reviews.count, locale)} ${t('common.reviews')}` : undefined} />
+          <SectionTitle
+            title={t('establishment.reviewsTitle')}
+            subtitle={
+              reviews && reviews.count > 0
+                ? `${ratingLabel(reviews.average)} / 5 · ${formatNumber(reviews.count, locale)} ${t('common.reviews')}`
+                : undefined
+            }
+          />
           {reviews && reviews.count > 0 && (
             <div className="rh-review-summary">
               <div className="rh-review-summary__score">
                 <strong>{ratingLabel(reviews.average)}</strong>
                 <Stars value={reviews.average} />
-                <span>{formatNumber(reviews.count, locale)} {t('common.reviews')}</span>
+                <span>
+                  {formatNumber(reviews.count, locale)} {t('common.reviews')}
+                </span>
               </div>
               <div className="rh-review-summary__bars">
                 {[5, 4, 3, 2, 1].map((star) => {
@@ -296,7 +382,10 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
                     <div className="rh-review-bar" key={star}>
                       <span>{star}</span>
                       <div className="rh-review-bar__track">
-                        <div className="rh-review-bar__fill" style={{ width: `${Math.round(ratio * 100)}%` }} />
+                        <div
+                          className="rh-review-bar__fill"
+                          style={{ width: `${Math.round(ratio * 100)}%` }}
+                        />
                       </div>
                       <span>{count}</span>
                     </div>
@@ -326,20 +415,34 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
           <form className="rh-review-form" onSubmit={submitReview}>
             <div className="rh-review-form__head">
               <strong>{t('establishment.writeReview')}</strong>
-              {hasExisting && <span className="rh-client-pill rh-client-pill--info">{t('establishment.reviewPending')}</span>}
+              {hasExisting && (
+                <span className="rh-client-pill rh-client-pill--info">
+                  {t('establishment.reviewPending')}
+                </span>
+              )}
             </div>
             {!user ? (
               <p className="rh-client-muted">
                 {t('establishment.reviewLogin')}{' '}
-                <button type="button" className="rh-client-link-btn" onClick={() => navigate('/compte')}>
+                <button
+                  type="button"
+                  className="rh-client-link-btn"
+                  onClick={() => navigate('/compte')}
+                >
                   {t('common.login')}
                 </button>
               </p>
             ) : (
               <>
                 <label className="rh-review-form__label">{t('establishment.yourRating')}</label>
-                <StarRatingInput value={rating || myReview?.rating || 0} onChange={setRating} label={t('establishment.yourRating')} />
-                {hasExisting && <p className="rh-client-hint">{t('establishment.reviewExisting')}</p>}
+                <StarRatingInput
+                  value={rating || myReview?.rating || 0}
+                  onChange={setRating}
+                  label={t('establishment.yourRating')}
+                />
+                {hasExisting && (
+                  <p className="rh-client-hint">{t('establishment.reviewExisting')}</p>
+                )}
                 <Textarea
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
@@ -347,7 +450,11 @@ export default function EstablishmentPage({ slug }: { slug: string }) {
                   maxLength={500}
                   rows={3}
                 />
-                <button type="submit" className="rh-client-btn rh-client-btn--primary" disabled={submitting || (rating === 0 && !hasExisting)}>
+                <button
+                  type="submit"
+                  className="rh-client-btn rh-client-btn--primary"
+                  disabled={submitting || (rating === 0 && !hasExisting)}
+                >
                   {submitting ? t('common.loading') : t('establishment.submitReview')}
                 </button>
               </>

@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   SESSION_KEY,
   authApi,
@@ -54,7 +62,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     (bundle: TokenBundle) => {
-      apply({ accessToken: bundle.accessToken, refreshToken: bundle.refreshToken, user: bundle.user });
+      apply({
+        accessToken: bundle.accessToken,
+        refreshToken: bundle.refreshToken,
+        user: bundle.user,
+      });
     },
     [apply],
   );
@@ -89,7 +101,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const onExpired = () => apply(null);
     const onTokens = (event: Event) => {
       const bundle = (event as CustomEvent<TokenBundle>).detail;
-      setSessionState((current) => (current ? { ...current, accessToken: bundle.accessToken, refreshToken: bundle.refreshToken } : current));
+      setSessionState((current) =>
+        current
+          ? { ...current, accessToken: bundle.accessToken, refreshToken: bundle.refreshToken }
+          : current,
+      );
     };
     window.addEventListener('restohub:client-session-expired', onExpired);
     window.addEventListener('restohub:client-tokens', onTokens);

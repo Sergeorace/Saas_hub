@@ -4,7 +4,8 @@ export const frStep3: Messages = {
   orders: {
     title: 'Commandes & service',
     nav: 'Commandes',
-    subtitle: 'Prise de commande en salle, à emporter, en livraison ou en précommande — workflow horodaté.',
+    subtitle:
+      'Prise de commande en salle, à emporter, en livraison ou en précommande — workflow horodaté.',
     newOrder: 'Nouvelle commande',
     refresh: 'Actualiser',
     search: 'Rechercher un numéro, une table, un client…',
@@ -101,7 +102,8 @@ export const frStep3: Messages = {
     offlinePending: '{count} commande(s) en attente de synchronisation',
     offlineSync: 'Synchroniser',
     offlineConflict: 'Conflit détecté : {message}',
-    offlineQueued: 'Hors connexion : commande enregistrée localement, elle sera synchronisée automatiquement.',
+    offlineQueued:
+      'Hors connexion : commande enregistrée localement, elle sera synchronisée automatiquement.',
     offlineSent: 'Commande hors ligne synchronisée.',
     offlineDiscard: 'Retirer',
     offlineRetry: 'Réessayer',
@@ -191,7 +193,8 @@ export const frStep3: Messages = {
     invoice: 'Facture',
     discount: 'Remise',
     cancel: 'Annuler',
-    cashierHint: 'Aucune carte n’est stockée : seules les références de transaction sont conservées.',
+    cashierHint:
+      'Aucune carte n’est stockée : seules les références de transaction sont conservées.',
     noSessionTitle: 'Caisse fermée',
     noSessionBody: 'Ouvrez une caisse pour encaisser les commandes du service.',
     errorLoad: 'La caisse n’a pas pu être chargée.',
@@ -226,7 +229,8 @@ export const frStep3: Messages = {
     trackingSub: 'Cette page se met à jour automatiquement.',
     orderNumber: 'Commande',
     paid: 'Payé',
-    paymentAtTable: 'Paiement à encaisser sur place par le personnel (espèces, Mobile Money ou carte).',
+    paymentAtTable:
+      'Paiement à encaisser sur place par le personnel (espèces, Mobile Money ou carte).',
     ticketsTitle: 'Production par poste',
     stationCuisine: 'Cuisine',
     stationBar: 'Bar',
@@ -238,7 +242,8 @@ export const frStep3: Messages = {
     statusAnnulee: 'Annulée',
     awaitingKitchen: 'La cuisine a pris connaissance de votre commande.',
     invalidLink: 'Lien de suivi invalide ou expiré.',
-    secureNote: 'Aucune carte bancaire n’est stockée. Les paiements sont traités par des prestataires agréés.',
+    secureNote:
+      'Aucune carte bancaire n’est stockée. Les paiements sont traités par des prestataires agréés.',
   },
 };
 

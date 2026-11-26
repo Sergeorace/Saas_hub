@@ -92,7 +92,9 @@
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--ink-2);
-  transition: background-color var(--duration-fast), color var(--duration-fast);
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast);
 }
 
 .rh-nav-item:hover {
@@ -302,7 +304,9 @@
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  transition: color var(--duration-fast), background-color var(--duration-fast);
+  transition:
+    color var(--duration-fast),
+    background-color var(--duration-fast);
 }
 
 .rh-bottom-nav__item:hover {

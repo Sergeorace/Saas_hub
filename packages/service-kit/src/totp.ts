@@ -36,14 +36,23 @@ export function base32Decode(input: string): Buffer {
   return Buffer.from(bytes);
 }
 
-export function totpWindow(secretBase32: string, timestamp = Date.now(), stepSeconds = 30, digits = 6): string {
+export function totpWindow(
+  secretBase32: string,
+  timestamp = Date.now(),
+  stepSeconds = 30,
+  digits = 6,
+): string {
   const secret = base32Decode(secretBase32);
   const counter = Math.floor(timestamp / 1000 / stepSeconds);
   const buffer = Buffer.alloc(8);
   buffer.writeBigUInt64BE(BigInt(counter));
   const hmac = createHmac('sha1', secret).update(buffer).digest();
   const offset = hmac[hmac.length - 1] & 0x0f;
-  const code = ((hmac[offset] & 0x7f) << 24) | (hmac[offset + 1] << 16) | (hmac[offset + 2] << 8) | hmac[offset + 3];
+  const code =
+    ((hmac[offset] & 0x7f) << 24) |
+    (hmac[offset + 1] << 16) |
+    (hmac[offset + 2] << 8) |
+    hmac[offset + 3];
   return String(code % 10 ** digits).padStart(digits, '0');
 }
 

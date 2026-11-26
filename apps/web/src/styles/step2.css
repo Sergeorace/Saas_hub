@@ -264,12 +264,24 @@
   border-radius: 50%;
 }
 
-.floor-dot--libre { background: var(--table-free); }
-.floor-dot--reservee { background: var(--table-reserved); }
-.floor-dot--occupee { background: var(--table-occupied); }
-.floor-dot--addition { background: var(--table-bill); }
-.floor-dot--nettoyage { background: var(--table-cleaning); }
-.floor-dot--hors_service { background: var(--table-out); }
+.floor-dot--libre {
+  background: var(--table-free);
+}
+.floor-dot--reservee {
+  background: var(--table-reserved);
+}
+.floor-dot--occupee {
+  background: var(--table-occupied);
+}
+.floor-dot--addition {
+  background: var(--table-bill);
+}
+.floor-dot--nettoyage {
+  background: var(--table-cleaning);
+}
+.floor-dot--hors_service {
+  background: var(--table-out);
+}
 
 .floor-layout {
   display: grid;
@@ -339,8 +351,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 25% 20%, var(--primary-soft) 0%, transparent 45%),
-    var(--surface-2);
+    radial-gradient(circle at 25% 20%, var(--primary-soft) 0%, transparent 45%), var(--surface-2);
   overflow: hidden;
   touch-action: pan-y;
 }
@@ -375,7 +386,10 @@
   cursor: grab;
   user-select: none;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
 }
 
 .floor-table:hover {
@@ -388,12 +402,42 @@
   outline-offset: 2px;
 }
 
-.floor-table--libre { --node-accent: var(--table-free); --node-soft: var(--table-free-soft); --node-border: var(--table-free-border); --node-ink: var(--table-free-ink); }
-.floor-table--reservee { --node-accent: var(--table-reserved); --node-soft: var(--table-reserved-soft); --node-border: var(--table-reserved-border); --node-ink: var(--table-reserved-ink); }
-.floor-table--occupee { --node-accent: var(--table-occupied); --node-soft: var(--table-occupied-soft); --node-border: var(--table-occupied-border); --node-ink: var(--table-occupied-ink); }
-.floor-table--addition { --node-accent: var(--table-bill); --node-soft: var(--table-bill-soft); --node-border: var(--table-bill-border); --node-ink: var(--table-bill-ink); }
-.floor-table--nettoyage { --node-accent: var(--table-cleaning); --node-soft: var(--table-cleaning-soft); --node-border: var(--table-cleaning-border); --node-ink: var(--table-cleaning-ink); }
-.floor-table--hors_service { --node-accent: var(--table-out); --node-soft: var(--table-out-soft); --node-border: var(--table-out-border); --node-ink: var(--table-out-ink); }
+.floor-table--libre {
+  --node-accent: var(--table-free);
+  --node-soft: var(--table-free-soft);
+  --node-border: var(--table-free-border);
+  --node-ink: var(--table-free-ink);
+}
+.floor-table--reservee {
+  --node-accent: var(--table-reserved);
+  --node-soft: var(--table-reserved-soft);
+  --node-border: var(--table-reserved-border);
+  --node-ink: var(--table-reserved-ink);
+}
+.floor-table--occupee {
+  --node-accent: var(--table-occupied);
+  --node-soft: var(--table-occupied-soft);
+  --node-border: var(--table-occupied-border);
+  --node-ink: var(--table-occupied-ink);
+}
+.floor-table--addition {
+  --node-accent: var(--table-bill);
+  --node-soft: var(--table-bill-soft);
+  --node-border: var(--table-bill-border);
+  --node-ink: var(--table-bill-ink);
+}
+.floor-table--nettoyage {
+  --node-accent: var(--table-cleaning);
+  --node-soft: var(--table-cleaning-soft);
+  --node-border: var(--table-cleaning-border);
+  --node-ink: var(--table-cleaning-ink);
+}
+.floor-table--hors_service {
+  --node-accent: var(--table-out);
+  --node-soft: var(--table-out-soft);
+  --node-border: var(--table-out-border);
+  --node-ink: var(--table-out-ink);
+}
 
 .floor-table::after {
   content: '';
@@ -406,7 +450,9 @@
 
 .floor-table.is-selected {
   border-color: var(--node-accent);
-  box-shadow: 0 0 0 3px var(--node-soft), 0 8px 18px rgba(0, 0, 0, 0.16);
+  box-shadow:
+    0 0 0 3px var(--node-soft),
+    0 8px 18px rgba(0, 0, 0, 0.16);
 }
 
 .floor-table.is-merge-selected {

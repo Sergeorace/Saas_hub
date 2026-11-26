@@ -47,7 +47,8 @@ async function main() {
   });
   identityBus.on('TenantSuspended', async (envelope) => {
     const tenantId = String(envelope.payload.tenantId ?? '');
-    if (tenantId) identityStore.revokeTenantSessions(tenantId, 'tenant-service', 'tenant_suspended');
+    if (tenantId)
+      identityStore.revokeTenantSessions(tenantId, 'tenant-service', 'tenant_suspended');
   });
   const identityServer = await startServer(
     {
@@ -63,7 +64,12 @@ async function main() {
     identityServer.url,
     'POST',
     '/internal/provision-platform-user',
-    { name: 'Super Admin', email: 'admin@test.tg', password: 'Admin#2026', platformRole: 'super_admin' },
+    {
+      name: 'Super Admin',
+      email: 'admin@test.tg',
+      password: 'Admin#2026',
+      platformRole: 'super_admin',
+    },
     { internalKey: INTERNAL_KEY },
   );
 
@@ -85,7 +91,10 @@ async function main() {
     internalKey: INTERNAL_KEY,
     subscribers: [identityServer.url],
   });
-  const identityClient = createServiceClient({ baseUrl: identityServer.url, internalKey: INTERNAL_KEY });
+  const identityClient = createServiceClient({
+    baseUrl: identityServer.url,
+    internalKey: INTERNAL_KEY,
+  });
   const tenantRoutes = buildTenantApp({
     store: tenantStore,
     config: tenantConfig,
@@ -147,7 +156,12 @@ async function main() {
         contact: { phone: seed.phone, email: seed.email },
         hours: [{ day: 'lun', open: '11:00', close: '23:00' }],
       },
-      manager: { name: `Gérant ${seed.brandName}`, email: seed.email, phone: seed.phone, password: seed.password },
+      manager: {
+        name: `Gérant ${seed.brandName}`,
+        email: seed.email,
+        phone: seed.phone,
+        password: seed.password,
+      },
       plan: seed.plan,
       languages: ['fr', 'en'],
       acceptTerms: false,
@@ -175,10 +189,18 @@ async function main() {
     );
 
   const submit = (id: string, token: string) =>
-    api(base, 'POST', `/api/v1/applications/${id}/submit`, {}, { headers: { 'x-application-token': token } });
+    api(
+      base,
+      'POST',
+      `/api/v1/applications/${id}/submit`,
+      {},
+      { headers: { 'x-application-token': token } },
+    );
 
   const patchApplication = (id: string, token: string, body: unknown) =>
-    api(base, 'PATCH', `/api/v1/applications/${id}`, body, { headers: { 'x-application-token': token } });
+    api(base, 'PATCH', `/api/v1/applications/${id}`, body, {
+      headers: { 'x-application-token': token },
+    });
 
   const approve = async (id: string) => {
     const result = await api(
@@ -265,8 +287,16 @@ async function main() {
           headers: { 'x-application-token': 'mauvais-jeton' },
         });
         assertStatus(badToken, 403, 'Jeton de demande invalide');
-        assertStatus(await uploadDoc(alpha.id, alpha.token, 'nif', 'NIF-Alpha.txt'), 201, 'Pièce NIF');
-        assertStatus(await uploadDoc(alpha.id, alpha.token, 'rccm', 'RCCM-Alpha.txt'), 201, 'Pièce RCCM');
+        assertStatus(
+          await uploadDoc(alpha.id, alpha.token, 'nif', 'NIF-Alpha.txt'),
+          201,
+          'Pièce NIF',
+        );
+        assertStatus(
+          await uploadDoc(alpha.id, alpha.token, 'rccm', 'RCCM-Alpha.txt'),
+          201,
+          'Pièce RCCM',
+        );
         const submitted = await submit(alpha.id, alpha.token);
         assertStatus(submitted, 200, 'Soumission Alpha');
         assertEqual(submitted.body.application.status, 'submitted', 'Statut soumis attendu');
@@ -275,15 +305,22 @@ async function main() {
         });
         assertStatus(tracking, 200, 'Suivi public');
         assertEqual(tracking.body.application.status, 'submitted', 'Suivi : statut soumis');
-        assert(!JSON.stringify(tracking.body).includes('Gerant#2026'), 'Le mot de passe ne doit jamais être exposé');
+        assert(
+          !JSON.stringify(tracking.body).includes('Gerant#2026'),
+          'Le mot de passe ne doit jamais être exposé',
+        );
       },
     },
     {
       name: 'Sécurité : un simple utilisateur ne peut pas ouvrir le back-office plateforme',
       async run() {
-        const list = await api(base, 'GET', '/api/v1/admin/applications', undefined, { token: visitorToken });
+        const list = await api(base, 'GET', '/api/v1/admin/applications', undefined, {
+          token: visitorToken,
+        });
         assertStatus(list, 403, 'Liste des demandes par un visiteur');
-        const tenants = await api(base, 'GET', '/api/v1/admin/tenants', undefined, { token: visitorToken });
+        const tenants = await api(base, 'GET', '/api/v1/admin/tenants', undefined, {
+          token: visitorToken,
+        });
         assertStatus(tenants, 403, 'Liste des établissements par un visiteur');
       },
     },
@@ -292,11 +329,30 @@ async function main() {
       async run() {
         const rejected = await submit(gamma.id, gamma.token);
         assertStatus(rejected, 422, 'Soumission sans pièces');
-        assertEqual(rejected.body.error.code, 'application_incomplete', 'Code d’incomplétude attendu');
-        assert(rejected.body.error.details.missing.includes('pièce NIF'), 'Pièce NIF manquante signalée');
-        assertStatus(await uploadDoc(gamma.id, gamma.token, 'nif', 'NIF-Gamma.txt'), 201, 'Pièce NIF Gamma');
-        assertStatus(await uploadDoc(gamma.id, gamma.token, 'rccm', 'RCCM-Gamma.txt'), 201, 'Pièce RCCM Gamma');
-        assertStatus(await patchApplication(gamma.id, gamma.token, { acceptTerms: true }), 200, 'CGU Gamma');
+        assertEqual(
+          rejected.body.error.code,
+          'application_incomplete',
+          'Code d’incomplétude attendu',
+        );
+        assert(
+          rejected.body.error.details.missing.includes('pièce NIF'),
+          'Pièce NIF manquante signalée',
+        );
+        assertStatus(
+          await uploadDoc(gamma.id, gamma.token, 'nif', 'NIF-Gamma.txt'),
+          201,
+          'Pièce NIF Gamma',
+        );
+        assertStatus(
+          await uploadDoc(gamma.id, gamma.token, 'rccm', 'RCCM-Gamma.txt'),
+          201,
+          'Pièce RCCM Gamma',
+        );
+        assertStatus(
+          await patchApplication(gamma.id, gamma.token, { acceptTerms: true }),
+          200,
+          'CGU Gamma',
+        );
         assertStatus(await submit(gamma.id, gamma.token), 200, 'Soumission Gamma');
       },
     },
@@ -308,9 +364,14 @@ async function main() {
         assertEqual(result.tenant.slug, 'alpha-grill', 'Sous-domaine attendu');
         assertEqual(result.tenant.status, 'active', 'Établissement actif attendu');
         assertEqual(result.subscription.status, 'trialing', 'Essai gratuit attendu');
-        assert(result.tenant.subdomain.endsWith('.resto-hub.tg'), 'Sous-domaine plateforme attendu');
+        assert(
+          result.tenant.subdomain.endsWith('.resto-hub.tg'),
+          'Sous-domaine plateforme attendu',
+        );
         assertEqual(result.credentials.email, 'gerant@alpha.tg', 'Accès gérant attendu');
-        const detail = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}`, undefined, { token: adminToken });
+        const detail = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}`, undefined, {
+          token: adminToken,
+        });
         assertStatus(detail, 200, 'Détail établissement Alpha');
         assertEqual(detail.body.sites.length, 1, 'Site principal automatique');
         const duplicate = await api(
@@ -361,18 +422,26 @@ async function main() {
     {
       name: 'Isolation : chaque comptable ne voit que son établissement (lectures croisées refusées)',
       async run() {
-        const alphaAccountant = await accountByTenant(alphaTenantId, 'compta@alpha.tg', 'Compta#2026');
+        const alphaAccountant = await accountByTenant(
+          alphaTenantId,
+          'compta@alpha.tg',
+          'Compta#2026',
+        );
         const betaAccountant = await accountByTenant(betaTenantId, 'compta@beta.tg', 'Compta#2026');
         alphaAccountantToken = alphaAccountant.token;
         betaAccountantToken = betaAccountant.token;
 
-        const mine = await api(base, 'GET', '/api/v1/tenants/mine', undefined, { token: alphaAccountantToken });
+        const mine = await api(base, 'GET', '/api/v1/tenants/mine', undefined, {
+          token: alphaAccountantToken,
+        });
         assertStatus(mine, 200, 'Établissements du comptable Alpha');
         assertEqual(mine.body.items.length, 1, 'Un seul établissement visible');
         assertEqual(mine.body.items[0].id, alphaTenantId, 'Seul Alpha visible');
         assert(!JSON.stringify(mine.body).includes(betaTenantId), 'Beta ne doit jamais apparaître');
 
-        const own = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}`, undefined, { token: alphaAccountantToken });
+        const own = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}`, undefined, {
+          token: alphaAccountantToken,
+        });
         assertStatus(own, 200, 'Alpha accessible au comptable Alpha');
 
         const attempts: Array<[string, string, unknown]> = [
@@ -384,7 +453,11 @@ async function main() {
           ['GET', `/api/v1/tenants/${betaTenantId}/team`, undefined],
           ['GET', `/api/v1/tenants/${betaTenantId}/export?format=json`, undefined],
           ['PATCH', `/api/v1/tenants/${betaTenantId}/branding`, { primaryColor: '#000000' }],
-          ['POST', `/api/v1/tenants/${betaTenantId}/sites`, { name: 'Site pirate', address: 'Nulle part' }],
+          [
+            'POST',
+            `/api/v1/tenants/${betaTenantId}/sites`,
+            { name: 'Site pirate', address: 'Nulle part' },
+          ],
         ];
         for (const [method, path, body] of attempts) {
           const result = await api(base, method, path, body, { token: alphaAccountantToken });
@@ -392,11 +465,25 @@ async function main() {
           assertEqual(result.body.error.code, 'tenant_scope_denied', `Code d’isolation ${path}`);
         }
 
-        const betaOwn = await api(base, 'GET', `/api/v1/tenants/${betaTenantId}`, undefined, { token: betaAccountantToken });
+        const betaOwn = await api(base, 'GET', `/api/v1/tenants/${betaTenantId}`, undefined, {
+          token: betaAccountantToken,
+        });
         assertStatus(betaOwn, 200, 'Beta accessible à son comptable');
-        const betaSites = await api(base, 'GET', `/api/v1/tenants/${betaTenantId}/sites`, undefined, { token: betaAccountantToken });
+        const betaSites = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${betaTenantId}/sites`,
+          undefined,
+          { token: betaAccountantToken },
+        );
         assertStatus(betaSites, 200, 'Sites Beta');
-        const crossAudit = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/audit`, undefined, { token: betaAccountantToken });
+        const crossAudit = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${alphaTenantId}/audit`,
+          undefined,
+          { token: betaAccountantToken },
+        );
         assertStatus(crossAudit, 403, 'Audit Alpha depuis Beta');
       },
     },
@@ -406,7 +493,9 @@ async function main() {
         const step = await identityLogin('gerant@alpha.tg', 'Gerant#2026');
         assertStatus(step, 200, 'Connexion gérant Alpha');
         assert(step.body.mfaSetupRequired === true, 'Activation MFA exigée');
-        const enroll = await api(idBase, 'POST', '/api/v1/auth/mfa/enroll', { ticket: step.body.ticket });
+        const enroll = await api(idBase, 'POST', '/api/v1/auth/mfa/enroll', {
+          ticket: step.body.ticket,
+        });
         assertStatus(enroll, 200, 'Enrôlement MFA');
         ownerASecret = enroll.body.secret;
         const confirm = await api(idBase, 'POST', '/api/v1/auth/mfa/confirm', {
@@ -415,7 +504,9 @@ async function main() {
         });
         assertStatus(confirm, 200, 'Activation MFA');
         ownerAToken = confirm.body.accessToken;
-        const me = await api(base, 'GET', '/api/v1/tenants/mine', undefined, { token: ownerAToken });
+        const me = await api(base, 'GET', '/api/v1/tenants/mine', undefined, {
+          token: ownerAToken,
+        });
         assertStatus(me, 200, 'Accès gérant Alpha après MFA');
         assertEqual(me.body.items[0].role, 'owner', 'Rôle gérant attendu');
       },
@@ -447,7 +538,11 @@ async function main() {
           { token: ownerAToken },
         );
         assertStatus(updated, 200, 'Personnalisation Alpha');
-        assertEqual(updated.body.tenant.settings.primaryColor, '#B45309', 'Couleur primaire appliquée');
+        assertEqual(
+          updated.body.tenant.settings.primaryColor,
+          '#B45309',
+          'Couleur primaire appliquée',
+        );
         assertEqual(updated.body.tenant.brandName, 'Alpha Grill & Bar', 'Nom commercial appliqué');
 
         const invalidColor = await api(
@@ -472,11 +567,15 @@ async function main() {
         });
         assertStatus(audit, 200, 'Audit Alpha');
         assert(
-          audit.body.items.some((entry: { action: string }) => entry.action === 'tenant.branding_updated'),
+          audit.body.items.some(
+            (entry: { action: string }) => entry.action === 'tenant.branding_updated',
+          ),
           'Changement de personnalisation audité',
         );
         assert(
-          audit.body.items.every((entry: { tenantId: string | null }) => entry.tenantId === alphaTenantId),
+          audit.body.items.every(
+            (entry: { tenantId: string | null }) => entry.tenantId === alphaTenantId,
+          ),
           'Aucune entrée d’un autre établissement',
         );
       },
@@ -509,7 +608,9 @@ async function main() {
         );
         assertStatus(overflow, 422, 'Quatrième site refusé (plan Pro = 3)');
         assertEqual(overflow.body.error.code, 'plan_site_limit', 'Code de limite de plan attendu');
-        const sites = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/sites`, undefined, { token: ownerAToken });
+        const sites = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/sites`, undefined, {
+          token: ownerAToken,
+        });
         assertEqual(sites.body.items.length, 3, 'Trois sites conservés');
         const primary = sites.body.items.find((site: { isPrimary: boolean }) => site.isPrimary);
         const deletePrimary = await api(
@@ -525,20 +626,44 @@ async function main() {
     {
       name: 'Onboarding : la checklist reflète la configuration réelle sans fuite inter-tenant',
       async run() {
-        const onboarding = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/onboarding`, undefined, {
-          token: ownerAToken,
-        });
+        const onboarding = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${alphaTenantId}/onboarding`,
+          undefined,
+          {
+            token: ownerAToken,
+          },
+        );
         assertStatus(onboarding, 200, 'Checklist Alpha');
-        const items = onboarding.body.items as Array<{ key: string; done: boolean; detail?: string }>;
+        const items = onboarding.body.items as Array<{
+          key: string;
+          done: boolean;
+          detail?: string;
+        }>;
         assertEqual(items.find((item) => item.key === 'space')?.done, true, 'Espace créé');
-        assertEqual(items.find((item) => item.key === 'branding')?.done, true, 'Personnalisation détectée');
+        assertEqual(
+          items.find((item) => item.key === 'branding')?.done,
+          true,
+          'Personnalisation détectée',
+        );
         assertEqual(items.find((item) => item.key === 'hours')?.done, true, 'Horaires détectés');
         assertEqual(items.find((item) => item.key === 'team')?.done, true, 'Équipe détectée');
-        assertEqual(items.find((item) => item.key === 'catalog')?.done, false, 'Catalogue pas encore créé');
+        assertEqual(
+          items.find((item) => item.key === 'catalog')?.done,
+          false,
+          'Catalogue pas encore créé',
+        );
         assert(onboarding.body.progress > 50, 'Progression attendue supérieure à 50 %');
-        const cross = await api(base, 'GET', `/api/v1/tenants/${betaTenantId}/onboarding`, undefined, {
-          token: alphaAccountantToken,
-        });
+        const cross = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${betaTenantId}/onboarding`,
+          undefined,
+          {
+            token: alphaAccountantToken,
+          },
+        );
         assertStatus(cross, 403, 'Checklist Beta depuis Alpha');
       },
     },
@@ -573,12 +698,23 @@ async function main() {
         );
         assertStatus(replay, 200, 'Rejeu du paiement');
         assertEqual(replay.body.alreadyProcessed, true, 'Paiement idempotent');
-        const subscription = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/subscription`, undefined, {
-          token: ownerAToken,
-        });
+        const subscription = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${alphaTenantId}/subscription`,
+          undefined,
+          {
+            token: ownerAToken,
+          },
+        );
         assertStatus(subscription, 200, 'Abonnement Alpha');
         assertEqual(subscription.body.subscription.status, 'active', 'Abonnement actif');
-        assert(subscription.body.invoices.some((invoice: { status: string }) => invoice.status === 'paid'), 'Facture payée listée');
+        assert(
+          subscription.body.invoices.some(
+            (invoice: { status: string }) => invoice.status === 'paid',
+          ),
+          'Facture payée listée',
+        );
       },
     },
     {
@@ -598,7 +734,9 @@ async function main() {
           headers: { 'x-billing-signature': 'deadbeef' },
         });
         assertStatus(badSignature, 401, 'Signature invalide');
-        const signature = createHmac('sha256', BILLING_SECRET).update(JSON.stringify(payload)).digest('hex');
+        const signature = createHmac('sha256', BILLING_SECRET)
+          .update(JSON.stringify(payload))
+          .digest('hex');
         const ok = await api(base, 'POST', '/internal/webhooks/billing', payload, {
           headers: { 'x-billing-signature': signature },
         });
@@ -614,21 +752,44 @@ async function main() {
     {
       name: 'Exports : données cloisonnées, format CSV et traçabilité',
       async run() {
-        const json = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/export?format=json`, undefined, {
-          token: ownerAToken,
-        });
+        const json = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${alphaTenantId}/export?format=json`,
+          undefined,
+          {
+            token: ownerAToken,
+          },
+        );
         assertStatus(json, 200, 'Export JSON Alpha');
         assertEqual(json.body.tenant.id, alphaTenantId, 'Établissement Alpha exporté');
-        assert(!JSON.stringify(json.body).includes(betaTenantId), 'Aucune donnée Beta dans l’export');
-        assert(!JSON.stringify(json.body).includes('gerant@beta.tg'), 'Aucun contact Beta dans l’export');
-        const csv = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/export?format=csv`, undefined, {
-          token: ownerAToken,
-        });
+        assert(
+          !JSON.stringify(json.body).includes(betaTenantId),
+          'Aucune donnée Beta dans l’export',
+        );
+        assert(
+          !JSON.stringify(json.body).includes('gerant@beta.tg'),
+          'Aucun contact Beta dans l’export',
+        );
+        const csv = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${alphaTenantId}/export?format=csv`,
+          undefined,
+          {
+            token: ownerAToken,
+          },
+        );
         assertStatus(csv, 200, 'Export CSV Alpha');
         assert(String(csv.body).includes('alpha-grill'), 'Contenu CSV Alpha attendu');
-        const audit = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/audit`, undefined, { token: ownerAToken });
+        const audit = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}/audit`, undefined, {
+          token: ownerAToken,
+        });
         assert(
-          audit.body.items.some((entry: { action: string; meta: { format?: string } }) => entry.action === 'tenant.exported'),
+          audit.body.items.some(
+            (entry: { action: string; meta: { format?: string } }) =>
+              entry.action === 'tenant.exported',
+          ),
           'Export audité',
         );
       },
@@ -636,12 +797,19 @@ async function main() {
     {
       name: 'Supervision : agrégats plateforme et chaîne d’audit intègre',
       async run() {
-        const overview = await api(base, 'GET', '/api/v1/admin/overview', undefined, { token: adminToken });
+        const overview = await api(base, 'GET', '/api/v1/admin/overview', undefined, {
+          token: adminToken,
+        });
         assertStatus(overview, 200, 'Vue d’ensemble plateforme');
         assertEqual(overview.body.tenants.active, 2, 'Deux établissements actifs');
-        assert(overview.body.billing.collectedXof >= 35000 + 15000, 'Encaissements cumulés attendus');
+        assert(
+          overview.body.billing.collectedXof >= 35000 + 15000,
+          'Encaissements cumulés attendus',
+        );
         assertEqual(overview.body.audit.integrity, true, 'Chaîne d’audit intègre');
-        const forbidden = await api(base, 'GET', '/api/v1/admin/overview', undefined, { token: alphaAccountantToken });
+        const forbidden = await api(base, 'GET', '/api/v1/admin/overview', undefined, {
+          token: alphaAccountantToken,
+        });
         assertStatus(forbidden, 403, 'Vue d’ensemble réservée à la plateforme');
       },
     },
@@ -658,16 +826,36 @@ async function main() {
         assertStatus(suspend, 200, 'Suspension Alpha');
         assertEqual(suspend.body.tenant.status, 'suspended', 'Statut suspendu');
         await waitFor(async () => {
-          const introspect = await api(idBase, 'POST', '/internal/introspect', { token: ownerAToken }, internal);
+          const introspect = await api(
+            idBase,
+            'POST',
+            '/internal/introspect',
+            { token: ownerAToken },
+            internal,
+          );
           return introspect.status === 401;
         }, 5000);
         await waitFor(async () => {
-          const introspect = await api(idBase, 'POST', '/internal/introspect', { token: alphaAccountantToken }, internal);
+          const introspect = await api(
+            idBase,
+            'POST',
+            '/internal/introspect',
+            { token: alphaAccountantToken },
+            internal,
+          );
           return introspect.status === 401;
         }, 5000);
-        const blocked = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}`, undefined, { token: ownerAToken });
+        const blocked = await api(base, 'GET', `/api/v1/tenants/${alphaTenantId}`, undefined, {
+          token: ownerAToken,
+        });
         assertStatus(blocked, 401, 'Session gérant révoquée après suspension');
-        const betaStillWorks = await api(base, 'GET', `/api/v1/tenants/${betaTenantId}`, undefined, { token: betaAccountantToken });
+        const betaStillWorks = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${betaTenantId}`,
+          undefined,
+          { token: betaAccountantToken },
+        );
         assertStatus(betaStillWorks, 200, 'Beta non affectée par la suspension d’Alpha');
       },
     },
@@ -708,18 +896,40 @@ async function main() {
         const betaInvoice = tenantStore.invoices.get(betaInvoiceId);
         assert(betaInvoice, 'Facture Beta attendue');
         betaInvoice.dueAt = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        const dunning = await api(base, 'POST', '/internal/billing/run-dunning', { graceDays: 0 }, internal);
+        const dunning = await api(
+          base,
+          'POST',
+          '/internal/billing/run-dunning',
+          { graceDays: 0 },
+          internal,
+        );
         assertStatus(dunning, 200, 'Relance des impayés');
         assertEqual(dunning.body.suspendedTenants, 1, 'Beta suspendue pour impayé');
-        const betaDetail = await api(base, 'GET', `/api/v1/admin/tenants`, undefined, { token: adminToken });
-        const betaRow = betaDetail.body.items.find((tenant: { id: string }) => tenant.id === betaTenantId);
+        const betaDetail = await api(base, 'GET', `/api/v1/admin/tenants`, undefined, {
+          token: adminToken,
+        });
+        const betaRow = betaDetail.body.items.find(
+          (tenant: { id: string }) => tenant.id === betaTenantId,
+        );
         assertEqual(betaRow.status, 'suspended', 'Beta suspendue dans le back-office');
         await waitFor(async () => {
-          const introspect = await api(idBase, 'POST', '/internal/introspect', { token: betaAccountantToken }, internal);
+          const introspect = await api(
+            idBase,
+            'POST',
+            '/internal/introspect',
+            { token: betaAccountantToken },
+            internal,
+          );
           return introspect.status === 401;
         }, 5000);
-        const overview = await api(base, 'GET', '/api/v1/admin/overview', undefined, { token: adminToken });
-        assertEqual(overview.body.audit.integrity, true, 'Audit intègre après opérations sensibles');
+        const overview = await api(base, 'GET', '/api/v1/admin/overview', undefined, {
+          token: adminToken,
+        });
+        assertEqual(
+          overview.body.audit.integrity,
+          true,
+          'Audit intègre après opérations sensibles',
+        );
         assert(overview.body.audit.entries > 10, 'Journal d’audit alimenté');
       },
     },
@@ -747,7 +957,10 @@ async function main() {
 
         const kind = await api(base, 'GET', '/api/v1/public/establishments?kind=bar');
         assertStatus(kind, 200, 'Filtre par type');
-        assert(!(kind.body.items as Array<{ id: string }>).some((item) => item.id === alphaTenantId), 'Alpha (les deux) sans type déclaré exclu du filtre bar');
+        assert(
+          !(kind.body.items as Array<{ id: string }>).some((item) => item.id === alphaTenantId),
+          'Alpha (les deux) sans type déclaré exclu du filtre bar',
+        );
 
         const invalidKind = await api(base, 'GET', '/api/v1/public/establishments?kind=club');
         assertStatus(invalidKind, 422, 'Type inconnu refusé');
@@ -759,7 +972,11 @@ async function main() {
         assertStatus(detailById, 200, 'Détail public par identifiant');
         assertEqual(detail.body.establishment.slug, 'alpha-grill', 'Slug exposé');
 
-        const suspendedDetail = await api(base, 'GET', `/api/v1/public/establishments/${betaTenantId}`);
+        const suspendedDetail = await api(
+          base,
+          'GET',
+          `/api/v1/public/establishments/${betaTenantId}`,
+        );
         assertStatus(suspendedDetail, 404, 'Établissement suspendu invisible');
         const unknown = await api(base, 'GET', '/api/v1/public/establishments/inexistant');
         assertStatus(unknown, 404, 'Établissement inconnu');
@@ -767,7 +984,10 @@ async function main() {
     },
   ];
 
-  await runTests('TENANT-SERVICE — demandes, espaces, abonnements et isolation multi-tenant', cases);
+  await runTests(
+    'TENANT-SERVICE — demandes, espaces, abonnements et isolation multi-tenant',
+    cases,
+  );
   await tenantBus.flush();
   await identityBus.flush();
   await tenantServer.close();

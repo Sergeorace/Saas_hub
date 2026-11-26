@@ -24,13 +24,21 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       'no-empty': ['error', { allowEmptyCatch: true }],
       'no-useless-escape': 'error',
     },
   },
   {
-    files: ['scripts/**/*.mjs', 'infra/**/*.mjs', 'packages/*/scripts/**/*.mjs', 'packages/*/tests/**/*.mjs'],
+    files: [
+      'scripts/**/*.mjs',
+      'infra/**/*.mjs',
+      'packages/*/scripts/**/*.mjs',
+      'packages/*/tests/**/*.mjs',
+    ],
     languageOptions: { sourceType: 'module' },
   },
   {

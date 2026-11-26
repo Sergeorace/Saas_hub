@@ -68,7 +68,12 @@ export function StatCard({ label, value, icon, delta, meta, className }: StatCar
       {(delta || meta) && (
         <div className="rh-stat__meta">
           {delta && (
-            <span className={cx('rh-trend', delta.direction === 'up' ? 'rh-trend--up' : 'rh-trend--down')}>
+            <span
+              className={cx(
+                'rh-trend',
+                delta.direction === 'up' ? 'rh-trend--up' : 'rh-trend--down',
+              )}
+            >
               <Icon name={delta.direction === 'up' ? 'trending-up' : 'arrow-right'} size="sm" />
               {delta.value}
             </span>

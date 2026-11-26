@@ -96,9 +96,15 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignView[]>([]);
   const [audience, setAudience] = useState<Record<string, number>>({});
   const [reviews, setReviews] = useState<ReviewView[]>([]);
-  const [reviewCounts, setReviewCounts] = useState<Record<ReviewStatus, number>>({ pending: 0, approved: 0, rejected: 0 });
+  const [reviewCounts, setReviewCounts] = useState<Record<ReviewStatus, number>>({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
   const [reviewFilter, setReviewFilter] = useState<'all' | ReviewStatus>('all');
-  const [audit, setAudit] = useState<{ entries: InventoryAuditEntry[]; integrity: boolean } | null>(null);
+  const [audit, setAudit] = useState<{ entries: InventoryAuditEntry[]; integrity: boolean } | null>(
+    null,
+  );
 
   const [promotionModal, setPromotionModal] = useState(false);
   const [promoForm, setPromoForm] = useState({
@@ -204,7 +210,15 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         active: true,
       });
       setPromotionModal(false);
-      setPromoForm({ name: '', description: '', type: 'percent', value: '10', minOrderXof: '0', appliesTo: 'all', ...defaultPeriod() });
+      setPromoForm({
+        name: '',
+        description: '',
+        type: 'percent',
+        value: '10',
+        minOrderXof: '0',
+        appliesTo: 'all',
+        ...defaultPeriod(),
+      });
     }, t('marketing.promotionCreated'));
 
   const togglePromotion = (promotion: PromotionView) =>
@@ -226,7 +240,15 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         active: true,
       });
       setCodeModal(false);
-      setCodeForm({ code: '', type: 'percent', value: '10', minOrderXof: '0', maxUses: '0', perUserLimit: '1', ...defaultPeriod() });
+      setCodeForm({
+        code: '',
+        type: 'percent',
+        value: '10',
+        minOrderXof: '0',
+        maxUses: '0',
+        perUserLimit: '1',
+        ...defaultPeriod(),
+      });
     }, t('marketing.codeCreated'));
 
   const toggleCode = (code: PromoCodeView) =>
@@ -241,7 +263,9 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         channel: campaignForm.channel,
         segment: campaignForm.segment,
         message: campaignForm.message,
-        scheduledAt: campaignForm.scheduledAt ? new Date(campaignForm.scheduledAt).toISOString() : null,
+        scheduledAt: campaignForm.scheduledAt
+          ? new Date(campaignForm.scheduledAt).toISOString()
+          : null,
       });
       setCampaignModal(false);
       setCampaignForm({ name: '', channel: 'sms', segment: 'all', message: '', scheduledAt: '' });
@@ -262,9 +286,14 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
     }, t('marketing.campaignCancelled'));
 
   const moderate = (review: ReviewView, action: 'approve' | 'reject') =>
-    run(async () => {
-      await marketingApi.moderateReview(tenantId, review.id, action);
-    }, action === 'approve' ? t('marketing.reviewStatus.approved') : t('marketing.reviewStatus.rejected'));
+    run(
+      async () => {
+        await marketingApi.moderateReview(tenantId, review.id, action);
+      },
+      action === 'approve'
+        ? t('marketing.reviewStatus.approved')
+        : t('marketing.reviewStatus.rejected'),
+    );
 
   const sendReply = () =>
     run(async () => {
@@ -275,7 +304,13 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
     }, t('marketing.replySent'));
 
   if (!canView) {
-    return <EmptyState icon="lock" title={t('marketing.forbidden')} description={t('marketing.readOnly')} />;
+    return (
+      <EmptyState
+        icon="lock"
+        title={t('marketing.forbidden')}
+        description={t('marketing.readOnly')}
+      />
+    );
   }
 
   if (loading && !dashboard) {
@@ -300,7 +335,11 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         </div>
       ),
     },
-    { key: 'type', header: t('marketing.colType'), render: (row) => t(`marketing.type.${row.type}`) },
+    {
+      key: 'type',
+      header: t('marketing.colType'),
+      render: (row) => t(`marketing.type.${row.type}`),
+    },
     {
       key: 'value',
       header: t('marketing.colValue'),
@@ -312,18 +351,31 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
       header: t('marketing.colPeriod'),
       render: (row) => `${formatDate(row.startAt, locale)} → ${formatDate(row.endAt, locale)}`,
     },
-    { key: 'min', header: t('marketing.colMinOrder'), align: 'right', render: (row) => formatXof(row.minOrderXof, locale) },
+    {
+      key: 'min',
+      header: t('marketing.colMinOrder'),
+      align: 'right',
+      render: (row) => formatXof(row.minOrderXof, locale),
+    },
     {
       key: 'status',
       header: t('marketing.colStatus'),
-      render: (row) => <Badge tone={STATUS_TONE[row.status] ?? 'neutral'} dot>{t(`marketing.status.${row.status}`)}</Badge>,
+      render: (row) => (
+        <Badge tone={STATUS_TONE[row.status] ?? 'neutral'} dot>
+          {t(`marketing.status.${row.status}`)}
+        </Badge>
+      ),
     },
     {
       key: 'action',
       header: t('marketing.colAction'),
       render: (row) =>
         canManage ? (
-          <Button size="sm" variant={row.active ? 'ghost' : 'outline'} onClick={() => void togglePromotion(row)}>
+          <Button
+            size="sm"
+            variant={row.active ? 'ghost' : 'outline'}
+            onClick={() => void togglePromotion(row)}
+          >
             {row.active ? t('marketing.deactivate') : t('marketing.activate')}
           </Button>
         ) : (
@@ -334,7 +386,11 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
 
   const codeColumns: Column<PromoCodeView>[] = [
     { key: 'code', header: t('marketing.colCode'), render: (row) => <strong>{row.code}</strong> },
-    { key: 'type', header: t('marketing.colType'), render: (row) => t(`marketing.type.${row.type}`) },
+    {
+      key: 'type',
+      header: t('marketing.colType'),
+      render: (row) => t(`marketing.type.${row.type}`),
+    },
     {
       key: 'value',
       header: t('marketing.colValue'),
@@ -347,18 +403,31 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
       align: 'right',
       render: (row) => `${row.uses}${row.maxUses ? ` / ${row.maxUses}` : ''}`,
     },
-    { key: 'remaining', header: t('marketing.colRemaining'), align: 'right', render: (row) => row.remainingUses ?? '∞' },
+    {
+      key: 'remaining',
+      header: t('marketing.colRemaining'),
+      align: 'right',
+      render: (row) => row.remainingUses ?? '∞',
+    },
     {
       key: 'status',
       header: t('marketing.colStatus'),
-      render: (row) => <Badge tone={STATUS_TONE[row.status] ?? 'neutral'} dot>{t(`marketing.status.${row.status}`)}</Badge>,
+      render: (row) => (
+        <Badge tone={STATUS_TONE[row.status] ?? 'neutral'} dot>
+          {t(`marketing.status.${row.status}`)}
+        </Badge>
+      ),
     },
     {
       key: 'action',
       header: t('marketing.colAction'),
       render: (row) =>
         canManage ? (
-          <Button size="sm" variant={row.active ? 'ghost' : 'outline'} onClick={() => void toggleCode(row)}>
+          <Button
+            size="sm"
+            variant={row.active ? 'ghost' : 'outline'}
+            onClick={() => void toggleCode(row)}
+          >
             {row.active ? t('marketing.deactivate') : t('marketing.activate')}
           </Button>
         ) : (
@@ -370,9 +439,29 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
   const redemptionColumns: Column<PromoRedemptionView>[] = [
     { key: 'code', header: t('marketing.colCode'), render: (row) => row.code },
     { key: 'order', header: t('marketing.colOrder'), render: (row) => row.orderId },
-    { key: 'total', header: t('marketing.colMinOrder'), align: 'right', render: (row) => formatXof(row.orderTotalXof, locale) },
-    { key: 'discount', header: t('marketing.colDiscount'), align: 'right', render: (row) => formatXof(row.discountXof, locale) },
-    { key: 'at', header: t('marketing.colDate'), render: (row) => formatDate(row.at, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) },
+    {
+      key: 'total',
+      header: t('marketing.colMinOrder'),
+      align: 'right',
+      render: (row) => formatXof(row.orderTotalXof, locale),
+    },
+    {
+      key: 'discount',
+      header: t('marketing.colDiscount'),
+      align: 'right',
+      render: (row) => formatXof(row.discountXof, locale),
+    },
+    {
+      key: 'at',
+      header: t('marketing.colDate'),
+      render: (row) =>
+        formatDate(row.at, locale, {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+    },
   ];
 
   const campaignColumns: Column<CampaignView>[] = [
@@ -382,17 +471,37 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
       render: (row) => (
         <div className="console-cell">
           <strong>{row.name}</strong>
-          <span>{row.message.slice(0, 70)}{row.message.length > 70 ? '…' : ''}</span>
+          <span>
+            {row.message.slice(0, 70)}
+            {row.message.length > 70 ? '…' : ''}
+          </span>
         </div>
       ),
     },
-    { key: 'channel', header: t('marketing.colChannel'), render: (row) => t(`marketing.channel.${row.channel}`) },
-    { key: 'segment', header: t('marketing.colSegment'), render: (row) => t(`marketing.segment.${row.segment}`) },
-    { key: 'recipients', header: t('marketing.colRecipients'), align: 'right', render: (row) => row.recipients ?? '—' },
+    {
+      key: 'channel',
+      header: t('marketing.colChannel'),
+      render: (row) => t(`marketing.channel.${row.channel}`),
+    },
+    {
+      key: 'segment',
+      header: t('marketing.colSegment'),
+      render: (row) => t(`marketing.segment.${row.segment}`),
+    },
+    {
+      key: 'recipients',
+      header: t('marketing.colRecipients'),
+      align: 'right',
+      render: (row) => row.recipients ?? '—',
+    },
     {
       key: 'status',
       header: t('marketing.colStatus'),
-      render: (row) => <Badge tone={STATUS_TONE[row.status] ?? 'neutral'} dot>{t(`marketing.campaignStatus.${row.status}`)}</Badge>,
+      render: (row) => (
+        <Badge tone={STATUS_TONE[row.status] ?? 'neutral'} dot>
+          {t(`marketing.campaignStatus.${row.status}`)}
+        </Badge>
+      ),
     },
     {
       key: 'sentAt',
@@ -407,7 +516,9 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
           <span className="console-muted">—</span>
         ) : (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <Button size="sm" onClick={() => void sendCampaign(row)}>{t('marketing.send')}</Button>
+            <Button size="sm" onClick={() => void sendCampaign(row)}>
+              {t('marketing.send')}
+            </Button>
             {row.status === 'planifiee' && (
               <Button size="sm" variant="ghost" onClick={() => void cancelCampaign(row)}>
                 {t('marketing.cancelCampaign')}
@@ -419,10 +530,28 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
   ];
 
   const auditColumns: Column<InventoryAuditEntry>[] = [
-    { key: 'at', header: t('marketing.colAt'), render: (row) => formatDate(row.createdAt, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) },
+    {
+      key: 'at',
+      header: t('marketing.colAt'),
+      render: (row) =>
+        formatDate(row.createdAt, locale, {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+    },
     { key: 'actor', header: t('marketing.colClient'), render: (row) => row.actorId },
-    { key: 'action', header: t('marketing.colAction'), render: (row) => <Badge tone="neutral">{row.action}</Badge> },
-    { key: 'target', header: t('marketing.colTarget'), render: (row) => `${row.targetType} · ${row.targetId}` },
+    {
+      key: 'action',
+      header: t('marketing.colAction'),
+      render: (row) => <Badge tone="neutral">{row.action}</Badge>,
+    },
+    {
+      key: 'target',
+      header: t('marketing.colTarget'),
+      render: (row) => `${row.targetType} · ${row.targetId}`,
+    },
   ];
 
   return (
@@ -449,12 +578,20 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         </div>
       </div>
 
-      {error && <p className="auth-error" role="alert">{error}</p>}
+      {error && (
+        <p className="auth-error" role="alert">
+          {error}
+        </p>
+      )}
 
       {section === 'overview' && (
         <>
           <div className="console-stats">
-            <StatCard label={t('marketing.statMembers')} value={dashboard?.members ?? 0} icon="users" />
+            <StatCard
+              label={t('marketing.statMembers')}
+              value={dashboard?.members ?? 0}
+              icon="users"
+            />
             <StatCard
               label={t('marketing.statPoints')}
               value={(dashboard?.pointsOutstanding ?? 0).toLocaleString(locale)}
@@ -478,7 +615,11 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
             <Card>
               <CardHeader
                 title={t('marketing.tiersTitle')}
-                action={<Badge tone="info">{formatXof(dashboard?.promoCodes.discountXof ?? 0, locale)}</Badge>}
+                action={
+                  <Badge tone="info">
+                    {formatXof(dashboard?.promoCodes.discountXof ?? 0, locale)}
+                  </Badge>
+                }
               />
               <CardBody>
                 {program ? (
@@ -487,9 +628,16 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
                       <li key={tier.code}>
                         <div>
                           <strong>{tier.label}</strong>
-                          <span>{t('marketing.tierMembers', { count: dashboard?.tiers[tier.code] ?? 0 })} · ×{tier.multiplier}</span>
+                          <span>
+                            {t('marketing.tierMembers', {
+                              count: dashboard?.tiers[tier.code] ?? 0,
+                            })}{' '}
+                            · ×{tier.multiplier}
+                          </span>
                         </div>
-                        <Badge tone="accent">{tier.minLifetimePoints.toLocaleString(locale)} pts</Badge>
+                        <Badge tone="accent">
+                          {tier.minLifetimePoints.toLocaleString(locale)} pts
+                        </Badge>
                       </li>
                     ))}
                   </ul>
@@ -510,7 +658,9 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
                             <strong>{reward.label}</strong>
                             <span>{reward.description}</span>
                           </div>
-                          <Badge tone="success">{t('marketing.rewardCost', { points: reward.costPoints })}</Badge>
+                          <Badge tone="success">
+                            {t('marketing.rewardCost', { points: reward.costPoints })}
+                          </Badge>
                         </li>
                       ))}
                     </ul>
@@ -520,7 +670,9 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
                     </div>
                     <div className="console-kv">
                       <span>{t('marketing.averageLabel')}</span>
-                      <span>{program.reviews.average.toFixed(1)} / 5 · {program.reviews.count}</span>
+                      <span>
+                        {program.reviews.average.toFixed(1)} / 5 · {program.reviews.count}
+                      </span>
                     </div>
                   </>
                 ) : (
@@ -537,13 +689,28 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
           <CardHeader
             title={t('marketing.promotionsTitle')}
             subtitle={t('marketing.promotionsHint')}
-            action={canManage ? <Button size="sm" iconLeft="plus" onClick={() => setPromotionModal(true)}>{t('marketing.addPromotion')}</Button> : undefined}
+            action={
+              canManage ? (
+                <Button size="sm" iconLeft="plus" onClick={() => setPromotionModal(true)}>
+                  {t('marketing.addPromotion')}
+                </Button>
+              ) : undefined
+            }
           />
           <CardBody>
             {promotions.length === 0 ? (
-              <EmptyState icon="gift" title={t('marketing.promotionsTitle')} description={t('marketing.emptyPromotions')} />
+              <EmptyState
+                icon="gift"
+                title={t('marketing.promotionsTitle')}
+                description={t('marketing.emptyPromotions')}
+              />
             ) : (
-              <DataTable columns={promotionColumns} rows={promotions} getRowId={(row) => row.id} caption={t('marketing.promotionsTitle')} />
+              <DataTable
+                columns={promotionColumns}
+                rows={promotions}
+                getRowId={(row) => row.id}
+                caption={t('marketing.promotionsTitle')}
+              />
             )}
           </CardBody>
         </Card>
@@ -555,13 +722,28 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
             <CardHeader
               title={t('marketing.codesTitle')}
               subtitle={t('marketing.codesHint')}
-              action={canManage ? <Button size="sm" iconLeft="plus" onClick={() => setCodeModal(true)}>{t('marketing.addCode')}</Button> : undefined}
+              action={
+                canManage ? (
+                  <Button size="sm" iconLeft="plus" onClick={() => setCodeModal(true)}>
+                    {t('marketing.addCode')}
+                  </Button>
+                ) : undefined
+              }
             />
             <CardBody>
               {codes.length === 0 ? (
-                <EmptyState icon="gift" title={t('marketing.codesTitle')} description={t('marketing.emptyCodes')} />
+                <EmptyState
+                  icon="gift"
+                  title={t('marketing.codesTitle')}
+                  description={t('marketing.emptyCodes')}
+                />
               ) : (
-                <DataTable columns={codeColumns} rows={codes} getRowId={(row) => row.id} caption={t('marketing.codesTitle')} />
+                <DataTable
+                  columns={codeColumns}
+                  rows={codes}
+                  getRowId={(row) => row.id}
+                  caption={t('marketing.codesTitle')}
+                />
               )}
             </CardBody>
           </Card>
@@ -571,7 +753,12 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
               {redemptions.length === 0 ? (
                 <p className="console-muted">{t('marketing.emptyRedemptions')}</p>
               ) : (
-                <DataTable columns={redemptionColumns} rows={redemptions.slice(0, 50)} getRowId={(row) => row.id} caption={t('marketing.redemptionsTitle')} />
+                <DataTable
+                  columns={redemptionColumns}
+                  rows={redemptions.slice(0, 50)}
+                  getRowId={(row) => row.id}
+                  caption={t('marketing.redemptionsTitle')}
+                />
               )}
             </CardBody>
           </Card>
@@ -583,7 +770,13 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
           <CardHeader
             title={t('marketing.campaignsTitle')}
             subtitle={t('marketing.campaignsHint')}
-            action={canManage ? <Button size="sm" iconLeft="plus" onClick={() => setCampaignModal(true)}>{t('marketing.addCampaign')}</Button> : undefined}
+            action={
+              canManage ? (
+                <Button size="sm" iconLeft="plus" onClick={() => setCampaignModal(true)}>
+                  {t('marketing.addCampaign')}
+                </Button>
+              ) : undefined
+            }
           />
           <CardBody>
             <div className="console-filters">
@@ -594,9 +787,18 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
               ))}
             </div>
             {campaigns.length === 0 ? (
-              <EmptyState icon="bell" title={t('marketing.campaignsTitle')} description={t('marketing.emptyCampaigns')} />
+              <EmptyState
+                icon="bell"
+                title={t('marketing.campaignsTitle')}
+                description={t('marketing.emptyCampaigns')}
+              />
             ) : (
-              <DataTable columns={campaignColumns} rows={campaigns} getRowId={(row) => row.id} caption={t('marketing.campaignsTitle')} />
+              <DataTable
+                columns={campaignColumns}
+                rows={campaigns}
+                getRowId={(row) => row.id}
+                caption={t('marketing.campaignsTitle')}
+              />
             )}
           </CardBody>
         </Card>
@@ -623,13 +825,19 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
                   aria-pressed={reviewFilter === value}
                   onClick={() => setReviewFilter(value)}
                 >
-                  {value === 'all' ? t('marketing.sectionReviews') : t(`marketing.reviewStatus.${value}`)}
+                  {value === 'all'
+                    ? t('marketing.sectionReviews')
+                    : t(`marketing.reviewStatus.${value}`)}
                   {value !== 'all' && ` · ${reviewCounts[value]}`}
                 </button>
               ))}
             </div>
             {visibleReviews.length === 0 ? (
-              <EmptyState icon="users" title={t('marketing.reviewsTitle')} description={t('marketing.emptyReviews')} />
+              <EmptyState
+                icon="users"
+                title={t('marketing.reviewsTitle')}
+                description={t('marketing.emptyReviews')}
+              />
             ) : (
               <ul className="console-queue">
                 {visibleReviews.map((review) => (
@@ -641,16 +849,35 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
                       </strong>
                       <span>{review.comment ?? '—'}</span>
                       <span>
-                        {review.reply ? `${t('marketing.reply')} : ${review.reply.message}` : t('marketing.noReply')}
+                        {review.reply
+                          ? `${t('marketing.reply')} : ${review.reply.message}`
+                          : t('marketing.noReply')}
                       </span>
                       <span className="console-muted">{formatDate(review.createdAt, locale)}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                      <Badge tone={REVIEW_TONE[review.status]} dot>{t(`marketing.reviewStatus.${review.status}`)}</Badge>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 6,
+                        flexWrap: 'wrap',
+                        justifyContent: 'flex-end',
+                      }}
+                    >
+                      <Badge tone={REVIEW_TONE[review.status]} dot>
+                        {t(`marketing.reviewStatus.${review.status}`)}
+                      </Badge>
                       {canManage && review.status === 'pending' && (
                         <>
-                          <Button size="sm" onClick={() => void moderate(review, 'approve')}>{t('marketing.approve')}</Button>
-                          <Button size="sm" variant="danger-soft" onClick={() => void moderate(review, 'reject')}>{t('marketing.reject')}</Button>
+                          <Button size="sm" onClick={() => void moderate(review, 'approve')}>
+                            {t('marketing.approve')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="danger-soft"
+                            onClick={() => void moderate(review, 'reject')}
+                          >
+                            {t('marketing.reject')}
+                          </Button>
                         </>
                       )}
                       {canManage && !review.reply && (
@@ -679,13 +906,28 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
           <CardHeader
             title={t('marketing.auditTitle')}
             subtitle={t('marketing.auditHint')}
-            action={<Badge tone={audit?.integrity ? 'success' : 'danger'} dot>{audit?.integrity ? t('marketing.auditIntegrityOk') : t('marketing.auditIntegrityBroken')}</Badge>}
+            action={
+              <Badge tone={audit?.integrity ? 'success' : 'danger'} dot>
+                {audit?.integrity
+                  ? t('marketing.auditIntegrityOk')
+                  : t('marketing.auditIntegrityBroken')}
+              </Badge>
+            }
           />
           <CardBody>
             {!audit || audit.entries.length === 0 ? (
-              <EmptyState icon="shield" title={t('marketing.auditTitle')} description={t('marketing.auditEmpty')} />
+              <EmptyState
+                icon="shield"
+                title={t('marketing.auditTitle')}
+                description={t('marketing.auditEmpty')}
+              />
             ) : (
-              <DataTable columns={auditColumns} rows={audit.entries} getRowId={(row) => row.id} caption={t('marketing.auditTitle')} />
+              <DataTable
+                columns={auditColumns}
+                rows={audit.entries}
+                getRowId={(row) => row.id}
+                caption={t('marketing.auditTitle')}
+              />
             )}
           </CardBody>
         </Card>
@@ -698,21 +940,38 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         title={t('marketing.addPromotion')}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={() => setPromotionModal(false)}>{t('marketing.cancel')}</Button>
-            <Button loading={pending} disabled={promoForm.name.trim().length < 2 || Number(promoForm.value) <= 0} onClick={() => void savePromotion()}>
+            <Button variant="ghost" onClick={() => setPromotionModal(false)}>
+              {t('marketing.cancel')}
+            </Button>
+            <Button
+              loading={pending}
+              disabled={promoForm.name.trim().length < 2 || Number(promoForm.value) <= 0}
+              onClick={() => void savePromotion()}
+            >
               {t('marketing.create')}
             </Button>
           </div>
         }
       >
         <div className="console-stack">
-          <Input label={t('marketing.formName')} required value={promoForm.name} onChange={(event) => setPromoForm({ ...promoForm, name: event.target.value })} />
-          <Textarea label={t('marketing.formDescription')} value={promoForm.description} onChange={(event) => setPromoForm({ ...promoForm, description: event.target.value })} />
+          <Input
+            label={t('marketing.formName')}
+            required
+            value={promoForm.name}
+            onChange={(event) => setPromoForm({ ...promoForm, name: event.target.value })}
+          />
+          <Textarea
+            label={t('marketing.formDescription')}
+            value={promoForm.description}
+            onChange={(event) => setPromoForm({ ...promoForm, description: event.target.value })}
+          />
           <div className="console-2col">
             <Select
               label={t('marketing.formDiscountType')}
               value={promoForm.type}
-              onChange={(event) => setPromoForm({ ...promoForm, type: event.target.value as DiscountType })}
+              onChange={(event) =>
+                setPromoForm({ ...promoForm, type: event.target.value as DiscountType })
+              }
               options={[
                 { value: 'percent', label: t('marketing.type.percent') },
                 { value: 'amount', label: t('marketing.type.amount') },
@@ -727,17 +986,41 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
             />
           </div>
           <div className="console-2col">
-            <Input label={t('marketing.formMinOrder')} type="number" min={0} value={promoForm.minOrderXof} onChange={(event) => setPromoForm({ ...promoForm, minOrderXof: event.target.value })} />
+            <Input
+              label={t('marketing.formMinOrder')}
+              type="number"
+              min={0}
+              value={promoForm.minOrderXof}
+              onChange={(event) => setPromoForm({ ...promoForm, minOrderXof: event.target.value })}
+            />
             <Select
               label={t('marketing.formAppliesTo')}
               value={promoForm.appliesTo}
-              onChange={(event) => setPromoForm({ ...promoForm, appliesTo: event.target.value as PromotionView['appliesTo'] })}
-              options={(['all', 'dine_in', 'delivery', 'takeaway'] as const).map((value) => ({ value, label: t(`marketing.appliesTo.${value}`) }))}
+              onChange={(event) =>
+                setPromoForm({
+                  ...promoForm,
+                  appliesTo: event.target.value as PromotionView['appliesTo'],
+                })
+              }
+              options={(['all', 'dine_in', 'delivery', 'takeaway'] as const).map((value) => ({
+                value,
+                label: t(`marketing.appliesTo.${value}`),
+              }))}
             />
           </div>
           <div className="console-2col">
-            <Input label={t('marketing.formStart')} type="datetime-local" value={promoForm.startAt} onChange={(event) => setPromoForm({ ...promoForm, startAt: event.target.value })} />
-            <Input label={t('marketing.formEnd')} type="datetime-local" value={promoForm.endAt} onChange={(event) => setPromoForm({ ...promoForm, endAt: event.target.value })} />
+            <Input
+              label={t('marketing.formStart')}
+              type="datetime-local"
+              value={promoForm.startAt}
+              onChange={(event) => setPromoForm({ ...promoForm, startAt: event.target.value })}
+            />
+            <Input
+              label={t('marketing.formEnd')}
+              type="datetime-local"
+              value={promoForm.endAt}
+              onChange={(event) => setPromoForm({ ...promoForm, endAt: event.target.value })}
+            />
           </div>
         </div>
       </Modal>
@@ -748,8 +1031,14 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         title={t('marketing.addCode')}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={() => setCodeModal(false)}>{t('marketing.cancel')}</Button>
-            <Button loading={pending} disabled={codeForm.code.trim().length < 3 || Number(codeForm.value) <= 0} onClick={() => void saveCode()}>
+            <Button variant="ghost" onClick={() => setCodeModal(false)}>
+              {t('marketing.cancel')}
+            </Button>
+            <Button
+              loading={pending}
+              disabled={codeForm.code.trim().length < 3 || Number(codeForm.value) <= 0}
+              onClick={() => void saveCode()}
+            >
               {t('marketing.create')}
             </Button>
           </div>
@@ -760,13 +1049,17 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
             label={t('marketing.formCode')}
             required
             value={codeForm.code}
-            onChange={(event) => setCodeForm({ ...codeForm, code: event.target.value.toUpperCase() })}
+            onChange={(event) =>
+              setCodeForm({ ...codeForm, code: event.target.value.toUpperCase() })
+            }
           />
           <div className="console-2col">
             <Select
               label={t('marketing.formDiscountType')}
               value={codeForm.type}
-              onChange={(event) => setCodeForm({ ...codeForm, type: event.target.value as DiscountType })}
+              onChange={(event) =>
+                setCodeForm({ ...codeForm, type: event.target.value as DiscountType })
+              }
               options={[
                 { value: 'percent', label: t('marketing.type.percent') },
                 { value: 'amount', label: t('marketing.type.amount') },
@@ -781,13 +1074,41 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
             />
           </div>
           <div className="console-2col">
-            <Input label={t('marketing.formMinOrder')} type="number" min={0} value={codeForm.minOrderXof} onChange={(event) => setCodeForm({ ...codeForm, minOrderXof: event.target.value })} />
-            <Input label={t('marketing.formMaxUses')} type="number" min={0} value={codeForm.maxUses} onChange={(event) => setCodeForm({ ...codeForm, maxUses: event.target.value })} />
+            <Input
+              label={t('marketing.formMinOrder')}
+              type="number"
+              min={0}
+              value={codeForm.minOrderXof}
+              onChange={(event) => setCodeForm({ ...codeForm, minOrderXof: event.target.value })}
+            />
+            <Input
+              label={t('marketing.formMaxUses')}
+              type="number"
+              min={0}
+              value={codeForm.maxUses}
+              onChange={(event) => setCodeForm({ ...codeForm, maxUses: event.target.value })}
+            />
           </div>
-          <Input label={t('marketing.formPerUser')} type="number" min={1} value={codeForm.perUserLimit} onChange={(event) => setCodeForm({ ...codeForm, perUserLimit: event.target.value })} />
+          <Input
+            label={t('marketing.formPerUser')}
+            type="number"
+            min={1}
+            value={codeForm.perUserLimit}
+            onChange={(event) => setCodeForm({ ...codeForm, perUserLimit: event.target.value })}
+          />
           <div className="console-2col">
-            <Input label={t('marketing.formStart')} type="datetime-local" value={codeForm.startAt} onChange={(event) => setCodeForm({ ...codeForm, startAt: event.target.value })} />
-            <Input label={t('marketing.formEnd')} type="datetime-local" value={codeForm.endAt} onChange={(event) => setCodeForm({ ...codeForm, endAt: event.target.value })} />
+            <Input
+              label={t('marketing.formStart')}
+              type="datetime-local"
+              value={codeForm.startAt}
+              onChange={(event) => setCodeForm({ ...codeForm, startAt: event.target.value })}
+            />
+            <Input
+              label={t('marketing.formEnd')}
+              type="datetime-local"
+              value={codeForm.endAt}
+              onChange={(event) => setCodeForm({ ...codeForm, endAt: event.target.value })}
+            />
           </div>
         </div>
       </Modal>
@@ -798,27 +1119,50 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
         title={t('marketing.addCampaign')}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={() => setCampaignModal(false)}>{t('marketing.cancel')}</Button>
-            <Button loading={pending} disabled={campaignForm.name.trim().length < 2 || campaignForm.message.trim().length < 5} onClick={() => void saveCampaign()}>
+            <Button variant="ghost" onClick={() => setCampaignModal(false)}>
+              {t('marketing.cancel')}
+            </Button>
+            <Button
+              loading={pending}
+              disabled={
+                campaignForm.name.trim().length < 2 || campaignForm.message.trim().length < 5
+              }
+              onClick={() => void saveCampaign()}
+            >
               {t('marketing.create')}
             </Button>
           </div>
         }
       >
         <div className="console-stack">
-          <Input label={t('marketing.formName')} required value={campaignForm.name} onChange={(event) => setCampaignForm({ ...campaignForm, name: event.target.value })} />
+          <Input
+            label={t('marketing.formName')}
+            required
+            value={campaignForm.name}
+            onChange={(event) => setCampaignForm({ ...campaignForm, name: event.target.value })}
+          />
           <div className="console-2col">
             <Select
               label={t('marketing.formChannel')}
               value={campaignForm.channel}
-              onChange={(event) => setCampaignForm({ ...campaignForm, channel: event.target.value as CampaignChannel })}
-              options={CHANNELS.map((channel) => ({ value: channel, label: t(`marketing.channel.${channel}`) }))}
+              onChange={(event) =>
+                setCampaignForm({ ...campaignForm, channel: event.target.value as CampaignChannel })
+              }
+              options={CHANNELS.map((channel) => ({
+                value: channel,
+                label: t(`marketing.channel.${channel}`),
+              }))}
             />
             <Select
               label={t('marketing.formSegment')}
               value={campaignForm.segment}
-              onChange={(event) => setCampaignForm({ ...campaignForm, segment: event.target.value as CampaignSegment })}
-              options={SEGMENTS.map((segment) => ({ value: segment, label: `${t(`marketing.segment.${segment}`)} (${audience[segment] ?? 0})` }))}
+              onChange={(event) =>
+                setCampaignForm({ ...campaignForm, segment: event.target.value as CampaignSegment })
+              }
+              options={SEGMENTS.map((segment) => ({
+                value: segment,
+                label: `${t(`marketing.segment.${segment}`)} (${audience[segment] ?? 0})`,
+              }))}
             />
           </div>
           <Textarea
@@ -833,20 +1177,43 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
             label={t('marketing.formScheduled')}
             type="datetime-local"
             value={campaignForm.scheduledAt}
-            onChange={(event) => setCampaignForm({ ...campaignForm, scheduledAt: event.target.value })}
+            onChange={(event) =>
+              setCampaignForm({ ...campaignForm, scheduledAt: event.target.value })
+            }
           />
         </div>
       </Modal>
 
       <Modal
         open={Boolean(replyTarget)}
-        onClose={() => { setReplyTarget(null); setReplyText(''); }}
-        title={replyTarget ? t('marketing.replyTitle', { name: replyTarget.userName }) : t('marketing.reply')}
+        onClose={() => {
+          setReplyTarget(null);
+          setReplyText('');
+        }}
+        title={
+          replyTarget
+            ? t('marketing.replyTitle', { name: replyTarget.userName })
+            : t('marketing.reply')
+        }
         description={t('marketing.replyHint')}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={() => { setReplyTarget(null); setReplyText(''); }}>{t('marketing.cancel')}</Button>
-            <Button loading={pending} disabled={replyText.trim().length < 3} onClick={() => void sendReply()}>{t('marketing.send')}</Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setReplyTarget(null);
+                setReplyText('');
+              }}
+            >
+              {t('marketing.cancel')}
+            </Button>
+            <Button
+              loading={pending}
+              disabled={replyText.trim().length < 3}
+              onClick={() => void sendReply()}
+            >
+              {t('marketing.send')}
+            </Button>
           </div>
         }
       >
@@ -856,7 +1223,12 @@ export function MarketingTab({ tenantId, locale, permissions }: Props) {
               {replyTarget.rating}/5 · {replyTarget.comment ?? '—'}
             </p>
           )}
-          <Textarea label={t('marketing.replyLabel')} rows={4} value={replyText} onChange={(event) => setReplyText(event.target.value)} />
+          <Textarea
+            label={t('marketing.replyLabel')}
+            rows={4}
+            value={replyText}
+            onChange={(event) => setReplyText(event.target.value)}
+          />
         </div>
       </Modal>
     </div>

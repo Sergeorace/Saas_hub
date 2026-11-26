@@ -75,15 +75,25 @@ test('fail-closed : sans contexte tenant, aucune ligne n’est visible ni inscri
   const visible = await asTenant(db, '', 'SELECT count(*)::int AS count FROM identity.users');
   assert.equal(count(visible), 0);
   await assert.rejects(
-    asTenant(db, '', `INSERT INTO identity.users (id, tenant_id, phone, display_name, role)
-      VALUES ('cccccccc-3333-4333-8333-333333333333', '${TENANT_A}', '+22890000009', 'Intrus', 'serveur')`),
+    asTenant(
+      db,
+      '',
+      `INSERT INTO identity.users (id, tenant_id, phone, display_name, role)
+      VALUES ('cccccccc-3333-4333-8333-333333333333', '${TENANT_A}', '+22890000009', 'Intrus', 'serveur')`,
+    ),
     /row-level security|violates/i,
   );
 });
 
 test('isolation en lecture : chaque tenant ne voit que ses utilisateurs', async () => {
-  assert.equal(count(await asTenant(db, TENANT_A, 'SELECT count(*)::int AS count FROM identity.users')), 2);
-  assert.equal(count(await asTenant(db, TENANT_B, 'SELECT count(*)::int AS count FROM identity.users')), 1);
+  assert.equal(
+    count(await asTenant(db, TENANT_A, 'SELECT count(*)::int AS count FROM identity.users')),
+    2,
+  );
+  assert.equal(
+    count(await asTenant(db, TENANT_B, 'SELECT count(*)::int AS count FROM identity.users')),
+    1,
+  );
 });
 
 test('lecture croisée par identifiant : la ligne d’un autre tenant reste invisible', async () => {
@@ -97,8 +107,12 @@ test('lecture croisée par identifiant : la ligne d’un autre tenant reste invi
 
 test('écriture croisée refusée (WITH CHECK) et mise à jour croisée sans effet', async () => {
   await assert.rejects(
-    asTenant(db, TENANT_A, `INSERT INTO identity.users (id, tenant_id, phone, display_name, role)
-      VALUES ('dddddddd-4444-4444-8444-444444444444', '${TENANT_B}', '+22890000010', 'Fuite', 'serveur')`),
+    asTenant(
+      db,
+      TENANT_A,
+      `INSERT INTO identity.users (id, tenant_id, phone, display_name, role)
+      VALUES ('dddddddd-4444-4444-8444-444444444444', '${TENANT_B}', '+22890000010', 'Fuite', 'serveur')`,
+    ),
     /row-level security|violates/i,
   );
   const update = await asTenant(
@@ -107,14 +121,25 @@ test('écriture croisée refusée (WITH CHECK) et mise à jour croisée sans eff
     `UPDATE identity.users SET display_name = 'Piraté' WHERE id = '${USER_B1}' RETURNING id`,
   );
   assert.equal(update.rows.length, 0);
-  const check = await asTenant(db, TENANT_B, `SELECT display_name FROM identity.users WHERE id = '${USER_B1}'`);
+  const check = await asTenant(
+    db,
+    TENANT_B,
+    `SELECT display_name FROM identity.users WHERE id = '${USER_B1}'`,
+  );
   assert.equal(check.rows[0].display_name, 'Dédé Gérante');
 });
 
 test('tenant : un établissement ne lit que sa propre fiche', async () => {
   const own = await asTenant(db, TENANT_A, 'SELECT name FROM identity.tenants');
-  assert.deepEqual(own.rows.map((row) => row.name), ['Sahel Grill']);
-  const other = await asTenant(db, TENANT_A, `SELECT name FROM identity.tenants WHERE id = '${TENANT_B}'`);
+  assert.deepEqual(
+    own.rows.map((row) => row.name),
+    ['Sahel Grill'],
+  );
+  const other = await asTenant(
+    db,
+    TENANT_A,
+    `SELECT name FROM identity.tenants WHERE id = '${TENANT_B}'`,
+  );
   assert.equal(other.rows.length, 0);
 });
 
@@ -126,8 +151,15 @@ test('journal d’audit : insertion contextualisée autorisée, mutation toujour
      VALUES ('${TENANT_A}', 'usr_a1', 'user.created', 'hash-1')`,
   );
   const rows = await asTenant(db, TENANT_A, 'SELECT action FROM identity.audit_log');
-  assert.deepEqual(rows.rows.map((row) => row.action), ['user.created']);
-  const otherTenantView = await asTenant(db, TENANT_B, 'SELECT count(*)::int AS count FROM identity.audit_log');
+  assert.deepEqual(
+    rows.rows.map((row) => row.action),
+    ['user.created'],
+  );
+  const otherTenantView = await asTenant(
+    db,
+    TENANT_B,
+    'SELECT count(*)::int AS count FROM identity.audit_log',
+  );
   assert.equal(count(otherTenantView), 0);
 
   await assert.rejects(
@@ -139,20 +171,14 @@ test('journal d’audit : insertion contextualisée autorisée, mutation toujour
     /permission denied|immuable/i,
   );
   // Même le propriétaire / superutilisateur ne peut pas réécrire l'historique.
-  await assert.rejects(
-    db.query("UPDATE identity.audit_log SET action = 'traficoté'"),
-    /immuable/i,
-  );
+  await assert.rejects(db.query("UPDATE identity.audit_log SET action = 'traficoté'"), /immuable/i);
   await assert.rejects(db.query('DELETE FROM identity.audit_log'), /immuable/i);
 });
 
 test('le rôle applicatif n’a aucun privilège DDL sur le schéma', async () => {
   await db.exec('RESET ROLE');
   await db.exec('SET ROLE resto_app');
-  await assert.rejects(
-    db.exec('CREATE TABLE identity.rogue (id int)'),
-    /permission denied/i,
-  );
+  await assert.rejects(db.exec('CREATE TABLE identity.rogue (id int)'), /permission denied/i);
   await db.exec('RESET ROLE');
 });
 

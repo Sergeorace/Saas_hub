@@ -27,7 +27,8 @@
   white-space: nowrap;
   text-decoration: none;
   user-select: none;
-  transition: background-color var(--duration-fast) var(--ease-standard),
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard),
     box-shadow var(--duration-fast) var(--ease-standard),
@@ -220,7 +221,8 @@
   color: var(--ink);
   font-size: var(--text-base);
   line-height: 1.4;
-  transition: border-color var(--duration-fast) var(--ease-standard),
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
     box-shadow var(--duration-fast) var(--ease-standard),
     background-color var(--duration-fast) var(--ease-standard);
 }
@@ -341,7 +343,9 @@
   background: var(--surface);
   display: grid;
   place-content: center;
-  transition: background-color var(--duration-fast), border-color var(--duration-fast);
+  transition:
+    background-color var(--duration-fast),
+    border-color var(--duration-fast);
 }
 
 .rh-checkbox input::after {
@@ -420,8 +424,10 @@
 }
 
 .rh-card--interactive {
-  transition: transform var(--duration-base) var(--ease-out),
-    box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base);
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base);
 }
 
 .rh-card--interactive:hover {
@@ -716,7 +722,9 @@
   font-weight: 600;
   color: var(--ink-3);
   white-space: nowrap;
-  transition: color var(--duration-fast), background-color var(--duration-fast),
+  transition:
+    color var(--duration-fast),
+    background-color var(--duration-fast),
     box-shadow var(--duration-fast);
 }
 
@@ -1127,7 +1135,9 @@
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--ink-3);
-  transition: background-color var(--duration-fast), color var(--duration-fast),
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
     box-shadow var(--duration-fast);
 }
 

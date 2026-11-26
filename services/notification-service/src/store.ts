@@ -1,5 +1,10 @@
 import { buildAuditEntry, newId, nowIso, type AuditEntry } from '@resto-hub/service-kit';
-import { renderTemplate, TEMPLATE_SEEDS, type TemplateChannel, type TemplateLocale } from './templates.js';
+import {
+  renderTemplate,
+  TEMPLATE_SEEDS,
+  type TemplateChannel,
+  type TemplateLocale,
+} from './templates.js';
 
 export type NotificationChannel = TemplateChannel | 'realtime';
 export type NotificationStatus = 'queued' | 'sent' | 'failed' | 'read' | 'supprime';
@@ -134,7 +139,11 @@ export function defaultPreference(tenantId: string, userId: string): Notificatio
   };
 }
 
-export function getPreference(store: NotificationStore, tenantId: string, userId: string): NotificationPreference {
+export function getPreference(
+  store: NotificationStore,
+  tenantId: string,
+  userId: string,
+): NotificationPreference {
   const key = preferenceKey(tenantId, userId);
   const existing = store.preferences.get(key);
   if (existing) return existing;
@@ -263,7 +272,8 @@ export function sendNotification(
   }
   const data = { ...(input.data ?? {}) };
   const body = renderTemplate(input.body ?? template?.body ?? '', data);
-  const subject = input.subject ?? (template?.subject ? renderTemplate(template.subject, data) : null);
+  const subject =
+    input.subject ?? (template?.subject ? renderTemplate(template.subject, data) : null);
 
   const record: NotificationRecord = {
     id: newId('ntf'),
@@ -303,7 +313,12 @@ export function sendNotification(
   const delivery = simulateDelivery(input.channel, input.recipient);
   record.attempts.push({
     at: now,
-    provider: input.channel === 'sms' ? 'agrégateur-sms' : input.channel === 'email' ? 'smtp-transactionnel' : 'fcm-push',
+    provider:
+      input.channel === 'sms'
+        ? 'agrégateur-sms'
+        : input.channel === 'email'
+          ? 'smtp-transactionnel'
+          : 'fcm-push',
     status: delivery.ok ? 'sent' : 'failed',
     messageId: delivery.ok ? messageId : null,
     error: delivery.ok ? null : delivery.error,
@@ -328,7 +343,10 @@ export function sendNotification(
   return { record, duplicate: false };
 }
 
-export function retryNotification(store: NotificationStore, record: NotificationRecord): NotificationRecord {
+export function retryNotification(
+  store: NotificationStore,
+  record: NotificationRecord,
+): NotificationRecord {
   if (record.channel === 'realtime') return record;
   const now = nowIso();
   store.sequence += 1;
@@ -336,7 +354,12 @@ export function retryNotification(store: NotificationStore, record: Notification
   const delivery = simulateDelivery(record.channel, record.recipient);
   record.attempts.push({
     at: now,
-    provider: record.channel === 'sms' ? 'agrégateur-sms' : record.channel === 'email' ? 'smtp-transactionnel' : 'fcm-push',
+    provider:
+      record.channel === 'sms'
+        ? 'agrégateur-sms'
+        : record.channel === 'email'
+          ? 'smtp-transactionnel'
+          : 'fcm-push',
     status: delivery.ok ? 'sent' : 'failed',
     messageId: delivery.ok ? messageId : null,
     error: delivery.ok ? null : delivery.error,
@@ -468,6 +491,10 @@ export function seedNotificationDemo(store: NotificationStore): void {
     action: 'notifications.seeded',
     targetType: 'notifications',
     targetId: 'demo',
-    meta: { templates: store.templates.size, notifications: store.notifications.size, devices: devices.length },
+    meta: {
+      templates: store.templates.size,
+      notifications: store.notifications.size,
+      devices: devices.length,
+    },
   });
 }

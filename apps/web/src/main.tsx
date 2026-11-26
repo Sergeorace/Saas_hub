@@ -1,11 +1,6 @@
 import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import {
-  I18nProvider,
-  ThemeProvider,
-  ToastProvider,
-  useI18n,
-} from '@resto-hub/design-system';
+import { I18nProvider, ThemeProvider, ToastProvider, useI18n } from '@resto-hub/design-system';
 import '@resto-hub/design-system/styles.css';
 import './styles/site.css';
 import './styles/console.css';

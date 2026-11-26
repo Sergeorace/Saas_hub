@@ -111,7 +111,12 @@ function readBody(req: IncomingMessage, limit: number): Promise<unknown> {
   });
 }
 
-function sendJson(res: ServerResponse, status: number, payload: unknown, headers: Record<string, string>) {
+function sendJson(
+  res: ServerResponse,
+  status: number,
+  payload: unknown,
+  headers: Record<string, string>,
+) {
   const body = Buffer.from(JSON.stringify(payload));
   res.writeHead(status, {
     'content-type': 'application/json; charset=utf-8',
@@ -124,7 +129,8 @@ function sendJson(res: ServerResponse, status: number, payload: unknown, headers
 export function createServiceServer(options: ServiceServerOptions): Server {
   const limit = options.bodyLimitBytes ?? 6 * 1024 * 1024;
   const startedAt = Date.now();
-  const rateLimit = options.rateLimit === false ? null : { ...RATE_LIMIT_DEFAULT, ...(options.rateLimit ?? {}) };
+  const rateLimit =
+    options.rateLimit === false ? null : { ...RATE_LIMIT_DEFAULT, ...(options.rateLimit ?? {}) };
   const buckets = new Map<string, { count: number; resetAt: number }>();
 
   const enforceRateLimit = (ip: string, path: string): number | null => {
@@ -153,10 +159,14 @@ export function createServiceServer(options: ServiceServerOptions): Server {
     const requestId = randomUUID();
     const cors: Record<string, string> = {};
     const origin = String(req.headers.origin ?? '');
-    if (origin && (!options.corsOrigin || options.corsOrigin === '*' || origin === options.corsOrigin)) {
+    if (
+      origin &&
+      (!options.corsOrigin || options.corsOrigin === '*' || origin === options.corsOrigin)
+    ) {
       cors['access-control-allow-origin'] = origin;
       cors['vary'] = 'Origin';
-      cors['access-control-allow-headers'] = 'authorization, content-type, x-internal-key, x-request-id';
+      cors['access-control-allow-headers'] =
+        'authorization, content-type, x-internal-key, x-request-id';
       cors['access-control-allow-methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
     }
     res.setHeader('x-request-id', requestId);
@@ -188,7 +198,8 @@ export function createServiceServer(options: ServiceServerOptions): Server {
     };
 
     try {
-      if (!methods.has(method)) throw new HttpError(405, 'method_not_allowed', 'Méthode non supportée.');
+      if (!methods.has(method))
+        throw new HttpError(405, 'method_not_allowed', 'Méthode non supportée.');
       const route = options.routes.find((candidate) => {
         if (candidate.method !== method) return false;
         const params = matchPath(candidate.path, segments);
@@ -258,7 +269,9 @@ export function createServiceServer(options: ServiceServerOptions): Server {
           'content-type': result.raw.contentType,
           'content-length': String(result.raw.data.length),
           ...(result.raw.fileName
-            ? { 'content-disposition': `inline; filename="${result.raw.fileName.replace(/"/g, '')}"` }
+            ? {
+                'content-disposition': `inline; filename="${result.raw.fileName.replace(/"/g, '')}"`,
+              }
             : {}),
           ...headers,
         });
@@ -267,7 +280,9 @@ export function createServiceServer(options: ServiceServerOptions): Server {
       }
       sendJson(res, result.status ?? 200, result.body ?? { ok: true }, headers);
       if (res.statusCode >= 500) {
-        console.error(`[${options.name}] ${method} ${url.pathname} ${res.statusCode} ${Date.now() - started}ms`);
+        console.error(
+          `[${options.name}] ${method} ${url.pathname} ${res.statusCode} ${Date.now() - started}ms`,
+        );
       }
     } catch (error) {
       if (options.onError) options.onError(error, ctx);
@@ -275,7 +290,9 @@ export function createServiceServer(options: ServiceServerOptions): Server {
         sendJson(
           res,
           error.status,
-          { error: { code: error.code, message: error.message, details: error.details, requestId } },
+          {
+            error: { code: error.code, message: error.message, details: error.details, requestId },
+          },
           cors,
         );
         return;

@@ -70,9 +70,7 @@ export function I18nProvider({
     (key: string, vars?: Record<string, string | number>) => {
       const value = resolve(messages[locale], key);
       const base =
-        typeof value === 'string'
-          ? value
-          : resolve(messages[locale === 'fr' ? 'en' : 'fr'], key);
+        typeof value === 'string' ? value : resolve(messages[locale === 'fr' ? 'en' : 'fr'], key);
       if (typeof base !== 'string') return key;
       if (!vars) return base;
       return base.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));

@@ -9,7 +9,12 @@ import { ClientHeader } from '../components/ClientChrome';
 import { loadCustomerDraft } from './CartPage';
 
 function lomeToday(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Lome',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
 }
 
 function addDays(iso: string, days: number): string {
@@ -22,22 +27,41 @@ function dayLabel(iso: string, locale: string): { weekday: string; day: string }
   const date = new Date(`${iso}T12:00:00Z`);
   return {
     weekday: new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' }).format(date),
-    day: new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', timeZone: 'UTC' }).format(date),
+    day: new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: 'short',
+      timeZone: 'UTC',
+    }).format(date),
   };
 }
 
 function prettyDate(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(
-    new Date(`${iso}T12:00:00Z`),
-  );
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${iso}T12:00:00Z`));
 }
 
-export default function ReservationPage({ slug, existingId, existingToken }: { slug: string; existingId?: string; existingToken?: string }) {
+export default function ReservationPage({
+  slug,
+  existingId,
+  existingToken,
+}: {
+  slug: string;
+  existingId?: string;
+  existingToken?: string;
+}) {
   const { t, locale } = useI18n();
   const toast = useToast();
   const { data, loading } = useEstablishment(slug);
   const establishment = data?.establishment;
-  useTenantTheme(establishment ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor } : null);
+  useTenantTheme(
+    establishment
+      ? { primaryColor: establishment.primaryColor, secondaryColor: establishment.secondaryColor }
+      : null,
+  );
 
   const today = lomeToday();
   const draft = loadCustomerDraft();
@@ -51,10 +75,15 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
   const [availability, setAvailability] = useState<ReservationAvailability | null>(null);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [confirmed, setConfirmed] = useState<{ reservation: Reservation; token: string } | null>(null);
+  const [confirmed, setConfirmed] = useState<{ reservation: Reservation; token: string } | null>(
+    null,
+  );
   const [cancelling, setCancelling] = useState(false);
 
-  const days = useMemo(() => Array.from({ length: 7 }, (_unused, index) => addDays(today, index)), [today]);
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_unused, index) => addDays(today, index)),
+    [today],
+  );
 
   useEffect(() => {
     if (!establishment) return;
@@ -65,8 +94,12 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
       .then((result) => {
         if (!alive) return;
         setAvailability(result);
-        setTime((current) => (result.slots.some((slot) => slot.time === current && slot.available) ? current : ''));
-        setTableId((current) => (result.tables.some((table) => table.id === current) ? current : ''));
+        setTime((current) =>
+          result.slots.some((slot) => slot.time === current && slot.available) ? current : '',
+        );
+        setTableId((current) =>
+          result.tables.some((table) => table.id === current) ? current : '',
+        );
       })
       .catch(() => {
         if (alive) setAvailability(null);
@@ -127,7 +160,12 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
     } catch (caught) {
       const code = caught instanceof ApiError ? caught.code : '';
       toast.push({
-        title: code === 'no_table_available' ? t('reservation.errorNoTable') : code === 'invalid_date' ? t('reservation.errorDate') : t('common.error'),
+        title:
+          code === 'no_table_available'
+            ? t('reservation.errorNoTable')
+            : code === 'invalid_date'
+              ? t('reservation.errorDate')
+              : t('common.error'),
         tone: 'error',
       });
     } finally {
@@ -140,7 +178,11 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
     if (!window.confirm(t('reservation.cancelConfirm'))) return;
     setCancelling(true);
     try {
-      const result = await publicApi.cancelReservation(establishment.id, confirmed.reservation.id, confirmed.token);
+      const result = await publicApi.cancelReservation(
+        establishment.id,
+        confirmed.reservation.id,
+        confirmed.token,
+      );
       updateReservationStatus(result.reservation.id, result.reservation.status);
       setConfirmed({ reservation: result.reservation, token: confirmed.token });
       toast.push({ title: t('reservation.cancelled'), tone: 'success' });
@@ -176,17 +218,41 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
 
   if (confirmed) {
     const reservation = confirmed.reservation;
-    const statusKey = reservation.status === 'confirmee' ? 'statusConfirmee' : reservation.status === 'installee' ? 'statusInstallee' : reservation.status === 'annulee' ? 'statusAnnulee' : 'statusNoShow';
+    const statusKey =
+      reservation.status === 'confirmee'
+        ? 'statusConfirmee'
+        : reservation.status === 'installee'
+          ? 'statusInstallee'
+          : reservation.status === 'annulee'
+            ? 'statusAnnulee'
+            : 'statusNoShow';
     return (
       <div className="rh-client-screen">
-        <ClientHeader title={t('reservation.confirmedTitle')} back={`/e/${establishment.slug}`} logo={establishment.logoUrl} />
+        <ClientHeader
+          title={t('reservation.confirmedTitle')}
+          back={`/e/${establishment.slug}`}
+          logo={establishment.logoUrl}
+        />
         <main className="rh-client-page rh-client-page--flush">
-          <section className={cx('rh-resa-ticket', reservation.status === 'annulee' && 'is-cancelled')}>
+          <section
+            className={cx('rh-resa-ticket', reservation.status === 'annulee' && 'is-cancelled')}
+          >
             <span className="rh-resa-ticket__icon">
-              <Icon name={reservation.status === 'annulee' ? 'x-circle' : 'check-circle'} size="lg" />
+              <Icon
+                name={reservation.status === 'annulee' ? 'x-circle' : 'check-circle'}
+                size="lg"
+              />
             </span>
-            <h1>{reservation.status === 'annulee' ? t('reservation.cancelled') : t('reservation.confirmedTitle')}</h1>
-            <p>{reservation.status === 'annulee' ? t('reservation.statusAnnulee') : t('reservation.confirmedDesc')}</p>
+            <h1>
+              {reservation.status === 'annulee'
+                ? t('reservation.cancelled')
+                : t('reservation.confirmedTitle')}
+            </h1>
+            <p>
+              {reservation.status === 'annulee'
+                ? t('reservation.statusAnnulee')
+                : t('reservation.confirmedDesc')}
+            </p>
             <div className="rh-resa-ticket__grid">
               <div>
                 <span>{t('reservation.reference')}</span>
@@ -217,14 +283,27 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
           </section>
           <div className="rh-resa-actions">
             {reservation.status === 'confirmee' && (
-              <button type="button" className="rh-client-btn rh-client-btn--ghost rh-client-btn--block" onClick={cancel} disabled={cancelling}>
+              <button
+                type="button"
+                className="rh-client-btn rh-client-btn--ghost rh-client-btn--block"
+                onClick={cancel}
+                disabled={cancelling}
+              >
                 <Icon name="x" size="sm" /> {t('reservation.cancelReservation')}
               </button>
             )}
-            <button type="button" className="rh-client-btn rh-client-btn--primary rh-client-btn--block" onClick={() => navigate(`/e/${establishment.slug}/menu`)}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--primary rh-client-btn--block"
+              onClick={() => navigate(`/e/${establishment.slug}/menu`)}
+            >
               <Icon name="utensils" size="sm" /> {t('establishment.menu')}
             </button>
-            <button type="button" className="rh-client-btn rh-client-btn--ghost rh-client-btn--block" onClick={() => navigate('/commandes')}>
+            <button
+              type="button"
+              className="rh-client-btn rh-client-btn--ghost rh-client-btn--block"
+              onClick={() => navigate('/commandes')}
+            >
               {t('reservation.myReservations')}
             </button>
           </div>
@@ -313,13 +392,21 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
                 <button
                   key={slot.time}
                   type="button"
-                  className={cx('rh-resa-slot', time === slot.time && 'is-active', !slot.available && 'is-full')}
+                  className={cx(
+                    'rh-resa-slot',
+                    time === slot.time && 'is-active',
+                    !slot.available && 'is-full',
+                  )}
                   disabled={!slot.available}
                   onClick={() => setTime(slot.time)}
                   aria-pressed={time === slot.time}
                 >
                   <strong>{slot.time}</strong>
-                  <span>{slot.available ? t('reservation.seats', { count: slot.tablesAvailable }) : t('reservation.full')}</span>
+                  <span>
+                    {slot.available
+                      ? t('reservation.seats', { count: slot.tablesAvailable })
+                      : t('reservation.full')}
+                  </span>
                 </button>
               ))}
             </div>
@@ -348,7 +435,8 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
               >
                 <strong>{table.code}</strong>
                 <span>
-                  {table.zoneName ?? table.type} · {t('reservation.seats', { count: table.effectiveCapacity })}
+                  {table.zoneName ?? table.type} ·{' '}
+                  {t('reservation.seats', { count: table.effectiveCapacity })}
                 </span>
               </button>
             ))}
@@ -359,7 +447,12 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
           <h2>{t('reservation.detailsTitle')}</h2>
           <label className="rh-client-field">
             <span>{t('reservation.name')}</span>
-            <input className="rh-client-input" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" />
+            <input
+              className="rh-client-input"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              autoComplete="name"
+            />
           </label>
           <label className="rh-client-field">
             <span>{t('reservation.phone')}</span>
@@ -387,7 +480,12 @@ export default function ReservationPage({ slug, existingId, existingToken }: { s
         </section>
 
         <div className="rh-resa-actions">
-          <button type="button" className="rh-client-btn rh-client-btn--primary rh-client-btn--block rh-client-btn--lg" onClick={submit} disabled={submitting}>
+          <button
+            type="button"
+            className="rh-client-btn rh-client-btn--primary rh-client-btn--block rh-client-btn--lg"
+            onClick={submit}
+            disabled={submitting}
+          >
             {submitting ? t('reservation.confirming') : t('reservation.confirm')}
           </button>
         </div>

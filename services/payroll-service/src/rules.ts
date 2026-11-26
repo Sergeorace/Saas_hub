@@ -8,7 +8,14 @@
  * comptable (base, valeur de base, opération, plafond appliqué, montant).
  */
 
-export const RULE_TYPES = ['prime', 'indemnite', 'cotisation', 'retenue', 'impot', 'avance'] as const;
+export const RULE_TYPES = [
+  'prime',
+  'indemnite',
+  'cotisation',
+  'retenue',
+  'impot',
+  'avance',
+] as const;
 export type RuleType = (typeof RULE_TYPES)[number];
 
 export const RULE_BASES = [
@@ -90,20 +97,29 @@ export interface PayrollComputation {
   netXof: number;
 }
 
-const RULE_ORDER: RuleType[][] = [['prime', 'indemnite'], ['cotisation'], ['retenue'], ['impot'], ['avance']];
+const RULE_ORDER: RuleType[][] = [
+  ['prime', 'indemnite'],
+  ['cotisation'],
+  ['retenue'],
+  ['impot'],
+  ['avance'],
+];
 
 function round0(value: number): number {
   return Math.round(value);
 }
 
-function baseValue(base: RuleBase, state: {
-  baseSalaryXof: number;
-  workingDaysPerMonth: number;
-  brut: number;
-  brutImposable: number;
-  netImposable: number;
-  ctx: PayrollContext;
-}): number {
+function baseValue(
+  base: RuleBase,
+  state: {
+    baseSalaryXof: number;
+    workingDaysPerMonth: number;
+    brut: number;
+    brutImposable: number;
+    netImposable: number;
+    ctx: PayrollContext;
+  },
+): number {
   switch (base) {
     case 'salaire_base':
       return state.baseSalaryXof;
@@ -208,7 +224,9 @@ export function evaluateRules(rules: PayRule[], ctx: PayrollContext): PayrollCom
       }
       const rounded = round0(Math.max(0, amount));
       const operation =
-        rule.kind === 'tranches' ? applyTranches(Math.max(0, value), rule.tranches ?? []).detail : describeAmount(rule, value);
+        rule.kind === 'tranches'
+          ? applyTranches(Math.max(0, value), rule.tranches ?? []).detail
+          : describeAmount(rule, value);
 
       if (rule.type === 'prime' || rule.type === 'indemnite') {
         state.brut += rounded;
@@ -274,54 +292,110 @@ export function validateRules(rules: PayRule[]): RuleIssue[] {
   const codes = new Set<string>();
   for (const rule of rules) {
     if (!rule.id || ids.has(rule.id)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: 'Identifiant de règle manquant ou dupliqué.' });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: 'Identifiant de règle manquant ou dupliqué.',
+      });
     }
     ids.add(rule.id);
     if (!rule.code || codes.has(rule.code)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: 'Code de règle manquant ou dupliqué.' });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: 'Code de règle manquant ou dupliqué.',
+      });
     }
     codes.add(rule.code);
     if (!RULE_TYPES.includes(rule.type)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: `Type inconnu : ${String(rule.type)}.` });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: `Type inconnu : ${String(rule.type)}.`,
+      });
     }
     if (!RULE_BASES.includes(rule.base)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: `Base inconnue : ${String(rule.base)}.` });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: `Base inconnue : ${String(rule.base)}.`,
+      });
     }
     if (!RULE_KINDS.includes(rule.kind)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: `Mode de calcul inconnu : ${String(rule.kind)}.` });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: `Mode de calcul inconnu : ${String(rule.kind)}.`,
+      });
     }
     if (rule.kind === 'percent' && (typeof rule.ratePercent !== 'number' || rule.ratePercent < 0)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: 'Un pourcentage positif est requis.' });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: 'Un pourcentage positif est requis.',
+      });
     }
-    if ((rule.kind === 'amount' || rule.kind === 'tranches') && rule.kind === 'amount' && rule.rateXof === undefined) {
-      issues.push({ level: 'error', ruleId: rule.id, message: 'Un montant forfaitaire (rateXof) est requis.' });
+    if (
+      (rule.kind === 'amount' || rule.kind === 'tranches') &&
+      rule.kind === 'amount' &&
+      rule.rateXof === undefined
+    ) {
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: 'Un montant forfaitaire (rateXof) est requis.',
+      });
     }
     if (rule.kind === 'heures' && (typeof rule.multiplier !== 'number' || rule.multiplier <= 0)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: 'Un coefficient d’heures supplémentaires positif est requis.' });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: 'Un coefficient d’heures supplémentaires positif est requis.',
+      });
     }
     if (rule.kind === 'jours' && (typeof rule.ratePercent !== 'number' || rule.ratePercent <= 0)) {
-      issues.push({ level: 'error', ruleId: rule.id, message: 'Un pourcentage journalier positif est requis.' });
+      issues.push({
+        level: 'error',
+        ruleId: rule.id,
+        message: 'Un pourcentage journalier positif est requis.',
+      });
     }
     if (rule.kind === 'tranches') {
       const tranches = rule.tranches ?? [];
       if (tranches.length === 0) {
-        issues.push({ level: 'error', ruleId: rule.id, message: 'Un barème par tranches est requis.' });
+        issues.push({
+          level: 'error',
+          ruleId: rule.id,
+          message: 'Un barème par tranches est requis.',
+        });
       }
       const sorted = [...tranches].sort(
         (a, b) => (a.upTo ?? Number.POSITIVE_INFINITY) - (b.upTo ?? Number.POSITIVE_INFINITY),
       );
       if (tranches[tranches.length - 1]?.upTo !== null) {
-        issues.push({ level: 'error', ruleId: rule.id, message: 'La dernière tranche doit avoir upTo = null.' });
+        issues.push({
+          level: 'error',
+          ruleId: rule.id,
+          message: 'La dernière tranche doit avoir upTo = null.',
+        });
       }
       for (let index = 0; index < sorted.length; index += 1) {
         const tier = sorted[index];
         if (tier.ratePercent < 0 || tier.ratePercent > 100) {
-          issues.push({ level: 'error', ruleId: rule.id, message: 'Chaque taux de tranche doit être compris entre 0 et 100 %.' });
+          issues.push({
+            level: 'error',
+            ruleId: rule.id,
+            message: 'Chaque taux de tranche doit être compris entre 0 et 100 %.',
+          });
         }
         if (index > 0 && tier.upTo !== null) {
           const previous = sorted[index - 1].upTo;
           if (previous !== null && tier.upTo <= previous) {
-            issues.push({ level: 'error', ruleId: rule.id, message: 'Les bornes de tranches doivent être croissantes.' });
+            issues.push({
+              level: 'error',
+              ruleId: rule.id,
+              message: 'Les bornes de tranches doivent être croissantes.',
+            });
           }
         }
       }
@@ -330,17 +404,27 @@ export function validateRules(rules: PayRule[]): RuleIssue[] {
       issues.push({ level: 'error', ruleId: rule.id, message: 'Un plafond négatif est invalide.' });
     }
     if (!rule.description || rule.description.trim().length < 10) {
-      issues.push({ level: 'warning', ruleId: rule.id, message: 'Une description lisible par l’expert est recommandée.' });
+      issues.push({
+        level: 'warning',
+        ruleId: rule.id,
+        message: 'Une description lisible par l’expert est recommandée.',
+      });
     }
   }
   if (!rules.some((rule) => rule.enabled)) {
     issues.push({ level: 'error', message: 'Aucune règle active : la paie serait nulle.' });
   }
   if (!rules.some((rule) => rule.enabled && rule.type === 'cotisation')) {
-    issues.push({ level: 'warning', message: 'Aucune cotisation sociale active pour cet établissement.' });
+    issues.push({
+      level: 'warning',
+      message: 'Aucune cotisation sociale active pour cet établissement.',
+    });
   }
   if (!rules.some((rule) => rule.enabled && rule.type === 'impot')) {
-    issues.push({ level: 'warning', message: 'Aucun impôt sur le revenu actif pour cet établissement.' });
+    issues.push({
+      level: 'warning',
+      message: 'Aucun impôt sur le revenu actif pour cet établissement.',
+    });
   }
   return issues;
 }
@@ -377,7 +461,8 @@ export const PRESET_RULES: PayRule[] = [
     base: 'ventes',
     kind: 'percent',
     ratePercent: 0.5,
-    description: 'Prime mensuelle calculée sur les ventes attribuées au collaborateur par le service Salon.',
+    description:
+      'Prime mensuelle calculée sur les ventes attribuées au collaborateur par le service Salon.',
     legalReference: 'Politique interne — montant librement paramétrable.',
   },
   {
@@ -391,7 +476,8 @@ export const PRESET_RULES: PayRule[] = [
     base: 'salaire_base',
     kind: 'amount',
     rateXof: 15000,
-    description: 'Forfait mensuel exonéré d’impôt, à ajuster selon la politique de l’établissement.',
+    description:
+      'Forfait mensuel exonéré d’impôt, à ajuster selon la politique de l’établissement.',
     legalReference: 'Barème interne — exonération à confirmer par expert.',
   },
   {
@@ -406,7 +492,8 @@ export const PRESET_RULES: PayRule[] = [
     kind: 'percent',
     ratePercent: 4,
     capXof: 15000,
-    description: 'Part salariale de la cotisation sociale, calculée sur le brut imposable, plafonnée.',
+    description:
+      'Part salariale de la cotisation sociale, calculée sur le brut imposable, plafonnée.',
     legalReference: 'Loi n° 2019-014 (protection sociale) — taux à confirmer auprès de la CNSS.',
   },
   {
@@ -453,7 +540,8 @@ export const PRESET_RULES: PayRule[] = [
     base: 'salaire_base',
     kind: 'amount',
     rateXof: 0,
-    description: 'Avance mensuelle forfaitaire, désactivée par défaut. Préférer les variables par collaborateur.',
+    description:
+      'Avance mensuelle forfaitaire, désactivée par défaut. Préférer les variables par collaborateur.',
     legalReference: 'Politique interne.',
   },
 ];

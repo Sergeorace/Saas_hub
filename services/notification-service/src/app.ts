@@ -37,7 +37,11 @@ export interface ContactInfo {
 
 export interface NotificationAppOptions {
   store: NotificationStore;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
   smsSecret: string;
   resolveContact?: (userId: string) => Promise<ContactInfo | null>;
   resolveStaff?: (tenantId: string) => Promise<Set<string>>;
@@ -138,7 +142,9 @@ function serializePreference(preference: NotificationPreference) {
 
 function channelField(value: unknown): TemplateChannel {
   if (typeof value !== 'string' || !CHANNELS.includes(value as TemplateChannel)) {
-    throw HttpError.unprocessable('validation_error', 'Canal invalide (sms, email ou push).', { field: 'channel' });
+    throw HttpError.unprocessable('validation_error', 'Canal invalide (sms, email ou push).', {
+      field: 'channel',
+    });
   }
   return value as TemplateChannel;
 }
@@ -146,14 +152,20 @@ function channelField(value: unknown): TemplateChannel {
 function localeField(value: unknown): NotificationLocale {
   if (value === undefined || value === null || value === '') return 'fr';
   if (typeof value !== 'string' || !LOCALES.includes(value as NotificationLocale)) {
-    throw HttpError.unprocessable('validation_error', 'Langue invalide (fr ou en).', { field: 'locale' });
+    throw HttpError.unprocessable('validation_error', 'Langue invalide (fr ou en).', {
+      field: 'locale',
+    });
   }
   return value as NotificationLocale;
 }
 
 function roomField(value: unknown): RoomName {
   if (typeof value !== 'string' || !ROOMS.includes(value as RoomName)) {
-    throw HttpError.unprocessable('validation_error', 'Salle inconnue (floor, kds, bar, pos, admin).', { field: 'room' });
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Salle inconnue (floor, kds, bar, pos, admin).',
+      { field: 'room' },
+    );
   }
   return value as RoomName;
 }
@@ -161,7 +173,9 @@ function roomField(value: unknown): RoomName {
 function timeField(value: unknown, field: string): string | null {
   if (value === undefined || value === null || value === '') return null;
   if (typeof value !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) {
-    throw HttpError.unprocessable('validation_error', `Format HH:MM attendu pour ${field}.`, { field });
+    throw HttpError.unprocessable('validation_error', `Format HH:MM attendu pour ${field}.`, {
+      field,
+    });
   }
   return value;
 }
@@ -171,9 +185,13 @@ function queue(store: NotificationStore, input: SendInput) {
     return sendNotification(store, input);
   } catch (error) {
     if ((error as { code?: string }).code === 'template_not_found') {
-      throw HttpError.unprocessable('template_not_found', 'Aucun modèle de notification ne correspond.', {
-        field: 'templateCode',
-      });
+      throw HttpError.unprocessable(
+        'template_not_found',
+        'Aucun modèle de notification ne correspond.',
+        {
+          field: 'templateCode',
+        },
+      );
     }
     throw error;
   }
@@ -193,7 +211,12 @@ async function resolveDestination(
   }
   if (channel === 'push') {
     const device = [...options.store.devices.values()].find((entry) => entry.userId === userId);
-    if (device) return { recipient: device.token, name: contact?.name ?? null, locale: contact?.locale ?? 'fr' };
+    if (device)
+      return {
+        recipient: device.token,
+        name: contact?.name ?? null,
+        locale: contact?.locale ?? 'fr',
+      };
   }
   return null;
 }
@@ -276,7 +299,9 @@ export async function handleNotificationEvent(
 ): Promise<void> {
   const { store } = options;
   const payload = event.payload;
-  const seq = String(payload.orderId ?? payload.reservationId ?? payload.runId ?? payload.itemId ?? '');
+  const seq = String(
+    payload.orderId ?? payload.reservationId ?? payload.runId ?? payload.itemId ?? '',
+  );
   const dedupe = `${event.type}:${tenantId}:${seq}:${payload.quantity ?? payload.amountXof ?? ''}`;
   if (store.handledEvents.has(dedupe)) return;
 
@@ -292,7 +317,11 @@ export async function handleNotificationEvent(
         type: 'order_created',
         title: 'Nouvelle commande',
         body: [number, table ? `Table ${table}` : null, channel].filter(Boolean).join(' · '),
-        data: { orderId: payload.orderId ?? null, tableCode: table, totalXof: payload.totalXof ?? null },
+        data: {
+          orderId: payload.orderId ?? null,
+          tableCode: table,
+          totalXof: payload.totalXof ?? null,
+        },
       });
       pushRoomMessage(store, {
         tenantId,
@@ -346,7 +375,12 @@ export async function handleNotificationEvent(
         type: 'table_status',
         title: `Table ${code}`,
         body: `${STATUS_LABELS[to] ?? to}`,
-        data: { tableId: payload.tableId ?? null, orderId: payload.orderId ?? null, from: payload.from ?? null, to },
+        data: {
+          tableId: payload.tableId ?? null,
+          orderId: payload.orderId ?? null,
+          from: payload.from ?? null,
+          to,
+        },
       });
       break;
     }
@@ -358,7 +392,10 @@ export async function handleNotificationEvent(
         type: 'reservation_created',
         title: 'Nouvelle réservation',
         body: `${String(payload.tableCode ?? '')} · ${String(payload.date ?? '')} ${String(payload.time ?? '')} · ${Number(payload.partySize ?? 0)} pers.`,
-        data: { reservationId: payload.reservationId ?? null, reference: payload.reference ?? null },
+        data: {
+          reservationId: payload.reservationId ?? null,
+          reference: payload.reference ?? null,
+        },
       });
       break;
     }
@@ -445,7 +482,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
     return ctx.auth;
   };
 
-  const requireRoomAccess = (ctx: RequestContext, room: RoomName): { tenantId: string; claims: AuthClaims } => {
+  const requireRoomAccess = (
+    ctx: RequestContext,
+    room: RoomName,
+  ): { tenantId: string; claims: AuthClaims } => {
     const tenantId = ctx.params.tenantId ?? '';
     const claims = requireTenantPermission(ctx.auth, tenantId, ROOM_PERMISSIONS[room]);
     return { tenantId, claims };
@@ -475,7 +515,9 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const tenantId = ctx.query.get('tenantId');
         const limit = Math.min(100, Math.max(1, Number(ctx.query.get('limit') ?? 30) || 30));
         const items = [...store.notifications.values()]
-          .filter((entry) => entry.userId === claims.sub && (!tenantId || entry.tenantId === tenantId))
+          .filter(
+            (entry) => entry.userId === claims.sub && (!tenantId || entry.tenantId === tenantId),
+          )
           .filter((entry) => entry.channel !== 'realtime')
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         const unread = items.filter((entry) => entry.status === 'sent' && !entry.readAt).length;
@@ -495,7 +537,8 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
       handler: (ctx) => {
         const claims = requireUser(ctx);
         const record = store.notifications.get(ctx.params.id ?? '');
-        if (!record || record.userId !== claims.sub) throw HttpError.notFound('Notification introuvable.');
+        if (!record || record.userId !== claims.sub)
+          throw HttpError.notFound('Notification introuvable.');
         if (!record.readAt) {
           record.readAt = nowIso();
           record.status = 'read';
@@ -526,8 +569,12 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
       path: '/api/v1/me/notification-preferences',
       handler: (ctx) => {
         const claims = requireUser(ctx);
-        const tenantId = requireString({ tenantId: ctx.query.get('tenantId') ?? '' }, 'tenantId', { max: 64 });
-        return { body: { preference: serializePreference(getPreference(store, tenantId, claims.sub)) } };
+        const tenantId = requireString({ tenantId: ctx.query.get('tenantId') ?? '' }, 'tenantId', {
+          max: 64,
+        });
+        return {
+          body: { preference: serializePreference(getPreference(store, tenantId, claims.sub)) },
+        };
       },
     },
     {
@@ -541,13 +588,16 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         for (const field of ['sms', 'email', 'push'] as const) {
           if (body[field] !== undefined) {
             if (typeof body[field] !== 'boolean') {
-              throw HttpError.unprocessable('validation_error', `${field} doit être un booléen.`, { field });
+              throw HttpError.unprocessable('validation_error', `${field} doit être un booléen.`, {
+                field,
+              });
             }
             preference[field] = body[field];
           }
         }
         if (body.locale !== undefined) preference.locale = localeField(body.locale);
-        if (body.quietFrom !== undefined) preference.quietFrom = timeField(body.quietFrom, 'quietFrom');
+        if (body.quietFrom !== undefined)
+          preference.quietFrom = timeField(body.quietFrom, 'quietFrom');
         if (body.quietTo !== undefined) preference.quietTo = timeField(body.quietTo, 'quietTo');
         preference.updatedAt = nowIso();
         store.preferences.set(preferenceKey(tenantId, claims.sub), preference);
@@ -572,7 +622,9 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const token = requireString(body, 'token', { max: 256 });
         const platform = body.platform ?? 'web';
         if (platform !== 'ios' && platform !== 'android' && platform !== 'web') {
-          throw HttpError.unprocessable('validation_error', 'Plateforme invalide.', { field: 'platform' });
+          throw HttpError.unprocessable('validation_error', 'Plateforme invalide.', {
+            field: 'platform',
+          });
         }
         const existing = [...store.devices.values()].find(
           (entry) => entry.tenantId === tenantId && entry.token === token,
@@ -601,7 +653,9 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
       handler: (ctx) => {
         const claims = requireUser(ctx);
         const token = ctx.params.token ?? '';
-        const device = [...store.devices.values()].find((entry) => entry.token === token && entry.userId === claims.sub);
+        const device = [...store.devices.values()].find(
+          (entry) => entry.token === token && entry.userId === claims.sub,
+        );
         if (!device) throw HttpError.notFound('Jeton d’appareil introuvable.');
         store.devices.delete(device.id);
         return { body: { removed: true, token } };
@@ -616,7 +670,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const since = ctx.query.get('since');
         const limit = Math.min(100, Math.max(1, Number(ctx.query.get('limit') ?? 40) || 40));
         const items = store.rooms
-          .filter((entry) => entry.tenantId === tenantId && entry.room === room && (!since || entry.at > since))
+          .filter(
+            (entry) =>
+              entry.tenantId === tenantId && entry.room === room && (!since || entry.at > since),
+          )
           .slice(-limit);
         return {
           body: {
@@ -641,8 +698,15 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
           .filter((entry) => entry.tenantId === null || entry.tenantId === tenantId)
           .filter((entry) => !channel || entry.channel === channel)
           .filter((entry) => !locale || entry.locale === locale)
-          .sort((a, b) => `${a.code}${a.channel}${a.locale}`.localeCompare(`${b.code}${b.channel}${b.locale}`));
-        return { body: { items: items.map(serializeTemplate), tenantsOverrides: items.filter((e) => e.tenantId).length } };
+          .sort((a, b) =>
+            `${a.code}${a.channel}${a.locale}`.localeCompare(`${b.code}${b.channel}${b.locale}`),
+          );
+        return {
+          body: {
+            items: items.map(serializeTemplate),
+            tenantsOverrides: items.filter((e) => e.tenantId).length,
+          },
+        };
       },
     },
     {
@@ -656,9 +720,17 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const channel = channelField(body.channel);
         const locale = localeField(body.locale);
         const existing = [...store.templates.values()].find(
-          (entry) => entry.tenantId === tenantId && entry.code === code && entry.channel === channel && entry.locale === locale,
+          (entry) =>
+            entry.tenantId === tenantId &&
+            entry.code === code &&
+            entry.channel === channel &&
+            entry.locale === locale,
         );
-        if (existing) throw HttpError.conflict('template_exists', 'Template personnalisé déjà défini pour cette combinaison.');
+        if (existing)
+          throw HttpError.conflict(
+            'template_exists',
+            'Template personnalisé déjà défini pour cette combinaison.',
+          );
         const template: MessageTemplate = {
           id: `tpl_${tenantId}_${code.toLowerCase()}_${channel}_${locale}`,
           tenantId,
@@ -690,7 +762,8 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'notification:manage');
         const template = store.templates.get(ctx.params.id ?? '');
-        if (!template || template.tenantId !== tenantId) throw HttpError.notFound('Modèle introuvable.');
+        if (!template || template.tenantId !== tenantId)
+          throw HttpError.notFound('Modèle introuvable.');
         const body = asObject(ctx.body);
         const subject = optionalString(body, 'subject', { max: 160 });
         if (subject !== undefined) template.subject = subject;
@@ -716,9 +789,12 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'notification:view');
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        const records = [...store.notifications.values()].filter((entry) => entry.tenantId === tenantId);
+        const records = [...store.notifications.values()].filter(
+          (entry) => entry.tenantId === tenantId,
+        );
         const byChannel = { sms: 0, email: 0, push: 0 } as Record<TemplateChannel, number>;
-        for (const record of records) if (record.channel !== 'realtime') byChannel[record.channel] += 1;
+        for (const record of records)
+          if (record.channel !== 'realtime') byChannel[record.channel] += 1;
         return {
           body: {
             tenantId,
@@ -728,10 +804,14 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
             suppressed: records.filter((entry) => entry.status === 'supprime').length,
             queued: records.filter((entry) => entry.status === 'queued').length,
             byChannel,
-            devices: [...store.devices.values()].filter((entry) => entry.tenantId === tenantId).length,
-            templates: [...store.templates.values()].filter((entry) => entry.tenantId === null || entry.tenantId === tenantId)
+            devices: [...store.devices.values()].filter((entry) => entry.tenantId === tenantId)
               .length,
-            roomMessages24h: store.rooms.filter((entry) => entry.tenantId === tenantId && entry.at >= since).length,
+            templates: [...store.templates.values()].filter(
+              (entry) => entry.tenantId === null || entry.tenantId === tenantId,
+            ).length,
+            roomMessages24h: store.rooms.filter(
+              (entry) => entry.tenantId === tenantId && entry.at >= since,
+            ).length,
             generatedAt: nowIso(),
           },
         };
@@ -768,11 +848,17 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         if (!recipient && userId) {
           const destination = await resolveDestination(options, userId, channel);
           if (!destination) {
-            throw HttpError.unprocessable('recipient_unresolved', 'Aucun contact ne correspond à cet utilisateur.');
+            throw HttpError.unprocessable(
+              'recipient_unresolved',
+              'Aucun contact ne correspond à cet utilisateur.',
+            );
           }
           recipient = destination.recipient;
         }
-        if (!recipient) throw HttpError.unprocessable('validation_error', 'Destinataire requis.', { field: 'recipient' });
+        if (!recipient)
+          throw HttpError.unprocessable('validation_error', 'Destinataire requis.', {
+            field: 'recipient',
+          });
         const room = body.room !== undefined && body.room !== null ? roomField(body.room) : null;
         const { record, duplicate } = await deliver(
           {
@@ -784,7 +870,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
             templateCode: optionalString(body, 'templateCode', { max: 64 }) ?? null,
             subject: optionalString(body, 'subject', { max: 160 }) ?? null,
             body: optionalString(body, 'body', { max: 4000 }) ?? null,
-            data: body.data && typeof body.data === 'object' ? (body.data as Record<string, unknown>) : {},
+            data:
+              body.data && typeof body.data === 'object'
+                ? (body.data as Record<string, unknown>)
+                : {},
             room,
             eventId: optionalString(body, 'eventId', { max: 128 }) ?? null,
             kind: body.kind === 'marketing' ? 'marketing' : 'transactional',
@@ -792,7 +881,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
           },
           claims.sub,
         );
-        return { status: duplicate ? 200 : 201, body: { notification: serializeNotification(record), duplicate } };
+        return {
+          status: duplicate ? 200 : 201,
+          body: { notification: serializeNotification(record), duplicate },
+        };
       },
     },
     {
@@ -802,9 +894,13 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'notification:manage');
         const record = store.notifications.get(ctx.params.id ?? '');
-        if (!record || record.tenantId !== tenantId) throw HttpError.notFound('Notification introuvable.');
+        if (!record || record.tenantId !== tenantId)
+          throw HttpError.notFound('Notification introuvable.');
         if (record.channel === 'realtime') {
-          throw HttpError.unprocessable('validation_error', 'Les messages temps réel ne se rejouent pas.');
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Les messages temps réel ne se rejouent pas.',
+          );
         }
         retryNotification(store, record);
         store.recordAudit({
@@ -832,7 +928,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
           type: optionalString(body, 'type', { max: 64 }) ?? 'manual',
           title: requireString(body, 'title', { max: 120 }),
           body: requireString(body, 'body', { max: 500 }),
-          data: body.data && typeof body.data === 'object' ? (body.data as Record<string, unknown>) : {},
+          data:
+            body.data && typeof body.data === 'object'
+              ? (body.data as Record<string, unknown>)
+              : {},
         });
         store.recordAudit({
           tenantId,
@@ -872,12 +971,18 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
         if (!recipient && userId) {
           const destination = await resolveDestination(options, userId, channel);
           if (!destination) {
-            throw HttpError.unprocessable('recipient_unresolved', 'Aucun contact ne correspond à cet utilisateur.');
+            throw HttpError.unprocessable(
+              'recipient_unresolved',
+              'Aucun contact ne correspond à cet utilisateur.',
+            );
           }
           recipient = destination.recipient;
           locale = locale ?? destination.locale;
         }
-        if (!recipient) throw HttpError.unprocessable('validation_error', 'Destinataire requis.', { field: 'recipient' });
+        if (!recipient)
+          throw HttpError.unprocessable('validation_error', 'Destinataire requis.', {
+            field: 'recipient',
+          });
         const room = body.room !== undefined && body.room !== null ? roomField(body.room) : null;
         const { record, duplicate } = await deliver(
           {
@@ -889,7 +994,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
             templateCode: optionalString(body, 'templateCode', { max: 64 }) ?? null,
             subject: optionalString(body, 'subject', { max: 160 }) ?? null,
             body: optionalString(body, 'body', { max: 4000 }) ?? null,
-            data: body.data && typeof body.data === 'object' ? (body.data as Record<string, unknown>) : {},
+            data:
+              body.data && typeof body.data === 'object'
+                ? (body.data as Record<string, unknown>)
+                : {},
             room,
             eventId: optionalString(body, 'eventId', { max: 128 }) ?? null,
             kind: body.kind === 'marketing' ? 'marketing' : 'transactional',
@@ -897,7 +1005,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
           },
           'notification-service',
         );
-        return { status: duplicate ? 200 : 201, body: { notification: serializeNotification(record), duplicate } };
+        return {
+          status: duplicate ? 200 : 201,
+          body: { notification: serializeNotification(record), duplicate },
+        };
       },
     },
     {
@@ -913,7 +1024,10 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
           type: optionalString(body, 'type', { max: 64 }) ?? 'event',
           title: requireString(body, 'title', { max: 120 }),
           body: requireString(body, 'body', { max: 500 }),
-          data: body.data && typeof body.data === 'object' ? (body.data as Record<string, unknown>) : {},
+          data:
+            body.data && typeof body.data === 'object'
+              ? (body.data as Record<string, unknown>)
+              : {},
         });
         return { status: 201, body: { message } };
       },
@@ -952,15 +1066,20 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
       path: '/api/v1/public/notifications/sms/webhook',
       auth: false,
       handler: async (ctx) => {
-        if (!smsSecret) throw new HttpError(503, 'webhook_not_configured', 'Webhook SMS non configuré.');
+        if (!smsSecret)
+          throw new HttpError(503, 'webhook_not_configured', 'Webhook SMS non configuré.');
         const body = asObject(ctx.body);
         const messageId = requireString(body, 'messageId', { max: 64 });
         const status = requireString(body, 'status', { max: 16 });
         if (status !== 'delivered' && status !== 'failed') {
-          throw HttpError.unprocessable('validation_error', 'Statut de remise invalide.', { field: 'status' });
+          throw HttpError.unprocessable('validation_error', 'Statut de remise invalide.', {
+            field: 'status',
+          });
         }
         const signature = String(ctx.headers['x-sms-signature'] ?? '');
-        const expected = createHmac('sha256', smsSecret).update(`${messageId}:${status}`).digest('hex');
+        const expected = createHmac('sha256', smsSecret)
+          .update(`${messageId}:${status}`)
+          .digest('hex');
         const provided = Buffer.from(signature, 'utf8');
         const target = Buffer.from(expected, 'utf8');
         if (provided.length !== target.length || !timingSafeEqual(provided, target)) {
@@ -970,10 +1089,13 @@ export function buildNotificationApp(options: NotificationAppOptions): Route[] {
           entry.attempts.some((attempt) => attempt.messageId === messageId),
         );
         if (!record) throw HttpError.notFound('Message introuvable.');
-        const attempt = [...record.attempts].reverse().find((entry) => entry.messageId === messageId);
+        const attempt = [...record.attempts]
+          .reverse()
+          .find((entry) => entry.messageId === messageId);
         if (attempt) {
           attempt.status = status;
-          if (status === 'failed') attempt.error = optionalString(body, 'error', { max: 160 }) ?? 'remise_refusee';
+          if (status === 'failed')
+            attempt.error = optionalString(body, 'error', { max: 160 }) ?? 'remise_refusee';
         }
         if (status === 'failed') record.status = 'failed';
         store.recordAudit({

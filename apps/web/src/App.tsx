@@ -59,7 +59,11 @@ export default function App() {
   const trackingMatch = /^\/suivi\/([^/]+)\/([^/]+)$/.exec(route.path);
   const title =
     TITLES[route.path] ??
-    (tableMatch ? 'Carte de la table — RESTO-HUB' : trackingMatch ? 'Suivi de commande — RESTO-HUB' : 'RESTO-HUB');
+    (tableMatch
+      ? 'Carte de la table — RESTO-HUB'
+      : trackingMatch
+        ? 'Suivi de commande — RESTO-HUB'
+        : 'RESTO-HUB');
 
   useEffect(() => {
     document.title = title;

@@ -105,10 +105,16 @@ function ensurePlatformPermission(claims: AuthClaims, permission: string): void 
 
 function passwordProblem(password: string): void {
   if (password.length < 8) {
-    throw HttpError.unprocessable('weak_password', 'Le mot de passe doit contenir au moins 8 caractères.');
+    throw HttpError.unprocessable(
+      'weak_password',
+      'Le mot de passe doit contenir au moins 8 caractères.',
+    );
   }
   if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
-    throw HttpError.unprocessable('weak_password', 'Le mot de passe doit mélanger lettres et chiffres.');
+    throw HttpError.unprocessable(
+      'weak_password',
+      'Le mot de passe doit mélanger lettres et chiffres.',
+    );
   }
 }
 
@@ -180,7 +186,15 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
 
   function issueTicket(user: UserRecord, purpose: 'mfa-verify' | 'mfa-setup'): string {
     return signToken(
-      { sub: user.id, sid: '', name: user.name, email: user.email, phone: user.phone, kind: 'mfa', purpose },
+      {
+        sub: user.id,
+        sid: '',
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        kind: 'mfa',
+        purpose,
+      },
       secret,
       600,
     );
@@ -188,7 +202,11 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
 
   function startLogin(user: UserRecord, ctx: RequestContext) {
     if (user.status !== 'active') {
-      throw new HttpError(403, 'account_suspended', 'Ce compte est suspendu. Contactez le support.');
+      throw new HttpError(
+        403,
+        'account_suspended',
+        'Ce compte est suspendu. Contactez le support.',
+      );
     }
     const requiresMfa = user.mfaEnabled || store.mfaRequiredFor(user.id);
     if (requiresMfa) {
@@ -284,10 +302,14 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         passwordProblem(password);
         const phone = optionalPhone(body);
         if (store.findUserByEmail(email)) {
-          throw HttpError.conflict('email_taken', 'Cet e-mail est déjà utilisé.', { field: 'email' });
+          throw HttpError.conflict('email_taken', 'Cet e-mail est déjà utilisé.', {
+            field: 'email',
+          });
         }
         if (phone && store.findUserByPhone(phone)) {
-          throw HttpError.conflict('phone_taken', 'Ce numéro est déjà utilisé.', { field: 'phone' });
+          throw HttpError.conflict('phone_taken', 'Ce numéro est déjà utilisé.', {
+            field: 'phone',
+          });
         }
         const now = nowIso();
         const user: UserRecord = {
@@ -326,7 +348,9 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const email = requireEmail(body);
         const password = requireString(body, 'password', { max: 128 });
         const user = store.findUserByEmail(email);
-        const valid = user?.passwordHash ? await verifyPassword(password, user.passwordHash) : false;
+        const valid = user?.passwordHash
+          ? await verifyPassword(password, user.passwordHash)
+          : false;
         if (!user || !valid) {
           throw HttpError.unauthorized('E-mail ou mot de passe incorrect.');
         }
@@ -355,7 +379,9 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         };
         store.otps.set(otp.id, otp);
         store.lastOtpAt.set(phone, Date.now());
-        console.log(`[identity-service] OTP demandé pour ${phone} (livraison SMS via notification-service)`);
+        console.log(
+          `[identity-service] OTP demandé pour ${phone} (livraison SMS via notification-service)`,
+        );
         return {
           body: {
             challengeId: otp.id,
@@ -441,7 +467,11 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         } else {
           const verifierUrl = process.env.SOCIAL_VERIFIER_URL;
           if (!verifierUrl) {
-            throw new HttpError(501, 'provider_not_configured', 'Ce fournisseur social n’est pas encore configuré.');
+            throw new HttpError(
+              501,
+              'provider_not_configured',
+              'Ce fournisseur social n’est pas encore configuré.',
+            );
           }
           const response = await fetch(`${verifierUrl.replace(/\/$/, '')}/${provider}`, {
             method: 'POST',
@@ -459,7 +489,8 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         let user = existing ? store.users.get(existing.userId) : undefined;
         if (!user && email) user = store.findUserByEmail(email);
         if (!user) {
-          const name = optionalString(body, 'name', { max: 80 }) ?? email?.split('@')[0] ?? 'Utilisateur';
+          const name =
+            optionalString(body, 'name', { max: 80 }) ?? email?.split('@')[0] ?? 'Utilisateur';
           const now = nowIso();
           user = {
             id: newId('usr'),
@@ -477,7 +508,13 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
           store.users.set(user.id, user);
         }
         if (!existing) {
-          store.socials.set(key, { provider, subject, userId: user.id, email, createdAt: nowIso() });
+          store.socials.set(key, {
+            provider,
+            subject,
+            userId: user.id,
+            email,
+            createdAt: nowIso(),
+          });
         }
         return { body: startLogin(user, ctx) };
       },
@@ -507,7 +544,14 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         session.refreshHash = sha256(nextRefresh);
         store.refreshIndex.set(session.refreshHash, session.id);
         const accessToken = signToken(
-          { sub: user.id, sid: session.id, name: user.name, email: user.email, phone: user.phone, kind: 'access' },
+          {
+            sub: user.id,
+            sid: session.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            kind: 'access',
+          },
           secret,
           config.accessTtlSeconds,
         );
@@ -656,7 +700,9 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         }
         const rawCode = requireString(body, 'code', { max: 20 });
         const numeric = /^\d{6}$/.test(rawCode.trim());
-        const valid = numeric ? totpValid(user.mfaSecret, rawCode.trim()) : consumeRecoveryCode(user, rawCode);
+        const valid = numeric
+          ? totpValid(user.mfaSecret, rawCode.trim())
+          : consumeRecoveryCode(user, rawCode);
         if (!valid) throw HttpError.unauthorized('Code MFA invalide.');
         store.recordAudit({
           tenantId: null,
@@ -677,7 +723,11 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const user = store.users.get(claims.sub);
         if (!user) throw HttpError.notFound('Compte introuvable.');
         if (store.mfaRequiredFor(user.id)) {
-          throw new HttpError(403, 'mfa_policy', 'Le MFA est obligatoire pour votre rôle et ne peut être désactivé.');
+          throw new HttpError(
+            403,
+            'mfa_policy',
+            'Le MFA est obligatoire pour votre rôle et ne peut être désactivé.',
+          );
         }
         const body = asObject(ctx.body);
         const password = requireString(body, 'password', { max: 128 });
@@ -754,18 +804,16 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         else if (!hasPlatformOperate(claims)) {
           throw HttpError.badRequest('tenant_required', 'Précisez l’établissement.');
         }
-        const roles = store
-          .rolesForTenant(tenantId ?? null)
-          .map((role) => ({
-            id: role.id,
-            tenantId: role.tenantId,
-            code: role.code,
-            name: role.name,
-            description: role.description,
-            permissions: role.permissions,
-            requiresMfa: role.requiresMfa,
-            system: role.system,
-          }));
+        const roles = store.rolesForTenant(tenantId ?? null).map((role) => ({
+          id: role.id,
+          tenantId: role.tenantId,
+          code: role.code,
+          name: role.name,
+          description: role.description,
+          permissions: role.permissions,
+          requiresMfa: role.requiresMfa,
+          system: role.system,
+        }));
         return { body: { items: roles } };
       },
     },
@@ -782,15 +830,22 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const permissions: Permission[] = [];
         for (const value of permissionsRaw) {
           if (typeof value !== 'string' || !isValidPermission(value)) {
-            throw HttpError.unprocessable('invalid_permission', `Permission inconnue : ${String(value)}.`);
+            throw HttpError.unprocessable(
+              'invalid_permission',
+              `Permission inconnue : ${String(value)}.`,
+            );
           }
           permissions.push(value);
         }
         const requiresMfa = optionalBoolean(body, 'requiresMfa') ?? false;
         const code = slugify(optionalString(body, 'code', { max: 40 }) ?? name);
         if (!code) throw HttpError.unprocessable('validation_error', 'Nom de rôle invalide.');
-        if (tenantRoles(tenantId).some((role) => role.tenantId === tenantId && role.code === code)) {
-          throw HttpError.conflict('role_exists', 'Un rôle avec ce code existe déjà.', { field: 'code' });
+        if (
+          tenantRoles(tenantId).some((role) => role.tenantId === tenantId && role.code === code)
+        ) {
+          throw HttpError.conflict('role_exists', 'Un rôle avec ce code existe déjà.', {
+            field: 'code',
+          });
         }
         const now = nowIso();
         const role: RoleRecord = {
@@ -825,7 +880,11 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const role = store.roles.get(ctx.params.id);
         if (!role) throw HttpError.notFound('Rôle introuvable.');
         if (role.system || !role.tenantId) {
-          throw new HttpError(403, 'system_role', 'Les modèles de rôles système ne sont pas modifiables.');
+          throw new HttpError(
+            403,
+            'system_role',
+            'Les modèles de rôles système ne sont pas modifiables.',
+          );
         }
         ensureTenantPermission(claims, role.tenantId, 'role:manage');
         const body = asObject(ctx.body);
@@ -835,15 +894,20 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
           const permissions: Permission[] = [];
           for (const value of values) {
             if (typeof value !== 'string' || !isValidPermission(value)) {
-              throw HttpError.unprocessable('invalid_permission', `Permission inconnue : ${String(value)}.`);
+              throw HttpError.unprocessable(
+                'invalid_permission',
+                `Permission inconnue : ${String(value)}.`,
+              );
             }
             permissions.push(value);
           }
           role.permissions = permissions;
         }
         if (body.name !== undefined) role.name = requireString(body, 'name', { min: 2, max: 60 });
-        if (body.description !== undefined) role.description = optionalString(body, 'description', { max: 200 }) ?? '';
-        if (body.requiresMfa !== undefined) role.requiresMfa = optionalBoolean(body, 'requiresMfa') ?? false;
+        if (body.description !== undefined)
+          role.description = optionalString(body, 'description', { max: 200 }) ?? '';
+        if (body.requiresMfa !== undefined)
+          role.requiresMfa = optionalBoolean(body, 'requiresMfa') ?? false;
         role.updatedAt = nowIso();
         store.recordAudit({
           tenantId: role.tenantId,
@@ -864,13 +928,19 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const role = store.roles.get(ctx.params.id);
         if (!role) throw HttpError.notFound('Rôle introuvable.');
         if (role.system || !role.tenantId) {
-          throw new HttpError(403, 'system_role', 'Les modèles système ne peuvent pas être supprimés.');
+          throw new HttpError(
+            403,
+            'system_role',
+            'Les modèles système ne peuvent pas être supprimés.',
+          );
         }
         ensureTenantPermission(claims, role.tenantId, 'role:manage');
         const inUse = [...store.assignments.values()].some(
-          (assignment) => assignment.tenantId === role.tenantId && assignment.roleCode === role.code,
+          (assignment) =>
+            assignment.tenantId === role.tenantId && assignment.roleCode === role.code,
         );
-        if (inUse) throw HttpError.conflict('role_in_use', 'Ce rôle est encore attribué à des membres.');
+        if (inUse)
+          throw HttpError.conflict('role_in_use', 'Ce rôle est encore attribué à des membres.');
         store.roles.delete(role.id);
         store.recordAudit({
           tenantId: role.tenantId,
@@ -937,7 +1007,8 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const rawRoles = requireArray(body, 'roleCodes', 10);
         const roleCodes: string[] = [];
         for (const value of rawRoles) {
-          if (typeof value !== 'string') throw HttpError.unprocessable('validation_error', 'Rôle invalide.');
+          if (typeof value !== 'string')
+            throw HttpError.unprocessable('validation_error', 'Rôle invalide.');
           const role = store.resolveRole(tenantId, value);
           if (!role) throw HttpError.unprocessable('unknown_role', `Rôle inconnu : ${value}.`);
           roleCodes.push(value);
@@ -947,7 +1018,8 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
           .assignmentsForTenant(tenantId)
           .filter((assignment) => assignment.roleCode === 'owner')
           .map((assignment) => assignment.userId);
-        const removingOwner = current.some((a) => a.roleCode === 'owner') && !roleCodes.includes('owner');
+        const removingOwner =
+          current.some((a) => a.roleCode === 'owner') && !roleCodes.includes('owner');
         if (removingOwner && owners.filter((id) => id === userId).length === owners.length) {
           throw HttpError.unprocessable(
             'last_owner',
@@ -1027,7 +1099,10 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
           return { body: { items } };
         }
         ensureTenantPermission(claims, tenantId, 'audit:view');
-        const items = store.audit.filter((entry) => entry.tenantId === tenantId).slice(-limit).reverse();
+        const items = store.audit
+          .filter((entry) => entry.tenantId === tenantId)
+          .slice(-limit)
+          .reverse();
         return { body: { items } };
       },
     },
@@ -1080,7 +1155,10 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         const password = optionalString(body, 'password', { max: 128 });
         const applicationId = optionalString(body, 'applicationId', { max: 64 });
         if (!email && !phone) {
-          throw HttpError.unprocessable('validation_error', 'E-mail ou téléphone requis pour le gérant.');
+          throw HttpError.unprocessable(
+            'validation_error',
+            'E-mail ou téléphone requis pour le gérant.',
+          );
         }
         const role = store.resolveRole(tenantId, roleCode);
         if (!role) throw HttpError.unprocessable('unknown_role', `Rôle inconnu : ${roleCode}.`);
@@ -1088,7 +1166,9 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
           const existingAssignment = [...store.assignments.values()].find(
             (assignment) => assignment.applicationId === applicationId,
           );
-          const existingUser = existingAssignment ? store.users.get(existingAssignment.userId) : undefined;
+          const existingUser = existingAssignment
+            ? store.users.get(existingAssignment.userId)
+            : undefined;
           if (existingUser) {
             return {
               body: {
@@ -1101,7 +1181,9 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
             };
           }
         }
-        let user = (email ? store.findUserByEmail(email) : undefined) ?? (phone ? store.findUserByPhone(phone) : undefined);
+        let user =
+          (email ? store.findUserByEmail(email) : undefined) ??
+          (phone ? store.findUserByPhone(phone) : undefined);
         let created = false;
         if (!user) {
           const now = nowIso();
@@ -1112,7 +1194,7 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
             email,
             phone,
             passwordHash: password ? await hashPassword(password) : undefined,
-            locale: (body.locale === 'en' ? 'en' : 'fr'),
+            locale: body.locale === 'en' ? 'en' : 'fr',
             status: 'active',
             platformRoles: [],
             platformPermissions: [],
@@ -1126,7 +1208,9 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
         }
         const alreadyAssigned = store
           .assignmentsForUser(user.id)
-          .some((assignment) => assignment.tenantId === tenantId && assignment.roleCode === roleCode);
+          .some(
+            (assignment) => assignment.tenantId === tenantId && assignment.roleCode === roleCode,
+          );
         if (!alreadyAssigned) {
           const id = newId('asg');
           store.assignments.set(id, {
@@ -1200,7 +1284,11 @@ export function buildIdentityApp({ store, config }: IdentityAppOptions): Identit
           user.updatedAt = nowIso();
         }
         return {
-          body: { userId: user.id, platformRoles: user.platformRoles, permissions: user.platformPermissions },
+          body: {
+            userId: user.id,
+            platformRoles: user.platformRoles,
+            permissions: user.platformPermissions,
+          },
         };
       },
     },

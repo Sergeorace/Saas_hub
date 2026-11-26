@@ -34,7 +34,11 @@ import {
 
 export interface InventoryAppOptions {
   store: InventoryStore;
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>;
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>;
 }
 
 const UNITS: StockUnit[] = ['kg', 'g', 'l', 'cl', 'pcs', 'btl'];
@@ -58,10 +62,14 @@ function numberField(
     throw HttpError.unprocessable('validation_error', `Entier attendu pour ${field}.`, { field });
   }
   if (options.min !== undefined && value < options.min) {
-    throw HttpError.unprocessable('validation_error', `${field} doit être ≥ ${options.min}.`, { field });
+    throw HttpError.unprocessable('validation_error', `${field} doit être ≥ ${options.min}.`, {
+      field,
+    });
   }
   if (options.max !== undefined && value > options.max) {
-    throw HttpError.unprocessable('validation_error', `${field} doit être ≤ ${options.max}.`, { field });
+    throw HttpError.unprocessable('validation_error', `${field} doit être ≤ ${options.max}.`, {
+      field,
+    });
   }
   return value;
 }
@@ -78,7 +86,9 @@ function optionalNumber(source: Record<string, unknown>, field: string): number 
 function dateBoundary(raw: string | null, endOfDay: boolean): string | null {
   if (!raw) return null;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-    throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', { field: 'date' });
+    throw HttpError.unprocessable('validation_error', 'Date attendue au format AAAA-MM-JJ.', {
+      field: 'date',
+    });
   }
   return `${raw}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}Z`;
 }
@@ -112,17 +122,25 @@ function serializeRecipe(store: InventoryStore, recipe: Recipe) {
 
 function parseRecipeLines(store: InventoryStore, tenantId: string, raw: unknown): RecipeLine[] {
   if (!Array.isArray(raw) || raw.length === 0) {
-    throw HttpError.unprocessable('validation_error', 'Au moins une ligne d’ingrédient est requise.', { field: 'lines' });
+    throw HttpError.unprocessable(
+      'validation_error',
+      'Au moins une ligne d’ingrédient est requise.',
+      { field: 'lines' },
+    );
   }
   if (raw.length > 60) {
-    throw HttpError.unprocessable('validation_error', '60 lignes maximum par fiche technique.', { field: 'lines' });
+    throw HttpError.unprocessable('validation_error', '60 lignes maximum par fiche technique.', {
+      field: 'lines',
+    });
   }
   return raw.map((entry, index) => {
     const line = asObject(entry);
     const itemId = requireString(line, 'itemId', { max: 60 });
     const item = store.items.get(itemId);
     if (!item || item.tenantId !== tenantId) {
-      throw HttpError.unprocessable('validation_error', 'Article de stock inconnu.', { field: `lines[${index}].itemId` });
+      throw HttpError.unprocessable('validation_error', 'Article de stock inconnu.', {
+        field: `lines[${index}].itemId`,
+      });
     }
     return { itemId, quantity: numberField(line, 'quantity', { min: 0.001, max: 100000 }) };
   });
@@ -130,19 +148,22 @@ function parseRecipeLines(store: InventoryStore, tenantId: string, raw: unknown)
 
 function loadItem(store: InventoryStore, tenantId: string, id: string): StockItem {
   const item = store.items.get(id);
-  if (!item || item.tenantId !== tenantId) throw HttpError.notFound('Article de stock introuvable.');
+  if (!item || item.tenantId !== tenantId)
+    throw HttpError.notFound('Article de stock introuvable.');
   return item;
 }
 
 function loadRecipe(store: InventoryStore, tenantId: string, id: string): Recipe {
   const recipe = store.recipes.get(id);
-  if (!recipe || recipe.tenantId !== tenantId) throw HttpError.notFound('Fiche technique introuvable.');
+  if (!recipe || recipe.tenantId !== tenantId)
+    throw HttpError.notFound('Fiche technique introuvable.');
   return recipe;
 }
 
 function loadSupplier(store: InventoryStore, tenantId: string, id: string): Supplier {
   const supplier = store.suppliers.get(id);
-  if (!supplier || supplier.tenantId !== tenantId) throw HttpError.notFound('Fournisseur introuvable.');
+  if (!supplier || supplier.tenantId !== tenantId)
+    throw HttpError.notFound('Fournisseur introuvable.');
   return supplier;
 }
 
@@ -174,7 +195,11 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
       action: `inventory.movement.${input.type}`,
       targetType: 'stock_item',
       targetId: input.itemId,
-      meta: { quantity: result.movement.quantity, reason: input.reason, costXof: result.movement.costXof },
+      meta: {
+        quantity: result.movement.quantity,
+        reason: input.reason,
+        costXof: result.movement.costXof,
+      },
     });
     await emit(tenantId, result.events);
     return result.movement;
@@ -203,11 +228,19 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
             lowStockCount: alerts.length,
             stockValueXof: items.reduce((sum, item) => sum + item.quantity * item.costXof, 0),
             waste30dXof: waste.reduce((sum, entry) => sum + Math.abs(entry.costXof), 0),
-            supplierCount: [...store.suppliers.values()].filter((entry) => entry.tenantId === tenantId && entry.status === 'active').length,
-            recipeCount: [...store.recipes.values()].filter((entry) => entry.tenantId === tenantId).length,
+            supplierCount: [...store.suppliers.values()].filter(
+              (entry) => entry.tenantId === tenantId && entry.status === 'active',
+            ).length,
+            recipeCount: [...store.recipes.values()].filter((entry) => entry.tenantId === tenantId)
+              .length,
             countCount: counts.length,
             lastCount: lastCount
-              ? { id: lastCount.id, date: lastCount.date, status: lastCount.status, varianceXof: lastCount.lines.reduce((sum, line) => sum + line.varianceCostXof, 0) }
+              ? {
+                  id: lastCount.id,
+                  date: lastCount.date,
+                  status: lastCount.status,
+                  varianceXof: lastCount.lines.reduce((sum, line) => sum + line.varianceCostXof, 0),
+                }
               : null,
             alerts: alerts.slice(0, 6).map(serializeItem),
             generatedAt: nowIso(),
@@ -227,16 +260,29 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const category = ctx.query.get('category') ?? '';
         const items = [...store.items.values()]
           .filter((item) => item.tenantId === tenantId)
-          .filter((item) => !query || item.name.toLowerCase().includes(query) || item.sku.toLowerCase().includes(query))
+          .filter(
+            (item) =>
+              !query ||
+              item.name.toLowerCase().includes(query) ||
+              item.sku.toLowerCase().includes(query),
+          )
           .filter((item) => !category || item.category === category)
           .sort((a, b) => a.name.localeCompare(b.name));
         return {
           body: {
             items: items.map((item) => ({
               ...serializeItem(item),
-              supplierName: item.supplierId ? store.suppliers.get(item.supplierId)?.name ?? null : null,
+              supplierName: item.supplierId
+                ? (store.suppliers.get(item.supplierId)?.name ?? null)
+                : null,
             })),
-            categories: [...new Set([...store.items.values()].filter((item) => item.tenantId === tenantId).map((item) => item.category))].sort(),
+            categories: [
+              ...new Set(
+                [...store.items.values()]
+                  .filter((item) => item.tenantId === tenantId)
+                  .map((item) => item.category),
+              ),
+            ].sort(),
             units: UNITS,
             locations: LOCATIONS,
           },
@@ -256,7 +302,9 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         }
         const locationRaw = optionalString(body, 'location', { max: 20 }) ?? 'reserve';
         if (!(LOCATIONS as string[]).includes(locationRaw)) {
-          throw HttpError.unprocessable('validation_error', 'Emplacement inconnu.', { field: 'location' });
+          throw HttpError.unprocessable('validation_error', 'Emplacement inconnu.', {
+            field: 'location',
+          });
         }
         const supplierId = optionalString(body, 'supplierId', { max: 60 }) ?? null;
         if (supplierId) loadSupplier(store, tenantId, supplierId);
@@ -297,9 +345,12 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const item = loadItem(store, tenantId, ctx.params.id ?? '');
         const body = asObject(ctx.body);
         if (body.name !== undefined) item.name = requireString(body, 'name', { min: 2, max: 80 });
-        if (body.category !== undefined) item.category = requireString(body, 'category', { min: 2, max: 30 });
-        if (body.threshold !== undefined) item.threshold = numberField(body, 'threshold', { min: 0 });
-        if (body.costXof !== undefined) item.costXof = numberField(body, 'costXof', { min: 0, int: true });
+        if (body.category !== undefined)
+          item.category = requireString(body, 'category', { min: 2, max: 30 });
+        if (body.threshold !== undefined)
+          item.threshold = numberField(body, 'threshold', { min: 0 });
+        if (body.costXof !== undefined)
+          item.costXof = numberField(body, 'costXof', { min: 0, int: true });
         if (body.supplierId !== undefined) {
           const supplierId = optionalString(body, 'supplierId', { max: 60 }) ?? null;
           if (supplierId) loadSupplier(store, tenantId, supplierId);
@@ -308,7 +359,9 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         if (body.location !== undefined) {
           const location = requireString(body, 'location', { max: 20 });
           if (!(LOCATIONS as string[]).includes(location)) {
-            throw HttpError.unprocessable('validation_error', 'Emplacement inconnu.', { field: 'location' });
+            throw HttpError.unprocessable('validation_error', 'Emplacement inconnu.', {
+              field: 'location',
+            });
           }
           item.location = location as StockLocation;
         }
@@ -356,7 +409,9 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const body = asObject(ctx.body);
         const typeRaw = requireString(body, 'type', { max: 10 });
         if (!(MOVEMENT_TYPES as string[]).includes(typeRaw) || typeRaw === 'waste') {
-          throw HttpError.unprocessable('validation_error', 'Type attendu : in, out ou adjust.', { field: 'type' });
+          throw HttpError.unprocessable('validation_error', 'Type attendu : in, out ou adjust.', {
+            field: 'type',
+          });
         }
         const refType = optionalString(body, 'refType', { max: 30 }) ?? null;
         const refId = optionalString(body, 'refId', { max: 80 }) ?? null;
@@ -372,7 +427,10 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
           refType,
           refId,
         });
-        return { status: 201, body: { movement: entry, item: serializeItem(loadItem(store, tenantId, entry.itemId)) } };
+        return {
+          status: 201,
+          body: { movement: entry, item: serializeItem(loadItem(store, tenantId, entry.itemId)) },
+        };
       },
     },
     {
@@ -389,7 +447,10 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
           reason: requireString(body, 'reason', { min: 2, max: 160 }),
           refType: 'waste',
         });
-        return { status: 201, body: { movement: entry, item: serializeItem(loadItem(store, tenantId, entry.itemId)) } };
+        return {
+          status: 201,
+          body: { movement: entry, item: serializeItem(loadItem(store, tenantId, entry.itemId)) },
+        };
       },
     },
 
@@ -415,8 +476,15 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const claims = requireTenantPermission(ctx.auth, tenantId, 'inventory:manage');
         const body = asObject(ctx.body);
         const productId = requireString(body, 'productId', { max: 60 });
-        if ([...store.recipes.values()].some((entry) => entry.tenantId === tenantId && entry.productId === productId)) {
-          throw HttpError.conflict('recipe_exists', 'Une fiche technique existe déjà pour ce produit.');
+        if (
+          [...store.recipes.values()].some(
+            (entry) => entry.tenantId === tenantId && entry.productId === productId,
+          )
+        ) {
+          throw HttpError.conflict(
+            'recipe_exists',
+            'Une fiche technique existe déjà pour ce produit.',
+          );
         }
         const now = nowIso();
         const recipe: Recipe = {
@@ -443,7 +511,12 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         await emit(tenantId, [
           {
             type: 'RecipeCostChanged',
-            payload: { tenantId, recipeId: recipe.id, productId, costXof: recipeCost(store, recipe) },
+            payload: {
+              tenantId,
+              recipeId: recipe.id,
+              productId,
+              costXof: recipeCost(store, recipe),
+            },
           },
         ]);
         return { status: 201, body: { recipe: serializeRecipe(store, recipe) } };
@@ -458,9 +531,12 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const recipe = loadRecipe(store, tenantId, ctx.params.id ?? '');
         const body = asObject(ctx.body);
         const before = recipeCost(store, recipe);
-        if (body.productName !== undefined) recipe.productName = requireString(body, 'productName', { min: 2, max: 80 });
-        if (body.productPriceXof !== undefined) recipe.productPriceXof = numberField(body, 'productPriceXof', { min: 0, int: true });
-        if (body.yieldQty !== undefined) recipe.yieldQty = numberField(body, 'yieldQty', { min: 0.1, max: 1000 });
+        if (body.productName !== undefined)
+          recipe.productName = requireString(body, 'productName', { min: 2, max: 80 });
+        if (body.productPriceXof !== undefined)
+          recipe.productPriceXof = numberField(body, 'productPriceXof', { min: 0, int: true });
+        if (body.yieldQty !== undefined)
+          recipe.yieldQty = numberField(body, 'yieldQty', { min: 0.1, max: 1000 });
         if (body.lines !== undefined) recipe.lines = parseRecipeLines(store, tenantId, body.lines);
         recipe.updatedAt = nowIso();
         recipe.updatedBy = claims.sub;
@@ -476,7 +552,13 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         await emit(tenantId, [
           {
             type: 'RecipeCostChanged',
-            payload: { tenantId, recipeId: recipe.id, productId: recipe.productId, costBeforeXof: before, costXof: after },
+            payload: {
+              tenantId,
+              recipeId: recipe.id,
+              productId: recipe.productId,
+              costBeforeXof: before,
+              costXof: after,
+            },
           },
         ]);
         return { body: { recipe: serializeRecipe(store, recipe) } };
@@ -547,16 +629,24 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const claims = requireTenantPermission(ctx.auth, tenantId, 'inventory:manage');
         const supplier = loadSupplier(store, tenantId, ctx.params.id ?? '');
         const body = asObject(ctx.body);
-        if (body.name !== undefined) supplier.name = requireString(body, 'name', { min: 2, max: 80 });
-        if (body.contactName !== undefined) supplier.contactName = optionalString(body, 'contactName', { max: 80 }) ?? null;
-        if (body.phone !== undefined) supplier.phone = optionalString(body, 'phone', { max: 30 }) ?? null;
-        if (body.email !== undefined) supplier.email = optionalString(body, 'email', { max: 120 }) ?? null;
-        if (body.termsDays !== undefined) supplier.termsDays = numberField(body, 'termsDays', { min: 0, max: 120 });
-        if (body.notes !== undefined) supplier.notes = optionalString(body, 'notes', { max: 300 }) ?? null;
+        if (body.name !== undefined)
+          supplier.name = requireString(body, 'name', { min: 2, max: 80 });
+        if (body.contactName !== undefined)
+          supplier.contactName = optionalString(body, 'contactName', { max: 80 }) ?? null;
+        if (body.phone !== undefined)
+          supplier.phone = optionalString(body, 'phone', { max: 30 }) ?? null;
+        if (body.email !== undefined)
+          supplier.email = optionalString(body, 'email', { max: 120 }) ?? null;
+        if (body.termsDays !== undefined)
+          supplier.termsDays = numberField(body, 'termsDays', { min: 0, max: 120 });
+        if (body.notes !== undefined)
+          supplier.notes = optionalString(body, 'notes', { max: 300 }) ?? null;
         if (body.status !== undefined) {
           const status = requireString(body, 'status', { max: 10 });
           if (!['active', 'inactive'].includes(status)) {
-            throw HttpError.unprocessable('validation_error', 'Statut inconnu.', { field: 'status' });
+            throw HttpError.unprocessable('validation_error', 'Statut inconnu.', {
+              field: 'status',
+            });
           }
           supplier.status = status as Supplier['status'];
         }
@@ -593,10 +683,16 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'inventory:manage');
         const body = asObject(ctx.body);
-        const supplier = loadSupplier(store, tenantId, requireString(body, 'supplierId', { max: 60 }));
+        const supplier = loadSupplier(
+          store,
+          tenantId,
+          requireString(body, 'supplierId', { max: 60 }),
+        );
         const rawLines = body.lines;
         if (!Array.isArray(rawLines) || rawLines.length === 0) {
-          throw HttpError.unprocessable('validation_error', 'Au moins une ligne est requise.', { field: 'lines' });
+          throw HttpError.unprocessable('validation_error', 'Au moins une ligne est requise.', {
+            field: 'lines',
+          });
         }
         const lines: PurchaseLine[] = rawLines.map((entry) => {
           const line = asObject(entry);
@@ -611,7 +707,9 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
             lineTotalXof: roundXof(quantity * unitCostXof),
           };
         });
-        const count = [...store.purchaseOrders.values()].filter((entry) => entry.tenantId === tenantId).length + 1;
+        const count =
+          [...store.purchaseOrders.values()].filter((entry) => entry.tenantId === tenantId).length +
+          1;
         const order: PurchaseOrder = {
           id: `po_${Math.random().toString(36).slice(2, 10)}`,
           tenantId,
@@ -644,8 +742,10 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'inventory:manage');
         const order = store.purchaseOrders.get(ctx.params.id ?? '');
-        if (!order || order.tenantId !== tenantId) throw HttpError.notFound('Commande d’achat introuvable.');
-        if (order.status === 'recue') throw HttpError.conflict('order_received', 'Cette commande a déjà été réceptionnée.');
+        if (!order || order.tenantId !== tenantId)
+          throw HttpError.notFound('Commande d’achat introuvable.');
+        if (order.status === 'recue')
+          throw HttpError.conflict('order_received', 'Cette commande a déjà été réceptionnée.');
         for (const line of order.lines) {
           const result = applyMovement(store, {
             tenantId,
@@ -672,7 +772,10 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
           meta: { totalXof: order.totalXof, lines: order.lines.length },
         });
         await emit(tenantId, [
-          { type: 'PurchaseOrderReceived', payload: { tenantId, purchaseOrderId: order.id, totalXof: order.totalXof } },
+          {
+            type: 'PurchaseOrderReceived',
+            payload: { tenantId, purchaseOrderId: order.id, totalXof: order.totalXof },
+          },
         ]);
         return { body: { purchaseOrder: order } };
       },
@@ -700,7 +803,11 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const body = asObject(ctx.body);
         const rawLines = body.lines;
         if (!Array.isArray(rawLines) || rawLines.length === 0) {
-          throw HttpError.unprocessable('validation_error', 'Au moins une ligne de comptage est requise.', { field: 'lines' });
+          throw HttpError.unprocessable(
+            'validation_error',
+            'Au moins une ligne de comptage est requise.',
+            { field: 'lines' },
+          );
         }
         const lines: CountLine[] = rawLines.map((entry) => {
           const line = asObject(entry);
@@ -747,8 +854,10 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         const tenantId = ctx.params.tenantId ?? '';
         const claims = requireTenantPermission(ctx.auth, tenantId, 'inventory:manage');
         const count = store.counts.get(ctx.params.id ?? '');
-        if (!count || count.tenantId !== tenantId) throw HttpError.notFound('Inventaire introuvable.');
-        if (count.status === 'valide') throw HttpError.conflict('count_validated', 'Cet inventaire est déjà validé.');
+        if (!count || count.tenantId !== tenantId)
+          throw HttpError.notFound('Inventaire introuvable.');
+        if (count.status === 'valide')
+          throw HttpError.conflict('count_validated', 'Cet inventaire est déjà validé.');
         for (const line of count.lines) {
           if (line.variance === 0) continue;
           const result = applyMovement(store, {
@@ -767,7 +876,11 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
             action: 'inventory.movement.adjust',
             targetType: 'stock_item',
             targetId: line.itemId,
-            meta: { quantity: line.variance, reason: `Inventaire ${count.date}`, varianceCostXof: line.varianceCostXof },
+            meta: {
+              quantity: line.variance,
+              reason: `Inventaire ${count.date}`,
+              varianceCostXof: line.varianceCostXof,
+            },
           });
           await emit(tenantId, result.events);
         }
@@ -811,7 +924,9 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
           body: {
             alerts: alertsFor(store, tenantId).map((item) => ({
               ...serializeItem(item),
-              supplierName: item.supplierId ? store.suppliers.get(item.supplierId)?.name ?? null : null,
+              supplierName: item.supplierId
+                ? (store.suppliers.get(item.supplierId)?.name ?? null)
+                : null,
             })),
             suggestions: reorderSuggestions(store, tenantId),
           },
@@ -826,8 +941,13 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
         requireTenantPermission(ctx.auth, tenantId, 'inventory:view');
-        const entries = store.audit.filter((entry) => entry.tenantId === tenantId).slice(-100).reverse();
-        return { body: { entries, integrity: verifyAuditChain(store.audit), generatedAt: nowIso() } };
+        const entries = store.audit
+          .filter((entry) => entry.tenantId === tenantId)
+          .slice(-100)
+          .reverse();
+        return {
+          body: { entries, integrity: verifyAuditChain(store.audit), generatedAt: nowIso() },
+        };
       },
     },
 
@@ -838,10 +958,14 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
       service: true,
       handler: (ctx) => {
         const tenantId = ctx.params.tenantId ?? '';
-        const ids = (ctx.query.get('productIds') ?? '').split(',').map((id) => id.trim()).filter(Boolean);
+        const ids = (ctx.query.get('productIds') ?? '')
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean);
         const wanted = ids.length > 0 ? ids : null;
         const recipes = [...store.recipes.values()].filter(
-          (recipe) => recipe.tenantId === tenantId && (!wanted || wanted.includes(recipe.productId)),
+          (recipe) =>
+            recipe.tenantId === tenantId && (!wanted || wanted.includes(recipe.productId)),
         );
         return {
           body: {
@@ -882,7 +1006,10 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
 }
 
 export interface OrderLineReader {
-  (tenantId: string, orderId: string): Promise<Array<{ productId: string; quantity: number }> | null>;
+  (
+    tenantId: string,
+    orderId: string,
+  ): Promise<Array<{ productId: string; quantity: number }> | null>;
 }
 
 export function createOrderLineReader(orders: ServiceClient): OrderLineReader {
@@ -903,7 +1030,11 @@ export async function handleInventoryEvent(
   store: InventoryStore,
   tenantId: string,
   event: { type: string; payload: Record<string, unknown> },
-  publish: (type: string, tenantId: string | null, payload: Record<string, unknown>) => Promise<unknown>,
+  publish: (
+    type: string,
+    tenantId: string | null,
+    payload: Record<string, unknown>,
+  ) => Promise<unknown>,
   readLines: OrderLineReader,
 ): Promise<void> {
   if (event.type !== 'OrderPaid') return;

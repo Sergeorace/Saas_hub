@@ -102,7 +102,8 @@ export function useEstablishment(
   key: string | undefined,
 ): AsyncState<{ establishment: Establishment; sites: EstablishmentSite[] }> {
   return useAsync(
-    () => (key ? publicApi.establishment(key) : Promise.reject(new Error('Établissement introuvable.'))),
+    () =>
+      key ? publicApi.establishment(key) : Promise.reject(new Error('Établissement introuvable.')),
     [key],
   );
 }

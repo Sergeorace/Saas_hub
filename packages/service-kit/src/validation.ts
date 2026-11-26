@@ -14,7 +14,9 @@ export function requireString(
 ): string {
   const value = source[field];
   if (typeof value !== 'string' || !value.trim()) {
-    throw HttpError.unprocessable('validation_error', `Le champ « ${field} » est requis.`, { field });
+    throw HttpError.unprocessable('validation_error', `Le champ « ${field} » est requis.`, {
+      field,
+    });
   }
   const trimmed = value.trim();
   if (opts.min && trimmed.length < opts.min) {
@@ -24,7 +26,9 @@ export function requireString(
     throw HttpError.unprocessable('validation_error', `« ${field} » est trop long.`, { field });
   }
   if (opts.pattern && !opts.pattern.test(trimmed)) {
-    throw HttpError.unprocessable('validation_error', `Format invalide pour « ${field} ».`, { field });
+    throw HttpError.unprocessable('validation_error', `Format invalide pour « ${field} ».`, {
+      field,
+    });
   }
   return trimmed;
 }
@@ -37,7 +41,9 @@ export function optionalString(
   const value = source[field];
   if (value === undefined || value === null || value === '') return undefined;
   if (typeof value !== 'string') {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une chaîne.`, { field });
+    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une chaîne.`, {
+      field,
+    });
   }
   if (opts.max && value.length > opts.max) {
     throw HttpError.unprocessable('validation_error', `« ${field} » est trop long.`, { field });
@@ -49,11 +55,16 @@ export function requireEmail(source: Record<string, unknown>, field = 'email'): 
   return requireString(source, field, { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/ }).toLowerCase();
 }
 
-export function optionalEmail(source: Record<string, unknown>, field = 'email'): string | undefined {
+export function optionalEmail(
+  source: Record<string, unknown>,
+  field = 'email',
+): string | undefined {
   const value = optionalString(source, field);
   if (!value) return undefined;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
-    throw HttpError.unprocessable('validation_error', `Format e-mail invalide pour « ${field} ».`, { field });
+    throw HttpError.unprocessable('validation_error', `Format e-mail invalide pour « ${field} ».`, {
+      field,
+    });
   }
   return value.toLowerCase();
 }
@@ -62,13 +73,21 @@ export function requirePhone(source: Record<string, unknown>, field = 'phone'): 
   const value = requireString(source, field, { min: 8, max: 20 });
   const digits = value.replace(/[^\d+]/g, '');
   if (!/^\+?\d{8,15}$/.test(digits)) {
-    throw HttpError.unprocessable('validation_error', `Format téléphone invalide pour « ${field} ».`, { field });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `Format téléphone invalide pour « ${field} ».`,
+      { field },
+    );
   }
   return digits;
 }
 
-export function optionalPhone(source: Record<string, unknown>, field = 'phone'): string | undefined {
-  if (source[field] === undefined || source[field] === null || source[field] === '') return undefined;
+export function optionalPhone(
+  source: Record<string, unknown>,
+  field = 'phone',
+): string | undefined {
+  if (source[field] === undefined || source[field] === null || source[field] === '')
+    return undefined;
   return requirePhone(source, field);
 }
 
@@ -88,11 +107,16 @@ export function requireEnum<T extends string>(
   return value as T;
 }
 
-export function optionalBoolean(source: Record<string, unknown>, field: string): boolean | undefined {
+export function optionalBoolean(
+  source: Record<string, unknown>,
+  field: string,
+): boolean | undefined {
   const value = source[field];
   if (value === undefined) return undefined;
   if (typeof value !== 'boolean') {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être un booléen.`, { field });
+    throw HttpError.unprocessable('validation_error', `« ${field} » doit être un booléen.`, {
+      field,
+    });
   }
   return value;
 }
@@ -100,10 +124,16 @@ export function optionalBoolean(source: Record<string, unknown>, field: string):
 export function requireArray(source: Record<string, unknown>, field: string, max = 20): unknown[] {
   const value = source[field];
   if (!Array.isArray(value) || value.length === 0) {
-    throw HttpError.unprocessable('validation_error', `« ${field} » doit être une liste non vide.`, { field });
+    throw HttpError.unprocessable(
+      'validation_error',
+      `« ${field} » doit être une liste non vide.`,
+      { field },
+    );
   }
   if (value.length > max) {
-    throw HttpError.unprocessable('validation_error', `Trop d'éléments dans « ${field} ».`, { field });
+    throw HttpError.unprocessable('validation_error', `Trop d'éléments dans « ${field} ».`, {
+      field,
+    });
   }
   return value;
 }

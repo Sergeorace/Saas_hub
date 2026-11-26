@@ -42,7 +42,13 @@ export interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyState({ icon = 'sparkles', title, description, action, className }: EmptyStateProps) {
+export function EmptyState({
+  icon = 'sparkles',
+  title,
+  description,
+  action,
+  className,
+}: EmptyStateProps) {
   return (
     <div className={cx('rh-empty', className)}>
       <span className="rh-empty__icon">

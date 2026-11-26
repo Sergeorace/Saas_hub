@@ -32,8 +32,20 @@ import {
 } from '../lib/api';
 
 const ALLERGENS: Allergen[] = [
-  'gluten', 'crustaces', 'oeufs', 'poisson', 'arachides', 'soja', 'lait',
-  'fruits_a_coque', 'celeri', 'moutarde', 'sesame', 'sulfites', 'lupin', 'mollusques',
+  'gluten',
+  'crustaces',
+  'oeufs',
+  'poisson',
+  'arachides',
+  'soja',
+  'lait',
+  'fruits_a_coque',
+  'celeri',
+  'moutarde',
+  'sesame',
+  'sulfites',
+  'lupin',
+  'mollusques',
 ];
 
 const ALLERGEN_LABEL: Record<Allergen, string> = {
@@ -157,7 +169,8 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
     void load();
   }, [load]);
 
-  const categoryName_ = (id: string) => snapshot?.categories.find((entry) => entry.id === id)?.name ?? '—';
+  const categoryName_ = (id: string) =>
+    snapshot?.categories.find((entry) => entry.id === id)?.name ?? '—';
 
   const products = useMemo(() => {
     if (!snapshot) return [];
@@ -170,7 +183,8 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
   }, [snapshot, search, categoryFilter]);
 
   const stats = useMemo(() => {
-    if (!snapshot) return { products: 0, available: 0, categories: 0, menus: 0, promos: 0, offSale: 0 };
+    if (!snapshot)
+      return { products: 0, available: 0, categories: 0, menus: 0, promos: 0, offSale: 0 };
     return {
       products: snapshot.products.length,
       available: snapshot.products.filter((product) => product.availability.available).length,
@@ -200,11 +214,17 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
     setCategoryPending(true);
     try {
       const result = await catalogApi.createCategory(tenantId, { name });
-      setSnapshot((current) => (current ? { ...current, categories: [...current.categories, result.category] } : current));
+      setSnapshot((current) =>
+        current ? { ...current, categories: [...current.categories, result.category] } : current,
+      );
       setCategoryName('');
       toast.push({ title: t('catalog.categoryCreated') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setCategoryPending(false);
     }
@@ -214,11 +234,17 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
     try {
       await catalogApi.deleteCategory(tenantId, id);
       setSnapshot((current) =>
-        current ? { ...current, categories: current.categories.filter((entry) => entry.id !== id) } : current,
+        current
+          ? { ...current, categories: current.categories.filter((entry) => entry.id !== id) }
+          : current,
       );
       toast.push({ title: t('catalog.categoryDeleted') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     }
   };
 
@@ -237,7 +263,10 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
       basePriceXof: String(product.basePriceXof),
       photos: product.photos.join('\n'),
       allergens: [...product.allergens],
-      variants: product.variants.map((variant) => ({ name: variant.name, priceXof: String(variant.priceXof) })),
+      variants: product.variants.map((variant) => ({
+        name: variant.name,
+        priceXof: String(variant.priceXof),
+      })),
       priceRules: product.priceRules.map((rule) => ({
         label: rule.label,
         days: [...rule.days],
@@ -252,12 +281,20 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
 
   const saveProduct = async () => {
     if (!form.name.trim() || !form.categoryId) {
-      toast.push({ title: t('workspace.errorTitle'), description: t('catalog.name'), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: t('catalog.name'),
+        tone: 'error',
+      });
       return;
     }
     const price = Number(form.basePriceXof);
     if (!Number.isInteger(price) || price < 0) {
-      toast.push({ title: t('workspace.errorTitle'), description: t('catalog.priceXof'), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: t('catalog.priceXof'),
+        tone: 'error',
+      });
       return;
     }
     const payload: ProductInput = {
@@ -265,7 +302,10 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
       name: form.name.trim(),
       description: form.description.trim() || undefined,
       basePriceXof: price,
-      photos: form.photos.split('\n').map((line) => line.trim()).filter(Boolean),
+      photos: form.photos
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
       allergens: form.allergens,
       active: form.active,
       variants: form.variants
@@ -294,7 +334,11 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
       }
       setProductOpen(false);
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setSavingProduct(false);
     }
@@ -304,21 +348,40 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
     try {
       await catalogApi.deleteProduct(tenantId, product.id);
       setSnapshot((current) =>
-        current ? { ...current, products: current.products.filter((entry) => entry.id !== product.id) } : current,
+        current
+          ? { ...current, products: current.products.filter((entry) => entry.id !== product.id) }
+          : current,
       );
       toast.push({ title: t('catalog.productDeleted') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     }
   };
 
-  const setAvailability = async (product: CatalogProduct, available: boolean, reason?: string, until?: string) => {
+  const setAvailability = async (
+    product: CatalogProduct,
+    available: boolean,
+    reason?: string,
+    until?: string,
+  ) => {
     try {
-      const result = await catalogApi.setAvailability(tenantId, product.id, { available, reason, until });
+      const result = await catalogApi.setAvailability(tenantId, product.id, {
+        available,
+        reason,
+        until,
+      });
       applyProductResult(result.product);
       toast.push({ title: t('catalog.availabilityUpdated') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     }
   };
 
@@ -355,7 +418,11 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
       toast.push({ title: t('catalog.promoSaved') });
       setPromoOpen(false);
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setSavingPromo(false);
     }
@@ -366,12 +433,19 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
       await catalogApi.deletePromotion(tenantId, promotion.id);
       setSnapshot((current) =>
         current
-          ? { ...current, promotions: current.promotions.filter((entry) => entry.id !== promotion.id) }
+          ? {
+              ...current,
+              promotions: current.promotions.filter((entry) => entry.id !== promotion.id),
+            }
           : current,
       );
       toast.push({ title: t('catalog.promoDeleted') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     }
   };
 
@@ -385,13 +459,19 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         priceXof: Number(menuForm.priceXof) || 0,
         items: menuItems.map((item) => ({ productId: item.productId, quantity: item.quantity })),
       });
-      setSnapshot((current) => (current ? { ...current, menus: [...current.menus, result.menu] } : current));
+      setSnapshot((current) =>
+        current ? { ...current, menus: [...current.menus, result.menu] } : current,
+      );
       toast.push({ title: t('catalog.menuSaved') });
       setMenuOpen(false);
       setMenuForm({ name: '', description: '', priceXof: '' });
       setMenuItems([]);
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setSavingMenu(false);
     }
@@ -401,11 +481,17 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
     try {
       await catalogApi.deleteMenu(tenantId, menu.id);
       setSnapshot((current) =>
-        current ? { ...current, menus: current.menus.filter((entry) => entry.id !== menu.id) } : current,
+        current
+          ? { ...current, menus: current.menus.filter((entry) => entry.id !== menu.id) }
+          : current,
       );
       toast.push({ title: t('catalog.menuDeleted') });
     } catch (cause) {
-      toast.push({ title: t('workspace.errorTitle'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('workspace.errorTitle'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     }
   };
 
@@ -417,14 +503,20 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         <div className="console-cell">
           <strong>{row.name}</strong>
           <span>
-            {row.description ? `${row.description.slice(0, 60)}${row.description.length > 60 ? '…' : ''} · ` : ''}
+            {row.description
+              ? `${row.description.slice(0, 60)}${row.description.length > 60 ? '…' : ''} · `
+              : ''}
             {row.variants.length ? `${row.variants.length} variante(s)` : '—'}
             {row.allergens.length ? ` · ${row.allergens.length} allergène(s)` : ''}
           </span>
         </div>
       ),
     },
-    { key: 'category', header: t('catalog.colCategory'), render: (row) => categoryName_(row.categoryId) },
+    {
+      key: 'category',
+      header: t('catalog.colCategory'),
+      render: (row) => categoryName_(row.categoryId),
+    },
     {
       key: 'price',
       header: t('catalog.colPrice'),
@@ -433,7 +525,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         <div className="console-cell console-cell--end">
           <strong>{formatXof(row.effectivePriceXof, locale)}</strong>
           {row.activePriceRule ? (
-            <Badge tone="accent" icon="clock">{row.activePriceRule.label}</Badge>
+            <Badge tone="accent" icon="clock">
+              {row.activePriceRule.label}
+            </Badge>
           ) : row.effectivePriceXof !== row.basePriceXof ? (
             <span>{formatXof(row.basePriceXof, locale)}</span>
           ) : null}
@@ -445,10 +539,21 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
       header: t('catalog.colStatus'),
       render: (row) => (
         <div className="console-roles">
-          <Badge tone={!row.active ? 'neutral' : row.availability.available ? 'success' : 'danger'} dot>
-            {!row.active ? 'Archivé' : row.availability.available ? t('catalog.available') : t('catalog.unavailable')}
+          <Badge
+            tone={!row.active ? 'neutral' : row.availability.available ? 'success' : 'danger'}
+            dot
+          >
+            {!row.active
+              ? 'Archivé'
+              : row.availability.available
+                ? t('catalog.available')
+                : t('catalog.unavailable')}
           </Badge>
-          {row.priceRules.length > 0 && <Badge tone="info" icon="clock">HH</Badge>}
+          {row.priceRules.length > 0 && (
+            <Badge tone="info" icon="clock">
+              HH
+            </Badge>
+          )}
         </div>
       ),
     },
@@ -470,7 +575,12 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
           <Button size="sm" variant="ghost" iconLeft="edit" onClick={() => openEdit(row)}>
             {t('catalog.edit')}
           </Button>
-          <Button size="sm" variant="ghost" iconLeft="trash" onClick={() => void removeProduct(row)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            iconLeft="trash"
+            onClick={() => void removeProduct(row)}
+          >
             {t('catalog.delete')}
           </Button>
         </div>
@@ -480,7 +590,11 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
 
   if (loading) {
     return (
-      <Card><CardBody><SkeletonText lines={8} /></CardBody></Card>
+      <Card>
+        <CardBody>
+          <SkeletonText lines={8} />
+        </CardBody>
+      </Card>
     );
   }
 
@@ -488,8 +602,12 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
     return (
       <Card className="console-alert">
         <CardBody>
-          <p className="auth-error" role="alert">{error ?? t('catalog.error')}</p>
-          <Button size="sm" variant="outline" onClick={() => void load()}>{t('workspace.retry')}</Button>
+          <p className="auth-error" role="alert">
+            {error ?? t('catalog.error')}
+          </p>
+          <Button size="sm" variant="outline" onClick={() => void load()}>
+            {t('workspace.retry')}
+          </Button>
         </CardBody>
       </Card>
     );
@@ -505,10 +623,30 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             icon: 'utensils' as const,
             meta: t('catalog.onSale', { count: stats.available }),
           },
-          { label: t('catalog.categoriesCount'), value: stats.categories, icon: 'layers' as const, meta: t('catalog.menuStructure') },
-          { label: t('catalog.menusCount'), value: stats.menus, icon: 'receipt' as const, meta: t('catalog.combos') },
-          { label: t('catalog.promosCount'), value: stats.promos, icon: 'gift' as const, meta: t('catalog.running') },
-          { label: t('catalog.offSale'), value: stats.offSale, icon: 'alert' as const, meta: t('catalog.watch') },
+          {
+            label: t('catalog.categoriesCount'),
+            value: stats.categories,
+            icon: 'layers' as const,
+            meta: t('catalog.menuStructure'),
+          },
+          {
+            label: t('catalog.menusCount'),
+            value: stats.menus,
+            icon: 'receipt' as const,
+            meta: t('catalog.combos'),
+          },
+          {
+            label: t('catalog.promosCount'),
+            value: stats.promos,
+            icon: 'gift' as const,
+            meta: t('catalog.running'),
+          },
+          {
+            label: t('catalog.offSale'),
+            value: stats.offSale,
+            icon: 'alert' as const,
+            meta: t('catalog.watch'),
+          },
         ].map((stat) => (
           <Card key={stat.label} className="ws-sub-card">
             <CardBody>
@@ -534,7 +672,12 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
               <Badge tone="neutral" icon="clock">
                 {t('catalog.timeZoneLabel', { zone: snapshot.timeZone })}
               </Badge>
-              <Button iconLeft="plus" size="sm" onClick={openCreate} disabled={snapshot.categories.length === 0}>
+              <Button
+                iconLeft="plus"
+                size="sm"
+                onClick={openCreate}
+                disabled={snapshot.categories.length === 0}
+              >
                 {t('catalog.newProduct')}
               </Button>
             </div>
@@ -555,7 +698,10 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
               onChange={(event) => setCategoryFilter(event.target.value)}
               options={[
                 { value: '', label: t('catalog.allCategories') },
-                ...snapshot.categories.map((category) => ({ value: category.id, label: category.name })),
+                ...snapshot.categories.map((category) => ({
+                  value: category.id,
+                  label: category.name,
+                })),
               ]}
             />
           </div>
@@ -563,8 +709,14 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             {snapshot.categories.map((category) => (
               <span key={category.id} className="cat-chip">
                 <strong>{category.name}</strong>
-                <span>{snapshot.products.filter((product) => product.categoryId === category.id).length}</span>
-                <button type="button" aria-label={`${t('catalog.delete')} ${category.name}`} onClick={() => void removeCategory(category.id)}>
+                <span>
+                  {snapshot.products.filter((product) => product.categoryId === category.id).length}
+                </span>
+                <button
+                  type="button"
+                  aria-label={`${t('catalog.delete')} ${category.name}`}
+                  onClick={() => void removeCategory(category.id)}
+                >
                   ×
                 </button>
               </span>
@@ -579,7 +731,13 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                   if (event.key === 'Enter') void addCategory();
                 }}
               />
-              <Button size="sm" variant="soft" loading={categoryPending} onClick={() => void addCategory()} iconLeft="plus">
+              <Button
+                size="sm"
+                variant="soft"
+                loading={categoryPending}
+                onClick={() => void addCategory()}
+                iconLeft="plus"
+              >
                 {t('catalog.create')}
               </Button>
             </div>
@@ -588,16 +746,25 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
           {products.length === 0 ? (
             <EmptyState
               icon="utensils"
-              title={snapshot.products.length === 0 ? t('catalog.emptyTitle') : t('catalog.noProducts')}
+              title={
+                snapshot.products.length === 0 ? t('catalog.emptyTitle') : t('catalog.noProducts')
+              }
               description={t('catalog.emptyBody')}
               action={
                 snapshot.categories.length > 0 ? (
-                  <Button onClick={openCreate} iconLeft="plus">{t('catalog.newProduct')}</Button>
+                  <Button onClick={openCreate} iconLeft="plus">
+                    {t('catalog.newProduct')}
+                  </Button>
                 ) : undefined
               }
             />
           ) : (
-            <DataTable columns={columns} rows={products} getRowId={(row) => row.id} caption={t('catalog.title')} />
+            <DataTable
+              columns={columns}
+              rows={products}
+              getRowId={(row) => row.id}
+              caption={t('catalog.title')}
+            />
           )}
         </CardBody>
       </Card>
@@ -607,31 +774,59 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
           <CardHeader
             title={t('catalog.promotions')}
             subtitle={t('catalog.subtitle')}
-            action={<Button size="sm" variant="outline" iconLeft="plus" onClick={() => setPromoOpen(true)}>{t('catalog.newPromotion')}</Button>}
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                iconLeft="plus"
+                onClick={() => setPromoOpen(true)}
+              >
+                {t('catalog.newPromotion')}
+              </Button>
+            }
           />
           <CardBody>
             {snapshot.promotions.length === 0 ? (
-              <EmptyState icon="gift" title={t('catalog.promotions')} description={t('catalog.noPromo')} />
+              <EmptyState
+                icon="gift"
+                title={t('catalog.promotions')}
+                description={t('catalog.noPromo')}
+              />
             ) : (
               <ul className="cat-list">
                 {snapshot.promotions.map((promotion) => {
-                  const running = promotion.active && new Date(promotion.startsAt) <= new Date() && new Date(promotion.endsAt) >= new Date();
+                  const running =
+                    promotion.active &&
+                    new Date(promotion.startsAt) <= new Date() &&
+                    new Date(promotion.endsAt) >= new Date();
                   return (
                     <li key={promotion.id}>
                       <div>
                         <strong>{promotion.name}</strong>
                         <span>
                           {promotion.code ? `${promotion.code} · ` : ''}
-                          {promotion.type === 'percent' ? `−${promotion.value}%` : `−${formatXof(promotion.value, locale)}`}
+                          {promotion.type === 'percent'
+                            ? `−${promotion.value}%`
+                            : `−${formatXof(promotion.value, locale)}`}
                           {' · '}
-                          {formatDate(promotion.startsAt, locale)} → {formatDate(promotion.endsAt, locale)}
+                          {formatDate(promotion.startsAt, locale)} →{' '}
+                          {formatDate(promotion.endsAt, locale)}
                         </span>
                       </div>
                       <div className="console-roles">
                         <Badge tone={running ? 'success' : 'neutral'} dot>
-                          {running ? t('catalog.happyHourActive') : promotion.active ? 'Planifiée' : 'Inactive'}
+                          {running
+                            ? t('catalog.happyHourActive')
+                            : promotion.active
+                              ? 'Planifiée'
+                              : 'Inactive'}
                         </Badge>
-                        <Button size="sm" variant="ghost" iconLeft="trash" onClick={() => void removePromotion(promotion)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          iconLeft="trash"
+                          onClick={() => void removePromotion(promotion)}
+                        >
                           {t('catalog.delete')}
                         </Button>
                       </div>
@@ -646,11 +841,19 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         <Card>
           <CardHeader
             title={t('catalog.menus')}
-            action={<Button size="sm" variant="outline" iconLeft="plus" onClick={() => setMenuOpen(true)}>{t('catalog.newMenu')}</Button>}
+            action={
+              <Button size="sm" variant="outline" iconLeft="plus" onClick={() => setMenuOpen(true)}>
+                {t('catalog.newMenu')}
+              </Button>
+            }
           />
           <CardBody>
             {snapshot.menus.length === 0 ? (
-              <EmptyState icon="receipt" title={t('catalog.menus')} description={t('catalog.noMenu')} />
+              <EmptyState
+                icon="receipt"
+                title={t('catalog.menus')}
+                description={t('catalog.noMenu')}
+              />
             ) : (
               <ul className="cat-list">
                 {snapshot.menus.map((menu) => (
@@ -658,13 +861,23 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                     <div>
                       <strong>{menu.name}</strong>
                       <span>
-                        {formatXof(menu.priceXof, locale)} · {t('catalog.items', { count: menu.items.length })}
-                        {menu.items.length ? ` · ${menu.items.map((item) => item.name ?? '—').join(', ')}` : ''}
+                        {formatXof(menu.priceXof, locale)} ·{' '}
+                        {t('catalog.items', { count: menu.items.length })}
+                        {menu.items.length
+                          ? ` · ${menu.items.map((item) => item.name ?? '—').join(', ')}`
+                          : ''}
                       </span>
                     </div>
                     <div className="console-roles">
-                      <Badge tone={menu.active ? 'success' : 'neutral'} dot>{menu.active ? t('catalog.available') : 'Inactif'}</Badge>
-                      <Button size="sm" variant="ghost" iconLeft="trash" onClick={() => void removeMenu(menu)}>
+                      <Badge tone={menu.active ? 'success' : 'neutral'} dot>
+                        {menu.active ? t('catalog.available') : 'Inactif'}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        iconLeft="trash"
+                        onClick={() => void removeMenu(menu)}
+                      >
                         {t('catalog.delete')}
                       </Button>
                     </div>
@@ -683,7 +896,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         size="lg"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setProductOpen(false)}>{t('catalog.cancel')}</Button>
+            <Button variant="ghost" onClick={() => setProductOpen(false)}>
+              {t('catalog.cancel')}
+            </Button>
             <Button loading={savingProduct} onClick={() => void saveProduct()} iconLeft="check">
               {editing ? t('catalog.save') : t('catalog.create')}
             </Button>
@@ -702,7 +917,10 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
               label={t('catalog.category')}
               value={form.categoryId}
               onChange={(event) => setForm({ ...form, categoryId: event.target.value })}
-              options={snapshot.categories.map((category) => ({ value: category.id, label: category.name }))}
+              options={snapshot.categories.map((category) => ({
+                value: category.id,
+                label: category.name,
+              }))}
             />
           </div>
           <Textarea
@@ -770,7 +988,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                   onChange={(event) =>
                     setForm({
                       ...form,
-                      variants: form.variants.map((entry, i) => (i === index ? { ...entry, name: event.target.value } : entry)),
+                      variants: form.variants.map((entry, i) =>
+                        i === index ? { ...entry, name: event.target.value } : entry,
+                      ),
                     })
                   }
                 />
@@ -783,7 +1003,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                   onChange={(event) =>
                     setForm({
                       ...form,
-                      variants: form.variants.map((entry, i) => (i === index ? { ...entry, priceXof: event.target.value } : entry)),
+                      variants: form.variants.map((entry, i) =>
+                        i === index ? { ...entry, priceXof: event.target.value } : entry,
+                      ),
                     })
                   }
                 />
@@ -793,7 +1015,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                   iconOnly
                   aria-label={t('catalog.delete')}
                   iconLeft="trash"
-                  onClick={() => setForm({ ...form, variants: form.variants.filter((_, i) => i !== index) })}
+                  onClick={() =>
+                    setForm({ ...form, variants: form.variants.filter((_, i) => i !== index) })
+                  }
                 />
               </div>
             ))}
@@ -801,7 +1025,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
               size="sm"
               variant="soft"
               iconLeft="plus"
-              onClick={() => setForm({ ...form, variants: [...form.variants, { name: '', priceXof: '' }] })}
+              onClick={() =>
+                setForm({ ...form, variants: [...form.variants, { name: '', priceXof: '' }] })
+              }
             >
               {t('catalog.addVariant')}
             </Button>
@@ -818,7 +1044,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                   onChange={(event) =>
                     setForm({
                       ...form,
-                      priceRules: form.priceRules.map((entry, i) => (i === index ? { ...entry, label: event.target.value } : entry)),
+                      priceRules: form.priceRules.map((entry, i) =>
+                        i === index ? { ...entry, label: event.target.value } : entry,
+                      ),
                     })
                   }
                 />
@@ -857,7 +1085,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                     onChange={(event) =>
                       setForm({
                         ...form,
-                        priceRules: form.priceRules.map((entry, i) => (i === index ? { ...entry, start: event.target.value } : entry)),
+                        priceRules: form.priceRules.map((entry, i) =>
+                          i === index ? { ...entry, start: event.target.value } : entry,
+                        ),
                       })
                     }
                   />
@@ -868,7 +1098,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                     onChange={(event) =>
                       setForm({
                         ...form,
-                        priceRules: form.priceRules.map((entry, i) => (i === index ? { ...entry, end: event.target.value } : entry)),
+                        priceRules: form.priceRules.map((entry, i) =>
+                          i === index ? { ...entry, end: event.target.value } : entry,
+                        ),
                       })
                     }
                   />
@@ -881,7 +1113,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                     onChange={(event) =>
                       setForm({
                         ...form,
-                        priceRules: form.priceRules.map((entry, i) => (i === index ? { ...entry, priceXof: event.target.value } : entry)),
+                        priceRules: form.priceRules.map((entry, i) =>
+                          i === index ? { ...entry, priceXof: event.target.value } : entry,
+                        ),
                       })
                     }
                   />
@@ -891,7 +1125,12 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                     iconOnly
                     aria-label={t('catalog.delete')}
                     iconLeft="trash"
-                    onClick={() => setForm({ ...form, priceRules: form.priceRules.filter((_, i) => i !== index) })}
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        priceRules: form.priceRules.filter((_, i) => i !== index),
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -903,7 +1142,16 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
               onClick={() =>
                 setForm({
                   ...form,
-                  priceRules: [...form.priceRules, { label: 'Happy hour', days: ['lun', 'mar', 'mer', 'jeu'], start: '17:00', end: '19:00', priceXof: '' }],
+                  priceRules: [
+                    ...form.priceRules,
+                    {
+                      label: 'Happy hour',
+                      days: ['lun', 'mar', 'mer', 'jeu'],
+                      start: '17:00',
+                      end: '19:00',
+                      priceXof: '',
+                    },
+                  ],
                 })
               }
             >
@@ -920,8 +1168,12 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         description={offSaleTarget?.name}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setOffSaleTarget(null)}>{t('catalog.cancel')}</Button>
-            <Button variant="danger" onClick={() => void confirmOffSale()}>{t('catalog.save')}</Button>
+            <Button variant="ghost" onClick={() => setOffSaleTarget(null)}>
+              {t('catalog.cancel')}
+            </Button>
+            <Button variant="danger" onClick={() => void confirmOffSale()}>
+              {t('catalog.save')}
+            </Button>
           </>
         }
       >
@@ -948,8 +1200,12 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         size="lg"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setPromoOpen(false)}>{t('catalog.cancel')}</Button>
-            <Button loading={savingPromo} onClick={() => void savePromotion()}>{t('catalog.create')}</Button>
+            <Button variant="ghost" onClick={() => setPromoOpen(false)}>
+              {t('catalog.cancel')}
+            </Button>
+            <Button loading={savingPromo} onClick={() => void savePromotion()}>
+              {t('catalog.create')}
+            </Button>
           </>
         }
       >
@@ -964,7 +1220,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             <Input
               label={t('catalog.promoCode')}
               value={promoForm.code}
-              onChange={(event) => setPromoForm({ ...promoForm, code: event.target.value.toUpperCase() })}
+              onChange={(event) =>
+                setPromoForm({ ...promoForm, code: event.target.value.toUpperCase() })
+              }
               placeholder="ETUD10"
             />
           </div>
@@ -972,7 +1230,9 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             <Select
               label={t('catalog.promoType')}
               value={promoForm.type}
-              onChange={(event) => setPromoForm({ ...promoForm, type: event.target.value as 'percent' | 'amount' })}
+              onChange={(event) =>
+                setPromoForm({ ...promoForm, type: event.target.value as 'percent' | 'amount' })
+              }
               options={[
                 { value: 'percent', label: t('catalog.promoPercent') },
                 { value: 'amount', label: t('catalog.promoAmount') },
@@ -990,7 +1250,13 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             <Select
               label={t('catalog.promoScope')}
               value={promoForm.scope}
-              onChange={(event) => setPromoForm({ ...promoForm, scope: event.target.value as 'all' | 'category' | 'product', targetId: '' })}
+              onChange={(event) =>
+                setPromoForm({
+                  ...promoForm,
+                  scope: event.target.value as 'all' | 'category' | 'product',
+                  targetId: '',
+                })
+              }
               options={[
                 { value: 'all', label: t('catalog.scopeAll') },
                 { value: 'category', label: t('catalog.scopeCategory') },
@@ -999,15 +1265,19 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             />
             {promoForm.scope !== 'all' && (
               <Select
-                label={promoForm.scope === 'category' ? t('catalog.category') : t('catalog.colProduct')}
+                label={
+                  promoForm.scope === 'category' ? t('catalog.category') : t('catalog.colProduct')
+                }
                 value={promoForm.targetId}
                 onChange={(event) => setPromoForm({ ...promoForm, targetId: event.target.value })}
                 options={[
                   { value: '', label: '—' },
-                  ...(promoForm.scope === 'category' ? snapshot.categories : snapshot.products).map((entry) => ({
-                    value: entry.id,
-                    label: entry.name,
-                  })),
+                  ...(promoForm.scope === 'category' ? snapshot.categories : snapshot.products).map(
+                    (entry) => ({
+                      value: entry.id,
+                      label: entry.name,
+                    }),
+                  ),
                 ]}
               />
             )}
@@ -1036,8 +1306,14 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
         size="lg"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setMenuOpen(false)}>{t('catalog.cancel')}</Button>
-            <Button loading={savingMenu} onClick={() => void saveMenu()} disabled={menuItems.length === 0}>
+            <Button variant="ghost" onClick={() => setMenuOpen(false)}>
+              {t('catalog.cancel')}
+            </Button>
+            <Button
+              loading={savingMenu}
+              onClick={() => void saveMenu()}
+              disabled={menuItems.length === 0}
+            >
               {t('catalog.create')}
             </Button>
           </>
@@ -1078,7 +1354,10 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
             }}
             options={[
               { value: '', label: '—' },
-              ...snapshot.products.map((product) => ({ value: product.id, label: `${product.name} · ${formatXof(product.effectivePriceXof, locale)}` })),
+              ...snapshot.products.map((product) => ({
+                value: product.id,
+                label: `${product.name} · ${formatXof(product.effectivePriceXof, locale)}`,
+              })),
             ]}
           />
           {menuItems.length > 0 && (
@@ -1103,7 +1382,10 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                           setMenuItems((current) =>
                             current.map((entry) =>
                               entry.productId === item.productId
-                                ? { ...entry, quantity: Math.max(1, Number(event.target.value) || 1) }
+                                ? {
+                                    ...entry,
+                                    quantity: Math.max(1, Number(event.target.value) || 1),
+                                  }
                                 : entry,
                             ),
                           )
@@ -1115,7 +1397,11 @@ export function CatalogTab({ tenantId, locale }: { tenantId: string; locale: Loc
                         iconOnly
                         aria-label={t('catalog.delete')}
                         iconLeft="trash"
-                        onClick={() => setMenuItems((current) => current.filter((entry) => entry.productId !== item.productId))}
+                        onClick={() =>
+                          setMenuItems((current) =>
+                            current.filter((entry) => entry.productId !== item.productId),
+                          )
+                        }
                       />
                     </div>
                   </li>

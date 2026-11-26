@@ -44,7 +44,12 @@ export function PlacesMap({ establishments }: { establishments: Establishment[] 
 
   return (
     <div className="rh-map">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="rh-map__canvas" role="img" aria-label={t('explore.mapHint')}>
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        className="rh-map__canvas"
+        role="img"
+        aria-label={t('explore.mapHint')}
+      >
         <defs>
           <linearGradient id="rh-map-bg" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="var(--primary-soft)" />
@@ -86,7 +91,12 @@ export function PlacesMap({ establishments }: { establishments: Establishment[] 
               }}
             >
               {active && <circle r="19" fill="var(--primary)" opacity="0.16" />}
-              <circle r={active ? 11 : 9} fill="var(--primary)" stroke="var(--surface)" strokeWidth="2.5" />
+              <circle
+                r={active ? 11 : 9}
+                fill="var(--primary)"
+                stroke="var(--surface)"
+                strokeWidth="2.5"
+              />
               <text y="3.5" textAnchor="middle" className="rh-map__pin-label">
                 {index + 1}
               </text>
@@ -107,7 +117,12 @@ export function PlacesMap({ establishments }: { establishments: Establishment[] 
               {t(`establishment.${kindKey(selected.kind)}`)} · {shortAddress(selected)}
             </span>
           </div>
-          <span className={cx('rh-client-pill', isOpenNow(selected) ? 'rh-client-pill--success' : 'rh-client-pill--neutral')}>
+          <span
+            className={cx(
+              'rh-client-pill',
+              isOpenNow(selected) ? 'rh-client-pill--success' : 'rh-client-pill--neutral',
+            )}
+          >
             {isOpenNow(selected) ? t('common.open') : t('common.closed')}
           </span>
         </button>

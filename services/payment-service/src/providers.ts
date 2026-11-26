@@ -4,13 +4,7 @@ export const PAYMENT_METHODS = ['mobile_money', 'carte'] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export type ProviderId =
-  | 'tmoney'
-  | 'moov_money'
-  | 'cinetpay'
-  | 'paydunya'
-  | 'fedapay'
-  | 'paygate'
-  | 'stripe';
+  'tmoney' | 'moov_money' | 'cinetpay' | 'paydunya' | 'fedapay' | 'paygate' | 'stripe';
 
 export interface ProviderQuote {
   feeXof: number;
@@ -66,7 +60,10 @@ interface Descriptor {
 }
 
 function sandboxReference(prefix: string, intentId: string): string {
-  const digest = createHash('sha256').update(`${prefix}:${intentId}:${Date.now()}`).digest('hex').slice(0, 10);
+  const digest = createHash('sha256')
+    .update(`${prefix}:${intentId}:${Date.now()}`)
+    .digest('hex')
+    .slice(0, 10);
   return `${prefix}_${digest.toUpperCase()}`;
 }
 
@@ -223,8 +220,9 @@ export interface RoutingInput {
  * disponible, sinon bascule automatique vers le moins cher des fournisseurs sains.
  */
 export function routeProvider(input: RoutingInput): RoutingDecision {
-  const candidates: RouteCandidate[] = PROVIDERS
-    .filter((provider) => provider.methods.includes(input.method))
+  const candidates: RouteCandidate[] = PROVIDERS.filter((provider) =>
+    provider.methods.includes(input.method),
+  )
     .map((provider) => {
       const available = provider.isConfigured(input.keys) && input.health[provider.id] !== 'down';
       return {
@@ -252,15 +250,21 @@ export function routeProvider(input: RoutingInput): RoutingDecision {
 
   const best = candidates.find((candidate) => candidate.available);
   if (!best) {
-    return { chosen: null, candidates, reason: 'aucun fournisseur disponible', switched: Boolean(preferred) };
+    return {
+      chosen: null,
+      candidates,
+      reason: 'aucun fournisseur disponible',
+      switched: Boolean(preferred),
+    };
   }
   const chosen = getProvider(best.provider) ?? null;
   return {
     chosen,
     candidates,
-    reason: preferred && preferred.id !== best.provider
-      ? `bascule automatique vers ${best.label} (frais les plus bas disponibles)`
-      : 'frais les plus bas',
+    reason:
+      preferred && preferred.id !== best.provider
+        ? `bascule automatique vers ${best.label} (frais les plus bas disponibles)`
+        : 'frais les plus bas',
     switched: Boolean(preferred) && preferred?.id !== best.provider,
   };
 }

@@ -61,7 +61,12 @@ async function main() {
     base,
     'POST',
     '/internal/provision-platform-user',
-    { name: 'Super Admin Test', email: 'support@resto-hub.tg', password: 'Support#2026', platformRole: 'super_admin' },
+    {
+      name: 'Super Admin Test',
+      email: 'support@resto-hub.tg',
+      password: 'Support#2026',
+      platformRole: 'super_admin',
+    },
     internal,
   );
 
@@ -110,7 +115,11 @@ async function main() {
     internal,
   );
   assertStatus(idempotent, 200, 'Provision idempotente');
-  assertEqual(idempotent.body.userId, alphaOwner.userId, 'La provision doit être idempotente par applicationId');
+  assertEqual(
+    idempotent.body.userId,
+    alphaOwner.userId,
+    'La provision doit être idempotente par applicationId',
+  );
 
   const login = async (email: string, password: string) =>
     api(base, 'POST', '/api/v1/auth/email/login', { email, password });
@@ -132,7 +141,9 @@ async function main() {
   let ownerRecoveryCodes: string[] = [];
 
   const wrongTotp = (secret: string) => {
-    const valid = new Set([-1, 0, 1].map((offset) => generateTotp(secret, Date.now() + offset * 30_000)));
+    const valid = new Set(
+      [-1, 0, 1].map((offset) => generateTotp(secret, Date.now() + offset * 30_000)),
+    );
     for (let i = 0; i < 1_000_000; i += 1) {
       const candidate = String(i).padStart(6, '0');
       if (!valid.has(candidate)) return candidate;
@@ -147,10 +158,15 @@ async function main() {
         const result = await login('gerant@alpha.tg', 'Gerant#2026');
         assertStatus(result, 200, 'Connexion gérant');
         assert(result.body.mfaRequired === true, 'Le MFA doit être exigé pour un gérant.');
-        assert(result.body.mfaSetupRequired === true, 'Le MFA doit être à activer à la première connexion.');
+        assert(
+          result.body.mfaSetupRequired === true,
+          'Le MFA doit être à activer à la première connexion.',
+        );
         assert(!result.body.accessToken, 'Aucun jeton ne doit être délivré avant le MFA.');
 
-        const enroll = await api(base, 'POST', '/api/v1/auth/mfa/enroll', { ticket: result.body.ticket });
+        const enroll = await api(base, 'POST', '/api/v1/auth/mfa/enroll', {
+          ticket: result.body.ticket,
+        });
         assertStatus(enroll, 200, 'Enrôlement MFA');
         assert(enroll.body.otpauthUrl.startsWith('otpauth://totp/'), 'URI otpauth attendue.');
         ownerSecret = enroll.body.secret;
@@ -161,8 +177,14 @@ async function main() {
           code,
         });
         assertStatus(confirm, 200, 'Confirmation MFA');
-        assert(Array.isArray(confirm.body.recoveryCodes) && confirm.body.recoveryCodes.length === 8, '8 codes de secours attendus.');
-        assert(typeof confirm.body.accessToken === 'string', 'Jeton d’accès attendu après activation.');
+        assert(
+          Array.isArray(confirm.body.recoveryCodes) && confirm.body.recoveryCodes.length === 8,
+          '8 codes de secours attendus.',
+        );
+        assert(
+          typeof confirm.body.accessToken === 'string',
+          'Jeton d’accès attendu après activation.',
+        );
         ownerToken = confirm.body.accessToken;
         ownerRecoveryCodes = confirm.body.recoveryCodes;
       },
@@ -172,7 +194,10 @@ async function main() {
       async run() {
         const step = await login('gerant@alpha.tg', 'Gerant#2026');
         assertStatus(step, 200, 'Connexion gérant MFA');
-        assert(step.body.mfaRequired === true && step.body.mfaSetupRequired === false, 'Le MFA doit être demandé (déjà activé).');
+        assert(
+          step.body.mfaRequired === true && step.body.mfaSetupRequired === false,
+          'Le MFA doit être demandé (déjà activé).',
+        );
         const refused = await api(base, 'POST', '/api/v1/auth/mfa/verify', {
           ticket: step.body.ticket,
           code: wrongTotp(ownerSecret),
@@ -207,7 +232,13 @@ async function main() {
     {
       name: 'Isolation : les permissions du comptable Alpha ne mentionnent que son établissement',
       async run() {
-        const introspect = await api(base, 'POST', '/internal/introspect', { token: alphaToken }, internal);
+        const introspect = await api(
+          base,
+          'POST',
+          '/internal/introspect',
+          { token: alphaToken },
+          internal,
+        );
         assertStatus(introspect, 200, 'Introspection Alpha');
         const tenantPermissions = introspect.body.claims.tenantPermissions;
         assert(tenantPermissions.tnt_alpha, 'Permissions attendues pour tnt_alpha.');
@@ -217,21 +248,38 @@ async function main() {
     {
       name: 'Isolation : Alpha ne peut pas lister l’équipe de Beta',
       async run() {
-        const own = await api(base, 'GET', '/api/v1/tenants/tnt_alpha/team', undefined, { token: alphaToken });
+        const own = await api(base, 'GET', '/api/v1/tenants/tnt_alpha/team', undefined, {
+          token: alphaToken,
+        });
         assertStatus(own, 200, 'Équipe Alpha');
         assertEqual(own.body.items.length, 3, 'Alpha doit voir uniquement ses 3 membres');
-        const cross = await api(base, 'GET', '/api/v1/tenants/tnt_beta/team', undefined, { token: alphaToken });
+        const cross = await api(base, 'GET', '/api/v1/tenants/tnt_beta/team', undefined, {
+          token: alphaToken,
+        });
         assertStatus(cross, 403, 'Équipe Beta depuis Alpha');
-        assertEqual(cross.body.error.code, 'tenant_scope_denied', 'Code d’erreur d’isolation attendu');
+        assertEqual(
+          cross.body.error.code,
+          'tenant_scope_denied',
+          'Code d’erreur d’isolation attendu',
+        );
       },
     },
     {
       name: 'Isolation : Alpha ne peut pas lire le journal d’audit de Beta',
       async run() {
-        const own = await api(base, 'GET', '/api/v1/audit?tenantId=tnt_alpha', undefined, { token: alphaToken });
+        const own = await api(base, 'GET', '/api/v1/audit?tenantId=tnt_alpha', undefined, {
+          token: alphaToken,
+        });
         assertStatus(own, 200, 'Audit Alpha');
-        assert(own.body.items.every((entry: { tenantId: string | null }) => entry.tenantId === 'tnt_alpha'), 'Le journal Alpha ne doit contenir que des entrées Alpha.');
-        const cross = await api(base, 'GET', '/api/v1/audit?tenantId=tnt_beta', undefined, { token: alphaToken });
+        assert(
+          own.body.items.every(
+            (entry: { tenantId: string | null }) => entry.tenantId === 'tnt_alpha',
+          ),
+          'Le journal Alpha ne doit contenir que des entrées Alpha.',
+        );
+        const cross = await api(base, 'GET', '/api/v1/audit?tenantId=tnt_beta', undefined, {
+          token: alphaToken,
+        });
         assertStatus(cross, 403, 'Audit Beta depuis Alpha');
       },
     },
@@ -259,17 +307,31 @@ async function main() {
           { token: alphaToken },
         );
         assertStatus(cross, 403, 'Modification de membre Beta');
-        const betaTeam = await api(base, 'GET', '/api/v1/tenants/tnt_beta/team', undefined, { token: betaToken });
+        const betaTeam = await api(base, 'GET', '/api/v1/tenants/tnt_beta/team', undefined, {
+          token: betaToken,
+        });
         assertStatus(betaTeam, 200, 'Équipe Beta intacte');
-        assertEqual(betaTeam.body.items[0].roles.join(','), 'accountant', 'Les rôles de Beta ne doivent pas avoir changé');
+        assertEqual(
+          betaTeam.body.items[0].roles.join(','),
+          'accountant',
+          'Les rôles de Beta ne doivent pas avoir changé',
+        );
       },
     },
     {
       name: 'Isolation : Alpha ne peut pas révoquer une session de Beta',
       async run() {
-        const cross = await api(base, 'DELETE', `/api/v1/sessions/${betaSessionId}`, undefined, { token: alphaToken });
+        const cross = await api(base, 'DELETE', `/api/v1/sessions/${betaSessionId}`, undefined, {
+          token: alphaToken,
+        });
         assertStatus(cross, 404, 'Révocation de session Beta');
-        const stillValid = await api(base, 'POST', '/internal/introspect', { token: betaToken }, internal);
+        const stillValid = await api(
+          base,
+          'POST',
+          '/internal/introspect',
+          { token: betaToken },
+          internal,
+        );
         assertStatus(stillValid, 200, 'La session de Beta doit rester active');
       },
     },
@@ -323,14 +385,22 @@ async function main() {
           { token: waiterLogin.body.accessToken },
           internal,
         );
-        assert(introspect.body.claims.tenantPermissions.tnt_alpha.includes('payment:refund'), 'La permission personnalisée doit être effective.');
-        assert(!introspect.body.claims.tenantPermissions.tnt_beta, 'Aucune permission Beta attendue.');
+        assert(
+          introspect.body.claims.tenantPermissions.tnt_alpha.includes('payment:refund'),
+          'La permission personnalisée doit être effective.',
+        );
+        assert(
+          !introspect.body.claims.tenantPermissions.tnt_beta,
+          'Aucune permission Beta attendue.',
+        );
       },
     },
     {
       name: 'Isolation : un rôle système ne peut pas être modifié ni supprimé par un gérant',
       async run() {
-        const systemRole = [...store.roles.values()].find((role) => role.code === 'waiter' && role.tenantId === null);
+        const systemRole = [...store.roles.values()].find(
+          (role) => role.code === 'waiter' && role.tenantId === null,
+        );
         assert(systemRole, 'Rôle système serveur attendu');
         const patch = await api(
           base,
@@ -347,16 +417,22 @@ async function main() {
       async run() {
         const fresh = await login('serveur@alpha.tg', 'Serveur#2026');
         const oldRefresh = fresh.body.refreshToken;
-        const rotated = await api(base, 'POST', '/api/v1/auth/refresh', { refreshToken: oldRefresh });
+        const rotated = await api(base, 'POST', '/api/v1/auth/refresh', {
+          refreshToken: oldRefresh,
+        });
         assertStatus(rotated, 200, 'Rotation réussie');
-        const replay = await api(base, 'POST', '/api/v1/auth/refresh', { refreshToken: oldRefresh });
+        const replay = await api(base, 'POST', '/api/v1/auth/refresh', {
+          refreshToken: oldRefresh,
+        });
         assertStatus(replay, 401, 'Rejeu du refresh token');
       },
     },
     {
       name: 'Journal d’audit : la chaîne de hachage est intègre',
       async run() {
-        const integrity = await api(base, 'GET', '/api/v1/audit/integrity', undefined, { token: supportToken });
+        const integrity = await api(base, 'GET', '/api/v1/audit/integrity', undefined, {
+          token: supportToken,
+        });
         assertStatus(integrity, 200, 'Intégrité du journal');
         assertEqual(integrity.body.valid, true, 'La chaîne d’audit doit être valide');
         assert(integrity.body.entries > 0, 'Le journal doit contenir des entrées');
@@ -368,9 +444,13 @@ async function main() {
         const all = await api(base, 'GET', '/api/v1/audit', undefined, { token: supportToken });
         assertStatus(all, 200, 'Audit global support');
         assert(all.body.items.length > 0, 'Le support doit voir des entrées.');
-        const alphaOnly = await api(base, 'GET', '/api/v1/audit?tenantId=tnt_alpha', undefined, { token: supportToken });
+        const alphaOnly = await api(base, 'GET', '/api/v1/audit?tenantId=tnt_alpha', undefined, {
+          token: supportToken,
+        });
         assertStatus(alphaOnly, 200, 'Audit Alpha support');
-        const cross = await api(base, 'GET', '/api/v1/tenants/tnt_beta/team', undefined, { token: ownerToken });
+        const cross = await api(base, 'GET', '/api/v1/tenants/tnt_beta/team', undefined, {
+          token: ownerToken,
+        });
         assertStatus(cross, 403, 'Le gérant ne doit pas voir Beta');
       },
     },

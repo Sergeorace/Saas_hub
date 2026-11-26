@@ -108,7 +108,8 @@ export const frStep2: Messages = {
     loading: 'Chargement du plan de salle…',
     error: 'Le plan de salle n’a pas pu être chargé.',
     settings: 'Code établissement',
-    settingsHint: '3 à 12 caractères A-Z/0-9. Les codes des places sont recalculés automatiquement.',
+    settingsHint:
+      '3 à 12 caractères A-Z/0-9. Les codes des places sont recalculés automatiquement.',
     settingsSaved: 'Paramétrage enregistré.',
     settingsRequired: 'Renseignez le code établissement avant de créer une place.',
     save: 'Enregistrer',
@@ -182,7 +183,8 @@ export const frStep2: Messages = {
     qrHint: 'Ce QR ouvre la carte du client pour cette place.',
     downloadPdf: 'Imprimer les QR (PDF)',
     pdfReady: 'Planche PDF générée.',
-    dragHint: 'Glissez une place pour la déplacer. Les positions sont enregistrées automatiquement.',
+    dragHint:
+      'Glissez une place pour la déplacer. Les positions sont enregistrées automatiquement.',
     savePosition: 'Position enregistrée.',
     selectTable: 'Sélectionnez une place sur le plan.',
     detailTitle: '{code}',
@@ -194,7 +196,8 @@ export const frStep2: Messages = {
     transitions: 'Actions rapides',
     auditTitle: 'Journal d’audit du plan de salle',
     auditIntegrity: 'Chaîne intègre',
-    eventNote: 'Chaque changement de statut publie TableStatusChanged pour la salle, la cuisine et la caisse.',
+    eventNote:
+      'Chaque changement de statut publie TableStatusChanged pour la salle, la cuisine et la caisse.',
   },
 };
 
@@ -392,6 +395,7 @@ export const enStep2: Messages = {
     transitions: 'Quick actions',
     auditTitle: 'Floor plan audit journal',
     auditIntegrity: 'Chain intact',
-    eventNote: 'Every status change publishes TableStatusChanged for the floor, kitchen and cashier.',
+    eventNote:
+      'Every status change publishes TableStatusChanged for the floor, kitchen and cashier.',
   },
 };

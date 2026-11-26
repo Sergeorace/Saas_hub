@@ -168,7 +168,12 @@ export interface PlatformAdminStore {
   metrics: PlatformMetrics;
   handledEvents: Set<string>;
   recordAudit(input: Omit<Parameters<typeof buildAuditEntry>[0], 'previousHash'>): AuditEntry;
-  log(level: TechnicalLog['level'], service: string, message: string, meta?: Record<string, unknown> | null): TechnicalLog;
+  log(
+    level: TechnicalLog['level'],
+    service: string,
+    message: string,
+    meta?: Record<string, unknown> | null,
+  ): TechnicalLog;
   raiseAlert(input: {
     severity: PlatformAlert['severity'];
     service: string;
@@ -208,14 +213,24 @@ export function createPlatformAdminStore(): PlatformAdminStore {
       return entry;
     },
     log(level, service, message, meta) {
-      const entry: TechnicalLog = { id: newId('log'), level, service, message, meta: meta ?? null, at: nowIso() };
+      const entry: TechnicalLog = {
+        id: newId('log'),
+        level,
+        service,
+        message,
+        meta: meta ?? null,
+        at: nowIso(),
+      };
       store.logs.push(entry);
       if (store.logs.length > LOG_LIMIT) store.logs.splice(0, store.logs.length - LOG_LIMIT);
       return entry;
     },
     raiseAlert(input) {
       const existing = [...store.alerts.values()].find(
-        (alert) => alert.status !== 'resolved' && alert.code === input.code && alert.service === input.service,
+        (alert) =>
+          alert.status !== 'resolved' &&
+          alert.code === input.code &&
+          alert.service === input.service,
       );
       if (existing) return existing;
       const alert: PlatformAlert = {
@@ -261,15 +276,78 @@ export function defaultSettings(): PlatformSettings {
     supportEmail: 'support@resto-hub.tg',
     supportPhone: '+228 90 00 00 00',
     countries: [
-      { code: 'TG', name: 'Togo', currency: 'XOF', dialCode: '+228', active: true, defaultTaxCode: 'TG_TVA_18' },
-      { code: 'BJ', name: 'Bénin', currency: 'XOF', dialCode: '+229', active: true, defaultTaxCode: 'UEMOA_TVA_18' },
-      { code: 'CI', name: "Côte d'Ivoire", currency: 'XOF', dialCode: '+225', active: true, defaultTaxCode: 'UEMOA_TVA_18' },
-      { code: 'BF', name: 'Burkina Faso', currency: 'XOF', dialCode: '+226', active: true, defaultTaxCode: 'UEMOA_TVA_18' },
-      { code: 'SN', name: 'Sénégal', currency: 'XOF', dialCode: '+221', active: true, defaultTaxCode: 'UEMOA_TVA_18' },
-      { code: 'ML', name: 'Mali', currency: 'XOF', dialCode: '+223', active: true, defaultTaxCode: 'UEMOA_TVA_18' },
-      { code: 'NE', name: 'Niger', currency: 'XOF', dialCode: '+227', active: true, defaultTaxCode: 'UEMOA_TVA_18' },
-      { code: 'GH', name: 'Ghana', currency: 'GHS', dialCode: '+233', active: false, defaultTaxCode: 'GH_VAT_15' },
-      { code: 'NG', name: 'Nigeria', currency: 'NGN', dialCode: '+234', active: false, defaultTaxCode: 'NG_VAT_7_5' },
+      {
+        code: 'TG',
+        name: 'Togo',
+        currency: 'XOF',
+        dialCode: '+228',
+        active: true,
+        defaultTaxCode: 'TG_TVA_18',
+      },
+      {
+        code: 'BJ',
+        name: 'Bénin',
+        currency: 'XOF',
+        dialCode: '+229',
+        active: true,
+        defaultTaxCode: 'UEMOA_TVA_18',
+      },
+      {
+        code: 'CI',
+        name: "Côte d'Ivoire",
+        currency: 'XOF',
+        dialCode: '+225',
+        active: true,
+        defaultTaxCode: 'UEMOA_TVA_18',
+      },
+      {
+        code: 'BF',
+        name: 'Burkina Faso',
+        currency: 'XOF',
+        dialCode: '+226',
+        active: true,
+        defaultTaxCode: 'UEMOA_TVA_18',
+      },
+      {
+        code: 'SN',
+        name: 'Sénégal',
+        currency: 'XOF',
+        dialCode: '+221',
+        active: true,
+        defaultTaxCode: 'UEMOA_TVA_18',
+      },
+      {
+        code: 'ML',
+        name: 'Mali',
+        currency: 'XOF',
+        dialCode: '+223',
+        active: true,
+        defaultTaxCode: 'UEMOA_TVA_18',
+      },
+      {
+        code: 'NE',
+        name: 'Niger',
+        currency: 'XOF',
+        dialCode: '+227',
+        active: true,
+        defaultTaxCode: 'UEMOA_TVA_18',
+      },
+      {
+        code: 'GH',
+        name: 'Ghana',
+        currency: 'GHS',
+        dialCode: '+233',
+        active: false,
+        defaultTaxCode: 'GH_VAT_15',
+      },
+      {
+        code: 'NG',
+        name: 'Nigeria',
+        currency: 'NGN',
+        dialCode: '+234',
+        active: false,
+        defaultTaxCode: 'NG_VAT_7_5',
+      },
     ],
     taxes: [
       { code: 'TG_TVA_18', name: 'TVA Togo', ratePct: 18, scope: 'sales', active: true },
@@ -279,13 +357,62 @@ export function defaultSettings(): PlatformSettings {
       { code: 'NG_VAT_7_5', name: 'Nigeria VAT', ratePct: 7.5, scope: 'sales', active: false },
     ],
     providers: [
-      { code: 'tmoney', name: 'TMoney', enabled: true, currencies: ['XOF'], channels: ['mobile_money'], priority: 1 },
-      { code: 'moov', name: 'Moov Money', enabled: true, currencies: ['XOF'], channels: ['mobile_money'], priority: 2 },
-      { code: 'cinetpay', name: 'CinetPay', enabled: true, currencies: ['XOF'], channels: ['mobile_money', 'card'], priority: 3 },
-      { code: 'paydunya', name: 'PayDunya', enabled: true, currencies: ['XOF'], channels: ['mobile_money', 'card'], priority: 4 },
-      { code: 'fedapay', name: 'FedaPay', enabled: true, currencies: ['XOF'], channels: ['mobile_money'], priority: 5 },
-      { code: 'paygate', name: 'PayGate', enabled: true, currencies: ['XOF'], channels: ['mobile_money'], priority: 6 },
-      { code: 'stripe', name: 'Stripe', enabled: false, currencies: ['XOF', 'EUR', 'USD'], channels: ['card'], priority: 7 },
+      {
+        code: 'tmoney',
+        name: 'TMoney',
+        enabled: true,
+        currencies: ['XOF'],
+        channels: ['mobile_money'],
+        priority: 1,
+      },
+      {
+        code: 'moov',
+        name: 'Moov Money',
+        enabled: true,
+        currencies: ['XOF'],
+        channels: ['mobile_money'],
+        priority: 2,
+      },
+      {
+        code: 'cinetpay',
+        name: 'CinetPay',
+        enabled: true,
+        currencies: ['XOF'],
+        channels: ['mobile_money', 'card'],
+        priority: 3,
+      },
+      {
+        code: 'paydunya',
+        name: 'PayDunya',
+        enabled: true,
+        currencies: ['XOF'],
+        channels: ['mobile_money', 'card'],
+        priority: 4,
+      },
+      {
+        code: 'fedapay',
+        name: 'FedaPay',
+        enabled: true,
+        currencies: ['XOF'],
+        channels: ['mobile_money'],
+        priority: 5,
+      },
+      {
+        code: 'paygate',
+        name: 'PayGate',
+        enabled: true,
+        currencies: ['XOF'],
+        channels: ['mobile_money'],
+        priority: 6,
+      },
+      {
+        code: 'stripe',
+        name: 'Stripe',
+        enabled: false,
+        currencies: ['XOF', 'EUR', 'USD'],
+        channels: ['card'],
+        priority: 7,
+      },
     ],
     updatedAt: nowIso(),
     updatedBy: 'system',
@@ -300,7 +427,10 @@ function daysAgo(days: number): string {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export function seedPlatformDemo(store: PlatformAdminStore, services: Array<{ name: string; url: string }> = []): void {
+export function seedPlatformDemo(
+  store: PlatformAdminStore,
+  services: Array<{ name: string; url: string }> = [],
+): void {
   for (const service of services) store.registerService(service.name, service.url);
 
   const tenants: Array<DirectoryEntry & { city: string }> = [
@@ -454,7 +584,9 @@ export function seedPlatformDemo(store: PlatformAdminStore, services: Array<{ na
   store.alerts.set(alert.id, alert);
 
   store.log('info', 'platform-admin-service', 'Passerelle de supervision initialisée (mode démo).');
-  store.log('warn', 'reporting-service', 'Export PDF lent (820 ms) sur une période de 90 jours.', { durationMs: 820 });
+  store.log('warn', 'reporting-service', 'Export PDF lent (820 ms) sur une période de 90 jours.', {
+    durationMs: 820,
+  });
   store.log('info', 'payment-service', 'Webhook TMoney reçu et vérifié par signature.');
 
   store.recordAudit({
@@ -469,11 +601,18 @@ export function seedPlatformDemo(store: PlatformAdminStore, services: Array<{ na
 
 export function upsertDirectory(
   store: PlatformAdminStore,
-  input: { tenantId: string; slug?: string; plan?: string; status?: DirectoryStatus; trial?: boolean },
+  input: {
+    tenantId: string;
+    slug?: string;
+    plan?: string;
+    status?: DirectoryStatus;
+    trial?: boolean;
+  },
 ): DirectoryEntry {
   const existing = store.directory.get(input.tenantId);
   const plan = (input.plan as PlatformPlan | undefined) ?? existing?.plan ?? 'starter';
-  const slug = input.slug ?? existing?.slug ?? input.tenantId.replace(/^tnt_/, '').replace(/_/g, '-');
+  const slug =
+    input.slug ?? existing?.slug ?? input.tenantId.replace(/^tnt_/, '').replace(/_/g, '-');
   const entry: DirectoryEntry = {
     tenantId: input.tenantId,
     brandName: existing?.brandName ?? titleize(slug),
@@ -592,7 +731,9 @@ export function applyPlatformEvent(store: PlatformAdminStore, envelope: EventEnv
         provider: asString(envelope.payload.provider, null as unknown as string) || null,
         at,
       });
-      store.log('info', 'payment-service', `Paiement confirmé ${amountXof} XOF (${tenantId}).`, { transactionId });
+      store.log('info', 'payment-service', `Paiement confirmé ${amountXof} XOF (${tenantId}).`, {
+        transactionId,
+      });
       return;
     }
     case 'PaymentFailed': {
@@ -606,7 +747,11 @@ export function applyPlatformEvent(store: PlatformAdminStore, envelope: EventEnv
         provider: asString(envelope.payload.provider, null as unknown as string) || null,
         at: asString(envelope.payload.at, envelope.occurredAt),
       });
-      store.log('warn', 'payment-service', `Paiement échoué (${tenantId}) : ${asString(envelope.payload.reason, 'raison inconnue')}.`);
+      store.log(
+        'warn',
+        'payment-service',
+        `Paiement échoué (${tenantId}) : ${asString(envelope.payload.reason, 'raison inconnue')}.`,
+      );
       if ((store.metrics.eventsByType.PaymentFailed ?? 0) % 3 === 0) {
         store.raiseAlert({
           severity: 'warning',
@@ -628,7 +773,11 @@ export function applyPlatformEvent(store: PlatformAdminStore, envelope: EventEnv
         provider: null,
         at: asString(envelope.payload.at, envelope.occurredAt),
       });
-      store.log('info', 'payment-service', `Remboursement de ${asNumber(envelope.payload.amountXof)} XOF (${tenantId}).`);
+      store.log(
+        'info',
+        'payment-service',
+        `Remboursement de ${asNumber(envelope.payload.amountXof)} XOF (${tenantId}).`,
+      );
       return;
     }
     case 'DisputeOpened': {
@@ -682,7 +831,9 @@ export function applyPlatformEvent(store: PlatformAdminStore, envelope: EventEnv
         provider: asString(envelope.payload.provider, null as unknown as string) || null,
         at: envelope.occurredAt,
       });
-      store.log('info', 'tenant-service', `Abonnement réglé (${tenantId}).`, { plan: envelope.payload.plan });
+      store.log('info', 'tenant-service', `Abonnement réglé (${tenantId}).`, {
+        plan: envelope.payload.plan,
+      });
       return;
     }
     default:
@@ -718,9 +869,16 @@ export function commissionGroups(
             : entry.at.slice(0, 10);
     const label =
       groupBy === 'tenant'
-        ? store.directory.get(entry.tenantId)?.brandName ?? entry.tenantId
+        ? (store.directory.get(entry.tenantId)?.brandName ?? entry.tenantId)
         : key;
-    const row = rows.get(key) ?? { key, label, transactions: 0, volumeXof: 0, commissionXof: 0, netXof: 0 };
+    const row = rows.get(key) ?? {
+      key,
+      label,
+      transactions: 0,
+      volumeXof: 0,
+      commissionXof: 0,
+      netXof: 0,
+    };
     row.transactions += 1;
     row.volumeXof += entry.amountXof;
     row.commissionXof += entry.commissionXof;
@@ -762,9 +920,11 @@ export function dashboardSnapshot(store: PlatformAdminStore) {
       net30dXof: net30,
       refunds30dXof: refunds30,
       failedPayments24h: failed24,
-      openDisputes: [...store.disputes.values()].filter((dispute) => dispute.status === 'open').length,
+      openDisputes: [...store.disputes.values()].filter((dispute) => dispute.status === 'open')
+        .length,
       mrrXof,
-      averageCommissionRatePct: volume30 > 0 ? Math.round((commission30 / volume30) * 10000) / 100 : 0,
+      averageCommissionRatePct:
+        volume30 > 0 ? Math.round((commission30 / volume30) * 10000) / 100 : 0,
     },
     operations: {
       services: services.length,

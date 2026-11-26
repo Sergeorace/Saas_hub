@@ -83,15 +83,57 @@ export const orders: OrderRow[] = [
 ];
 
 export const eventFeed = [
-  { id: 'e1', name: 'OrderPaid', detail: 'CMD-1046 · T09 · 21 000 FCFA', time: '20:40', tone: 'success' },
+  {
+    id: 'e1',
+    name: 'OrderPaid',
+    detail: 'CMD-1046 · T09 · 21 000 FCFA',
+    time: '20:40',
+    tone: 'success',
+  },
   { id: 'e2', name: 'OrderCreated', detail: 'CMD-1049 · T06 · 2', time: '21:01', tone: 'primary' },
-  { id: 'e3', name: 'TableStatusChanged', detail: 'T04 → bill_requested', time: '21:02', tone: 'info' },
-  { id: 'e4', name: 'StockBelowThreshold', detail: 'SKU-RHUM-ARR · 4', time: '20:56', tone: 'warning' },
-  { id: 'e5', name: 'PayrollApproved', detail: 'payroll-2026-11 · 12', time: '20:40', tone: 'accent' },
+  {
+    id: 'e3',
+    name: 'TableStatusChanged',
+    detail: 'T04 → bill_requested',
+    time: '21:02',
+    tone: 'info',
+  },
+  {
+    id: 'e4',
+    name: 'StockBelowThreshold',
+    detail: 'SKU-RHUM-ARR · 4',
+    time: '20:56',
+    tone: 'warning',
+  },
+  {
+    id: 'e5',
+    name: 'PayrollApproved',
+    detail: 'payroll-2026-11 · 12',
+    time: '20:40',
+    tone: 'accent',
+  },
 ] as const;
 
 export const auditTrail = [
-  { id: 'a1', action: 'commands:refund', detail: 'CMD-1031 · 4 500 FCFA', who: 'Mariam K.', time: '21:03' },
-  { id: 'a2', action: 'prices:update', detail: 'Cocktail Hibiscus · 3 500 → 3 800', who: 'Akouvi D.', time: '19:44' },
-  { id: 'a3', action: 'payroll:approve', detail: 'Lot novembre · 2 840 000 FCFA', who: 'Akouvi D.', time: '19:12' },
+  {
+    id: 'a1',
+    action: 'commands:refund',
+    detail: 'CMD-1031 · 4 500 FCFA',
+    who: 'Mariam K.',
+    time: '21:03',
+  },
+  {
+    id: 'a2',
+    action: 'prices:update',
+    detail: 'Cocktail Hibiscus · 3 500 → 3 800',
+    who: 'Akouvi D.',
+    time: '19:44',
+  },
+  {
+    id: 'a3',
+    action: 'payroll:approve',
+    detail: 'Lot novembre · 2 840 000 FCFA',
+    who: 'Akouvi D.',
+    time: '19:12',
+  },
 ];

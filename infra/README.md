@@ -17,12 +17,12 @@ pour valider la même `init.sql`.
 
 ## Contenu
 
-| Élément | Rôle |
-| --- | --- |
-| `docker-compose.yml` (racine) | postgres:16, redis:7, minio + initialisation idempotente du bucket |
-| `infra/postgres/init.sql` | pilote identity-service : rôles, schéma `identity`, RLS forcée, audit append-only |
-| `infra/postgres/20-role-password.sh` | fixe le mot de passe `resto_app` depuis `RESTO_APP_PASSWORD` |
-| `infra/postgres/rls-test.mjs` | 10 tests d’isolation multi-tenant sur le moteur PostgreSQL réel |
+| Élément                              | Rôle                                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------------- |
+| `docker-compose.yml` (racine)        | postgres:16, redis:7, minio + initialisation idempotente du bucket                |
+| `infra/postgres/init.sql`            | pilote identity-service : rôles, schéma `identity`, RLS forcée, audit append-only |
+| `infra/postgres/20-role-password.sh` | fixe le mot de passe `resto_app` depuis `RESTO_APP_PASSWORD`                      |
+| `infra/postgres/rls-test.mjs`        | 10 tests d’isolation multi-tenant sur le moteur PostgreSQL réel                   |
 
 ## Modèle d’isolation retenu
 

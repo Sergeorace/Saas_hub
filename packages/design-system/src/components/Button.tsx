@@ -3,13 +3,7 @@ import { cx } from '../lib/cx';
 import { Icon, type IconName } from './Icon';
 
 export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'outline'
-  | 'ghost'
-  | 'soft'
-  | 'danger'
-  | 'danger-soft';
+  'primary' | 'secondary' | 'outline' | 'ghost' | 'soft' | 'danger' | 'danger-soft';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;

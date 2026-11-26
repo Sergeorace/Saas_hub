@@ -5,7 +5,9 @@ const DAY_ORDER = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'] as const;
 export function establishmentAddress(establishment: Establishment): string {
   const address = establishment.address;
   if (!address) return establishment.primarySite?.address ?? '';
-  return [address.street, address.district, address.city, address.country].filter(Boolean).join(', ');
+  return [address.street, address.district, address.city, address.country]
+    .filter(Boolean)
+    .join(', ');
 }
 
 export function shortAddress(establishment: Establishment): string {
@@ -22,7 +24,15 @@ export function telHref(phone: string | null | undefined): string | undefined {
 export function dayKey(date = new Date(), timeZone = 'Africa/Lome'): string {
   const formatter = new Intl.DateTimeFormat('en-GB', { timeZone, weekday: 'short' });
   const weekday = formatter.format(date);
-  const map: Record<string, string> = { Sun: 'dim', Mon: 'lun', Tue: 'mar', Wed: 'mer', Thu: 'jeu', Fri: 'ven', Sat: 'sam' };
+  const map: Record<string, string> = {
+    Sun: 'dim',
+    Mon: 'lun',
+    Tue: 'mar',
+    Wed: 'mer',
+    Thu: 'jeu',
+    Fri: 'ven',
+    Sat: 'sam',
+  };
   return map[weekday] ?? DAY_ORDER[date.getDay()];
 }
 
@@ -32,7 +42,12 @@ function minutesOf(value: string): number {
 }
 
 export function zonedMinutes(date = new Date(), timeZone = 'Africa/Lome'): number {
-  const formatter = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false });
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
   const [h, m] = formatter.format(date).split(':').map(Number);
   return (h % 24) * 60 + m;
 }
@@ -55,13 +70,23 @@ export function isOpenNow(establishment: Establishment, at = new Date()): boolea
   return minutes >= open || minutes < close;
 }
 
-export function todayLabelKeys(): Array<{ iso: string; dayKey: string; day: number; month: number }> {
+export function todayLabelKeys(): Array<{
+  iso: string;
+  dayKey: string;
+  day: number;
+  month: number;
+}> {
   const result: Array<{ iso: string; dayKey: string; day: number; month: number }> = [];
   const now = new Date();
   for (let offset = 0; offset < 14; offset += 1) {
     const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
     const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    result.push({ iso, dayKey: DAY_ORDER[date.getDay()], day: date.getDate(), month: date.getMonth() + 1 });
+    result.push({
+      iso,
+      dayKey: DAY_ORDER[date.getDay()],
+      day: date.getDate(),
+      month: date.getMonth() + 1,
+    });
   }
   return result;
 }
@@ -87,6 +112,8 @@ export function distanceKm(
   const toRad = (value: number) => (value * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
   const dLng = toRad(b.lng - a.lng);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
   return Math.round(2 * 6371 * Math.asin(Math.sqrt(h)) * 10) / 10;
 }

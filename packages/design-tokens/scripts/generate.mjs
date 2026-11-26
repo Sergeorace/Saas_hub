@@ -85,7 +85,8 @@ const primitives = Object.fromEntries(pick((s) => s === ':root'));
 const lightTheme = Object.fromEntries(pick((s) => s === ":root, [data-theme='light']"));
 const darkTheme = Object.fromEntries(pick((s) => s === "[data-theme='dark']"));
 
-if (Object.keys(primitives).length === 0) throw new Error('Aucune primitive trouvée dans tokens.css');
+if (Object.keys(primitives).length === 0)
+  throw new Error('Aucune primitive trouvée dans tokens.css');
 if (Object.keys(lightTheme).length === 0) throw new Error('Aucun token de thème clair trouvé');
 if (Object.keys(darkTheme).length === 0) throw new Error('Aucun token de thème sombre trouvé');
 
@@ -158,10 +159,13 @@ const ts = generateTs();
 
 if (check) {
   const stale = [];
-  if (!existsSync(JSON_TARGET) || readFileSync(JSON_TARGET, 'utf8') !== json) stale.push('tokens.json');
+  if (!existsSync(JSON_TARGET) || readFileSync(JSON_TARGET, 'utf8') !== json)
+    stale.push('tokens.json');
   if (!existsSync(TS_TARGET) || readFileSync(TS_TARGET, 'utf8') !== ts) stale.push('src/tokens.ts');
   if (stale.length > 0) {
-    console.error(`Jetons désynchronisés (${stale.join(', ')}) : lancez npm run build -w @resto-hub/design-tokens.`);
+    console.error(
+      `Jetons désynchronisés (${stale.join(', ')}) : lancez npm run build -w @resto-hub/design-tokens.`,
+    );
     process.exit(1);
   }
   console.log(`Jetons à jour — ${Object.keys(light.colors).length} couleurs × 2 thèmes.`);

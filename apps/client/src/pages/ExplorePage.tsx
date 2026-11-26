@@ -57,12 +57,21 @@ export default function ExplorePage() {
       }),
     );
     const cities = Array.from(
-      new Set(all.items.map((item) => item.address?.city).filter((value): value is string => Boolean(value))),
+      new Set(
+        all.items
+          .map((item) => item.address?.city)
+          .filter((value): value is string => Boolean(value)),
+      ),
     ).sort();
     return { items: filtered.items, cities, ratings: Object.fromEntries(ratings) };
   }, [query.q, query.kind, query.city]);
 
-  const applyFilters = (next: { q?: string; kind?: string; city?: string; view?: 'list' | 'map' }) => {
+  const applyFilters = (next: {
+    q?: string;
+    kind?: string;
+    city?: string;
+    view?: 'list' | 'map';
+  }) => {
     navigate(
       withQuery('/recherche', {
         q: next.q ?? q.trim(),
@@ -80,12 +89,19 @@ export default function ExplorePage() {
 
   const onFavorite = async (tenantId: string) => {
     if (!user) {
-      toast.push({ title: t('common.signInRequired'), description: t('establishment.favoriteLogin'), tone: 'info' });
+      toast.push({
+        title: t('common.signInRequired'),
+        description: t('establishment.favoriteLogin'),
+        tone: 'info',
+      });
       navigate('/compte');
       return;
     }
     const added = await toggle(tenantId);
-    toast.push({ title: added ? t('establishment.favorited') : t('establishment.favorite'), tone: 'success' });
+    toast.push({
+      title: added ? t('establishment.favorited') : t('establishment.favorite'),
+      tone: 'success',
+    });
   };
 
   return (

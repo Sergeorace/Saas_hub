@@ -101,7 +101,8 @@ export const frPlatform = {
     unsaved: 'Modifications non enregistrées',
     reload: 'Recharger',
     languagesTitle: 'Langues',
-    languagesHint: 'Langues proposées aux établissements. Le français reste la langue par défaut recommandée.',
+    languagesHint:
+      'Langues proposées aux établissements. Le français reste la langue par défaut recommandée.',
     langFr: 'Français',
     langEn: 'Anglais',
     defaultLanguage: 'Langue par défaut',

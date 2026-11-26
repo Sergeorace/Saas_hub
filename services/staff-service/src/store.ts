@@ -1,4 +1,11 @@
-import { buildAuditEntry, newId, nowIso, randomDigits, randomToken, type AuditEntry } from '@resto-hub/service-kit';
+import {
+  buildAuditEntry,
+  newId,
+  nowIso,
+  randomDigits,
+  randomToken,
+  type AuditEntry,
+} from '@resto-hub/service-kit';
 
 export const STAFF_STATUSES = ['invite', 'actif', 'suspendu', 'sorti'] as const;
 export type StaffStatus = (typeof STAFF_STATUSES)[number];
@@ -176,7 +183,11 @@ export function performanceKey(tenantId: string, employeeId: string): string {
   return `${tenantId}::${employeeId}`;
 }
 
-export function getPerformance(store: StaffStore, tenantId: string, employeeId: string): PerformanceRecord {
+export function getPerformance(
+  store: StaffStore,
+  tenantId: string,
+  employeeId: string,
+): PerformanceRecord {
   const key = performanceKey(tenantId, employeeId);
   const existing = store.performance.get(key);
   if (existing) return existing;
@@ -285,13 +296,105 @@ export function seedStaffDemo(store: StaffStore): void {
   });
 
   const employees: Employee[] = [
-    make('emp_akouvi', 'tnt_sahelgrill', 'Akouvi Mensah', 'Serveur', 'waiter', '+228 90 11 22 33', 'akouvi@sahelgrill.tg', 140000, '1234', 'TMoney 90 12 34 56', 'mobile_money', '2023-02-14'),
-    make('emp_kossi', 'tnt_sahelgrill', 'Kossi Adjo', 'Cuisinier', 'cook', '+228 90 22 33 44', 'kossi@sahelgrill.tg', 160000, '2345', 'Moov Money 96 55 44 33', 'mobile_money', '2022-08-01'),
-    make('emp_sena', 'tnt_sahelgrill', 'Sena Amah', 'Barman', 'bartender', '+228 90 33 44 55', 'sena@sahelgrill.tg', 150000, '3456', 'Compte BOA TG 000123', 'bank', '2024-01-09'),
-    make('emp_yawa', 'tnt_sahelgrill', 'Yawa Doe', 'Caissière', 'cashier', '+228 90 44 55 66', 'yawa@sahelgrill.tg', 155000, '4567', 'TMoney 90 77 88 99', 'mobile_money', '2023-11-02'),
-    make('emp_komlan', 'tnt_sahelgrill', 'Komlan Tetteh', 'Manager de salle', 'floor_manager', '+228 90 55 66 77', 'komlan@sahelgrill.tg', 280000, '5678', 'Compte Ecobank TG 445566', 'bank', '2021-05-17'),
-    make('emp_ama', 'tnt_baobab', 'Ama Kponou', 'Serveuse', 'waiter', '+228 91 10 20 30', 'ama@baobab.tg', 130000, '6789', 'Moov Money 97 12 34 56', 'mobile_money', '2024-03-04'),
-    make('emp_yao', 'tnt_baobab', 'Yao Sossou', 'Cuisinier', 'cook', '+228 91 20 30 40', 'yao@baobab.tg', 150000, '7890', 'TMoney 90 55 66 77', 'mobile_money', '2023-06-12', 'cdd'),
+    make(
+      'emp_akouvi',
+      'tnt_sahelgrill',
+      'Akouvi Mensah',
+      'Serveur',
+      'waiter',
+      '+228 90 11 22 33',
+      'akouvi@sahelgrill.tg',
+      140000,
+      '1234',
+      'TMoney 90 12 34 56',
+      'mobile_money',
+      '2023-02-14',
+    ),
+    make(
+      'emp_kossi',
+      'tnt_sahelgrill',
+      'Kossi Adjo',
+      'Cuisinier',
+      'cook',
+      '+228 90 22 33 44',
+      'kossi@sahelgrill.tg',
+      160000,
+      '2345',
+      'Moov Money 96 55 44 33',
+      'mobile_money',
+      '2022-08-01',
+    ),
+    make(
+      'emp_sena',
+      'tnt_sahelgrill',
+      'Sena Amah',
+      'Barman',
+      'bartender',
+      '+228 90 33 44 55',
+      'sena@sahelgrill.tg',
+      150000,
+      '3456',
+      'Compte BOA TG 000123',
+      'bank',
+      '2024-01-09',
+    ),
+    make(
+      'emp_yawa',
+      'tnt_sahelgrill',
+      'Yawa Doe',
+      'Caissière',
+      'cashier',
+      '+228 90 44 55 66',
+      'yawa@sahelgrill.tg',
+      155000,
+      '4567',
+      'TMoney 90 77 88 99',
+      'mobile_money',
+      '2023-11-02',
+    ),
+    make(
+      'emp_komlan',
+      'tnt_sahelgrill',
+      'Komlan Tetteh',
+      'Manager de salle',
+      'floor_manager',
+      '+228 90 55 66 77',
+      'komlan@sahelgrill.tg',
+      280000,
+      '5678',
+      'Compte Ecobank TG 445566',
+      'bank',
+      '2021-05-17',
+    ),
+    make(
+      'emp_ama',
+      'tnt_baobab',
+      'Ama Kponou',
+      'Serveuse',
+      'waiter',
+      '+228 91 10 20 30',
+      'ama@baobab.tg',
+      130000,
+      '6789',
+      'Moov Money 97 12 34 56',
+      'mobile_money',
+      '2024-03-04',
+    ),
+    make(
+      'emp_yao',
+      'tnt_baobab',
+      'Yao Sossou',
+      'Cuisinier',
+      'cook',
+      '+228 91 20 30 40',
+      'yao@baobab.tg',
+      150000,
+      '7890',
+      'TMoney 90 55 66 77',
+      'mobile_money',
+      '2023-06-12',
+      'cdd',
+    ),
   ];
   for (const employee of employees) store.employees.set(employee.id, employee);
 
@@ -372,7 +475,9 @@ export function seedStaffDemo(store: StaffStore): void {
       const date = dateOnly(-day);
       const clockIn = new Date(`${date}T09:05:00.000Z`).toISOString();
       const overtime = employeeId === 'emp_akouvi' && day % 3 === 0 ? 45 : 0;
-      const clockOut = new Date(new Date(clockIn).getTime() + (8 * 60 + 5 + overtime) * 60000).toISOString();
+      const clockOut = new Date(
+        new Date(clockIn).getTime() + (8 * 60 + 5 + overtime) * 60000,
+      ).toISOString();
       const record: AttendanceRecord = {
         id: newId('att'),
         tenantId: 'tnt_sahelgrill',

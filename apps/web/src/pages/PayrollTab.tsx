@@ -62,7 +62,14 @@ const RUN_TONE: Record<PayrollRunStatus, BadgeTone> = {
   a_rejouer: 'warning',
 };
 
-const RULE_TYPES: PayRuleType[] = ['prime', 'indemnite', 'cotisation', 'retenue', 'impot', 'avance'];
+const RULE_TYPES: PayRuleType[] = [
+  'prime',
+  'indemnite',
+  'cotisation',
+  'retenue',
+  'impot',
+  'avance',
+];
 const RULE_BASES: PayRuleBase[] = [
   'salaire_base',
   'salaire_journalier',
@@ -94,7 +101,9 @@ function saveBlob(blob: Blob, fileName: string) {
 
 function tranchesToText(tranches?: PayRuleTier[]): string {
   if (!tranches?.length) return '';
-  return tranches.map((tier) => `${tier.upTo === null ? '-' : tier.upTo}:${tier.ratePercent}`).join(' ; ');
+  return tranches
+    .map((tier) => `${tier.upTo === null ? '-' : tier.upTo}:${tier.ratePercent}`)
+    .join(' ; ');
 }
 
 function parseTranches(text: string): PayRuleTier[] {
@@ -144,7 +153,9 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
   const [summary, setSummary] = useState<PayrollSummary | null>(null);
   const [runs, setRuns] = useState<PayrollRunSummary[]>([]);
   const [settings, setSettings] = useState<PayrollSettings | null>(null);
-  const [audit, setAudit] = useState<{ entries: StaffAuditEntry[]; integrity: boolean } | null>(null);
+  const [audit, setAudit] = useState<{ entries: StaffAuditEntry[]; integrity: boolean } | null>(
+    null,
+  );
   const [selected, setSelected] = useState<PayrollRunDetail | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -158,10 +169,22 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
     amountXof: string;
     note: string;
   }>({ employeeId: '', type: 'prime', label: '', amountXof: '', note: '' });
-  const [adjustDraft, setAdjustDraft] = useState<Array<{ employeeId: string; type: PayrollAdjustmentType; label: string; amountXof: number; note: string }>>([]);
+  const [adjustDraft, setAdjustDraft] = useState<
+    Array<{
+      employeeId: string;
+      type: PayrollAdjustmentType;
+      label: string;
+      amountXof: number;
+      note: string;
+    }>
+  >([]);
   const [traceEmployeeId, setTraceEmployeeId] = useState<string | null>(null);
 
-  const [draft, setDraft] = useState<{ monthlyHours: string; workingDaysPerMonth: string; rules: PayRule[] } | null>(null);
+  const [draft, setDraft] = useState<{
+    monthlyHours: string;
+    workingDaysPerMonth: string;
+    rules: PayRule[];
+  } | null>(null);
   const [tranchesText, setTranchesText] = useState<Record<string, string>>({});
   const [issues, setIssues] = useState<PayRuleIssue[]>([]);
 
@@ -221,7 +244,10 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
         })),
       );
       setTraceEmployeeId(result.run.payslips[0]?.employeeId ?? null);
-      setAdjustForm((current) => ({ ...current, employeeId: result.run.payslips[0]?.employeeId ?? '' }));
+      setAdjustForm((current) => ({
+        ...current,
+        employeeId: result.run.payslips[0]?.employeeId ?? '',
+      }));
     } catch (cause) {
       toast.push({ title: t('payroll.error'), description: errorMessage(cause), tone: 'error' });
     }
@@ -241,18 +267,24 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
   };
 
   const prepareRun = () =>
-    run(async () => {
-      const result = await payrollApi.createRun(tenantId, {
-        period: runForm.period,
-        notes: runForm.notes || undefined,
-      });
-      setPrepareModal(false);
-      setRunForm({ period: currentPeriod(), notes: '' });
-      setSelected(result.run);
-      setAdjustDraft([]);
-      setTraceEmployeeId(result.run.payslips[0]?.employeeId ?? null);
-      setAdjustForm((current) => ({ ...current, employeeId: result.run.payslips[0]?.employeeId ?? '' }));
-    }, t('payroll.runCreated', { period: runForm.period }));
+    run(
+      async () => {
+        const result = await payrollApi.createRun(tenantId, {
+          period: runForm.period,
+          notes: runForm.notes || undefined,
+        });
+        setPrepareModal(false);
+        setRunForm({ period: currentPeriod(), notes: '' });
+        setSelected(result.run);
+        setAdjustDraft([]);
+        setTraceEmployeeId(result.run.payslips[0]?.employeeId ?? null);
+        setAdjustForm((current) => ({
+          ...current,
+          employeeId: result.run.payslips[0]?.employeeId ?? '',
+        }));
+      },
+      t('payroll.runCreated', { period: runForm.period }),
+    );
 
   const recalculate = () =>
     run(async () => {
@@ -352,7 +384,9 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
   const updateRule = (index: number, patch: Partial<PayRule>) => {
     setDraft((current) => {
       if (!current) return current;
-      const rules = current.rules.map((rule, position) => (position === index ? { ...rule, ...patch } : rule));
+      const rules = current.rules.map((rule, position) =>
+        position === index ? { ...rule, ...patch } : rule,
+      );
       return { ...current, rules };
     });
   };
@@ -397,9 +431,16 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
       const rules = rulesWithTranches();
       const result = await payrollApi.validateSettings(tenantId, rules);
       setIssues(result.issues);
-      toast.push({ title: result.valid ? t('payroll.rulesValid') : t('payroll.invalidRules'), tone: result.valid ? 'success' : 'warning' });
+      toast.push({
+        title: result.valid ? t('payroll.rulesValid') : t('payroll.invalidRules'),
+        tone: result.valid ? 'success' : 'warning',
+      });
     } catch (cause) {
-      toast.push({ title: t('payroll.tranchesInvalid'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('payroll.tranchesInvalid'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setPending(false);
     }
@@ -420,7 +461,11 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
     } catch (cause) {
       const details = issueList(cause);
       if (details.length) setIssues(details);
-      toast.push({ title: t('payroll.invalidRules'), description: errorMessage(cause), tone: 'error' });
+      toast.push({
+        title: t('payroll.invalidRules'),
+        description: errorMessage(cause),
+        tone: 'error',
+      });
     } finally {
       setPending(false);
     }
@@ -445,10 +490,30 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
           </div>
         ),
       },
-      { key: 'base', header: t('payroll.colBase'), align: 'right', render: (row) => formatXof(row.baseSalaryXof, locale) },
-      { key: 'hours', header: t('payroll.colHours'), align: 'right', render: (row) => `${row.hoursWorked.toFixed(1)} h` },
-      { key: 'tips', header: t('payroll.colTips'), align: 'right', render: (row) => formatXof(row.tipsXof, locale) },
-      { key: 'net', header: t('payroll.colNet'), align: 'right', render: (row) => <strong>{formatXof(row.netXof, locale)}</strong> },
+      {
+        key: 'base',
+        header: t('payroll.colBase'),
+        align: 'right',
+        render: (row) => formatXof(row.baseSalaryXof, locale),
+      },
+      {
+        key: 'hours',
+        header: t('payroll.colHours'),
+        align: 'right',
+        render: (row) => `${row.hoursWorked.toFixed(1)} h`,
+      },
+      {
+        key: 'tips',
+        header: t('payroll.colTips'),
+        align: 'right',
+        render: (row) => formatXof(row.tipsXof, locale),
+      },
+      {
+        key: 'net',
+        header: t('payroll.colNet'),
+        align: 'right',
+        render: (row) => <strong>{formatXof(row.netXof, locale)}</strong>,
+      },
       {
         key: 'sent',
         header: t('payroll.colSent'),
@@ -478,13 +543,22 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
   );
 
   const componentColumns: Column<PayComponent>[] = [
-    { key: 'label', header: t('payroll.component'), render: (row) => `${row.label} · ${t(`payroll.type.${row.type}`)}` },
-    { key: 'base', header: t('payroll.baseValue'), align: 'right', render: (row) =>
-      row.base === 'heures_sup'
-        ? `${row.baseValue} h`
-        : row.base === 'jours_absence'
-          ? `${row.baseValue} j`
-          : formatXof(row.baseValue, locale) },
+    {
+      key: 'label',
+      header: t('payroll.component'),
+      render: (row) => `${row.label} · ${t(`payroll.type.${row.type}`)}`,
+    },
+    {
+      key: 'base',
+      header: t('payroll.baseValue'),
+      align: 'right',
+      render: (row) =>
+        row.base === 'heures_sup'
+          ? `${row.baseValue} h`
+          : row.base === 'jours_absence'
+            ? `${row.baseValue} j`
+            : formatXof(row.baseValue, locale),
+    },
     { key: 'operation', header: t('payroll.operation'), render: (row) => row.operation },
     {
       key: 'amount',
@@ -492,20 +566,51 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
       align: 'right',
       render: (row) => (
         <span>
-          {formatXof(row.amountXof, locale)} {row.capApplied && <Badge tone="warning">{t('payroll.capApplied')}</Badge>}
+          {formatXof(row.amountXof, locale)}{' '}
+          {row.capApplied && <Badge tone="warning">{t('payroll.capApplied')}</Badge>}
         </span>
       ),
     },
   ];
 
   const runColumns: Column<PayrollRunSummary>[] = [
-    { key: 'period', header: t('payroll.colPeriod'), render: (row) => <strong>{row.periodLabel}</strong> },
-    { key: 'status', header: t('payroll.colStatus'), render: (row) => <Badge tone={RUN_TONE[row.status]} dot>{t(`payroll.status.${row.status}`)}</Badge> },
-    { key: 'headcount', header: t('payroll.colHeadcount'), align: 'right', render: (row) => row.totals.headcount },
-    { key: 'net', header: t('payroll.colNet'), align: 'right', render: (row) => formatXof(row.totals.netXof, locale) },
+    {
+      key: 'period',
+      header: t('payroll.colPeriod'),
+      render: (row) => <strong>{row.periodLabel}</strong>,
+    },
+    {
+      key: 'status',
+      header: t('payroll.colStatus'),
+      render: (row) => (
+        <Badge tone={RUN_TONE[row.status]} dot>
+          {t(`payroll.status.${row.status}`)}
+        </Badge>
+      ),
+    },
+    {
+      key: 'headcount',
+      header: t('payroll.colHeadcount'),
+      align: 'right',
+      render: (row) => row.totals.headcount,
+    },
+    {
+      key: 'net',
+      header: t('payroll.colNet'),
+      align: 'right',
+      render: (row) => formatXof(row.totals.netXof, locale),
+    },
     { key: 'prepared', header: t('payroll.colPrepared'), render: (row) => row.preparedBy ?? '—' },
-    { key: 'validated', header: t('payroll.colValidated'), render: (row) => row.validatedBy ?? '—' },
-    { key: 'paid', header: t('payroll.colPaid'), render: (row) => (row.paidAt ? formatDate(row.paidAt, locale) : '—') },
+    {
+      key: 'validated',
+      header: t('payroll.colValidated'),
+      render: (row) => row.validatedBy ?? '—',
+    },
+    {
+      key: 'paid',
+      header: t('payroll.colPaid'),
+      render: (row) => (row.paidAt ? formatDate(row.paidAt, locale) : '—'),
+    },
     {
       key: 'action',
       header: t('payroll.colAction'),
@@ -518,14 +623,34 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
   ];
 
   const auditColumns: Column<StaffAuditEntry>[] = [
-    { key: 'at', header: t('payroll.colAt'), render: (row) => formatDate(row.createdAt, locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) },
+    {
+      key: 'at',
+      header: t('payroll.colAt'),
+      render: (row) =>
+        formatDate(row.createdAt, locale, {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+    },
     { key: 'actor', header: t('payroll.colActor'), render: (row) => row.actorId },
-    { key: 'action', header: t('payroll.colAction'), render: (row) => <Badge tone="neutral">{row.action}</Badge> },
-    { key: 'target', header: t('payroll.colTarget'), render: (row) => `${row.targetType} · ${row.targetId}` },
+    {
+      key: 'action',
+      header: t('payroll.colAction'),
+      render: (row) => <Badge tone="neutral">{row.action}</Badge>,
+    },
+    {
+      key: 'target',
+      header: t('payroll.colTarget'),
+      render: (row) => `${row.targetType} · ${row.targetId}`,
+    },
   ];
 
   if (!canView) {
-    return <EmptyState icon="lock" title={t('payroll.forbidden')} description={t('payroll.readOnly')} />;
+    return (
+      <EmptyState icon="lock" title={t('payroll.forbidden')} description={t('payroll.readOnly')} />
+    );
   }
 
   if (loading && !summary) {
@@ -539,8 +664,11 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
     );
   }
 
-  const editable = selected ? !selected.locked && !['validee', 'en_cours', 'reussi'].includes(selected.status) : false;
-  const trace = selected?.payslips.find((payslip) => payslip.employeeId === traceEmployeeId) ?? null;
+  const editable = selected
+    ? !selected.locked && !['validee', 'en_cours', 'reussi'].includes(selected.status)
+    : false;
+  const trace =
+    selected?.payslips.find((payslip) => payslip.employeeId === traceEmployeeId) ?? null;
   const latestPaid = summary?.latestPaid ?? null;
   const currentRun = summary?.currentRun ?? null;
 
@@ -563,14 +691,25 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
             {t('payroll.refresh')}
           </Button>
           {canPrepare && (
-            <Button size="sm" iconLeft="plus" onClick={() => { setRunForm({ period: currentPeriod(), notes: '' }); setPrepareModal(true); }}>
+            <Button
+              size="sm"
+              iconLeft="plus"
+              onClick={() => {
+                setRunForm({ period: currentPeriod(), notes: '' });
+                setPrepareModal(true);
+              }}
+            >
               {t('payroll.prepare')}
             </Button>
           )}
         </div>
       </div>
 
-      {error && <p className="auth-error" role="alert">{error}</p>}
+      {error && (
+        <p className="auth-error" role="alert">
+          {error}
+        </p>
+      )}
 
       {section === 'runs' && (
         <>
@@ -583,7 +722,13 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
             />
             <StatCard
               label={t('payroll.statNet')}
-              value={currentRun ? formatXof(currentRun.totals.netXof, locale) : latestPaid ? formatXof(latestPaid.totals.netXof, locale) : '—'}
+              value={
+                currentRun
+                  ? formatXof(currentRun.totals.netXof, locale)
+                  : latestPaid
+                    ? formatXof(latestPaid.totals.netXof, locale)
+                    : '—'
+              }
               icon="wallet"
               meta={currentRun?.periodLabel ?? latestPaid?.periodLabel ?? t('payroll.statNone')}
             />
@@ -592,22 +737,41 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
               label={t('payroll.statLastPaid')}
               value={latestPaid ? formatXof(latestPaid.totals.netXof, locale) : '—'}
               icon="check-circle"
-              meta={latestPaid?.paidAt ? t('payroll.statLastPaidMeta', { period: latestPaid.periodLabel, date: formatDate(latestPaid.paidAt, locale) }) : t('payroll.statNone')}
+              meta={
+                latestPaid?.paidAt
+                  ? t('payroll.statLastPaidMeta', {
+                      period: latestPaid.periodLabel,
+                      date: formatDate(latestPaid.paidAt, locale),
+                    })
+                  : t('payroll.statNone')
+              }
             />
           </div>
 
           <Card>
-            <CardHeader title={t('payroll.runsTitle')} action={<Badge tone="neutral">{runs.length}</Badge>} />
+            <CardHeader
+              title={t('payroll.runsTitle')}
+              action={<Badge tone="neutral">{runs.length}</Badge>}
+            />
             <CardBody>
               {runs.length === 0 ? (
                 <EmptyState
                   icon="banknote"
                   title={t('payroll.runsEmpty')}
                   description={t('payroll.prepareHint')}
-                  action={canPrepare ? <Button onClick={() => setPrepareModal(true)}>{t('payroll.prepare')}</Button> : undefined}
+                  action={
+                    canPrepare ? (
+                      <Button onClick={() => setPrepareModal(true)}>{t('payroll.prepare')}</Button>
+                    ) : undefined
+                  }
                 />
               ) : (
-                <DataTable columns={runColumns} rows={runs} getRowId={(row) => row.id} caption={t('payroll.runsTitle')} />
+                <DataTable
+                  columns={runColumns}
+                  rows={runs}
+                  getRowId={(row) => row.id}
+                  caption={t('payroll.runsTitle')}
+                />
               )}
             </CardBody>
           </Card>
@@ -619,39 +783,96 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                 subtitle={selected.notes || t('payroll.twoLevelHint')}
                 action={
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <Badge tone={RUN_TONE[selected.status]} dot>{t(`payroll.status.${selected.status}`)}</Badge>
+                    <Badge tone={RUN_TONE[selected.status]} dot>
+                      {t(`payroll.status.${selected.status}`)}
+                    </Badge>
                     {selected.locked && <Badge tone="neutral">{t('payroll.locked')}</Badge>}
-                    {selected.retentionBlocked && <Badge tone="danger">{t('payroll.retentionBlocked')}</Badge>}
-                    <Button size="sm" variant="ghost" onClick={() => setSelected(null)}>{t('staff.close')}</Button>
+                    {selected.retentionBlocked && (
+                      <Badge tone="danger">{t('payroll.retentionBlocked')}</Badge>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => setSelected(null)}>
+                      {t('staff.close')}
+                    </Button>
                   </div>
                 }
               />
               <CardBody>
                 {selected.staleReason && (
-                  <p className="auth-error" role="status" style={{ marginTop: 0 }}>{t('payroll.stale')}</p>
+                  <p className="auth-error" role="status" style={{ marginTop: 0 }}>
+                    {t('payroll.stale')}
+                  </p>
                 )}
 
                 <div className="console-stats">
-                  <StatCard label={t('payroll.gross')} value={formatXof(selected.totals.brutXof, locale)} icon="receipt" />
-                  <StatCard label={t('payroll.cotisations')} value={formatXof(selected.totals.cotisationsXof, locale)} icon="shield" />
-                  <StatCard label={`${t('payroll.impots')} · ${t('payroll.retenues')} · ${t('payroll.avances')}`} value={formatXof(selected.totals.impotsXof + selected.totals.retenuesXof + selected.totals.avancesXof, locale)} icon="minus" />
-                  <StatCard label={t('payroll.net')} value={formatXof(selected.totals.netXof, locale)} icon="wallet" meta={`${selected.totals.headcount} · ${t('payroll.workflow')}`} />
+                  <StatCard
+                    label={t('payroll.gross')}
+                    value={formatXof(selected.totals.brutXof, locale)}
+                    icon="receipt"
+                  />
+                  <StatCard
+                    label={t('payroll.cotisations')}
+                    value={formatXof(selected.totals.cotisationsXof, locale)}
+                    icon="shield"
+                  />
+                  <StatCard
+                    label={`${t('payroll.impots')} · ${t('payroll.retenues')} · ${t('payroll.avances')}`}
+                    value={formatXof(
+                      selected.totals.impotsXof +
+                        selected.totals.retenuesXof +
+                        selected.totals.avancesXof,
+                      locale,
+                    )}
+                    icon="minus"
+                  />
+                  <StatCard
+                    label={t('payroll.net')}
+                    value={formatXof(selected.totals.netXof, locale)}
+                    icon="wallet"
+                    meta={`${selected.totals.headcount} · ${t('payroll.workflow')}`}
+                  />
                 </div>
 
                 <div className="console-kv" style={{ marginTop: 'var(--space-4)' }}>
-                  <div><dt>{t('payroll.stepCreated')}</dt><dd>{formatDate(selected.createdAt, locale)} {t('payroll.by', { actor: selected.createdBy })}</dd></div>
-                  <div><dt>{t('payroll.stepPrepared')}</dt><dd>{selected.preparedBy ? `${selected.preparedBy} · ${selected.preparedAt ? formatDate(selected.preparedAt, locale) : ''}` : '—'}</dd></div>
-                  <div><dt>{t('payroll.stepValidated')}</dt><dd>{selected.validatedBy ? `${selected.validatedBy} · ${selected.validatedAt ? formatDate(selected.validatedAt, locale) : ''}` : '—'}</dd></div>
-                  <div><dt>{t('payroll.stepPaid')}</dt><dd>{selected.paidAt ? formatDate(selected.paidAt, locale) : '—'}</dd></div>
+                  <div>
+                    <dt>{t('payroll.stepCreated')}</dt>
+                    <dd>
+                      {formatDate(selected.createdAt, locale)}{' '}
+                      {t('payroll.by', { actor: selected.createdBy })}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t('payroll.stepPrepared')}</dt>
+                    <dd>
+                      {selected.preparedBy
+                        ? `${selected.preparedBy} · ${selected.preparedAt ? formatDate(selected.preparedAt, locale) : ''}`
+                        : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t('payroll.stepValidated')}</dt>
+                    <dd>
+                      {selected.validatedBy
+                        ? `${selected.validatedBy} · ${selected.validatedAt ? formatDate(selected.validatedAt, locale) : ''}`
+                        : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t('payroll.stepPaid')}</dt>
+                    <dd>{selected.paidAt ? formatDate(selected.paidAt, locale) : '—'}</dd>
+                  </div>
                 </div>
 
                 <div className="console-toolbar" style={{ marginTop: 'var(--space-4)' }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {canPrepare && editable && (
-                      <Button size="sm" variant="outline" onClick={() => void recalculate()}>{t('payroll.recalculate')}</Button>
+                      <Button size="sm" variant="outline" onClick={() => void recalculate()}>
+                        {t('payroll.recalculate')}
+                      </Button>
                     )}
                     {canPrepare && selected.status !== 'brouillon' && (
-                      <Button size="sm" variant="ghost" onClick={() => void sendBulletins()}>{t('payroll.sendBulletins')}</Button>
+                      <Button size="sm" variant="ghost" onClick={() => void sendBulletins()}>
+                        {t('payroll.sendBulletins')}
+                      </Button>
                     )}
                     {canApprove && selected.status === 'preparee' && (
                       <Button
@@ -665,53 +886,91 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                     )}
                     {canPay && ['validee', 'echoue', 'a_rejouer'].includes(selected.status) && (
                       <Button size="sm" loading={pending} onClick={() => void payRun()}>
-                        {selected.status === 'validee' ? t('payroll.payRun') : t('payroll.payRetry')}
+                        {selected.status === 'validee'
+                          ? t('payroll.payRun')
+                          : t('payroll.payRetry')}
                       </Button>
                     )}
                   </div>
                   {canExport && (
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('csv')}>{t('payroll.exportCsv')}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('xls')}>{t('payroll.exportXls')}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('pdf')}>{t('payroll.exportPdf')}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('rules.csv')}>{t('payroll.exportRules')}</Button>
+                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('csv')}>
+                        {t('payroll.exportCsv')}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('xls')}>
+                        {t('payroll.exportXls')}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => void downloadExport('pdf')}>
+                        {t('payroll.exportPdf')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => void downloadExport('rules.csv')}
+                      >
+                        {t('payroll.exportRules')}
+                      </Button>
                     </div>
                   )}
                 </div>
-                {canApprove && selected.status === 'preparee' && selected.preparedBy === actorId && (
-                  <p className="console-muted">{t('payroll.segregation')}</p>
-                )}
+                {canApprove &&
+                  selected.status === 'preparee' &&
+                  selected.preparedBy === actorId && (
+                    <p className="console-muted">{t('payroll.segregation')}</p>
+                  )}
                 {canPay && ['validee', 'echoue', 'a_rejouer'].includes(selected.status) && (
                   <p className="console-muted">{t('payroll.payHint')}</p>
                 )}
 
                 <div className="console-2col" style={{ marginTop: 'var(--space-4)' }}>
                   <Card>
-                    <CardHeader title={t('payroll.payslipsTitle')} subtitle={t('payroll.componentsTitle')} />
+                    <CardHeader
+                      title={t('payroll.payslipsTitle')}
+                      subtitle={t('payroll.componentsTitle')}
+                    />
                     <CardBody>
-                      <DataTable columns={payslipColumns} rows={selected.payslips} getRowId={(row) => row.employeeId} caption={t('payroll.payslipsTitle')} />
+                      <DataTable
+                        columns={payslipColumns}
+                        rows={selected.payslips}
+                        getRowId={(row) => row.employeeId}
+                        caption={t('payroll.payslipsTitle')}
+                      />
                     </CardBody>
                   </Card>
                   <Card>
-                    <CardHeader title={t('payroll.adjustmentsTitle')} subtitle={t('payroll.adjustmentsHint')} />
+                    <CardHeader
+                      title={t('payroll.adjustmentsTitle')}
+                      subtitle={t('payroll.adjustmentsHint')}
+                    />
                     <CardBody>
                       {adjustDraft.length === 0 ? (
                         <p className="console-muted">{t('payroll.noAdjustments')}</p>
                       ) : (
                         <ul className="console-queue">
                           {adjustDraft.map((adjustment, index) => {
-                            const employee = selected.payslips.find((payslip) => payslip.employeeId === adjustment.employeeId);
+                            const employee = selected.payslips.find(
+                              (payslip) => payslip.employeeId === adjustment.employeeId,
+                            );
                             return (
                               <li key={`${adjustment.employeeId}-${index}`}>
                                 <div>
-                                  <strong>{employee?.name ?? adjustment.employeeId} · {adjustment.label}</strong>
-                                  <span>{t(`payroll.type.${adjustment.type}`)} · {formatXof(adjustment.amountXof, locale)}</span>
+                                  <strong>
+                                    {employee?.name ?? adjustment.employeeId} · {adjustment.label}
+                                  </strong>
+                                  <span>
+                                    {t(`payroll.type.${adjustment.type}`)} ·{' '}
+                                    {formatXof(adjustment.amountXof, locale)}
+                                  </span>
                                 </div>
                                 {canPrepare && editable && (
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => setAdjustDraft(adjustDraft.filter((_, position) => position !== index))}
+                                    onClick={() =>
+                                      setAdjustDraft(
+                                        adjustDraft.filter((_, position) => position !== index),
+                                      )
+                                    }
                                   >
                                     {t('staff.refuse')}
                                   </Button>
@@ -726,30 +985,61 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                           <Select
                             label={t('payroll.adjEmployee')}
                             value={adjustForm.employeeId}
-                            onChange={(event) => setAdjustForm({ ...adjustForm, employeeId: event.target.value })}
-                            options={selected.payslips.map((payslip) => ({ value: payslip.employeeId, label: payslip.name }))}
+                            onChange={(event) =>
+                              setAdjustForm({ ...adjustForm, employeeId: event.target.value })
+                            }
+                            options={selected.payslips.map((payslip) => ({
+                              value: payslip.employeeId,
+                              label: payslip.name,
+                            }))}
                           />
                           <Select
                             label={t('payroll.adjType')}
                             value={adjustForm.type}
-                            onChange={(event) => setAdjustForm({ ...adjustForm, type: event.target.value as PayrollAdjustmentType })}
-                            options={ADJUSTMENT_TYPES.map((type) => ({ value: type, label: t(`payroll.type.${type}`) }))}
+                            onChange={(event) =>
+                              setAdjustForm({
+                                ...adjustForm,
+                                type: event.target.value as PayrollAdjustmentType,
+                              })
+                            }
+                            options={ADJUSTMENT_TYPES.map((type) => ({
+                              value: type,
+                              label: t(`payroll.type.${type}`),
+                            }))}
                           />
-                          <Input label={t('payroll.adjLabel')} value={adjustForm.label} onChange={(event) => setAdjustForm({ ...adjustForm, label: event.target.value })} />
+                          <Input
+                            label={t('payroll.adjLabel')}
+                            value={adjustForm.label}
+                            onChange={(event) =>
+                              setAdjustForm({ ...adjustForm, label: event.target.value })
+                            }
+                          />
                           <Input
                             label={t('payroll.adjAmount')}
                             type="number"
                             min={1}
                             value={adjustForm.amountXof}
-                            onChange={(event) => setAdjustForm({ ...adjustForm, amountXof: event.target.value })}
+                            onChange={(event) =>
+                              setAdjustForm({ ...adjustForm, amountXof: event.target.value })
+                            }
                           />
-                          <Input label={t('payroll.adjNote')} value={adjustForm.note} onChange={(event) => setAdjustForm({ ...adjustForm, note: event.target.value })} />
+                          <Input
+                            label={t('payroll.adjNote')}
+                            value={adjustForm.note}
+                            onChange={(event) =>
+                              setAdjustForm({ ...adjustForm, note: event.target.value })
+                            }
+                          />
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <Button
                               size="sm"
                               variant="outline"
                               iconLeft="plus"
-                              disabled={!adjustForm.employeeId || adjustForm.label.trim().length < 2 || Number(adjustForm.amountXof) < 1}
+                              disabled={
+                                !adjustForm.employeeId ||
+                                adjustForm.label.trim().length < 2 ||
+                                Number(adjustForm.amountXof) < 1
+                              }
                               onClick={() => {
                                 setAdjustDraft([
                                   ...adjustDraft,
@@ -761,12 +1051,21 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                                     note: adjustForm.note,
                                   },
                                 ]);
-                                setAdjustForm({ ...adjustForm, label: '', amountXof: '', note: '' });
+                                setAdjustForm({
+                                  ...adjustForm,
+                                  label: '',
+                                  amountXof: '',
+                                  note: '',
+                                });
                               }}
                             >
                               {t('payroll.addAdjustment')}
                             </Button>
-                            <Button size="sm" loading={pending} onClick={() => void saveAdjustments()}>
+                            <Button
+                              size="sm"
+                              loading={pending}
+                              onClick={() => void saveAdjustments()}
+                            >
                               {t('payroll.adjSave')}
                             </Button>
                           </div>
@@ -785,24 +1084,59 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                     />
                     <CardBody>
                       <dl className="console-kv">
-                        <div><dt>{t('payroll.gross')}</dt><dd>{formatXof(trace.brutXof, locale)}</dd></div>
-                        <div><dt>{t('payroll.brutImposable')}</dt><dd>{formatXof(trace.brutImposableXof, locale)}</dd></div>
-                        <div><dt>{t('payroll.cotisations')}</dt><dd>{formatXof(trace.cotisationsXof, locale)}</dd></div>
-                        <div><dt>{t('payroll.retenues')}</dt><dd>{formatXof(trace.retenuesXof, locale)}</dd></div>
-                        <div><dt>{t('payroll.impots')}</dt><dd>{formatXof(trace.impotsXof, locale)}</dd></div>
-                        <div><dt>{t('payroll.avances')}</dt><dd>{formatXof(trace.avancesXof, locale)}</dd></div>
+                        <div>
+                          <dt>{t('payroll.gross')}</dt>
+                          <dd>{formatXof(trace.brutXof, locale)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t('payroll.brutImposable')}</dt>
+                          <dd>{formatXof(trace.brutImposableXof, locale)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t('payroll.cotisations')}</dt>
+                          <dd>{formatXof(trace.cotisationsXof, locale)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t('payroll.retenues')}</dt>
+                          <dd>{formatXof(trace.retenuesXof, locale)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t('payroll.impots')}</dt>
+                          <dd>{formatXof(trace.impotsXof, locale)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t('payroll.avances')}</dt>
+                          <dd>{formatXof(trace.avancesXof, locale)}</dd>
+                        </div>
                       </dl>
-                      <DataTable columns={componentColumns} rows={trace.components} getRowId={(row) => row.ruleId} caption={t('payroll.componentsTitle')} />
+                      <DataTable
+                        columns={componentColumns}
+                        rows={trace.components}
+                        getRowId={(row) => row.ruleId}
+                        caption={t('payroll.componentsTitle')}
+                      />
                     </CardBody>
                   </Card>
                 )}
 
                 <Card style={{ marginTop: 'var(--space-4)' }}>
-                  <CardHeader title={t('payroll.attemptsTitle')} action={selected.payment ? <Badge tone={RUN_TONE[selected.status]}>{t(`payroll.paymentStatus.${selected.payment.status}`)}</Badge> : <Badge tone="neutral">{t('payroll.noAttempts')}</Badge>} />
+                  <CardHeader
+                    title={t('payroll.attemptsTitle')}
+                    action={
+                      selected.payment ? (
+                        <Badge tone={RUN_TONE[selected.status]}>
+                          {t(`payroll.paymentStatus.${selected.payment.status}`)}
+                        </Badge>
+                      ) : (
+                        <Badge tone="neutral">{t('payroll.noAttempts')}</Badge>
+                      )
+                    }
+                  />
                   <CardBody>
                     {selected.payment && (
                       <p className="console-muted">
-                        {t('payroll.reference')} : <strong>{selected.payment.reference}</strong> · {selected.payment.message}
+                        {t('payroll.reference')} : <strong>{selected.payment.reference}</strong> ·{' '}
+                        {selected.payment.message}
                       </p>
                     )}
                     {selected.attempts.length > 0 && (
@@ -810,11 +1144,18 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                         {selected.attempts.map((attempt, index) => (
                           <li key={`${attempt.reference}-${index}`}>
                             <div>
-                              <strong>{t(`payroll.paymentStatus.${attempt.status}`)} · {formatDate(attempt.at, locale)}</strong>
+                              <strong>
+                                {t(`payroll.paymentStatus.${attempt.status}`)} ·{' '}
+                                {formatDate(attempt.at, locale)}
+                              </strong>
                               <span>{attempt.message}</span>
                             </div>
                             {attempt.walletAvailableXof !== undefined && (
-                              <span className="console-muted">{t('payroll.available', { amount: formatXof(attempt.walletAvailableXof, locale) })}</span>
+                              <span className="console-muted">
+                                {t('payroll.available', {
+                                  amount: formatXof(attempt.walletAvailableXof, locale),
+                                })}
+                              </span>
                             )}
                           </li>
                         ))}
@@ -836,11 +1177,17 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
               subtitle={t('payroll.settingsHint')}
               action={
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  <Button size="sm" variant="ghost" onClick={() => void validateRules()}>{t('payroll.validateRules')}</Button>
+                  <Button size="sm" variant="ghost" onClick={() => void validateRules()}>
+                    {t('payroll.validateRules')}
+                  </Button>
                   {canPrepare && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => void resetSettings()}>{t('payroll.resetSettings')}</Button>
-                      <Button size="sm" loading={pending} onClick={() => void saveSettings()}>{t('payroll.saveSettings')}</Button>
+                      <Button size="sm" variant="outline" onClick={() => void resetSettings()}>
+                        {t('payroll.resetSettings')}
+                      </Button>
+                      <Button size="sm" loading={pending} onClick={() => void saveSettings()}>
+                        {t('payroll.saveSettings')}
+                      </Button>
                     </>
                   )}
                 </div>
@@ -865,7 +1212,9 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                   max={31}
                   value={draft.workingDaysPerMonth}
                   disabled={!canPrepare}
-                  onChange={(event) => setDraft({ ...draft, workingDaysPerMonth: event.target.value })}
+                  onChange={(event) =>
+                    setDraft({ ...draft, workingDaysPerMonth: event.target.value })
+                  }
                 />
               </div>
             </CardBody>
@@ -875,67 +1224,188 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
             <CardHeader
               title={t('payroll.rulesTitle')}
               subtitle={`${draft.rules.length} ${t('payroll.numRules')}`}
-              action={canPrepare ? <Button size="sm" variant="outline" iconLeft="plus" onClick={addRule}>{t('payroll.addRule')}</Button> : undefined}
+              action={
+                canPrepare ? (
+                  <Button size="sm" variant="outline" iconLeft="plus" onClick={addRule}>
+                    {t('payroll.addRule')}
+                  </Button>
+                ) : undefined
+              }
             />
             <CardBody>
               <div className="console-stack">
                 {draft.rules.map((rule, index) => (
-                  <div key={rule.id} className="console-toolbar" style={{ marginBottom: 0, alignItems: 'flex-start', borderTop: index === 0 ? 'none' : '1px solid var(--border)', paddingTop: index === 0 ? 0 : 'var(--space-4)' }}>
+                  <div
+                    key={rule.id}
+                    className="console-toolbar"
+                    style={{
+                      marginBottom: 0,
+                      alignItems: 'flex-start',
+                      borderTop: index === 0 ? 'none' : '1px solid var(--border)',
+                      paddingTop: index === 0 ? 0 : 'var(--space-4)',
+                    }}
+                  >
                     <div className="console-stack" style={{ flex: '1 1 480px', minWidth: 260 }}>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <div
+                        style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}
+                      >
                         <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <input type="checkbox" checked={rule.enabled} disabled={!canPrepare} onChange={(event) => updateRule(index, { enabled: event.target.checked })} />
+                          <input
+                            type="checkbox"
+                            checked={rule.enabled}
+                            disabled={!canPrepare}
+                            onChange={(event) =>
+                              updateRule(index, { enabled: event.target.checked })
+                            }
+                          />
                           <span>{t('payroll.ruleEnabled')}</span>
                         </label>
                         <Badge tone={rule.enabled ? 'success' : 'neutral'}>{rule.code}</Badge>
                         <Badge tone="info">{t(`payroll.type.${rule.type}`)}</Badge>
                         <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <input type="checkbox" checked={rule.taxable} disabled={!canPrepare} onChange={(event) => updateRule(index, { taxable: event.target.checked })} />
+                          <input
+                            type="checkbox"
+                            checked={rule.taxable}
+                            disabled={!canPrepare}
+                            onChange={(event) =>
+                              updateRule(index, { taxable: event.target.checked })
+                            }
+                          />
                           <span>{t('payroll.ruleTaxable')}</span>
                         </label>
                         <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <input type="checkbox" checked={rule.deductible} disabled={!canPrepare} onChange={(event) => updateRule(index, { deductible: event.target.checked })} />
+                          <input
+                            type="checkbox"
+                            checked={rule.deductible}
+                            disabled={!canPrepare}
+                            onChange={(event) =>
+                              updateRule(index, { deductible: event.target.checked })
+                            }
+                          />
                           <span>{t('payroll.ruleDeductible')}</span>
                         </label>
                       </div>
-                      <div className="console-2col" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-                        <Input label={t('payroll.ruleLabel')} value={rule.label} disabled={!canPrepare} onChange={(event) => updateRule(index, { label: event.target.value })} />
-                        <Input label={t('payroll.ruleCode')} value={rule.code} disabled={!canPrepare} onChange={(event) => updateRule(index, { code: event.target.value.toUpperCase() })} />
+                      <div
+                        className="console-2col"
+                        style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
+                      >
+                        <Input
+                          label={t('payroll.ruleLabel')}
+                          value={rule.label}
+                          disabled={!canPrepare}
+                          onChange={(event) => updateRule(index, { label: event.target.value })}
+                        />
+                        <Input
+                          label={t('payroll.ruleCode')}
+                          value={rule.code}
+                          disabled={!canPrepare}
+                          onChange={(event) =>
+                            updateRule(index, { code: event.target.value.toUpperCase() })
+                          }
+                        />
                         <Select
                           label={t('payroll.ruleType')}
                           value={rule.type}
                           disabled={!canPrepare}
-                          onChange={(event) => updateRule(index, { type: event.target.value as PayRuleType })}
-                          options={RULE_TYPES.map((type) => ({ value: type, label: t(`payroll.type.${type}`) }))}
+                          onChange={(event) =>
+                            updateRule(index, { type: event.target.value as PayRuleType })
+                          }
+                          options={RULE_TYPES.map((type) => ({
+                            value: type,
+                            label: t(`payroll.type.${type}`),
+                          }))}
                         />
                         <Select
                           label={t('payroll.ruleBase')}
                           value={rule.base}
                           disabled={!canPrepare}
-                          onChange={(event) => updateRule(index, { base: event.target.value as PayRuleBase })}
-                          options={RULE_BASES.map((base) => ({ value: base, label: t(`payroll.base.${base}`) }))}
+                          onChange={(event) =>
+                            updateRule(index, { base: event.target.value as PayRuleBase })
+                          }
+                          options={RULE_BASES.map((base) => ({
+                            value: base,
+                            label: t(`payroll.base.${base}`),
+                          }))}
                         />
                         <Select
                           label={t('payroll.ruleKind')}
                           value={rule.kind}
                           disabled={!canPrepare}
-                          onChange={(event) => updateRule(index, { kind: event.target.value as PayRuleKind })}
-                          options={RULE_KINDS.map((kind) => ({ value: kind, label: t(`payroll.kind.${kind}`) }))}
+                          onChange={(event) =>
+                            updateRule(index, { kind: event.target.value as PayRuleKind })
+                          }
+                          options={RULE_KINDS.map((kind) => ({
+                            value: kind,
+                            label: t(`payroll.kind.${kind}`),
+                          }))}
                         />
                         {rule.kind === 'percent' && (
-                          <Input label={t('payroll.ruleRatePercent')} type="number" step="0.01" disabled={!canPrepare} value={String(rule.ratePercent ?? 0)} onChange={(event) => updateRule(index, { ratePercent: optionalNumber(event.target.value) ?? 0 })} />
+                          <Input
+                            label={t('payroll.ruleRatePercent')}
+                            type="number"
+                            step="0.01"
+                            disabled={!canPrepare}
+                            value={String(rule.ratePercent ?? 0)}
+                            onChange={(event) =>
+                              updateRule(index, {
+                                ratePercent: optionalNumber(event.target.value) ?? 0,
+                              })
+                            }
+                          />
                         )}
                         {rule.kind === 'amount' && (
-                          <Input label={t('payroll.ruleRateXof')} type="number" disabled={!canPrepare} value={String(rule.rateXof ?? 0)} onChange={(event) => updateRule(index, { rateXof: optionalNumber(event.target.value) ?? 0 })} />
+                          <Input
+                            label={t('payroll.ruleRateXof')}
+                            type="number"
+                            disabled={!canPrepare}
+                            value={String(rule.rateXof ?? 0)}
+                            onChange={(event) =>
+                              updateRule(index, {
+                                rateXof: optionalNumber(event.target.value) ?? 0,
+                              })
+                            }
+                          />
                         )}
                         {rule.kind === 'heures' && (
                           <>
-                            <Input label={t('payroll.ruleRateXof')} type="number" disabled={!canPrepare} value={String(rule.rateXof ?? 0)} onChange={(event) => updateRule(index, { rateXof: optionalNumber(event.target.value) ?? 0 })} />
-                            <Input label={t('payroll.ruleMultiplier')} type="number" step="0.05" disabled={!canPrepare} value={String(rule.multiplier ?? 1)} onChange={(event) => updateRule(index, { multiplier: optionalNumber(event.target.value) ?? 1 })} />
+                            <Input
+                              label={t('payroll.ruleRateXof')}
+                              type="number"
+                              disabled={!canPrepare}
+                              value={String(rule.rateXof ?? 0)}
+                              onChange={(event) =>
+                                updateRule(index, {
+                                  rateXof: optionalNumber(event.target.value) ?? 0,
+                                })
+                              }
+                            />
+                            <Input
+                              label={t('payroll.ruleMultiplier')}
+                              type="number"
+                              step="0.05"
+                              disabled={!canPrepare}
+                              value={String(rule.multiplier ?? 1)}
+                              onChange={(event) =>
+                                updateRule(index, {
+                                  multiplier: optionalNumber(event.target.value) ?? 1,
+                                })
+                              }
+                            />
                           </>
                         )}
                         {rule.kind === 'jours' && (
-                          <Input label={t('payroll.ruleRatePercent')} type="number" step="0.01" disabled={!canPrepare} value={String(rule.ratePercent ?? 0)} onChange={(event) => updateRule(index, { ratePercent: optionalNumber(event.target.value) ?? 0 })} />
+                          <Input
+                            label={t('payroll.ruleRatePercent')}
+                            type="number"
+                            step="0.01"
+                            disabled={!canPrepare}
+                            value={String(rule.ratePercent ?? 0)}
+                            onChange={(event) =>
+                              updateRule(index, {
+                                ratePercent: optionalNumber(event.target.value) ?? 0,
+                              })
+                            }
+                          />
                         )}
                         {rule.kind === 'tranches' && (
                           <Input
@@ -943,7 +1413,9 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                             hint={t('payroll.tranchesFormat')}
                             disabled={!canPrepare}
                             value={tranchesText[rule.id] ?? ''}
-                            onChange={(event) => setTranchesText({ ...tranchesText, [rule.id]: event.target.value })}
+                            onChange={(event) =>
+                              setTranchesText({ ...tranchesText, [rule.id]: event.target.value })
+                            }
                           />
                         )}
                         <Input
@@ -951,11 +1423,26 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                           type="number"
                           disabled={!canPrepare}
                           value={rule.capXof === undefined ? '' : String(rule.capXof)}
-                          onChange={(event) => updateRule(index, { capXof: optionalNumber(event.target.value) })}
+                          onChange={(event) =>
+                            updateRule(index, { capXof: optionalNumber(event.target.value) })
+                          }
                         />
                       </div>
-                      <Textarea label={t('payroll.ruleDescription')} rows={2} disabled={!canPrepare} value={rule.description} onChange={(event) => updateRule(index, { description: event.target.value })} />
-                      <Input label={t('payroll.ruleLegal')} disabled={!canPrepare} value={rule.legalReference ?? ''} onChange={(event) => updateRule(index, { legalReference: event.target.value })} />
+                      <Textarea
+                        label={t('payroll.ruleDescription')}
+                        rows={2}
+                        disabled={!canPrepare}
+                        value={rule.description}
+                        onChange={(event) => updateRule(index, { description: event.target.value })}
+                      />
+                      <Input
+                        label={t('payroll.ruleLegal')}
+                        disabled={!canPrepare}
+                        value={rule.legalReference ?? ''}
+                        onChange={(event) =>
+                          updateRule(index, { legalReference: event.target.value })
+                        }
+                      />
                     </div>
                   </div>
                 ))}
@@ -967,8 +1454,19 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
             <CardHeader
               title={t('payroll.issuesTitle')}
               action={
-                <Badge tone={issues.some((issue) => issue.level === 'error') ? 'danger' : issues.length ? 'warning' : 'success'} dot>
-                  {issues.filter((issue) => issue.level === 'error').length} {t('payroll.errors')} · {issues.filter((issue) => issue.level === 'warning').length} {t('payroll.warnings')}
+                <Badge
+                  tone={
+                    issues.some((issue) => issue.level === 'error')
+                      ? 'danger'
+                      : issues.length
+                        ? 'warning'
+                        : 'success'
+                  }
+                  dot
+                >
+                  {issues.filter((issue) => issue.level === 'error').length} {t('payroll.errors')} ·{' '}
+                  {issues.filter((issue) => issue.level === 'warning').length}{' '}
+                  {t('payroll.warnings')}
                 </Badge>
               }
             />
@@ -980,7 +1478,10 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
                   {issues.map((issue, index) => (
                     <li key={`${issue.ruleId ?? 'global'}-${index}`}>
                       <div>
-                        <strong>{issue.level === 'error' ? t('payroll.errors') : t('payroll.warnings')} · {issue.ruleId ?? '—'}</strong>
+                        <strong>
+                          {issue.level === 'error' ? t('payroll.errors') : t('payroll.warnings')} ·{' '}
+                          {issue.ruleId ?? '—'}
+                        </strong>
                         <span>{issue.message}</span>
                       </div>
                     </li>
@@ -989,7 +1490,8 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
               )}
               {settings?.updatedAt && (
                 <p className="console-muted" style={{ marginTop: 'var(--space-3)' }}>
-                  {t('payroll.settingsUpdated')} : {formatDate(settings.updatedAt, locale)} {settings.updatedBy ? t('payroll.by', { actor: settings.updatedBy }) : ''}
+                  {t('payroll.settingsUpdated')} : {formatDate(settings.updatedAt, locale)}{' '}
+                  {settings.updatedBy ? t('payroll.by', { actor: settings.updatedBy }) : ''}
                 </p>
               )}
             </CardBody>
@@ -1002,13 +1504,28 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
           <CardHeader
             title={t('payroll.auditTitle')}
             subtitle={t('payroll.auditHint')}
-            action={<Badge tone={audit?.integrity ? 'success' : 'danger'} dot>{audit?.integrity ? t('payroll.auditIntegrityOk') : t('payroll.auditIntegrityBroken')}</Badge>}
+            action={
+              <Badge tone={audit?.integrity ? 'success' : 'danger'} dot>
+                {audit?.integrity
+                  ? t('payroll.auditIntegrityOk')
+                  : t('payroll.auditIntegrityBroken')}
+              </Badge>
+            }
           />
           <CardBody>
             {!audit || audit.entries.length === 0 ? (
-              <EmptyState icon="shield" title={t('payroll.auditEmpty')} description={t('payroll.auditHint')} />
+              <EmptyState
+                icon="shield"
+                title={t('payroll.auditEmpty')}
+                description={t('payroll.auditHint')}
+              />
             ) : (
-              <DataTable columns={auditColumns} rows={audit.entries} getRowId={(row) => row.id} caption={t('payroll.auditTitle')} />
+              <DataTable
+                columns={auditColumns}
+                rows={audit.entries}
+                getRowId={(row) => row.id}
+                caption={t('payroll.auditTitle')}
+              />
             )}
           </CardBody>
         </Card>
@@ -1021,14 +1538,28 @@ export function PayrollTab({ tenantId, locale, permissions, actorId }: Props) {
         description={t('payroll.prepareHint')}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={() => setPrepareModal(false)}>{t('staff.cancel')}</Button>
-            <Button loading={pending} onClick={() => void prepareRun()}>{t('payroll.createRun')}</Button>
+            <Button variant="ghost" onClick={() => setPrepareModal(false)}>
+              {t('staff.cancel')}
+            </Button>
+            <Button loading={pending} onClick={() => void prepareRun()}>
+              {t('payroll.createRun')}
+            </Button>
           </div>
         }
       >
         <div className="console-stack">
-          <Input label={t('payroll.period')} type="month" max={currentPeriod()} value={runForm.period} onChange={(event) => setRunForm({ ...runForm, period: event.target.value })} />
-          <Textarea label={t('payroll.notes')} value={runForm.notes} onChange={(event) => setRunForm({ ...runForm, notes: event.target.value })} />
+          <Input
+            label={t('payroll.period')}
+            type="month"
+            max={currentPeriod()}
+            value={runForm.period}
+            onChange={(event) => setRunForm({ ...runForm, period: event.target.value })}
+          />
+          <Textarea
+            label={t('payroll.notes')}
+            value={runForm.notes}
+            onChange={(event) => setRunForm({ ...runForm, notes: event.target.value })}
+          />
         </div>
       </Modal>
     </div>

@@ -17,7 +17,11 @@ import { accountKey, createLoyaltyStore, entriesFor, seedLoyaltyDemo } from '../
 const INTERNAL_KEY = 'test-internal-key';
 const TENANT = 'tnt_sahelgrill';
 
-function claims(sub: string, name: string, tenantPermissions: Record<string, string[]>): AuthClaims {
+function claims(
+  sub: string,
+  name: string,
+  tenantPermissions: Record<string, string[]>,
+): AuthClaims {
   return {
     sub,
     sid: `ses_${sub}`,
@@ -37,15 +41,33 @@ async function main() {
   const orders = new Map<string, Record<string, unknown>>([
     [
       'ord_paid_1',
-      { id: 'ord_paid_1', number: 'CMD-2026-000101', tenantId: TENANT, paymentStatus: 'payee', totalXof: 12500 },
+      {
+        id: 'ord_paid_1',
+        number: 'CMD-2026-000101',
+        tenantId: TENANT,
+        paymentStatus: 'payee',
+        totalXof: 12500,
+      },
     ],
     [
       'ord_paid_big',
-      { id: 'ord_paid_big', number: 'CMD-2026-000102', tenantId: TENANT, paymentStatus: 'payee', totalXof: 125000 },
+      {
+        id: 'ord_paid_big',
+        number: 'CMD-2026-000102',
+        tenantId: TENANT,
+        paymentStatus: 'payee',
+        totalXof: 125000,
+      },
     ],
     [
       'ord_unpaid',
-      { id: 'ord_unpaid', number: 'CMD-2026-000103', tenantId: TENANT, paymentStatus: 'impayee', totalXof: 8000 },
+      {
+        id: 'ord_unpaid',
+        number: 'CMD-2026-000103',
+        tenantId: TENANT,
+        paymentStatus: 'impayee',
+        totalXof: 8000,
+      },
     ],
   ]);
   const orderRoutes: Route[] = [
@@ -56,7 +78,10 @@ async function main() {
       handler: (ctx) => {
         const order = orders.get(ctx.params.orderId ?? '');
         if (!order || order.tenantId !== ctx.params.tenantId) {
-          return { status: 404, body: { error: { code: 'order_not_found', message: 'Commande introuvable.' } } };
+          return {
+            status: 404,
+            body: { error: { code: 'order_not_found', message: 'Commande introuvable.' } },
+          };
         }
         return { body: { order } };
       },
@@ -138,19 +163,37 @@ async function main() {
     {
       name: 'Favoris : ajout idempotent, suppression et isolation entre comptes',
       run: async () => {
-        const added = await api(base, 'POST', '/api/v1/me/favorites', { tenantId: TENANT }, { token: clientA });
+        const added = await api(
+          base,
+          'POST',
+          '/api/v1/me/favorites',
+          { tenantId: TENANT },
+          { token: clientA },
+        );
         assertStatus(added, 201, 'Favori ajouté');
         assertEqual(added.body.alreadySaved, false, 'Nouveau favori');
-        const again = await api(base, 'POST', '/api/v1/me/favorites', { tenantId: TENANT }, { token: clientA });
+        const again = await api(
+          base,
+          'POST',
+          '/api/v1/me/favorites',
+          { tenantId: TENANT },
+          { token: clientA },
+        );
         assertStatus(again, 200, 'Rejeu idempotent');
         assertEqual(again.body.alreadySaved, true, 'Favori déjà présent');
         const mine = await api(base, 'GET', '/api/v1/me/favorites', undefined, { token: clientA });
         assertEqual(mine.body.items.length, 1, 'Un favori pour Akouvi');
-        const otherMine = await api(base, 'GET', '/api/v1/me/favorites', undefined, { token: clientB });
+        const otherMine = await api(base, 'GET', '/api/v1/me/favorites', undefined, {
+          token: clientB,
+        });
         assertEqual(otherMine.body.items.length, 0, 'Aucun favori pour Kossi');
-        const removed = await api(base, 'DELETE', `/api/v1/me/favorites/${TENANT}`, undefined, { token: clientB });
+        const removed = await api(base, 'DELETE', `/api/v1/me/favorites/${TENANT}`, undefined, {
+          token: clientB,
+        });
         assertEqual(removed.body.removed, false, 'Suppression sans effet pour un autre compte');
-        const removedMine = await api(base, 'DELETE', `/api/v1/me/favorites/${TENANT}`, undefined, { token: clientA });
+        const removedMine = await api(base, 'DELETE', `/api/v1/me/favorites/${TENANT}`, undefined, {
+          token: clientA,
+        });
         assertEqual(removedMine.body.removed, true, 'Suppression effective');
         const anonymous = await api(base, 'GET', '/api/v1/me/favorites');
         assertStatus(anonymous, 401, 'Favoris réservés aux utilisateurs connectés');
@@ -172,12 +215,23 @@ async function main() {
         const publicBefore = await api(base, 'GET', `/api/v1/public/tenants/${TENANT}/reviews`);
         assertEqual(publicBefore.body.aggregate.count, 3, 'Avis en attente non publié');
 
-        const staff = await api(base, 'GET', `/api/v1/tenants/${TENANT}/reviews?status=pending`, undefined, {
-          token: managerA,
-        });
+        const staff = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/reviews?status=pending`,
+          undefined,
+          {
+            token: managerA,
+          },
+        );
         assertStatus(staff, 200, 'File de modération');
-        assert(staff.body.items.some((review: { id: string }) => review.id === clientReviewId), 'Avis visible en salle');
-        const cross = await api(base, 'GET', `/api/v1/tenants/${TENANT}/reviews`, undefined, { token: managerB });
+        assert(
+          staff.body.items.some((review: { id: string }) => review.id === clientReviewId),
+          'Avis visible en salle',
+        );
+        const cross = await api(base, 'GET', `/api/v1/tenants/${TENANT}/reviews`, undefined, {
+          token: managerB,
+        });
         assertStatus(cross, 403, 'Modération Alpha interdite à Beta');
         const forbidden = await api(
           base,
@@ -200,7 +254,11 @@ async function main() {
         const publicAfter = await api(base, 'GET', `/api/v1/public/tenants/${TENANT}/reviews`);
         assertEqual(publicAfter.body.aggregate.count, 4, 'Avis publié dans l’agrégat');
         assert(
-          bus.outbox().some((event) => event.type === 'ReviewModerated' && event.payload.status === 'approved'),
+          bus
+            .outbox()
+            .some(
+              (event) => event.type === 'ReviewModerated' && event.payload.status === 'approved',
+            ),
           'Événement ReviewModerated publié',
         );
         const invalidRating = await api(
@@ -295,21 +353,41 @@ async function main() {
         assertStatus(again, 422, 'Solde insuffisant');
         assertEqual(again.body.error.code, 'loyalty_insufficient_points', 'Code explicite');
 
-        const crossAccount = await api(base, 'GET', `/api/v1/me/loyalty?tenantId=${TENANT}`, undefined, {
-          token: clientA,
-        });
+        const crossAccount = await api(
+          base,
+          'GET',
+          `/api/v1/me/loyalty?tenantId=${TENANT}`,
+          undefined,
+          {
+            token: clientA,
+          },
+        );
         assertEqual(crossAccount.body.account.points, 0, 'Chaque client ne voit que son solde');
-        const staffAccounts = await api(base, 'GET', `/api/v1/tenants/${TENANT}/loyalty/accounts`, undefined, {
-          token: managerA,
-        });
+        const staffAccounts = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/loyalty/accounts`,
+          undefined,
+          {
+            token: managerA,
+          },
+        );
         assertStatus(staffAccounts, 200, 'Comptes fidélité côté salle');
         assert(
-          staffAccounts.body.items.some((account: { userId: string }) => account.userId === 'usr_client_b'),
+          staffAccounts.body.items.some(
+            (account: { userId: string }) => account.userId === 'usr_client_b',
+          ),
           'Compte de Kossi visible par le manager',
         );
-        const crossStaff = await api(base, 'GET', `/api/v1/tenants/${TENANT}/loyalty/accounts`, undefined, {
-          token: managerB,
-        });
+        const crossStaff = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/loyalty/accounts`,
+          undefined,
+          {
+            token: managerB,
+          },
+        );
         assertStatus(crossStaff, 403, 'Comptes Sahel invisibles à Baobab');
       },
     },
@@ -348,258 +426,487 @@ async function main() {
           tenantId: TENANT,
           payload: { tenantId: TENANT, orderId: 'ord_anonyme', totalXof: 6000 },
         });
-        assertEqual(entriesFor(store, 'usr_client_c', TENANT).length, 1, 'Commande anonyme ignorée');
+        assertEqual(
+          entriesFor(store, 'usr_client_c', TENANT).length,
+          1,
+          'Commande anonyme ignorée',
+        );
       },
     },
     {
       name: 'Promotions et codes : période, minimum, doublons et cloisonnement',
       run: async () => {
-        const iso = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+        const iso = (days: number) =>
+          new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
         const publicPromos = await api(base, 'GET', `/api/v1/public/tenants/${TENANT}/promotions`);
         assertStatus(publicPromos, 200, 'Promotions publiques');
         assertEqual(publicPromos.body.items.length, 2, 'Deux promotions actives seedées');
-        assert(publicPromos.body.items.every((entry: { status: string }) => entry.status === 'active'), 'Seules les actives exposées');
+        assert(
+          publicPromos.body.items.every((entry: { status: string }) => entry.status === 'active'),
+          'Seules les actives exposées',
+        );
 
-        const list = await api(base, 'GET', `/api/v1/tenants/${TENANT}/marketing/promotions`, undefined, { token: managerA });
+        const list = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/marketing/promotions`,
+          undefined,
+          { token: managerA },
+        );
         assertStatus(list, 200, 'Promotions gérant');
         assertEqual(list.body.counts.active, 2, 'Deux actives');
 
-        const invalid = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/promotions`, {
-          name: 'Remise folle',
-          type: 'percent',
-          value: 150,
-          startAt: iso(-1),
-          endAt: iso(10),
-        }, { token: managerA });
+        const invalid = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/promotions`,
+          {
+            name: 'Remise folle',
+            type: 'percent',
+            value: 150,
+            startAt: iso(-1),
+            endAt: iso(10),
+          },
+          { token: managerA },
+        );
         assertStatus(invalid, 422, 'Pourcentage > 100 refusé');
 
-        const created = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/promotions`, {
-          name: 'Brunch du dimanche',
-          description: '−20 % sur les formules brunch.',
-          type: 'percent',
-          value: 20,
-          minOrderXof: 5000,
-          startAt: iso(-1),
-          endAt: iso(30),
-        }, { token: managerA });
+        const created = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/promotions`,
+          {
+            name: 'Brunch du dimanche',
+            description: '−20 % sur les formules brunch.',
+            type: 'percent',
+            value: 20,
+            minOrderXof: 5000,
+            startAt: iso(-1),
+            endAt: iso(30),
+          },
+          { token: managerA },
+        );
         assertStatus(created, 201, 'Promotion créée');
         assertEqual(created.body.promotion.status, 'active', 'Statut actif calculé');
         const promoId = created.body.promotion.id as string;
 
-        const cross = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/promotions`, {
-          name: 'Intrusion',
-          type: 'amount',
-          value: 1000,
-          startAt: iso(0),
-          endAt: iso(5),
-        }, { token: managerB });
+        const cross = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/promotions`,
+          {
+            name: 'Intrusion',
+            type: 'amount',
+            value: 1000,
+            startAt: iso(0),
+            endAt: iso(5),
+          },
+          { token: managerB },
+        );
         assertStatus(cross, 403, 'Création croisée refusée');
 
-        const disabled = await api(base, 'PATCH', `/api/v1/tenants/${TENANT}/marketing/promotions/${promoId}`, {
-          active: false,
-        }, { token: managerA });
+        const disabled = await api(
+          base,
+          'PATCH',
+          `/api/v1/tenants/${TENANT}/marketing/promotions/${promoId}`,
+          {
+            active: false,
+          },
+          { token: managerA },
+        );
         assertStatus(disabled, 200, 'Promotion désactivée');
         assertEqual(disabled.body.promotion.status, 'desactivee', 'Statut désactivée');
         const publicAfter = await api(base, 'GET', `/api/v1/public/tenants/${TENANT}/promotions`);
         assertEqual(publicAfter.body.items.length, 2, 'Promotion désactivée retirée du public');
 
-        const duplicate = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/promo-codes`, {
-          code: 'bienvenue10',
-          type: 'percent',
-          value: 5,
-          startAt: iso(0),
-          endAt: iso(5),
-        }, { token: managerA });
+        const duplicate = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/promo-codes`,
+          {
+            code: 'bienvenue10',
+            type: 'percent',
+            value: 5,
+            startAt: iso(0),
+            endAt: iso(5),
+          },
+          { token: managerA },
+        );
         assertStatus(duplicate, 409, 'Code en doublon refusé');
 
-        const testCode = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/promo-codes`, {
-          code: 'TEST1',
-          type: 'percent',
-          value: 20,
-          minOrderXof: 1000,
-          maxUses: 1,
-          perUserLimit: 5,
-          startAt: iso(-1),
-          endAt: iso(10),
-        }, { token: managerA });
+        const testCode = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/promo-codes`,
+          {
+            code: 'TEST1',
+            type: 'percent',
+            value: 20,
+            minOrderXof: 1000,
+            maxUses: 1,
+            perUserLimit: 5,
+            startAt: iso(-1),
+            endAt: iso(10),
+          },
+          { token: managerA },
+        );
         assertStatus(testCode, 201, 'Code TEST1 créé');
         assertEqual(testCode.body.promoCode.code, 'TEST1', 'Code normalisé');
 
-        const belowMin = await api(base, 'POST', `/api/v1/public/tenants/${TENANT}/promo-codes/BIENVENUE10/validate`, {
-          orderTotalXof: 2500,
-        });
+        const belowMin = await api(
+          base,
+          'POST',
+          `/api/v1/public/tenants/${TENANT}/promo-codes/BIENVENUE10/validate`,
+          {
+            orderTotalXof: 2500,
+          },
+        );
         assertStatus(belowMin, 200, 'Validation publique');
         assertEqual(belowMin.body.valid, false, 'Montant minimum bloquant');
         assertEqual(belowMin.body.reason, 'promo_code_min_order', 'Motif explicite');
-        const validCode = await api(base, 'POST', `/api/v1/public/tenants/${TENANT}/promo-codes/BIENVENUE10/validate`, {
-          orderTotalXof: 5000,
-        });
+        const validCode = await api(
+          base,
+          'POST',
+          `/api/v1/public/tenants/${TENANT}/promo-codes/BIENVENUE10/validate`,
+          {
+            orderTotalXof: 5000,
+          },
+        );
         assertEqual(validCode.body.valid, true, 'Code valide');
         assertEqual(validCode.body.discountXof, 500, '10 % de 5 000 F CFA');
-        const unknownCode = await api(base, 'POST', `/api/v1/public/tenants/${TENANT}/promo-codes/INCONNU/validate`, {
-          orderTotalXof: 5000,
-        });
+        const unknownCode = await api(
+          base,
+          'POST',
+          `/api/v1/public/tenants/${TENANT}/promo-codes/INCONNU/validate`,
+          {
+            orderTotalXof: 5000,
+          },
+        );
         assertEqual(unknownCode.body.valid, false, 'Code inconnu rejeté');
 
-        const redeemed = await api(base, 'POST', '/api/v1/me/promo-codes/redeem', {
-          tenantId: TENANT,
-          code: 'BIENVENUE10',
-          orderId: 'ord_paid_1',
-        }, { token: clientB });
+        const redeemed = await api(
+          base,
+          'POST',
+          '/api/v1/me/promo-codes/redeem',
+          {
+            tenantId: TENANT,
+            code: 'BIENVENUE10',
+            orderId: 'ord_paid_1',
+          },
+          { token: clientB },
+        );
         assertStatus(redeemed, 201, 'Code appliqué à la commande');
         assertEqual(redeemed.body.redemption.discountXof, 1250, '10 % de 12 500 F CFA');
-        const replay = await api(base, 'POST', '/api/v1/me/promo-codes/redeem', {
-          tenantId: TENANT,
-          code: 'BIENVENUE10',
-          orderId: 'ord_paid_1',
-        }, { token: clientB });
+        const replay = await api(
+          base,
+          'POST',
+          '/api/v1/me/promo-codes/redeem',
+          {
+            tenantId: TENANT,
+            code: 'BIENVENUE10',
+            orderId: 'ord_paid_1',
+          },
+          { token: clientB },
+        );
         assertStatus(replay, 200, 'Rejeu idempotent');
         assertEqual(replay.body.alreadyRedeemed, true, 'Aucun double décompte');
-        const overLimit = await api(base, 'POST', '/api/v1/me/promo-codes/redeem', {
-          tenantId: TENANT,
-          code: 'BIENVENUE10',
-          orderId: 'ord_paid_big',
-        }, { token: clientB });
+        const overLimit = await api(
+          base,
+          'POST',
+          '/api/v1/me/promo-codes/redeem',
+          {
+            tenantId: TENANT,
+            code: 'BIENVENUE10',
+            orderId: 'ord_paid_big',
+          },
+          { token: clientB },
+        );
         assertStatus(overLimit, 422, 'Limite par client appliquée');
         assertEqual(overLimit.body.error.code, 'promo_code_user_limit', 'Code limite client');
 
-        const firstUse = await api(base, 'POST', '/api/v1/me/promo-codes/redeem', {
-          tenantId: TENANT,
-          code: 'TEST1',
-          orderId: 'ord_paid_1',
-        }, { token: clientA });
+        const firstUse = await api(
+          base,
+          'POST',
+          '/api/v1/me/promo-codes/redeem',
+          {
+            tenantId: TENANT,
+            code: 'TEST1',
+            orderId: 'ord_paid_1',
+          },
+          { token: clientA },
+        );
         assertStatus(firstUse, 201, 'Première utilisation TEST1');
         assertEqual(firstUse.body.redemption.discountXof, 2500, '20 % de 12 500 F CFA');
-        const exhausted = await api(base, 'POST', '/api/v1/me/promo-codes/redeem', {
-          tenantId: TENANT,
-          code: 'TEST1',
-          orderId: 'ord_paid_1',
-        }, { token: clientC });
+        const exhausted = await api(
+          base,
+          'POST',
+          '/api/v1/me/promo-codes/redeem',
+          {
+            tenantId: TENANT,
+            code: 'TEST1',
+            orderId: 'ord_paid_1',
+          },
+          { token: clientC },
+        );
         assertStatus(exhausted, 422, 'Quota global épuisé');
         assertEqual(exhausted.body.error.code, 'promo_code_exhausted', 'Code quota épuisé');
 
-        const codes = await api(base, 'GET', `/api/v1/tenants/${TENANT}/marketing/promo-codes`, undefined, { token: managerA });
+        const codes = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/marketing/promo-codes`,
+          undefined,
+          { token: managerA },
+        );
         assertStatus(codes, 200, 'Codes gérant');
         const test = codes.body.items.find((entry: { code: string }) => entry.code === 'TEST1');
         assertEqual(test.remainingUses, 0, 'Quota consommé exposé');
         assert(codes.body.totals.redemptions >= 3, 'Historique des utilisations');
         assert(codes.body.totals.discountXof >= 3750, 'Remise cumulée valorisée');
-        assert(bus.outbox().some((event) => event.type === 'PromoCodeRedeemed'), 'PromoCodeRedeemed publié');
+        assert(
+          bus.outbox().some((event) => event.type === 'PromoCodeRedeemed'),
+          'PromoCodeRedeemed publié',
+        );
       },
     },
     {
       name: 'Campagnes : audience par segment, envoi compté, annulation et cloisonnement',
       run: async () => {
-        const list = await api(base, 'GET', `/api/v1/tenants/${TENANT}/marketing/campaigns`, undefined, { token: managerA });
+        const list = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns`,
+          undefined,
+          { token: managerA },
+        );
         assertStatus(list, 200, 'Campagnes gérant');
         assertEqual(list.body.channels.length, 3, 'SMS, e-mail et push');
         assert(list.body.audience.all > 0, 'Audience globale calculée');
 
-        const invalid = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns`, {
-          name: 'Canal invalide',
-          channel: 'fax',
-          segment: 'all',
-          message: 'Test',
-        }, { token: managerA });
+        const invalid = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns`,
+          {
+            name: 'Canal invalide',
+            channel: 'fax',
+            segment: 'all',
+            message: 'Test',
+          },
+          { token: managerA },
+        );
         assertStatus(invalid, 422, 'Canal inconnu refusé');
 
-        const created = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns`, {
-          name: 'Soirée jazz',
-          channel: 'email',
-          segment: 'all',
-          message: 'Soirée jazz vendredi dès 20h, entrée libre.',
-        }, { token: managerA });
+        const created = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns`,
+          {
+            name: 'Soirée jazz',
+            channel: 'email',
+            segment: 'all',
+            message: 'Soirée jazz vendredi dès 20h, entrée libre.',
+          },
+          { token: managerA },
+        );
         assertStatus(created, 201, 'Campagne créée');
         assertEqual(created.body.campaign.status, 'brouillon', 'Brouillon sans planification');
         const campaignId = created.body.campaign.id as string;
 
-        const beforeSend = await api(base, 'GET', `/api/v1/tenants/${TENANT}/marketing/campaigns`, undefined, { token: managerA });
-        const sent = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns/${campaignId}/send`, {}, { token: managerA });
+        const beforeSend = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns`,
+          undefined,
+          { token: managerA },
+        );
+        const sent = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns/${campaignId}/send`,
+          {},
+          { token: managerA },
+        );
         assertStatus(sent, 200, 'Campagne envoyée');
         assertEqual(sent.body.campaign.status, 'envoyee', 'Statut envoyée');
-        assertEqual(sent.body.campaign.recipients, beforeSend.body.audience.all, 'Destinataires comptés');
+        assertEqual(
+          sent.body.campaign.recipients,
+          beforeSend.body.audience.all,
+          'Destinataires comptés',
+        );
         assert(sent.body.campaign.sentAt !== null, 'Horodatage de l’envoi');
-        assert(bus.outbox().some((event) => event.type === 'CampaignSent'), 'CampaignSent publié');
-        const twice = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns/${campaignId}/send`, {}, { token: managerA });
+        assert(
+          bus.outbox().some((event) => event.type === 'CampaignSent'),
+          'CampaignSent publié',
+        );
+        const twice = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns/${campaignId}/send`,
+          {},
+          { token: managerA },
+        );
         assertStatus(twice, 409, 'Double envoi refusé');
 
-        const scheduled = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns`, {
-          name: 'Rappel week-end',
-          channel: 'push',
-          segment: 'argent',
-          message: 'Vos points doublent ce week-end.',
-          scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-        }, { token: managerA });
+        const scheduled = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns`,
+          {
+            name: 'Rappel week-end',
+            channel: 'push',
+            segment: 'argent',
+            message: 'Vos points doublent ce week-end.',
+            scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          },
+          { token: managerA },
+        );
         assertStatus(scheduled, 201, 'Campagne planifiée');
         assertEqual(scheduled.body.campaign.status, 'planifiee', 'Statut planifiée');
-        const cancelled = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns/${scheduled.body.campaign.id}/cancel`, {}, { token: managerA });
+        const cancelled = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns/${scheduled.body.campaign.id}/cancel`,
+          {},
+          { token: managerA },
+        );
         assertStatus(cancelled, 200, 'Campagne annulée');
         assertEqual(cancelled.body.campaign.status, 'annulee', 'Statut annulée');
-        const sendCancelled = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns/${scheduled.body.campaign.id}/send`, {}, { token: managerA });
+        const sendCancelled = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns/${scheduled.body.campaign.id}/send`,
+          {},
+          { token: managerA },
+        );
         assertStatus(sendCancelled, 409, 'Envoi d’une campagne annulée refusé');
 
-        const cross = await api(base, 'POST', `/api/v1/tenants/${TENANT}/marketing/campaigns/${campaignId}/send`, {}, { token: managerB });
+        const cross = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/marketing/campaigns/${campaignId}/send`,
+          {},
+          { token: managerB },
+        );
         assertStatus(cross, 403, 'Envoi croisé refusé');
       },
     },
     {
       name: 'Avis : réponse du gérant, remplacement et isolation',
       run: async () => {
-        const replied = await api(base, 'POST', `/api/v1/tenants/${TENANT}/reviews/rev_demo_2/reply`, {
-          message: 'Merci Kossi, nos tarifs week-end incluent le service live.',
-        }, { token: managerA });
+        const replied = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/reviews/rev_demo_2/reply`,
+          {
+            message: 'Merci Kossi, nos tarifs week-end incluent le service live.',
+          },
+          { token: managerA },
+        );
         assertStatus(replied, 200, 'Réponse publiée');
         assertEqual(replied.body.review.reply.by, 'usr_manager_a', 'Auteur tracé');
         assertEqual(replied.body.review.reply.byName, 'Manager Sahel', 'Nom affiché');
         assert(replied.body.aggregate.replied >= 2, 'Taux de réponse mis à jour');
 
-        const replaced = await api(base, 'POST', `/api/v1/tenants/${TENANT}/reviews/rev_demo_2/reply`, {
-          message: 'Merci Kossi ! Le service live est offert chaque samedi.',
-        }, { token: managerA });
+        const replaced = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/reviews/rev_demo_2/reply`,
+          {
+            message: 'Merci Kossi ! Le service live est offert chaque samedi.',
+          },
+          { token: managerA },
+        );
         assertStatus(replaced, 200, 'Réponse remplacée');
         assert(replaced.body.review.reply.message.includes('samedi'), 'Nouveau message conservé');
 
         const pub = await api(base, 'GET', `/api/v1/public/tenants/${TENANT}/reviews`);
-        const withReply = pub.body.items.find((review: { id: string }) => review.id === 'rev_demo_2');
+        const withReply = pub.body.items.find(
+          (review: { id: string }) => review.id === 'rev_demo_2',
+        );
         assert(withReply.reply !== null, 'Réponse exposée publiquement');
 
-        const forbidden = await api(base, 'POST', `/api/v1/tenants/${TENANT}/reviews/rev_demo_2/reply`, {
-          message: 'Test',
-        }, { token: waiterA });
+        const forbidden = await api(
+          base,
+          'POST',
+          `/api/v1/tenants/${TENANT}/reviews/rev_demo_2/reply`,
+          {
+            message: 'Test',
+          },
+          { token: waiterA },
+        );
         assertStatus(forbidden, 403, 'Réponse réservée à loyalty:manage');
 
-        const cross = await api(base, 'POST', '/api/v1/tenants/tnt_baobab/reviews/rev_demo_2/reply', {
-          message: 'Intrusion',
-        }, { token: managerB });
+        const cross = await api(
+          base,
+          'POST',
+          '/api/v1/tenants/tnt_baobab/reviews/rev_demo_2/reply',
+          {
+            message: 'Intrusion',
+          },
+          { token: managerB },
+        );
         assertStatus(cross, 404, 'Avis d’un autre établissement introuvable');
-        assert(bus.outbox().some((event) => event.type === 'ReviewReplied'), 'ReviewReplied publié');
+        assert(
+          bus.outbox().some((event) => event.type === 'ReviewReplied'),
+          'ReviewReplied publié',
+        );
       },
     },
     {
       name: 'Programme et tableau de bord marketing : indicateurs et RBAC',
       run: async () => {
-        const program = await api(base, 'GET', `/api/v1/tenants/${TENANT}/loyalty/program`, undefined, { token: managerA });
+        const program = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/loyalty/program`,
+          undefined,
+          { token: managerA },
+        );
         assertStatus(program, 200, 'Programme gérant');
         assertEqual(program.body.program.tiers.length, 4, 'Quatre niveaux');
         assert(program.body.stats.members > 0, 'Membres comptés');
         assert(program.body.stats.pointsOutstanding >= 0, 'Points en circulation');
 
-        const dashboard = await api(base, 'GET', `/api/v1/tenants/${TENANT}/marketing/dashboard`, undefined, { token: managerA });
+        const dashboard = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/marketing/dashboard`,
+          undefined,
+          { token: managerA },
+        );
         assertStatus(dashboard, 200, 'Tableau de bord marketing');
-        const tierSum = Object.values(dashboard.body.tiers as Record<string, number>).reduce((sum, value) => sum + value, 0);
+        const tierSum = Object.values(dashboard.body.tiers as Record<string, number>).reduce(
+          (sum, value) => sum + value,
+          0,
+        );
         assertEqual(tierSum, dashboard.body.members, 'Répartition par niveau cohérente');
         assert(dashboard.body.promoCodes.redemptions >= 3, 'Utilisations de codes comptées');
         assert(dashboard.body.promoCodes.discountXof > 0, 'Remises valorisées');
         assert(dashboard.body.campaigns.envoyees >= 2, 'Campagnes envoyées comptées');
         assert(dashboard.body.reviews.pending >= 1, 'Avis en attente signalés');
 
-        const denied = await api(base, 'GET', `/api/v1/tenants/${TENANT}/marketing/dashboard`, undefined, { token: waiterA });
+        const denied = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/marketing/dashboard`,
+          undefined,
+          { token: waiterA },
+        );
         assertStatus(denied, 403, 'Tableau de bord réservé à loyalty:view');
-        const cross = await api(base, 'GET', `/api/v1/tenants/${TENANT}/loyalty/program`, undefined, { token: managerB });
+        const cross = await api(
+          base,
+          'GET',
+          `/api/v1/tenants/${TENANT}/loyalty/program`,
+          undefined,
+          { token: managerB },
+        );
         assertStatus(cross, 403, 'Programme cloisonné');
 
-        const audit = await api(base, 'GET', `/api/v1/tenants/${TENANT}/loyalty/audit`, undefined, { token: managerA });
+        const audit = await api(base, 'GET', `/api/v1/tenants/${TENANT}/loyalty/audit`, undefined, {
+          token: managerA,
+        });
         assertStatus(audit, 200, 'Journal marketing');
         assertEqual(audit.body.integrity, true, 'Chaîne intacte');
         const actions = audit.body.entries.map((entry: { action: string }) => entry.action);
@@ -611,7 +918,10 @@ async function main() {
         ]) {
           assert(actions.includes(expected), `Action auditée : ${expected}`);
         }
-        assert(audit.body.entries.every((entry: { tenantId: string }) => entry.tenantId === TENANT), 'Filtré par tenant');
+        assert(
+          audit.body.entries.every((entry: { tenantId: string }) => entry.tenantId === TENANT),
+          'Filtré par tenant',
+        );
       },
     },
   ];

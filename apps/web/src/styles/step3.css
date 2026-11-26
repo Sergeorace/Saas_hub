@@ -931,8 +931,7 @@
   border: 1px solid #2a231d;
   background:
     radial-gradient(circle at 8% -10%, rgba(242, 92, 31, 0.2), transparent 38%),
-    radial-gradient(circle at 92% 0%, rgba(22, 163, 116, 0.12), transparent 40%),
-    var(--kds-bg);
+    radial-gradient(circle at 92% 0%, rgba(22, 163, 116, 0.12), transparent 40%), var(--kds-bg);
   color: var(--kds-ink);
   color-scheme: dark;
 }
@@ -1570,9 +1569,7 @@
   max-width: 44rem;
   margin-inline: auto;
   padding: var(--space-3) var(--space-4) calc(6.5rem + env(safe-area-inset-bottom, 0px));
-  background:
-    radial-gradient(circle at 50% -10%, var(--glow), transparent 46%),
-    var(--bg);
+  background: radial-gradient(circle at 50% -10%, var(--glow), transparent 46%), var(--bg);
   color: var(--ink);
 }
 

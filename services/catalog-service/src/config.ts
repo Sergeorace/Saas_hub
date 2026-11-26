@@ -21,7 +21,10 @@ export function loadCatalogConfig(): CatalogConfig {
     internalKey: process.env.INTERNAL_API_KEY ?? 'dev-internal-key',
     identityUrl: process.env.IDENTITY_URL ?? 'http://127.0.0.1:4001',
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
-    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    eventSubscribers: (process.env.EVENT_SUBSCRIBERS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     timeZone: process.env.CATALOG_TIMEZONE ?? 'Africa/Lome',
     demoSeed: envFlag('DEMO_SEED', !production),
   };
