@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.vite/
+package-lock.json
+docs/openapi/
+docs/*.pdf
+apps/*/public/
+**/*.min.js
+**/*.min.css
