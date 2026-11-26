@@ -11,32 +11,32 @@ contrat entre le design et le code : toute interface web, PWA ou Flutter consomm
 
 ## 2. Palette et sémantique
 
-| Rôle | Clair | Sombre | Usage |
-|---|---|---|---|
-| Primaire | `--pimento-600` `#c2410c` | `#ff8a4c` | actions principales, focus |
-| Secondaire | `--basilic-700` `#0c6750` | `#58d9a6` | accents, succès produit |
-| Accent | `--gold-400` `#e7b23e` | `#e7b23e` | badges premium, fidélité |
-| Fond | `--stone-50` `#faf7f2` | `--stone-950` `#12100e` | pages |
-| Surface | `#ffffff` | `#1a1714` | cartes, panneaux |
-| Texte | `--stone-900` `#1c1815` | `#f7f2ea` | titres et corps |
-| Succès | `#157f3d` | `#43d17a` | confirmation, statut libre |
-| Alerte | `#a35a06` | `#fbbf24` | addition demandée, avertissements |
-| Erreur | `#b42318` | `#f87171` | erreurs, annulations |
-| Info | `#0e7490` | `#67d3e8` | informations neutres |
+| Rôle       | Clair                     | Sombre                  | Usage                             |
+| ---------- | ------------------------- | ----------------------- | --------------------------------- |
+| Primaire   | `--pimento-600` `#c2410c` | `#ff8a4c`               | actions principales, focus        |
+| Secondaire | `--basilic-700` `#0c6750` | `#58d9a6`               | accents, succès produit           |
+| Accent     | `--gold-400` `#e7b23e`    | `#e7b23e`               | badges premium, fidélité          |
+| Fond       | `--stone-50` `#faf7f2`    | `--stone-950` `#12100e` | pages                             |
+| Surface    | `#ffffff`                 | `#1a1714`               | cartes, panneaux                  |
+| Texte      | `--stone-900` `#1c1815`   | `#f7f2ea`               | titres et corps                   |
+| Succès     | `#157f3d`                 | `#43d17a`               | confirmation, statut libre        |
+| Alerte     | `#a35a06`                 | `#fbbf24`               | addition demandée, avertissements |
+| Erreur     | `#b42318`                 | `#f87171`               | erreurs, annulations              |
+| Info       | `#0e7490`                 | `#67d3e8`               | informations neutres              |
 
 Contraste : AA vérifié automatiquement (`npm run test:tokens`, minimum 4,70:1 sur les couples
 texte/fond). Le mode sombre est obligatoire (bar, cuisine).
 
 ## 3. Statuts de table (6)
 
-| Statut | Jeton | Clair | Sombre |
-|---|---|---|---|
-| Libre | `--table-free` | `#12864a` | `#34d399` |
-| Réservée | `--table-reserved` | `#c47a08` | `#fbbf24` |
-| Occupée | `--table-occupied` | `#d9480f` | `#fb923c` |
-| Addition demandée | `--table-bill` | `#2563eb` | `#60a5fa` |
-| À nettoyer | `--table-cleaning` | `#7c3aed` | `#a78bfa` |
-| Hors service | `--table-out` | `#78716c` | `#a8a29e` |
+| Statut            | Jeton              | Clair     | Sombre    |
+| ----------------- | ------------------ | --------- | --------- |
+| Libre             | `--table-free`     | `#12864a` | `#34d399` |
+| Réservée          | `--table-reserved` | `#c47a08` | `#fbbf24` |
+| Occupée           | `--table-occupied` | `#d9480f` | `#fb923c` |
+| Addition demandée | `--table-bill`     | `#2563eb` | `#60a5fa` |
+| À nettoyer        | `--table-cleaning` | `#7c3aed` | `#a78bfa` |
+| Hors service      | `--table-out`      | `#78716c` | `#a8a29e` |
 
 Chaque statut expose `-soft`, `-border` et `-ink` pour composer badges, cartes et plan de salle.
 Couleur jamais seule : le libellé FR/EN accompagne toujours l'indicateur.
