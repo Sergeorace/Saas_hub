@@ -1,0 +1,1789 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RESTO-HUB — payment-service",
+    "version": "0.2.0",
+    "description": "Agrégateur de paiement, portefeuille, reversements, commissions, litiges.\n\nContrat public en HTTP/JSON, devise XOF, locales fr/en. Les événements métier correspondants sont documentés dans docs/architecture.md.",
+    "contact": {
+      "name": "Équipe RESTO-HUB",
+      "email": "support@resto-hub.tg"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4006",
+      "description": "Développement local"
+    },
+    {
+      "url": "https://payment-service.resto-hub.tg",
+      "description": "Cible (placeholder de déploiement)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "authenticated",
+      "description": "JWT + permissions fines."
+    },
+    {
+      "name": "public",
+      "description": "Sans authentification (client final, QR)."
+    },
+    {
+      "name": "internal",
+      "description": "Inter-services, clé interne + réseau privé."
+    }
+  ],
+  "paths": {
+    "/api/v1/tenants/{tenantId}/payments/overview": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_overview",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/overview",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/providers": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_providers",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/providers",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/providers/{providerId}/health": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_providers_providerId_health",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/providers/:providerId/health",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/transactions": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_transactions",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/transactions",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_transactions",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/transactions",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/transactions/{id}": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_transactions_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/transactions/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/transactions/{id}/cancel": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_transactions_id_cancel",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/transactions/:id/cancel",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/transactions/{id}/refund": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_transactions_id_refund",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/transactions/:id/refund",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/transactions/{id}/sandbox": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_transactions_id_sandbox",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/transactions/:id/sandbox",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/transactions/{id}/confirm-3ds": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_transactions_id_confirm_3ds",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/transactions/:id/confirm-3ds",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/splits": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_splits",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/splits",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/splits/{id}": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_splits_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/splits/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/wallet": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_wallet",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/wallet",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/settlements": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_settlements",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/settlements",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/reconciliation": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_reconciliation",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/reconciliation",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/reconciliation/run": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_reconciliation_run",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/reconciliation/run",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/ledger": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_ledger",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/ledger",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/fraud/blocks": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_fraud_blocks",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/fraud/blocks",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/fraud/blocks/{id}/lift": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_payments_fraud_blocks_id_lift",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/payments/fraud/blocks/:id/lift",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/exports/transactions.csv": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_exports_transactions_csv",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/exports/transactions.csv",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/exports/transactions.xls": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_exports_transactions_xls",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/exports/transactions.xls",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/exports/transactions.pdf": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_exports_transactions_pdf",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/exports/transactions.pdf",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/payments/audit": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_payments_audit",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/payments/audit",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/providers/{providerId}": {
+      "post": {
+        "operationId": "post_api_v1_webhooks_providers_providerId",
+        "tags": [
+          "public"
+        ],
+        "summary": "POST /api/v1/webhooks/providers/:providerId",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/summary": {
+      "get": {
+        "operationId": "get_api_v1_platform_payments_summary",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/platform/payments/summary",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/transactions": {
+      "get": {
+        "operationId": "get_api_v1_platform_payments_transactions",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/platform/payments/transactions",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/settlements": {
+      "get": {
+        "operationId": "get_api_v1_platform_payments_settlements",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/platform/payments/settlements",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/settlements/{id}/approve": {
+      "post": {
+        "operationId": "post_api_v1_platform_payments_settlements_id_approve",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/platform/payments/settlements/:id/approve",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/settlements/{id}/reject": {
+      "post": {
+        "operationId": "post_api_v1_platform_payments_settlements_id_reject",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/platform/payments/settlements/:id/reject",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/disputes": {
+      "get": {
+        "operationId": "get_api_v1_platform_payments_disputes",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/platform/payments/disputes",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_platform_payments_disputes",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/platform/payments/disputes",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/disputes/{id}/resolve": {
+      "post": {
+        "operationId": "post_api_v1_platform_payments_disputes_id_resolve",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/platform/payments/disputes/:id/resolve",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/platform/payments/ledger": {
+      "get": {
+        "operationId": "get_api_v1_platform_payments_ledger",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/platform/payments/ledger",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/payments/disbursements": {
+      "post": {
+        "operationId": "post_internal_tenants_tenantId_payments_disbursements",
+        "tags": [
+          "internal"
+        ],
+        "summary": "POST /internal/tenants/:tenantId/payments/disbursements",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/payments/summary": {
+      "get": {
+        "operationId": "get_internal_tenants_tenantId_payments_summary",
+        "tags": [
+          "internal"
+        ],
+        "summary": "GET /internal/tenants/:tenantId/payments/summary",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "payment-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "internalKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-key"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "validation_error"
+              },
+              "message": {
+                "type": "string"
+              },
+              "field": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-route-count": 35
+}

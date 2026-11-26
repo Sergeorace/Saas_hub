@@ -1,0 +1,1246 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RESTO-HUB — inventory-service",
+    "version": "0.2.0",
+    "description": "Stocks, fiches techniques, inventaires, pertes, fournisseurs.\n\nContrat public en HTTP/JSON, devise XOF, locales fr/en. Les événements métier correspondants sont documentés dans docs/architecture.md.",
+    "contact": {
+      "name": "Équipe RESTO-HUB",
+      "email": "support@resto-hub.tg"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4009",
+      "description": "Développement local"
+    },
+    {
+      "url": "https://inventory-service.resto-hub.tg",
+      "description": "Cible (placeholder de déploiement)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "authenticated",
+      "description": "JWT + permissions fines."
+    },
+    {
+      "name": "public",
+      "description": "Sans authentification (client final, QR)."
+    },
+    {
+      "name": "internal",
+      "description": "Inter-services, clé interne + réseau privé."
+    }
+  ],
+  "paths": {
+    "/api/v1/tenants/{tenantId}/inventory/summary": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_summary",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/summary",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/items": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_items",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/items",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_items",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/items",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/items/{id}": {
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_inventory_items_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/inventory/items/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/movements": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_movements",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/movements",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_movements",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/movements",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/waste": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_waste",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/waste",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/recipes": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_recipes",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/recipes",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_recipes",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/recipes",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/recipes/{id}": {
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_inventory_recipes_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/inventory/recipes/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/recipes/{id}/cost": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_recipes_id_cost",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/recipes/:id/cost",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/suppliers": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_suppliers",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/suppliers",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_suppliers",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/suppliers",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/suppliers/{id}": {
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_inventory_suppliers_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/inventory/suppliers/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/purchase-orders": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_purchase_orders",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/purchase-orders",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_purchase_orders",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/purchase-orders",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/purchase-orders/{id}/receive": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_purchase_orders_id_receive",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/purchase-orders/:id/receive",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/counts": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_counts",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/counts",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_counts",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/counts",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/counts/{id}/validate": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_inventory_counts_id_validate",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/inventory/counts/:id/validate",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/alerts": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_alerts",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/alerts",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/inventory/audit": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_inventory_audit",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/inventory/audit",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/inventory/availability": {
+      "get": {
+        "operationId": "get_internal_tenants_tenantId_inventory_availability",
+        "tags": [
+          "internal"
+        ],
+        "summary": "GET /internal/tenants/:tenantId/inventory/availability",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/inventory/cogs": {
+      "get": {
+        "operationId": "get_internal_tenants_tenantId_inventory_cogs",
+        "tags": [
+          "internal"
+        ],
+        "summary": "GET /internal/tenants/:tenantId/inventory/cogs",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "inventory-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "internalKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-key"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "validation_error"
+              },
+              "message": {
+                "type": "string"
+              },
+              "field": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-route-count": 24
+}

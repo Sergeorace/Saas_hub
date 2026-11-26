@@ -1,0 +1,1477 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RESTO-HUB — floor-service",
+    "version": "0.2.0",
+    "description": "Zones, plan de salle, tables, QR, réservations.\n\nContrat public en HTTP/JSON, devise XOF, locales fr/en. Les événements métier correspondants sont documentés dans docs/architecture.md.",
+    "contact": {
+      "name": "Équipe RESTO-HUB",
+      "email": "support@resto-hub.tg"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4004",
+      "description": "Développement local"
+    },
+    {
+      "url": "https://floor-service.resto-hub.tg",
+      "description": "Cible (placeholder de déploiement)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "authenticated",
+      "description": "JWT + permissions fines."
+    },
+    {
+      "name": "public",
+      "description": "Sans authentification (client final, QR)."
+    },
+    {
+      "name": "internal",
+      "description": "Inter-services, clé interne + réseau privé."
+    }
+  ],
+  "paths": {
+    "/api/v1/tenants/{tenantId}/floor": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_floor",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/floor",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/occupancy": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_floor_occupancy",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/floor/occupancy",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/settings": {
+      "put": {
+        "operationId": "put_api_v1_tenants_tenantId_floor_settings",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PUT /api/v1/tenants/:tenantId/floor/settings",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/zones": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_floor_zones",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/floor/zones",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/zones/{id}": {
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_floor_zones_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/floor/zones/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_api_v1_tenants_tenantId_floor_zones_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "DELETE /api/v1/tenants/:tenantId/floor/zones/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_floor_tables",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/floor/tables",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables/{id}": {
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_floor_tables_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/floor/tables/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_api_v1_tenants_tenantId_floor_tables_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "DELETE /api/v1/tenants/:tenantId/floor/tables/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables/{id}/status": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_floor_tables_id_status",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/floor/tables/:id/status",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables/merge": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_floor_tables_merge",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/floor/tables/merge",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables/{id}/split": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_floor_tables_id_split",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/floor/tables/:id/split",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables/{id}/transfer": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_floor_tables_id_transfer",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/floor/tables/:id/transfer",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/tables/{id}/qr": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_floor_tables_id_qr",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/floor/tables/:id/qr",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/qr-sheet.pdf": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_floor_qr_sheet_pdf",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/floor/qr-sheet.pdf",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/floor/audit": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_floor_audit",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/floor/audit",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/public/tenants/{tenantId}/reservations/availability": {
+      "get": {
+        "operationId": "get_api_v1_public_tenants_tenantId_reservations_availability",
+        "tags": [
+          "public"
+        ],
+        "summary": "GET /api/v1/public/tenants/:tenantId/reservations/availability",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/public/tenants/{tenantId}/reservations": {
+      "post": {
+        "operationId": "post_api_v1_public_tenants_tenantId_reservations",
+        "tags": [
+          "public"
+        ],
+        "summary": "POST /api/v1/public/tenants/:tenantId/reservations",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/public/tenants/{tenantId}/reservations/{id}": {
+      "get": {
+        "operationId": "get_api_v1_public_tenants_tenantId_reservations_id",
+        "tags": [
+          "public"
+        ],
+        "summary": "GET /api/v1/public/tenants/:tenantId/reservations/:id",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/public/tenants/{tenantId}/reservations/{id}/cancel": {
+      "post": {
+        "operationId": "post_api_v1_public_tenants_tenantId_reservations_id_cancel",
+        "tags": [
+          "public"
+        ],
+        "summary": "POST /api/v1/public/tenants/:tenantId/reservations/:id/cancel",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/reservations": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_reservations",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/reservations",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_reservations",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/reservations",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/reservations/{id}/status": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_reservations_id_status",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/reservations/:id/status",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/public/tenants/{tenantId}/tables/{code}": {
+      "get": {
+        "operationId": "get_api_v1_public_tenants_tenantId_tables_code",
+        "tags": [
+          "public"
+        ],
+        "summary": "GET /api/v1/public/tenants/:tenantId/tables/:code",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/floor/tables/{code}/verify": {
+      "post": {
+        "operationId": "post_internal_tenants_tenantId_floor_tables_code_verify",
+        "tags": [
+          "internal"
+        ],
+        "summary": "POST /internal/tenants/:tenantId/floor/tables/:code/verify",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/floor/tables/{code}/order": {
+      "post": {
+        "operationId": "post_internal_tenants_tenantId_floor_tables_code_order",
+        "tags": [
+          "internal"
+        ],
+        "summary": "POST /internal/tenants/:tenantId/floor/tables/:code/order",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/floor/tables/{code}/release": {
+      "post": {
+        "operationId": "post_internal_tenants_tenantId_floor_tables_code_release",
+        "tags": [
+          "internal"
+        ],
+        "summary": "POST /internal/tenants/:tenantId/floor/tables/:code/release",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/floor/tables/{code}": {
+      "get": {
+        "operationId": "get_internal_tenants_tenantId_floor_tables_code",
+        "tags": [
+          "internal"
+        ],
+        "summary": "GET /internal/tenants/:tenantId/floor/tables/:code",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/floor/capacity": {
+      "get": {
+        "operationId": "get_internal_tenants_tenantId_floor_capacity",
+        "tags": [
+          "internal"
+        ],
+        "summary": "GET /internal/tenants/:tenantId/floor/capacity",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "floor-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "internalKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-key"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "validation_error"
+              },
+              "message": {
+                "type": "string"
+              },
+              "field": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-route-count": 29
+}

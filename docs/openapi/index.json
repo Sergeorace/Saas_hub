@@ -1,0 +1,96 @@
+{
+  "source": "services/<nom>-service/src/app.ts",
+  "services": [
+    {
+      "service": "identity-service",
+      "port": 4001,
+      "routes": 32,
+      "spec": "docs/openapi/identity-service.json",
+      "url": "http://localhost:4001"
+    },
+    {
+      "service": "tenant-service",
+      "port": 4002,
+      "routes": 34,
+      "spec": "docs/openapi/tenant-service.json",
+      "url": "http://localhost:4002"
+    },
+    {
+      "service": "catalog-service",
+      "port": 4003,
+      "routes": 19,
+      "spec": "docs/openapi/catalog-service.json",
+      "url": "http://localhost:4003"
+    },
+    {
+      "service": "floor-service",
+      "port": 4004,
+      "routes": 29,
+      "spec": "docs/openapi/floor-service.json",
+      "url": "http://localhost:4004"
+    },
+    {
+      "service": "order-service",
+      "port": 4005,
+      "routes": 21,
+      "spec": "docs/openapi/order-service.json",
+      "url": "http://localhost:4005"
+    },
+    {
+      "service": "payment-service",
+      "port": 4006,
+      "routes": 35,
+      "spec": "docs/openapi/payment-service.json",
+      "url": "http://localhost:4006"
+    },
+    {
+      "service": "staff-service",
+      "port": 4007,
+      "routes": 27,
+      "spec": "docs/openapi/staff-service.json",
+      "url": "http://localhost:4007"
+    },
+    {
+      "service": "payroll-service",
+      "port": 4008,
+      "routes": 17,
+      "spec": "docs/openapi/payroll-service.json",
+      "url": "http://localhost:4008"
+    },
+    {
+      "service": "inventory-service",
+      "port": 4009,
+      "routes": 24,
+      "spec": "docs/openapi/inventory-service.json",
+      "url": "http://localhost:4009"
+    },
+    {
+      "service": "loyalty-marketing-service",
+      "port": 4010,
+      "routes": 30,
+      "spec": "docs/openapi/loyalty-marketing-service.json",
+      "url": "http://localhost:4010"
+    },
+    {
+      "service": "notification-service",
+      "port": 4011,
+      "routes": 21,
+      "spec": "docs/openapi/notification-service.json",
+      "url": "http://localhost:4011"
+    },
+    {
+      "service": "reporting-service",
+      "port": 4012,
+      "routes": 15,
+      "spec": "docs/openapi/reporting-service.json",
+      "url": "http://localhost:4012"
+    },
+    {
+      "service": "platform-admin-service",
+      "port": 4013,
+      "routes": 14,
+      "spec": "docs/openapi/platform-admin-service.json",
+      "url": "http://localhost:4013"
+    }
+  ]
+}

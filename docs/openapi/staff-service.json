@@ -1,0 +1,1387 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RESTO-HUB — staff-service",
+    "version": "0.2.0",
+    "description": "Employés, plannings, pointage, performances, audit.\n\nContrat public en HTTP/JSON, devise XOF, locales fr/en. Les événements métier correspondants sont documentés dans docs/architecture.md.",
+    "contact": {
+      "name": "Équipe RESTO-HUB",
+      "email": "support@resto-hub.tg"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4007",
+      "description": "Développement local"
+    },
+    {
+      "url": "https://staff-service.resto-hub.tg",
+      "description": "Cible (placeholder de déploiement)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "authenticated",
+      "description": "JWT + permissions fines."
+    },
+    {
+      "name": "public",
+      "description": "Sans authentification (client final, QR)."
+    },
+    {
+      "name": "internal",
+      "description": "Inter-services, clé interne + réseau privé."
+    }
+  ],
+  "paths": {
+    "/api/v1/tenants/{tenantId}/staff/summary": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_summary",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/summary",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/employees": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_employees",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/employees",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_employees",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/employees",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/employees/{id}": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_employees_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/employees/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_staff_employees_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/staff/employees/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/employees/{id}/documents": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_employees_id_documents",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/employees/:id/documents",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/invitations": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_invitations",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/invitations",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/invitations/{token}/accept": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_invitations_token_accept",
+        "tags": [
+          "public"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/invitations/:token/accept",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/invitations/{token}/resend": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_invitations_token_resend",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/invitations/:token/resend",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/shifts": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_shifts",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/shifts",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_shifts",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/shifts",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/shifts/{id}": {
+      "patch": {
+        "operationId": "patch_api_v1_tenants_tenantId_staff_shifts_id",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PATCH /api/v1/tenants/:tenantId/staff/shifts/:id",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/shifts/{id}/swap": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_shifts_id_swap",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/shifts/:id/swap",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/swaps": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_swaps",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/swaps",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/swaps/{id}/decide": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_swaps_id_decide",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/swaps/:id/decide",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/leaves": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_leaves",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/leaves",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_leaves",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/leaves",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/leaves/{id}/decide": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_leaves_id_decide",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/leaves/:id/decide",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/absences": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_absences",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/absences",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/attendance": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_attendance",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/attendance",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/attendance/clock": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_attendance_clock",
+        "tags": [
+          "public"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/attendance/clock",
+        "description": "Endpoint public (espace client, QR de table).",
+        "security": [],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/attendance/{id}/clock-out": {
+      "post": {
+        "operationId": "post_api_v1_tenants_tenantId_staff_attendance_id_clock_out",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "POST /api/v1/tenants/:tenantId/staff/attendance/:id/clock-out",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/performance": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_performance",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/performance",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/settings": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_settings",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/settings",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_api_v1_tenants_tenantId_staff_settings",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "PUT /api/v1/tenants/:tenantId/staff/settings",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}/staff/audit": {
+      "get": {
+        "operationId": "get_api_v1_tenants_tenantId_staff_audit",
+        "tags": [
+          "authenticated"
+        ],
+        "summary": "GET /api/v1/tenants/:tenantId/staff/audit",
+        "description": "Endpoint authentifié (JWT + permission fine évaluée côté service).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    },
+    "/internal/tenants/{tenantId}/staff/payroll-input": {
+      "get": {
+        "operationId": "get_internal_tenants_tenantId_staff_payroll_input",
+        "tags": [
+          "internal"
+        ],
+        "summary": "GET /internal/tenants/:tenantId/staff/payroll-input",
+        "description": "Appel inter-service (clé interne, hors contrat public).",
+        "security": [
+          {
+            "internalKey": []
+          }
+        ],
+        "x-service": "staff-service",
+        "responses": {
+          "200": {
+            "description": "Succès (corps conforme au contrat du service)."
+          },
+          "400": {
+            "description": "Requête invalide (validation d’entrée).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentification requise ou invalide."
+          },
+          "403": {
+            "description": "Permission insuffisante ou accès inter-tenant refusé."
+          },
+          "404": {
+            "description": "Ressource inexistante."
+          },
+          "409": {
+            "description": "Conflit métier (état incompatible)."
+          },
+          "422": {
+            "description": "Règle métier non satisfaite."
+          },
+          "429": {
+            "description": "Limitation de débit."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "internalKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-key"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "validation_error"
+              },
+              "message": {
+                "type": "string"
+              },
+              "field": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-route-count": 27
+}
