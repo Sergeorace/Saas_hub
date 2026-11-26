@@ -1,13 +1,13 @@
 import { buildAuditEntry, newId, nowIso, randomToken, type AuditEntry } from '@resto-hub/service-kit';
+import { TABLE_STATUSES, type TableStatus } from '@resto-hub/shared-contracts';
+
+export { TABLE_STATUSES, type TableStatus };
 
 export const ZONE_KINDS = ['salle', 'terrasse', 'vip', 'bar', 'etage'] as const;
 export type ZoneKind = (typeof ZONE_KINDS)[number];
 
 export const TABLE_TYPES = ['table', 'comptoir', 'canape', 'loge'] as const;
 export type TableType = (typeof TABLE_TYPES)[number];
-
-export const TABLE_STATUSES = ['libre', 'reservee', 'occupee', 'addition', 'nettoyage', 'hors_service'] as const;
-export type TableStatus = (typeof TABLE_STATUSES)[number];
 
 export const STATUS_TRANSITIONS: Record<TableStatus, TableStatus[]> = {
   libre: ['reservee', 'occupee', 'hors_service'],

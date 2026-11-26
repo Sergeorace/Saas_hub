@@ -46,5 +46,12 @@ export {
 } from './eventing.js';
 export { base32Decode, base32Encode, generateTotp, totpWindow } from './totp.js';
 export { createEventBus, createEventInboxRoute, type EventBus, type EventEnvelope } from './bus.js';
+export {
+  DOMAIN_EVENTS,
+  REQUIRED_DOMAIN_EVENTS,
+  isDomainEventEnvelope,
+  type DomainEventEnvelope,
+  type DomainEventName,
+} from '@resto-hub/shared-contracts';
 export { createServiceClient, type ServiceClient } from './client.js';
 export { api, assert, assertEqual, assertStatus, runTests, waitFor, type ApiResult, type TestCase } from './testing.js';

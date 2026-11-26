@@ -1,10 +1,10 @@
 import { buildAuditEntry, newId, nowIso, randomToken, type AuditEntry } from '@resto-hub/service-kit';
+import { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type PaymentMethod } from '@resto-hub/shared-contracts';
+
+export { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type PaymentMethod };
 
 export const ORDER_CHANNELS = ['sur_place', 'a_emporter', 'livraison', 'precommande'] as const;
 export type OrderChannel = (typeof ORDER_CHANNELS)[number];
-
-export const ORDER_STATUSES = ['recue', 'en_preparation', 'prete', 'servie', 'annulee'] as const;
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   recue: ['en_preparation', 'annulee'],
@@ -13,9 +13,6 @@ export const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   servie: [],
   annulee: [],
 };
-
-export const PAYMENT_METHODS = ['especes', 'mobile_money', 'carte'] as const;
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const STATIONS = ['cuisine', 'bar'] as const;
 export type Station = (typeof STATIONS)[number];
@@ -240,7 +237,6 @@ export function createTickets(store: OrderStore, order: Order, actorId: string):
 export function seedOrderDemo(store: OrderStore): void {
   if (store.orders.size > 0) return;
   const tenantId = 'tnt_sahelgrill';
-  const now = nowIso();
   const actor = 'usr_demo_seed';
   const year = new Date().getUTCFullYear();
   store.counters.set(tenantId, { year, order: 7, invoice: 2, receipt: 2 });
