@@ -28,3 +28,17 @@ export {
   type PaginationQuery,
   type Paginated,
 } from './dto.js';
+export {
+  type OrderChannel,
+  type OrderCreatedPayload,
+  type OrderStatusChangedPayload,
+  type OrderPaidPayload,
+  type PaymentFailedPayload,
+  type TableStatusChangedPayload,
+  type ReservationCreatedPayload,
+  type PayrollApprovedPayload,
+  type StockBelowThresholdPayload,
+  type CatalogItemUpdatedPayload,
+  type DomainEventPayloads,
+  type TypedDomainEvent,
+} from './event-payloads.js';
