@@ -1,5 +1,6 @@
 import type { Route } from './http.js';
 import { makeEvent, type OutboxRecord } from './eventing.js';
+import { isDomainEventEnvelope } from '@resto-hub/shared-contracts';
 
 export interface EventEnvelope {
   id: string;
@@ -110,11 +111,11 @@ export function createEventInboxRoute(bus: EventBus): Route {
     path: '/internal/events',
     service: true,
     handler: async (ctx) => {
-      const envelope = ctx.body as EventEnvelope & { type?: string };
-      if (!envelope || typeof envelope !== 'object' || typeof envelope.type !== 'string') {
-        return { status: 400, body: { error: { code: 'invalid_event', message: 'Événement invalide.' } } };
+      if (!isDomainEventEnvelope(ctx.body)) {
+        return { status: 400, body: { error: { code: 'invalid_event', message: 'Événement invalide ou hors contrat.' } } };
       }
-      await bus.deliver(envelope as EventEnvelope);
+      const envelope = ctx.body as EventEnvelope;
+      await bus.deliver(envelope);
       return { status: 202, body: { accepted: true, id: envelope.id } };
     },
   };

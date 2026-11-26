@@ -8,13 +8,12 @@ import {
   createEventInboxRoute,
   runTests,
   startServer,
-  type ApiResult,
   type AuthClaims,
   type TestCase,
 } from '@resto-hub/service-kit';
 import { buildPaymentApp, handlePaymentEvent } from '../app.js';
 import { PROVIDERS } from '../providers.js';
-import { createPaymentStore, type PaymentStore } from '../store.js';
+import { createPaymentStore } from '../store.js';
 
 const INTERNAL_KEY = 'test-internal-key';
 const TENANT = 'tnt_alpha';

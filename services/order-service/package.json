@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@resto-hub/service-kit": "*",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "@resto-hub/shared-contracts": "*"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

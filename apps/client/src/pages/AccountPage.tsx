@@ -14,7 +14,7 @@ import { useSession } from '../lib/session';
 import { useAsync } from '../lib/hooks';
 import { navigate } from '../lib/router';
 import { ClientBottomBar, ClientHeader } from '../components/ClientChrome';
-import { StarRatingInput, Stars } from '../components/Stars';
+import { Stars } from '../components/Stars';
 
 export default function AccountPage() {
   const { t, locale, setLocale } = useI18n();

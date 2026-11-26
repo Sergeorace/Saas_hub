@@ -374,7 +374,7 @@ export function buildCatalogApp(options: CatalogAppOptions): Route[] {
       method: 'POST',
       path: '/api/v1/tenants/:tenantId/catalog/categories',
       handler: async (ctx) => {
-        const { tenantId, claims } = tenantOf(ctx, 'catalog:manage');
+        const { tenantId } = tenantOf(ctx, 'catalog:manage');
         const body = asObject(ctx.body);
         const name = requireString(body, 'name', { min: 2, max: 60 });
         if (nameTaken(store, tenantId, name)) {

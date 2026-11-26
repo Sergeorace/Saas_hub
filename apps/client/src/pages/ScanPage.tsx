@@ -47,7 +47,7 @@ export default function ScanPage({ presetTenant }: { presetTenant?: string }) {
     setScanning(false);
   };
 
-  useEffect(() => stopCamera, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => stopCamera, []);
 
   const tick = async () => {
     const video = videoRef.current;

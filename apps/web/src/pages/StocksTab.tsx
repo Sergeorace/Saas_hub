@@ -328,8 +328,6 @@ export function StocksTab({ tenantId, locale, permissions }: Props) {
     );
   }
 
-  const itemName = (id: string) => items.find((item) => item.id === id)?.name ?? id;
-
   const itemColumns: Column<StockItem>[] = [
     {
       key: 'name',

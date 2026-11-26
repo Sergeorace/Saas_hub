@@ -9,7 +9,7 @@ import {
   useI18n,
   useToast,
 } from '@resto-hub/design-system';
-import { accountApi, publicApi, type LoyaltyProgram, type Review, type ReviewAggregate } from '../lib/api';
+import { accountApi, publicApi, type LoyaltyProgram, type ReviewAggregate } from '../lib/api';
 import { useAsync, useEstablishment, useFavorites } from '../lib/hooks';
 import { useSession } from '../lib/session';
 import { useTenantTheme } from '../lib/tenantTheme';

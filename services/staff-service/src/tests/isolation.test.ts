@@ -69,9 +69,6 @@ async function main() {
   );
   const base = server.url;
 
-  const iso = (offsetMinutes: number) =>
-    new Date(Date.now() + offsetMinutes * 60000).toISOString();
-
   const cases: TestCase[] = [
     {
       name: 'Isolation : un gérant ne voit que les employés de son établissement',

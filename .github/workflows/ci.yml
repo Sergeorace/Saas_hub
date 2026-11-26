@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint · Types · Build · Tests · RLS · OpenAPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Vérification des types (web + PWA client)
+        run: npm run typecheck
+
+      - name: Build web + client
+        run: npm run build
+
+      - name: Contrats partagés + jetons de design
+        run: npm run test:packages
+
+      - name: Tests services + couverture (≥ 70 % lignes)
+        run: npm run test:coverage
+
+      - name: Isolation RLS multi-tenant (PostgreSQL embarqué)
+        run: npm run db:test
+
+      - name: Documentation OpenAPI à jour
+        run: npm run openapi:check

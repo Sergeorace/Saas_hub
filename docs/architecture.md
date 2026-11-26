@@ -964,6 +964,7 @@ journalisation de l'export (audit). Le reporting ne détient aucun PII de paieme
 - [x] **Étape 6 — staff-service et payroll-service** (équipe, plannings, pointage, performances, paie paramétrable, validation à deux niveaux, voir §21).
 - [x] **Étape 7 — inventory-service, loyalty-marketing-service, notification-service et reporting-service** (stocks, fiches techniques, marketing/fidélité, notifications temps réel, rapports et exports, voir §22).
 - [x] **Étape 8 — platform-admin-service, sécurité et finition** (back-office plateforme, supervision, paramètres globaux, passe sécurité et design, guide d'acceptation, voir §23).
+- [x] **Socle technique** : Git (main/develop/tags), `packages/shared-contracts`, `packages/design-tokens`, Docker Compose (PostgreSQL/Redis/MinIO), pilote RLS identity-service (10 tests), ESLint/CI/couverture (≥ 70 % lignes), OpenAPI 13 services / 318 routes (voir §24).
 - [x] **Périmètre des 13 services couvert.** Les évolutions suivantes (nouveaux services ou fonctionnalités) restent **en attente de votre instruction explicite**.
 
 ---
@@ -1717,3 +1718,114 @@ npm run typecheck && npm run build -w @resto-hub/web
 ### 23.11 Guide d’acceptation
 
 `docs/guide-test-acceptation.md` recense les prérequis, comptes de démonstration, commandes automatisées, contrôles de sécurité manuels, scénarios back-office, parcours client/serveur/gérant, exigences design/accessibilité et limites connues de la démonstration.
+
+---
+
+## 24. Socle technique — contrats, jetons, infra, RLS et CI (option « socle d'abord »)
+
+> Branche `feature/infra/socle`, issue de `develop` au commit `e82770f` (import consolidé des étapes 1–8).
+> Objectif : transformer le prototype fonctionnel en dépôt outillé (Git, contrats partagés, jetons de design,
+> infrastructure locale, isolation PostgreSQL, CI, OpenAPI) **sans réécrire les écrans ni casser les 159 tests**.
+
+### 24.1 `packages/shared-contracts` — source unique des contrats
+
+| Élément | Contenu |
+| --- | --- |
+| `events.ts` | `DOMAIN_EVENTS` (60 noms), dont les 9 événements imposés ; `DomainEventEnvelope` (`id`, `type`, `tenantId`, `occurredAt`, `payload`) ; `isDomainEventName`, `isDomainEventEnvelope` |
+| `dto.ts` | `TABLE_STATUSES` (6), `ORDER_STATUSES` (5), `PAYMENT_METHODS` (3), `TRANSACTION_STATUSES` (7), `DISPUTE_STATUSES` (4), `SUPPORTED_LOCALES` (`fr`/`en`), `DEFAULT_CURRENCY` (`XOF`), `MoneyXof`, `Paginated<T>` |
+| `tests/contracts.test.ts` | 5 tests : registre sans doublon, 9 événements requis présents, **chaque événement requis réellement publié dans `services/*/src`**, 6 statuts de table exacts, validateur d'enveloppe |
+
+- Les enums dupliqués ont été remplacés par les contrats dans **floor-service** (`TABLE_STATUSES`), **order-service** (`ORDER_STATUSES`, `PAYMENT_METHODS`) et **payment-service** (`TRANSACTION_STATUSES`, `DISPUTE_STATUSES`).
+- `service-kit` dépend désormais de `shared-contracts` : la route `POST /internal/events` rejette en **400 `invalid_event`** toute enveloppe hors contrat (type inconnu, `tenantId` non conforme, `occurredAt` illisible, `payload` non objet). Les 56 noms réellement émis par les services sont tous déclarés (vérifié automatiquement) — aucun test n'a dû être adapté.
+- Ordre de build : `build:services` compile `shared-contracts` avant `service-kit` puis les 13 services.
+
+### 24.2 `packages/design-tokens` — jetons consommables par le web et Flutter
+
+- `tokens.css` devient **la source de vérité** (déplacée depuis `design-system`, qui l'importe via `@import '@resto-hub/design-tokens/tokens.css'` ; l'entrée historique `./tokens.css` reste valide).
+- `scripts/generate.mjs` analyse la CSS (primitives, thèmes clair/sombre, résolution récursive des `var()`), puis génère :
+  - `tokens.json` — 123 couleurs par thème, 40 dimensions en px numériques, 4 durées en ms, 8 nombres, 12 valeurs brutes (ombres, easings, tracking) et 3 familles typographiques ;
+  - `src/tokens.ts` — export typé `designTokens` (`as const`) avec `ColorTokenName`.
+- `--check` échoue si `tokens.json` ou `src/tokens.ts` ne correspondent plus à la CSS (test `npm run test:tokens`).
+- **8 tests automatiques** : parité des clés entre thèmes (123 = 123), formats couleur (hex/rgb(a)), 6 statuts × 4 variantes présents deux fois, contraste AA, focus ≥ 3:1, cible tactile 44 px, échelle typographique 12 → 56 px, familles typographiques + métadonnées XOF/fr/en.
+
+Contrastes mesurés (`npm run contrast -w @resto-hub/design-tokens`) — 23 paires × 2 thèmes :
+
+- minimum texte **4,70:1** (clair `ink-3` sur `surface`), maximum 17,63:1 ; toutes les paires sémantiques et les six statuts de table ≥ 4,5:1 ;
+- anneau de focus : **4,85:1** (clair) et **9,49:1** (sombre) sur `--bg` (seuil AA composants 3:1).
+
+Vérification navigateur (serveurs Vite de dev) : accueil web et PWA client rendus dans les deux thèmes, variables présentes (`--primary` `#c2410c`/`#ff8a4c`, `--table-free` `#12864a`/`#34d399`, `--touch-target` 2,75 rem).
+
+### 24.3 Infrastructure locale (Docker Compose)
+
+`docker-compose.yml` (racine) + `infra/` :
+
+| Service | Image | Ports | Rôle |
+| --- | --- | --- | --- |
+| `postgres` | `postgres:16-alpine` | 5432 | base `resto_identity`, scripts `infra/postgres/init.sql` et mot de passe applicatif |
+| `redis` | `redis:7-alpine` | 6379 | file BullMQ / cache (AOF activé, mot de passe requis) |
+| `minio` | `minio/minio` | 9000/9001 | stockage S3 compatible (console 9001) |
+| `minio-init` | `minio/mc` | — | crée le bucket `resto-hub-media` de façon idempotente |
+
+- Secrets exclusivement par variables (`RESTO_DB_PASSWORD`, `RESTO_APP_PASSWORD`, `RESTO_REDIS_PASSWORD`, `MINIO_ROOT_*`) ; modèle dans `infra/.env.example`, `.env` ignoré par Git.
+- `scripts/db.mjs` : `db:start`, `db:stop`, `db:reset`, `db:logs`, `db:psql`, `db:test`. Sans Docker, `db:start` s'arrête avec un message explicite.
+- **Limite d'environnement** : Docker n'est pas installé sur la machine de développement actuelle ; le compose a été revu statiquement mais **non exécuté**. Les tests RLS, eux, tournent réellement sur un moteur PostgreSQL (voir §24.4).
+
+### 24.4 Pilote RLS — identity-service (PostgreSQL)
+
+`infra/postgres/init.sql` : schéma `identity` avec `tenants`, `users`, `audit_log` ; rôle `resto_app`
+(`NOSUPERUSER`, `NOBYPASSRLS`, aucun DDL), `ENABLE` **et** `FORCE ROW LEVEL SECURITY` sur les trois tables,
+politiques `USING` + `WITH CHECK` sur `identity.current_tenant()` (= `current_setting('app.tenant_id')`).
+Privilèges minimaux : `SELECT` sur `tenants`, `SELECT/INSERT/UPDATE` sur `users`, `SELECT/INSERT` sur `audit_log`
+(aucun `DELETE`), trigger `deny_audit_mutation` rendant l'historique immuable même pour le propriétaire.
+
+`infra/postgres/rls-test.mjs` — **10 tests, 10/10**, exécutés sur PostgreSQL 19 compilé en WASM (PGlite 0.6, sans Docker) :
+
+| # | Vérification | Résultat |
+| --- | --- | --- |
+| 1 | `resto_app` : `rolsuper=false`, `rolbypassrls=false` | ✅ |
+| 2 | RLS activée **et** forcée sur les 3 tables | ✅ |
+| 3 | Sans contexte tenant : 0 ligne lisible, insertion refusée (fail-closed) | ✅ |
+| 4 | Tenant A → 2 utilisateurs ; tenant B → 1 (aucun débordement) | ✅ |
+| 5 | Lecture ciblée de l'utilisateur B depuis A → 0 ligne | ✅ |
+| 6 | Insertion inter-tenant refusée (`WITH CHECK`), `UPDATE` croisé → 0 ligne, donnée B intacte | ✅ |
+| 7 | `tenants` : un tenant ne lit que sa fiche | ✅ |
+| 8 | `audit_log` : insertion contextualisée OK ; `UPDATE`/`DELETE` refusés par privilèges puis par trigger (y compris en superutilisateur) | ✅ |
+| 9 | Aucun privilège DDL pour `resto_app` (`CREATE TABLE` → permission denied) | ✅ |
+| 10 | Un superutilisateur voit les 3 lignes malgré la RLS → le rôle dédié est obligatoire | ✅ |
+
+### 24.5 Qualité : lint, couverture, CI, OpenAPI
+
+- **ESLint 9 (flat config)** : `@eslint/js` + `typescript-eslint` (recommandé) + `eslint-plugin-react-hooks` (règles de hooks en `error`, `exhaustive-deps` en `warning`) ; `no-control-regex` désactivé uniquement, avec justification, sur l'assainisseur PDF. Nettoyage de 28 symboles morts (imports, variables, helper). Résultat : **0 erreur**, 5 avertissements `exhaustive-deps` hérités assumés.
+- **Couverture** (`npm run test:coverage`, c8 sur `services/*/dist`, tests exclus) :
+
+| Indicateur | Mesure | Seuil CI |
+| --- | --- | --- |
+| Lignes / instructions | **83,86 %** (19 190 / 22 883) | 70 % |
+| Fonctions | **90,75 %** (766 / 844) | 70 % |
+| Branches | 69,27 % (2 943 / 4 248) | 60 % (plancher prudent, objectif 70 %) |
+
+- **CI GitHub Actions** (`.github/workflows/ci.yml`, push `main`/`develop` + PR) : `npm ci` → lint → typecheck → build web/PWA → tests contrats & jetons → tests services + couverture → tests RLS → vérification OpenAPI.
+- **OpenAPI 3.1 généré** (`npm run openapi`) : `docs/openapi/<service>.json` pour les 13 services — **318 routes** extraites des tables de routes (y compris les constantes `TABLE.*` d'identity-service), avec `bearerAuth`, `x-internal-key`, tags `authenticated`/`public`/`internal`, schéma d'erreur commun et index de ports. `npm run openapi:check` échoue si la doc dérive du code. La migration NestJS remplacera ce générateur par l'export natif, schémas de requête/réponse inclus.
+
+### 24.6 Commandes de vérification
+
+```bash
+npm run lint            # 0 erreur
+npm run typecheck       # web + PWA client
+npm run build           # web (149,7 kB CSS) + PWA (98,1 kB CSS)
+npm run test:packages   # contracts 5/5 + jetons 8/8 (avec contrôle de fraîcheur)
+npm run test:services   # 159/159
+npm run test:coverage   # 159/159 + seuils c8
+npm run db:test         # 10/10 RLS PostgreSQL
+npm run openapi:check   # 13 services / 318 routes à jour
+npm run db:start        # Docker requis (non disponible sur cette machine)
+```
+
+### 24.7 Ce qui reste pour la cible technique complète
+
+- Remplacer le kit HTTP maison par **NestJS** et Vite/React par **Next.js** (les écrans et le design system sont conservés).
+- Migrer chaque service de son store mémoire vers **PostgreSQL + RLS** (modèle §24.4), avec migrations par service et OpenAPI natif.
+- Introduction de **Redis/BullMQ** pour l'outbox (aujourd'hui en mémoire) et **Socket.IO** pour le temps réel ; MinIO pour les médias (bucket déjà prévu).
+- Application **Flutter** consommant `tokens.json` et les API ; Kubernetes/manifestes de déploiement.
+
+Ces migrations restent **en attente d'instruction** conformément à la règle « ne pas coder un service sans demande ».

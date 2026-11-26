@@ -11,6 +11,9 @@
     "./tokens.css": "./src/tokens.css",
     "./base.css": "./src/base.css"
   },
+  "dependencies": {
+    "@resto-hub/design-tokens": "*"
+  },
   "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

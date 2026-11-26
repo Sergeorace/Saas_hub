@@ -5,7 +5,6 @@ import {
   requireString,
   requireTenantPermission,
   verifyAuditChain,
-  type RequestContext,
   type Route,
   type ServiceClient,
 } from '@resto-hub/service-kit';
@@ -163,7 +162,7 @@ function parseTranches(raw: unknown, ruleIndex: number): RuleTier[] {
   if (!Array.isArray(raw)) {
     throw HttpError.unprocessable('rules_invalid', `Tranches attendues pour la règle #${ruleIndex + 1}.`);
   }
-  return raw.map((entry, tierIndex) => {
+  return raw.map((entry) => {
     const tier = asObject(entry);
     const upTo = tier.upTo === null ? null : numberField(tier, 'upTo', { min: 0 });
     return { upTo, ratePercent: numberField(tier, 'ratePercent', { min: 0, max: 100 }) };

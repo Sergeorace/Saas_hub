@@ -16,7 +16,8 @@
   "dependencies": {
     "@resto-hub/service-kit": "*",
     "pdf-lib": "^1.17.1",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "@resto-hub/shared-contracts": "*"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",

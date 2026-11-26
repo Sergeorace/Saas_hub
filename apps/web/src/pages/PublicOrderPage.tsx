@@ -14,7 +14,6 @@ import {
   formatXof,
   useI18n,
   useToast,
-  type Locale,
 } from '@resto-hub/design-system';
 import { navigate } from '../lib/router';
 import {

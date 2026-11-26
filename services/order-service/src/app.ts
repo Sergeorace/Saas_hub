@@ -33,7 +33,6 @@ import {
   type OrderPayment,
   type PaymentMethod,
   type Station,
-  type StationTicket,
 } from './store.js';
 import { buildReceiptPdf } from './receipt.js';
 

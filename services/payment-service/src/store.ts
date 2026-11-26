@@ -1,17 +1,9 @@
 import { buildAuditEntry, newId, nowIso, type AuditEntry } from '@resto-hub/service-kit';
+import { DISPUTE_STATUSES, TRANSACTION_STATUSES, type DisputeStatus, type TransactionStatus } from '@resto-hub/shared-contracts';
 import { appendEntry, createLedger, type Ledger } from './ledger.js';
 import { getProvider, type PaymentMethod, type ProviderId, type RoutingDecision } from './providers.js';
 
-export const TRANSACTION_STATUSES = [
-  'en_attente',
-  'confirmee',
-  'echouee',
-  'expiree',
-  'annulee',
-  'remboursee_partielle',
-  'remboursee',
-] as const;
-export type TransactionStatus = (typeof TRANSACTION_STATUSES)[number];
+export { DISPUTE_STATUSES, TRANSACTION_STATUSES, type DisputeStatus, type TransactionStatus };
 
 export type TransactionSource = 'agregateur' | 'caisse';
 export type TransactionMethod = PaymentMethod | 'especes';
@@ -20,8 +12,6 @@ export const SETTLEMENT_MODES = ['instant', 'batch'] as const;
 export type SettlementMode = (typeof SETTLEMENT_MODES)[number];
 export const SETTLEMENT_STATUSES = ['en_attente', 'payee', 'rejetee'] as const;
 export type SettlementStatus = (typeof SETTLEMENT_STATUSES)[number];
-export const DISPUTE_STATUSES = ['ouverte', 'en_examen', 'resolue', 'rejetee'] as const;
-export type DisputeStatus = (typeof DISPUTE_STATUSES)[number];
 
 /** Commission plateforme par plan d'abonnement (%). */
 export const PLAN_COMMISSION: Record<string, number> = {

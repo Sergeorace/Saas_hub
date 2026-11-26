@@ -4,10 +4,14 @@ Règles obligatoires du projet. Ce document est mis à jour à chaque étape.
 
 ## 1. État du dépôt
 
-- Le dossier de travail **n'est pas encore un dépôt Git** (`git init` à faire).
-- Tant que l'initialisation n'est pas faite, aucun branchement ni tag ne peut être appliqué.
-- Séquence d'amorçage proposée, à valider : `git init` → commit initial sur `main` (exception
-  unique d'amorçage) → création de `develop` → travail exclusif depuis `develop`.
+- Dépôt initialisé : `main` (commit d'amorçage `e82770f`, étapes 1–8 importées en une fois) et
+  `develop` au même commit. Exception d'amorçage documentée : ce commit unique est le seul à ne pas
+  être passé par `develop`.
+- Le socle technique est développé sur `feature/infra/socle`, puis fusionné dans `develop`.
+- Les étiquettes d'étapes 1–8 pointent toutes sur `e82770f` : l'historique détaillé n'a pas été
+  reconstitué (import consolidé). Les étapes suivantes sont taguées normalement.
+- Identité de commit utilisée par l'outillage : `Qoder <qoder@localhost>` via variables
+  d'environnement de commande (aucune configuration Git globale modifiée).
 
 ## 2. Branches
 
@@ -63,12 +67,17 @@ Un tag annoté clôt chaque étape validée :
 | `v0.7.0-staff-payroll` | staff-service, payroll-service |
 | `v0.8.0-operations` | inventory, loyalty-marketing, notification, reporting |
 | `v0.9.0-platform-admin` | platform-admin-service, sécurité et finition |
+| `v0.1.1-infra` | incrément technique (hors étape produit) : contrats partagés, jetons, infra locale, RLS, CI, OpenAPI |
 
-Les tags des étapes 1 à 8 restent à poser une fois le dépôt initialisé.
+`v0.9.0-platform-admin` clôt le commit d'amorçage. `v0.1.1-infra` étiquette le merge du socle dans
+`develop`; les étapes 1–8 n'ont pas d'étiquette individuelle (import consolidé, voir §1).
 
 ## 6. Hygiène
 
 - `.env.example` uniquement ; aucun secret ni identifiant réel versionné.
 - `node_modules/`, `dist/`, journaux et artefacts de build exclus.
 - Mise à jour de ce document et de `docs/architecture.md` à chaque étape.
-- CI (lint, typecheck, tests, couverture ≥ 70 %) à brancher dès la mise en place du dépôt.
+- CI GitHub Actions opérationnelle : `.github/workflows/ci.yml` (lint, typecheck, build, contrats,
+  tests services + couverture ≥ 70 % lignes, RLS, OpenAPI).
+- `npm run verify` rejoue localement l'essentiel de la CI ; `npm run openapi:check` et
+  `npm run test:tokens` gardent la documentation et les jetons alignés sur le code.
