@@ -39,7 +39,9 @@
     "verify": "npm run lint && npm run typecheck && npm run build && npm run test:packages && npm run db:test && npm run openapi:check && npm run test:services",
     "preview": "npm run preview -w @resto-hub/web",
     "preview:client": "npm run preview -w @resto-hub/client",
-    "tokens:check": "npm run check -w @resto-hub/design-tokens"
+    "tokens:check": "npm run check -w @resto-hub/design-tokens",
+    "flutter:theme": "node packages/design-tokens/scripts/flutter.mjs",
+    "flutter:theme:check": "node packages/design-tokens/scripts/flutter.mjs --check"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.6.0",

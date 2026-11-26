@@ -15,6 +15,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminPage } from './pages/AdminPage';
 import { WorkspacePage } from './pages/WorkspacePage';
+import { DesignPage } from './pages/DesignPage';
 import { PublicTablePage, PublicTrackingPage } from './pages/PublicOrderPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -51,6 +52,7 @@ const TITLES: Record<string, string> = {
   '/inscription': 'Créer un établissement — RESTO-HUB',
   '/admin': 'Supervision plateforme — RESTO-HUB',
   '/espace': 'Espace gérant — RESTO-HUB',
+  '/design': 'Design system — RESTO-HUB',
 };
 
 export default function App() {
@@ -102,6 +104,8 @@ export default function App() {
       return <AdminPage />;
     case '/espace':
       return <WorkspacePage />;
+    case '/design':
+      return <DesignPage />;
     default:
       return <LandingPage />;
   }
