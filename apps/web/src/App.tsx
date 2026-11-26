@@ -3,6 +3,9 @@ import { useI18n } from '@resto-hub/design-system';
 import { SiteHeader } from './components/SiteHeader';
 import { SiteFooter } from './components/SiteFooter';
 import { Hero } from './sections/Hero';
+import { TrustStrip } from './sections/TrustStrip';
+import { Story } from './sections/Story';
+import { Testimonials } from './sections/Testimonials';
 import { Cockpit } from './sections/Cockpit';
 import { Services } from './sections/Services';
 import { Journeys } from './sections/Journeys';
@@ -34,10 +37,13 @@ function LandingPage() {
       <SiteHeader />
       <main id="main">
         <Hero />
+        <TrustStrip />
+        <Story />
         <Cockpit />
         <Services />
         <Journeys />
         <Payments />
+        <Testimonials />
         <DesignGallery />
         <Pricing />
         <FinalCta />

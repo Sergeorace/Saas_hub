@@ -1,51 +1,66 @@
-import { Icon, useI18n } from '@resto-hub/design-system';
+import { Icon, formatXof, useI18n } from '@resto-hub/design-system';
 
 export function FinalCta() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   return (
-    <section className="section" aria-labelledby="cta-title">
+    <section className="section cdownload" aria-labelledby="cta-title">
       <div className="site-container">
-        <div className="final-cta">
-          <div className="final-cta__glow" aria-hidden="true" />
-          <div className="final-cta__copy">
-            <h2 className="rh-display" id="cta-title">
-              {t('finalCta.title')}
-            </h2>
-            <p>{t('finalCta.lead')}</p>
-            <div className="final-cta__actions">
-              <a className="rh-btn rh-btn--primary rh-btn--lg" href="#/inscription">
-                {t('finalCta.primary')}
-                <span className="rh-btn__icon">
-                  <Icon name="arrow-right" />
-                </span>
-              </a>
-              <a className="rh-btn rh-btn--outline rh-btn--lg" href="#/connexion">
-                {t('finalCta.secondary')}
-              </a>
+        <div className="cdownload__banner">
+          <div className="cdownload__glow" aria-hidden="true" />
+          <div className="cdownload__art">
+            <div className="cdownload__plate">
+              <img
+                src="/marketing/hero-chicken.webp"
+                alt=""
+                width={1200}
+                height={1200}
+                loading="lazy"
+              />
             </div>
-            <p className="final-cta__note">{t('finalCta.note')}</p>
+            <div className="cdownload__order-card">
+              <div>
+                <strong>{t('landing.download.cardTitle')}</strong>
+                <span>{t('landing.download.cardMeta')}</span>
+                <em>{formatXof(4500, locale)}</em>
+              </div>
+              <span className="cdownload__order-btn">
+                {t('landing.download.cardCta')}
+                <Icon name="plus" size="sm" />
+              </span>
+            </div>
           </div>
-          <div className="final-cta__art" aria-hidden="true">
-            <div className="final-cta__card">
-              <span className="final-cta__card-icon">
-                <Icon name="qr" />
-              </span>
-              <div>
-                <strong>Table 07 · Terrasse</strong>
-                <span>lebaobab.resto-hub.tg/qr/07</span>
-              </div>
-              <Icon name="scan" />
+
+          <div className="cdownload__copy">
+            <p className="cdownload__eyebrow">{t('landing.download.eyebrow')}</p>
+            <h2 className="cdownload__title" id="cta-title">
+              {t('landing.download.title')}
+            </h2>
+            <p className="cdownload__lead">{t('landing.download.lead')}</p>
+            <div className="cdownload__actions">
+              <a className="cdownload__btn cdownload__btn--accent" href="#/inscription">
+                {t('landing.download.primaryCta')}
+                <Icon name="arrow-right" size="sm" />
+              </a>
+              <a className="cdownload__btn cdownload__btn--ghost" href="#product">
+                <Icon name="play" size="sm" />
+                {t('landing.download.secondaryCta')}
+              </a>
             </div>
-            <div className="final-cta__card final-cta__card--offset">
-              <span className="final-cta__card-icon final-cta__card-icon--success">
-                <Icon name="check-circle" />
-              </span>
-              <div>
-                <strong>OrderPaid · 12 800 FCFA</strong>
-                <span>TMoney · signature vérifiée</span>
+            <div className="cdownload__store">
+              <span>{t('landing.download.storeLabel')}</span>
+              <div className="cdownload__store-pill">
+                <Icon name="smartphone" size="sm" />
+                <div>
+                  <strong>{t('landing.download.web')}</strong>
+                  <span>resto-hub.tg</span>
+                </div>
               </div>
             </div>
+            <p className="cdownload__note">
+              <Icon name="check-circle" size="sm" />
+              {t('landing.download.note')}
+            </p>
           </div>
         </div>
       </div>

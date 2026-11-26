@@ -12,21 +12,21 @@ function providerSlug(name: string) {
 
 export function Payments() {
   const { t, tm } = useI18n();
-  const providers = tm<ProviderItem[]>('payments.providers') ?? [];
-  const features = tm<PaymentFeature[]>('payments.features') ?? [];
-  const flow = tm<string[]>('payments.flow') ?? [];
+  const providers = tm<ProviderItem[]>('paymentsShowcase.providers') ?? [];
+  const features = tm<PaymentFeature[]>('paymentsShowcase.features') ?? [];
+  const flow = tm<string[]>('paymentsShowcase.flow') ?? [];
 
   return (
     <section className="section section--alt" id="payments" aria-labelledby="payments-title">
       <div className="site-container">
         <header className="section__head">
           <div>
-            <p className="rh-eyebrow">{t('payments.eyebrow')}</p>
+            <p className="rh-eyebrow">{t('paymentsShowcase.eyebrow')}</p>
             <h2 className="rh-display section__title" id="payments-title">
-              {t('payments.title')}
+              {t('paymentsShowcase.title')}
             </h2>
           </div>
-          <p className="section__lead">{t('payments.lead')}</p>
+          <p className="section__lead">{t('paymentsShowcase.lead')}</p>
         </header>
 
         <div className="payments__layout">
@@ -53,10 +53,10 @@ export function Payments() {
             </div>
             <p className="payments__failover">
               <Icon name="refresh" size="sm" />
-              {t('payments.providerNote')}
+              {t('paymentsShowcase.providerNote')}
             </p>
 
-            <ol className="flow" aria-label={t('payments.eyebrow')}>
+            <ol className="flow" aria-label={t('paymentsShowcase.eyebrow')}>
               {flow.map((step, index) => (
                 <li key={step}>
                   <span className="flow__num">{index + 1}</span>
@@ -86,7 +86,7 @@ export function Payments() {
 
         <p className="payments__note">
           <Icon name="lock" size="sm" />
-          {t('payments.note')}
+          {t('paymentsShowcase.note')}
         </p>
       </div>
     </section>
