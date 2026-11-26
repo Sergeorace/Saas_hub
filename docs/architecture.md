@@ -282,21 +282,24 @@ une room temps réel ou un export de A.
 
 ## 7. Catalogue des services
 
-| #   | Service           | Responsabilité                                     | Base           | Publie (extraits)                       | Consomme (extraits)                        |
-| --- | ----------------- | -------------------------------------------------- | -------------- | --------------------------------------- | ------------------------------------------ |
-| 1   | identity          | auth, OTP, sessions, MFA, RBAC                     | `identity`     | UserRegistered, RoleChanged             | TenantSuspended                            |
-| 2   | tenant            | établissements, KYC, branding, abonnements         | `tenant`       | TenantApproved, SubscriptionChanged     | InvoicePaid                                |
-| 3   | catalog           | produits, menus, prix, promos                      | `catalog`      | ProductUpdated, PriceChanged            | TenantApproved, StockBelowThreshold        |
-| 4   | floor             | zones, tables, QR, réservations, temps réel        | `floor`        | TableStatusChanged, ReservationCreated  | OrderPaid, OrderCancelled                  |
-| 5   | order             | panier, commandes, KDS, POS, caisse                | `order`        | OrderCreated, OrderPaid, OrderCancelled | PaymentSucceeded, PaymentFailed            |
-| 6   | payment           | agrégateur, portefeuille, commissions, grand livre | `payment`      | PaymentSucceeded, PayoutSucceeded       | OrderCreated, PayrollApproved              |
-| 7   | staff             | employés, plannings, pointage, audit               | `staff`        | EmployeeHired, AuditRecorded            | OrderPaid                                  |
-| 8   | payroll           | paie, bulletins, paiement groupé 2 niveaux         | `payroll`      | PayrollApproved, PayslipPublished       | AttendanceClocked, SalaryPaymentSucceeded  |
-| 9   | inventory         | stocks, recettes, pertes, fournisseurs             | `inventory`    | StockBelowThreshold, WasteRecorded      | OrderPaid, ProductUpdated                  |
-| 10  | loyalty-marketing | fidélité, promos, campagnes, avis                  | `loyalty`      | PointsEarned, ReviewSubmitted           | OrderPaid, CustomerRegistered              |
-| 11  | notification      | push, SMS, e-mail, temps réel                      | `notification` | NotificationSent, NotificationFailed    | (tous les événements métier)               |
-| 12  | reporting         | entrepôt de lecture, KPI, exports                  | `reporting`    | ReportReady, AnomalyDetected            | OrderPaid, PosShiftClosed, PayrollApproved |
-| 13  | platform-admin    | supervision, litiges, paramètres globaux           | `platform`     | DisputeResolved, FeatureFlagChanged     | TenantApplied, PaymentFailed               |
+| #   | Service           | Responsabilité                                     | Base           | Publie (réel)                                                                                                                                                                                                                     | Consomme (réel)                                                                                                                                                                                                 |
+| --- | ----------------- | -------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | identity          | auth, OTP, sessions, MFA, RBAC                     | `identity`     | — (sessions, aucun événement métier)                                                                                                                                                                                              | TenantApproved, TenantSuspended                                                                                                                                                                                 |
+| 2   | tenant            | établissements, KYC, branding, abonnements         | `tenant`       | TenantApplicationSubmitted/InfoRequested/Rejected, TenantApproved, TenantSuspended, TenantReactivated, TenantBrandingUpdated, SubscriptionInvoicePaid                                                                             | SubscriptionInvoicePaid                                                                                                                                                                                         |
+| 3   | catalog           | produits, menus, prix, promos                      | `catalog`      | CatalogItemUpdated                                                                                                                                                                                                                | —                                                                                                                                                                                                               |
+| 4   | floor             | zones, tables, QR, réservations, temps réel        | `floor`        | TableStatusChanged, ReservationCreated, ReservationStatusChanged, FloorLayoutUpdated, FloorOrderTransferred, FloorTablesMerged, FloorTablesSplit                                                                                  | —                                                                                                                                                                                                               |
+| 5   | order             | panier, commandes, KDS, POS, caisse                | `order`        | OrderCreated, OrderStatusChanged, OrderPaid                                                                                                                                                                                       | —                                                                                                                                                                                                               |
+| 6   | payment           | agrégateur, portefeuille, commissions, grand livre | `payment`      | PaymentInitiated, PaymentConfirmed, PaymentFailed, PaymentCancelled, RefundIssued, DisputeOpened, DisputeResolved, SettlementRequested, SettlementPaid, ReconciliationCompleted, DisbursementPaid, SplitCompleted, TipDistributed | OrderPaid                                                                                                                                                                                                       |
+| 7   | staff             | employés, plannings, pointage, audit               | `staff`        | StaffInvited, StaffActivated, StaffUpdated, AttendanceClocked, ShiftPublished, ShiftSwapDecided, LeaveDecided                                                                                                                     | OrderPaid, TipDistributed                                                                                                                                                                                       |
+| 8   | payroll           | paie, bulletins, paiement groupé 2 niveaux         | `payroll`      | PayrollRunCreated, PayrollSettingsUpdated, PayrollApproved, PayrollPaid, PayrollPaymentFailed, PayslipsSent                                                                                                                       | StaffUpdated                                                                                                                                                                                                    |
+| 9   | inventory         | stocks, recettes, pertes, fournisseurs             | `inventory`    | StockBelowThreshold, StockDepleted, StockReplenished, WasteRecorded                                                                                                                                                               | OrderPaid                                                                                                                                                                                                       |
+| 10  | loyalty-marketing | fidélité, promos, campagnes, avis                  | `loyalty`      | LoyaltyPointsEarned, LoyaltyRewardRedeemed, PromoCodeRedeemed, PromotionCreated, CampaignSent, ReviewSubmitted, ReviewReplied, ReviewModerated                                                                                    | OrderPaid                                                                                                                                                                                                       |
+| 11  | notification      | push, SMS, e-mail, temps réel                      | `notification` | SmsDeliveryReported                                                                                                                                                                                                               | OrderCreated, OrderPaid, PaymentFailed, TableStatusChanged, ReservationCreated, StockBelowThreshold, StockDepleted, CampaignSent, PayrollApproved, PayrollPaid                                                  |
+| 12  | reporting         | entrepôt de lecture, KPI, exports                  | `reporting`    | ReportExported                                                                                                                                                                                                                    | OrderPaid, PaymentFailed, RefundIssued, ReservationCreated, ReviewSubmitted, ReviewModerated, PayrollPaid                                                                                                       |
+| 13  | platform-admin    | supervision, litiges, paramètres globaux           | `platform`     | PlatformSettingsUpdated                                                                                                                                                                                                           | TenantApplicationSubmitted/Rejected, TenantApproved, TenantSuspended, TenantReactivated, SubscriptionInvoicePaid, PaymentConfirmed, PaymentFailed, RefundIssued, DisputeOpened, DisputeResolved, SettlementPaid |
+
+> Ces listes sont issues du code (`services/*/src`, hors tests) et recoupées par les tests de
+> `packages/shared-contracts` : chaque événement imposé doit être publié par au moins un service.
 
 Ports de développement (convention) : identity 4001, tenant 4002, catalog 4003, floor 4004,
 order 4005, payment 4006, staff 4007, payroll 4008, inventory 4009, loyalty 4010,
@@ -1822,7 +1825,7 @@ Privilèges minimaux : `SELECT` sur `tenants`, `SELECT/INSERT/UPDATE` sur `users
 | Fonctions             | **90,75 %** (766 / 844)       | 70 %                                   |
 | Branches              | 69,27 % (2 943 / 4 248)       | 60 % (plancher prudent, objectif 70 %) |
 
-- **CI GitHub Actions** (`.github/workflows/ci.yml`, push `main`/`develop` + PR) : `npm ci` → lint → typecheck → build web/PWA → tests contrats & jetons → tests services + couverture → tests RLS → vérification OpenAPI.
+- **CI GitHub Actions** (`.github/workflows/ci.yml`, push `main`/`develop` + PR) : `npm ci` → format (Prettier `--check`) → lint → typecheck → build web/PWA → tests contrats, jetons et gabarit → tests services + couverture → tests RLS → vérification OpenAPI.
 - **OpenAPI 3.1 généré** (`npm run openapi`) : `docs/openapi/<service>.json` pour les 13 services — **318 routes** extraites des tables de routes (y compris les constantes `TABLE.*` d'identity-service), avec `bearerAuth`, `x-internal-key`, tags `authenticated`/`public`/`internal`, schéma d'erreur commun et index de ports. `npm run openapi:check` échoue si la doc dérive du code. La migration NestJS remplacera ce générateur par l'export natif, schémas de requête/réponse inclus.
 
 ### 24.6 Commandes de vérification
@@ -1831,7 +1834,7 @@ Privilèges minimaux : `SELECT` sur `tenants`, `SELECT/INSERT/UPDATE` sur `users
 npm run lint            # 0 erreur
 npm run typecheck       # web + PWA client
 npm run build           # web (149,7 kB CSS) + PWA (98,1 kB CSS)
-npm run test:packages   # contracts 5/5 + jetons 8/8 (avec contrôle de fraîcheur)
+npm run test:packages   # contrats + jetons 8/8 + gabarit 20/20 (avec contrôle de fraîcheur)
 npm run test:services   # 159/159
 npm run test:coverage   # 159/159 + seuils c8
 npm run db:test         # 10/10 RLS PostgreSQL
@@ -1841,9 +1844,105 @@ npm run db:start        # Docker requis (non disponible sur cette machine)
 
 ### 24.7 Ce qui reste pour la cible technique complète
 
-- Remplacer le kit HTTP maison par **NestJS** et Vite/React par **Next.js** (les écrans et le design system sont conservés).
+- Remplacer le kit HTTP maison par **NestJS** en partant de `packages/service-template` (§25.3) et Vite/React par **Next.js** (les écrans et le design system sont conservés).
 - Migrer chaque service de son store mémoire vers **PostgreSQL + RLS** (modèle §24.4), avec migrations par service et OpenAPI natif.
 - Introduction de **Redis/BullMQ** pour l'outbox (aujourd'hui en mémoire) et **Socket.IO** pour le temps réel ; MinIO pour les médias (bucket déjà prévu).
 - Application **Flutter** consommant `tokens.json` et les API ; Kubernetes/manifestes de déploiement.
 
 Ces migrations restent **en attente d'instruction** conformément à la règle « ne pas coder un service sans demande ».
+
+---
+
+## 25. Socle de production — monorepo, gabarit NestJS, contrats typés et design system
+
+> Livraison de l'étape « socle » : outillage du monorepo, design system documenté et portable,
+> gabarit de microservice sécurisé, contrats d'événements typés. **Aucun service métier n'a été
+> créé ou modifié dans cette étape.**
+
+### 25.1 Monorepo et qualité (`feature/platform/monorepo-scaffold`)
+
+- `npm` workspaces : `apps/web` (back-office/console React + Vite), `apps/client` (PWA client),
+  `apps/mobile` (thème Flutter), `packages/*`, `services/*` (13 services, ports 4001–4013).
+- Outillage : Prettier 3 (`.prettierrc.json`, `.prettierignore`), ESLint 9 flat config, Node ≥ 22.
+- `.env.example` à la racine (secrets en variables uniquement), `docker-compose.yml`
+  (PostgreSQL 16 + Redis 7 + MinIO), `CONTRIBUTING.md`, modèle de Pull Request.
+- CI `.github/workflows/ci.yml` : `npm ci` → **format:check** → lint → typecheck → build →
+  tests contrats/jetons/gabarit → tests services + couverture → RLS → OpenAPI.
+- Le formatage du dépôt a été aligné sur Prettier (`feature/platform/prettier-baseline`) ;
+  les fichiers générés (`tokens.json`, `src/tokens.ts`, `resto_tokens.g.dart`,
+  `packages/service-template/openapi.json`) sont exclus du formatage et contrôlés par leurs
+  propres scripts `--check`.
+
+### 25.2 Design system (`design/design-system`)
+
+- Contrat de design : `packages/design-tokens/DESIGN.md` (identité « Le Baobab », palette
+  claire/sombre, contrastes AA mesurés, typographie Fraunces/Inter/JetBrains Mono, espacements,
+  rayons, mouvement, 6 statuts de table, thèmes établissement `le-baobab` et `lagune`).
+- Catalogue des composants web : `packages/design-system/README.md` (boutons 7 variantes, champs,
+  cartes, tableaux, modales, badges, toasts, onglets, navigation latérale, barre inférieure,
+  états vides, skeletons, providers thème/i18n).
+- Portage Flutter : `packages/design-tokens/scripts/flutter.mjs` génère
+  `apps/mobile/lib/theme/resto_tokens.g.dart` depuis `tokens.json` (123 couleurs × 2 thèmes,
+  dimensions, durées, familles) ; `RestoTheme.light()/dark()` et `RestoStatusColors` exposent les
+  mêmes jetons, `--check` échoue en cas de désynchronisation.
+- Vitrine vérifiée en navigateur : route `/#/design` de `apps/web` — couleurs, typographie,
+  espacements, tous les composants, les 6 statuts de table, navigation web/mobile, états
+  vide/chargement/erreur, thèmes d'établissement, blocs en mode sombre, formats XOF.
+
+### 25.3 Gabarit de microservice NestJS (`feature/shared/service-template`)
+
+`packages/service-template` est le modèle des 13 services (aucun service métier livré ici) :
+
+| Brique          | Fichier(s)                                                    | Contenu                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Configuration   | `src/config.ts`                                               | `ServiceConfig` typée, refus de démarrer en production sans `INTERNAL_API_KEY`                                                                                                           |
+| Santé           | `src/health.controller.ts`                                    | `GET /health` (liveness), `GET /ready` (ping PostgreSQL → `ready`/`degraded`)                                                                                                            |
+| OpenAPI         | `src/openapi.ts`, `src/export-openapi.ts`                     | Swagger `/docs` (hors production), export `openapi.json`                                                                                                                                 |
+| Contexte tenant | `src/tenant/tenant-context.ts`, `.middleware.ts`, `.guard.ts` | `AsyncLocalStorage`, en-tête `x-tenant-id`, cohérence en-tête/jeton/route, refus `403 tenant_scope_denied`                                                                               |
+| Base tenant     | `src/tenant/tenant.database.ts`, `rls.sql`                    | transaction `BEGIN` + `set_config('app.tenant_id')`, pool paresseux, `rls.sql` complet                                                                                                   |
+| RLS             | `src/tenant/rls.sql`                                          | rôle `resto_app` (`NOSUPERUSER`, `NOBYPASSRLS`), `ENABLE` + `FORCE ROW LEVEL SECURITY`, policies `USING`/`WITH CHECK`, audit `SELECT/INSERT` seulement, trigger d'immuabilité, aucun DDL |
+| Audit           | `src/audit/audit.service.ts`                                  | chaîne SHA-256 (`id`, `prevHash`, tenant, acteur, action, payload, date), `verifyChain`                                                                                                  |
+| Événements      | `src/events/*`                                                | enveloppe validée, outbox, livraison idempotente, `POST /internal/events` protégé par clé interne (comparaison à temps constant)                                                         |
+| Exemple         | `src/example/ping.controller.ts`                              | `GET /api/v1/ping` derrière le guard tenant                                                                                                                                              |
+
+**20 tests automatiques** (`npm run test:template`) :
+
+- isolation (6) : en-tête incohérent avec `x-user-tenant` ou avec `:tenantId` de route → 403 ;
+  en-tête absent → 403 ; contexte de requête non contredisable ; propagation et nettoyage
+  `AsyncLocalStorage` ; `requireTenantId()` hors requête échoue explicitement ;
+- RLS réelle sur PGlite (7) : `resto_app` sans superutilisateur ni BYPASSRLS, RLS activée et
+  forcée sur `records`/`audit_log`, fail-closed sans tenant, cloisonnement A/B (2 vs 1 lignes),
+  insertion croisée refusée, `UPDATE`/`DELETE` d'audit refusés, DDL refusé ;
+- audit (4) : chaîne valide, falsification détectée (`brokenAt`), chaîne tronquée détectée,
+  tenant obligatoire ;
+- événements (3) : publication → livraison unique puis doublon ignoré, enveloppe invalide rejetée,
+  outbox filtrée par tenant.
+
+Procédure de génération d'un service : voir `packages/service-template/README.md`.
+
+### 25.4 Contrats d'événements typés (`feature/shared/shared-contracts`)
+
+- `src/event-payloads.ts` : types de charge utile pour les 9 événements imposés
+  (`OrderCreated`, `OrderStatusChanged`, `OrderPaid`, `PaymentFailed`, `TableStatusChanged`,
+  `ReservationCreated`, `PayrollApproved`, `StockBelowThreshold`, `CatalogItemUpdated`), alignés
+  sur les payloads réellement émis par les services, plus `TypedDomainEvent<T>` et
+  `DomainEventPayloads`.
+- `tests/contracts.test.ts` : **8 tests** (dont fixtures exhaustives des 9 événements,
+  compatibilité enveloppe, invariants XOF entiers positifs).
+- Les consommateurs peuvent désormais importer le contrat typé sans dupliquer la forme des charges
+  utiles ; le registre reste vérifié contre `services/*/src`.
+
+### 25.5 Commandes de vérification de l'étape
+
+```bash
+npm run format:check        # Prettier sur tout le dépôt
+npm run lint                # 0 erreur (5 avertissements exhaustive-deps historiques)
+npm run typecheck           # web + PWA client
+npm run build               # web + PWA client
+npm run test:packages       # contrats 8/8 + jetons 8/8 + gabarit 20/20
+npm run flutter:theme:check # thème Flutter aligné sur tokens.json
+npm run test:services       # 13 services, isolation et règles métier
+npm run test:coverage       # seuils c8
+npm run db:test             # RLS PostgreSQL (PGlite)
+npm run openapi:check       # 13 services à jour
+```

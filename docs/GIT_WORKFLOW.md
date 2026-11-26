@@ -12,6 +12,14 @@ Règles obligatoires du projet. Ce document est mis à jour à chaque étape.
   reconstitué (import consolidé). Les étapes suivantes sont taguées normalement.
 - Identité de commit utilisée par l'outillage : `Qoder <qoder@localhost>` via variables
   d'environnement de commande (aucune configuration Git globale modifiée).
+- **Étape socle (branches dédiées)** : `feature/platform/monorepo-scaffold`,
+  `design/design-system`, `feature/platform/prettier-baseline`,
+  `feature/shared/service-template`, `feature/shared/shared-contracts`, `feature/platform/docs-socle` — toutes
+  fusionnées dans `develop` par `--no-ff` (voir §7).
+- **Pas de remote configuré et `gh` indisponible sur la machine de développement** : les pushes et
+  Pull Requests ne peuvent pas être exécutés depuis cet environnement. Les titres/descriptions de
+  PR sont préparés dans le journal (§7) pour être ouverts dès qu'un remote est ajouté ; ce
+  contournement est explicite et ne modifie pas la règle « PR vers `develop` ».
 
 ## 2. Branches
 
@@ -58,7 +66,7 @@ Un tag annoté clôt chaque étape validée :
 
 | Tag                      | Périmètre                                                                                            |
 | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `v0.1.0-socle`           | architecture, design system, accueil de démonstration                                                |
+| `v0.1.0-socle`           | monorepo outillé, design system (web + Flutter + vitrine), gabarit NestJS, contrats typés, docs      |
 | `v0.2.0-identity-tenant` | identity-service, tenant-service                                                                     |
 | `v0.3.0-catalog-floor`   | catalog-service, floor-service                                                                       |
 | `v0.4.0-order`           | order-service                                                                                        |
@@ -81,3 +89,25 @@ Un tag annoté clôt chaque étape validée :
   tests services + couverture ≥ 70 % lignes, RLS, OpenAPI).
 - `npm run verify` rejoue localement l'essentiel de la CI ; `npm run openapi:check` et
   `npm run test:tokens` gardent la documentation et les jetons alignés sur le code.
+
+## 7. Journal de l'étape « socle » (v0.1.0-socle)
+
+Chaque fonctionnalité a une branche dédiée, issue de `develop`, fusionnée par `--no-ff`.
+Les commits ci-dessous sont ceux de la branche (le merge correspondant est indiqué).
+
+| Branche                              | Commits (message)                                                                                                                                                                                                                                                                                                                                                                | Merge dans `develop` | Titre de PR préparé                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------- |
+| `feature/platform/monorepo-scaffold` | `3f194db` chore(platform): outillage - prettier, env d exemple, readme et contribution · `93fd337` chore(platform): monorepo-scaffold - formatage initial et modele de pull request                                                                                                                                                                                              | `31fbc7b`            | `chore(platform): monorepo-scaffold - outillage du monorepo`                       |
+| `design/design-system`               | `dda978e` design(designSystem): tokens - contrat visuel, palette, statuts et echelle typographique · `e4945c9` design(designSystem): composants - catalogue des composants web accessibles · `7c30131` design(designSystem): flutter-theme - theme Material 3 genere depuis les jetons · `253eef8` design(designSystem): page-design - vitrine des composants en clair et sombre | `983da4a`            | `design(designSystem): design system - jetons, composants, thème Flutter, vitrine` |
+| `feature/platform/prettier-baseline` | `a747f84` chore(platform): prettier - aligner le formatage du dépôt sur la configuration commune                                                                                                                                                                                                                                                                                 | `f643f9d`            | `chore(platform): prettier - aligner le formatage du dépôt`                        |
+| `feature/shared/service-template`    | `105ae8d` feat(shared): service-template - gabarit NestJS sécurisé pour les 13 microservices                                                                                                                                                                                                                                                                                     | `d191fba`            | `feat(shared): service-template - gabarit NestJS sécurisé`                         |
+| `feature/shared/shared-contracts`    | `c09326f` feat(shared): contrats - charges utiles typées des neuf événements obligatoires                                                                                                                                                                                                                                                                                        | `49b0455`            | `feat(shared): contrats - charges utiles typées des événements`                    |
+| `feature/platform/docs-socle`        | `docs(platform): socle - architecture des services, gabarit et workflow Git`                                                                                                                                                                                                                                                                                                     | — (dernier merge)    | `docs: socle - architecture et workflow Git`                                       |
+
+- Tag de clôture : **`v0.1.0-socle`** (annoté) posé sur `develop` après la fusion de `feature/platform/docs-socle`.
+- Les PR ne peuvent pas être ouvertes depuis cette machine (aucun remote, pas de `gh`) : les titres
+  ci-dessus et les descriptions du modèle `.github/PULL_REQUEST_TEMPLATE.md` sont prêts à l'emploi.
+- Les branches fusionnées sont supprimées après merge (`git branch -d`), conformément au §4 ; les
+  branches de service sont conservées uniquement pour les étapes suivantes.
+- Aucun commit direct sur `main` ni `develop` : les commits de merge de chaque branche sont les seuls objets
+  créés sur `develop`, et `main` reste sur `e82770f`.
