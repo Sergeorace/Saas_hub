@@ -1,4 +1,5 @@
 import { Badge, BottomNav, Button, Icon, Logo, formatXof, useI18n } from '@resto-hub/design-system';
+import { DeviceStatus } from '../components/DeviceStatus';
 import type { DemoMenuItem, JourneyItem } from '../data/types';
 
 interface JourneyDemo {
@@ -68,10 +69,7 @@ export function Journeys() {
                   <div className="phone-demo__notch" aria-hidden="true" />
                   <div className="phone-demo__status" aria-hidden="true">
                     <span>21:04</span>
-                    <span className="phone-demo__status-icons">
-                      <Icon name="wifi-off" size="sm" />
-                      <Icon name="zap" size="sm" />
-                    </span>
+                    <DeviceStatus className="phone-demo__status-icons" />
                   </div>
                   <div className="phone-demo__app">
                     <div className="phone-demo__head">

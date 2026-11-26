@@ -23,8 +23,7 @@ export const frLanding: Messages = {
       featureTracking: 'Suivi temps réel',
       featurePayment: 'Paiement Mobile Money',
       phone: {
-        deliver: 'Livrer à',
-        address: 'Boulevard du 13 Janvier, Lomé',
+        table: 'Table 12 · Sur place',
         greetingA: 'Quelle est votre',
         greetingB: 'envie aujourd’hui ?',
         search: 'Rechercher un plat, un bar…',
@@ -121,8 +120,7 @@ export const enLanding: Messages = {
       featureTracking: 'Real-time tracking',
       featurePayment: 'Mobile Money payment',
       phone: {
-        deliver: 'Deliver to',
-        address: 'Boulevard du 13 Janvier, Lomé',
+        table: 'Table 12 · Dine-in',
         greetingA: 'What’s your',
         greetingB: 'craving today?',
         search: 'Search a dish, a bar…',
