@@ -76,9 +76,11 @@ Un tag annoté clôt chaque étape validée :
 | `v0.8.0-operations`      | inventory, loyalty-marketing, notification, reporting                                                |
 | `v0.9.0-platform-admin`  | platform-admin-service, sécurité et finition                                                         |
 | `v0.1.1-infra`           | incrément technique (hors étape produit) : contrats partagés, jetons, infra locale, RLS, CI, OpenAPI |
+| `v0.1.2-vitrine`         | incrément de design : refonte de la vitrine marketing selon la direction artistique Cravk            |
 
 `v0.9.0-platform-admin` clôt le commit d'amorçage. `v0.1.1-infra` étiquette le merge du socle dans
 `develop`; les étapes 1–8 n'ont pas d'étiquette individuelle (import consolidé, voir §1).
+`v0.1.2-vitrine` étiquette la refonte Cravk de la page marketing (voir §8).
 
 ## 6. Hygiène
 
@@ -118,9 +120,9 @@ Les commits ci-dessous sont ceux de la branche (le merge correspondant est indiq
 Refonte de la page marketing à partir de la référence Dribbble
 « Cravk – Food Delivery App Landing Page » (Sheikh Elias / uixelias).
 
-| Branche                | Commits (message)                                                                                                                                                                        | Merge dans `develop` | Titre de PR préparé                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------- |
-| `design/landing-cravk` | `3b155bb` design(landing): cravk - direction artistique, navigation et héros · `eeaa649` feat(landing): cravk - récit, preuves sociales et CTA application                              | `fcb0d52`            | `design(landing): cravk - refonte de la vitrine marketing` |
+| Branche                | Commits (message)                                                                                                                                          | Merge dans `develop` | Titre de PR préparé                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
+| `design/landing-cravk` | `3b155bb` design(landing): cravk - direction artistique, navigation et héros · `eeaa649` feat(landing): cravk - récit, preuves sociales et CTA application | `fcb0d52`            | `design(landing): cravk - refonte de la vitrine marketing` |
 
 - Périmètre : navigation noire flottante, héros avec aperçu téléphone du parcours client,
   bandeau de confiance, récit d'établissement, témoignages et bandeau application ; les sections
