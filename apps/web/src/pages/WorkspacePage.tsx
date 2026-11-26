@@ -163,7 +163,6 @@ export function WorkspacePage() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, myTenants]);
 
   const loadTenant = async (id: string) => {

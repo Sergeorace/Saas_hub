@@ -22,6 +22,7 @@ function ascii(value: string): string {
   return value
     .replace(/[\u202f\u00a0]/g, ' ')
     .replace(/\u2192/g, '->')
+    // eslint-disable-next-line no-control-regex -- assainissement PDF : les caractères de contrôle sont remplacés
     .replace(/[^\x00-\xFF\u2018\u2019\u201c\u201d\u2013\u2014\u2026\u20ac\u0153\u0152]/g, '?');
 }
 

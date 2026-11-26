@@ -65,7 +65,7 @@ async function main() {
     internal,
   );
 
-  const alphaAccountant = await provision({
+  await provision({
     tenantId: 'tnt_alpha',
     roleCode: 'accountant',
     name: 'Compta Alpha',

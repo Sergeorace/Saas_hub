@@ -8,7 +8,6 @@ import {
   runTests,
   startServer,
   type AuthClaims,
-  type Route,
   type TestCase,
 } from '@resto-hub/service-kit';
 import { buildPayrollApp, handlePayrollEvent, previewPayslip } from '../app.js';

@@ -24,7 +24,7 @@ import {
   type TaxSetting,
   type CountrySetting,
 } from './store.js';
-import { checkAllServices, type HealthCheckResult } from './supervision.js';
+import { type HealthCheckResult } from './supervision.js';
 
 export interface PlatformAdminAppOptions {
   store: PlatformAdminStore;

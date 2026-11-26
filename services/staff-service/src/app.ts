@@ -3,7 +3,6 @@ import {
   asObject,
   newId,
   optionalEmail,
-  optionalPhone,
   optionalString,
   randomToken,
   requireEnum,
@@ -11,23 +10,18 @@ import {
   requireString,
   requireTenantPermission,
   verifyAuditChain,
-  type AuthClaims,
-  type RequestContext,
   type Route,
 } from '@resto-hub/service-kit';
 import {
   CONTRACT_TYPES,
-  LEAVE_STATUSES,
   LEAVE_TYPES,
   PAYMENT_METHODS,
   SHIFT_STATIONS,
   SHIFT_STATUSES,
   STAFF_STATUSES,
-  createStaffStore,
   getPerformance,
   minutesBetween,
   newPin,
-  performanceKey,
   serializeEmployee,
   todayString,
   type AttendanceRecord,
@@ -49,11 +43,6 @@ export interface StaffAppOptions {
 
 function isoNow(): string {
   return new Date().toISOString();
-}
-
-function requireAuth(ctx: RequestContext): AuthClaims {
-  if (!ctx.auth) throw HttpError.unauthorized();
-  return ctx.auth;
 }
 
 function employeeName(store: StaffStore, employeeId: string): string {

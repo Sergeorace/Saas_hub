@@ -598,7 +598,7 @@ export function buildInventoryApp(options: InventoryAppOptions): Route[] {
         if (!Array.isArray(rawLines) || rawLines.length === 0) {
           throw HttpError.unprocessable('validation_error', 'Au moins une ligne est requise.', { field: 'lines' });
         }
-        const lines: PurchaseLine[] = rawLines.map((entry, index) => {
+        const lines: PurchaseLine[] = rawLines.map((entry) => {
           const line = asObject(entry);
           const item = loadItem(store, tenantId, requireString(line, 'itemId', { max: 60 }));
           const quantity = numberField(line, 'quantity', { min: 0.001, max: 100000 });

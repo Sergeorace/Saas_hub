@@ -13,7 +13,6 @@ import {
   requirePhone,
   requireString,
   sha256,
-  slugify,
   verifyAuditChain,
   type AuthClaims,
   type RequestContext,

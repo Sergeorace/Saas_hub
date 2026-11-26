@@ -56,7 +56,7 @@ interface Props {
   locale: Locale;
 }
 
-export function FloorTab({ tenantId, canManage, canStatus, locale }: Props) {
+export function FloorTab({ tenantId, canManage, canStatus }: Props) {
   const { t } = useI18n();
   const toast = useToast();
 
@@ -66,7 +66,6 @@ export function FloorTab({ tenantId, canManage, canStatus, locale }: Props) {
   const [activeZone, setActiveZone] = useState<string>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [settingsCode, setSettingsCode] = useState('');
-  const [savingSettings, setSavingSettings] = useState(false);
   const [mergeMode, setMergeMode] = useState(false);
   const [mergeIds, setMergeIds] = useState<string[]>([]);
   const [transferTarget, setTransferTarget] = useState('');
