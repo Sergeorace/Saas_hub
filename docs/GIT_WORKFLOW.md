@@ -165,7 +165,7 @@ Le bandeau de confiance (« Plus de 1 000 établissements… ») défile désorm
 
 | Branche                  | Commits (message)                                                                              | Merge dans `develop` | Titre de PR préparé                                          |
 | ------------------------ | ---------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------ |
-| `design/landing-marquee` | `ce0731d` feat(web): bandeau-defilant - etablissements en marquee continue avec repli statique | `b27f6bd`            | `feat(web): bandeau-defilant - etablissements en defilement` |
+| `design/landing-marquee` | `ce0731d` feat(web): bandeau-defilant - etablissements en marquee continue avec repli statique | `baf6411`            | `feat(web): bandeau-defilant - etablissements en defilement` |
 
 - `TrustStrip` duplique la liste pour une boucle sans saut (deux moitiés égales, translation
   `-50 %` sur 42 s) ; la copie est `aria-hidden` et les entrées dupliquées ne sont pas annoncées.
