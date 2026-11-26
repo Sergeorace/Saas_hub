@@ -112,3 +112,22 @@ Les commits ci-dessous sont ceux de la branche (le merge correspondant est indiq
   branches de service sont conservées uniquement pour les étapes suivantes.
 - Aucun commit direct sur `main` ni `develop` : les commits de merge de chaque branche sont les seuls objets
   créés sur `develop`, et `main` reste sur `e82770f`.
+
+## 8. Journal de l'étape « vitrine Cravk »
+
+Refonte de la page marketing à partir de la référence Dribbble
+« Cravk – Food Delivery App Landing Page » (Sheikh Elias / uixelias).
+
+| Branche                | Commits (message)                                                                                                                                                                        | Merge dans `develop` | Titre de PR préparé                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------- |
+| `design/landing-cravk` | `3b155bb` design(landing): cravk - direction artistique, navigation et héros · `eeaa649` feat(landing): cravk - récit, preuves sociales et CTA application                              | `fcb0d52`            | `design(landing): cravk - refonte de la vitrine marketing` |
+
+- Périmètre : navigation noire flottante, héros avec aperçu téléphone du parcours client,
+  bandeau de confiance, récit d'établissement, témoignages et bandeau application ; les sections
+  produit existantes (cockpit, services, parcours, paiements, design system, tarifs) sont conservées.
+- i18n FR/EN (`landing.*`), thème clair et sombre, cibles tactiles ≥ 44 px, animation désactivée
+  avec `prefers-reduced-motion` ; menu mobile refermable au clavier (`Échap`).
+- Les contenus de la section paiements sont rétablis via le namespace `paymentsShowcase`, le
+  namespace `payments` restant réservé à l'espace gérant.
+- Vérifications : `format:check`, `lint` (0 erreur), `typecheck` et `build` web ; captures clair,
+  sombre, mobile 390 px et anglais ; aucun débordement horizontal à 1440 px ni 390 px.
