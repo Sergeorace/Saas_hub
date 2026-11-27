@@ -544,9 +544,9 @@
 }
 
 .rh-badge--neutral {
-  background: var(--surface-3);
-  color: var(--ink-2);
-  border-color: var(--border);
+  background: color-mix(in srgb, #175732 12%, var(--surface));
+  color: color-mix(in srgb, #175732 85%, var(--ink));
+  border-color: color-mix(in srgb, #175732 35%, var(--border));
 }
 
 .rh-badge--primary {
@@ -1109,9 +1109,9 @@
 }
 
 .rh-avatar--neutral {
-  background: var(--surface-3);
-  color: var(--ink-2);
-  border-color: var(--border);
+  background: color-mix(in srgb, #175732 12%, var(--surface));
+  color: color-mix(in srgb, #175732 85%, var(--ink));
+  border-color: color-mix(in srgb, #175732 35%, var(--border));
 }
 
 .rh-segmented {
