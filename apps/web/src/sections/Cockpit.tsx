@@ -1,6 +1,5 @@
 import {
   Badge,
-  Button,
   Card,
   CardBody,
   CardHeader,
@@ -10,7 +9,6 @@ import {
   formatPercent,
   formatXof,
   useI18n,
-  useToast,
   type BadgeTone,
   type Column,
 } from '@resto-hub/design-system';
@@ -27,7 +25,6 @@ const statusTone: Record<OrderRow['status'], BadgeTone> = {
 
 export function Cockpit() {
   const { t, tm, locale } = useI18n();
-  const { push } = useToast();
   const orderStatuses = tm<Record<OrderRow['status'], string>>('cockpit.orderStatuses');
   const rbacChips = tm<string[]>('cockpit.rbacChips');
 
@@ -154,19 +151,12 @@ export function Cockpit() {
                   </div>
                 </li>
               </ol>
-              <Button
-                fullWidth
-                iconLeft="shield"
-                onClick={() =>
-                  push({
-                    tone: 'success',
-                    title: t('cockpit.payrollToastTitle'),
-                    description: t('cockpit.payrollToastDesc'),
-                  })
-                }
-              >
+              <span className="rh-btn rh-btn--primary rh-btn--full cockpit__demo-action">
+                <span className="rh-btn__icon">
+                  <Icon name="shield" />
+                </span>
                 {t('cockpit.payrollAction')}
-              </Button>
+              </span>
             </CardBody>
           </Card>
         </div>

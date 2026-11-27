@@ -669,25 +669,6 @@
   color: var(--ink-4);
 }
 
-.preview__live-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-full);
-  background: var(--success);
-  box-shadow: 0 0 0 3px var(--success-soft);
-  animation: rh-live 2.2s var(--ease-in-out) infinite;
-}
-
-@keyframes rh-live {
-  0%,
-  100% {
-    box-shadow: 0 0 0 3px var(--success-soft);
-  }
-  55% {
-    box-shadow: 0 0 0 7px transparent;
-  }
-}
 
 .hero__float {
   position: absolute;
@@ -994,6 +975,11 @@
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 600;
+}
+
+.cockpit__demo-action {
+  pointer-events: none;
+  cursor: default;
 }
 
 /* ---- Graphique CA ------------------------------------------------------- */
