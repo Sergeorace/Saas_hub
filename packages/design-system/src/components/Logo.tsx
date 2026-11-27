@@ -33,14 +33,31 @@ export function Logo({ withWordmark = true, tag, inverse, className, size = 34 }
             y2="40"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#F97316" />
-            <stop offset="1" stopColor="#B23A0F" />
+            <stop stopColor="#175732" />
+            <stop offset="1" stopColor="#0B5343" />
           </linearGradient>
         </defs>
         <rect width="40" height="40" rx="12" fill={`url(#${gradientId})`} />
-        <path d="M13 11v18M27 11v18" stroke="#FFF7ED" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="20" cy="20" r="6.5" fill="none" stroke="#FFF7ED" strokeWidth="2.6" />
-        <circle cx="20" cy="20" r="1.8" fill="#FDBA74" />
+        <rect
+          x="1"
+          y="1"
+          width="38"
+          height="38"
+          rx="11"
+          fill="none"
+          stroke="#FFF7ED"
+          strokeOpacity="0.14"
+        />
+        <path
+          d="M11 23a9 9 0 0 1 18 0"
+          fill="none"
+          stroke="#FFF7ED"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path d="M8.5 23h23" stroke="#FFF7ED" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="20" cy="13" r="3" fill="#F2CD6B" />
+        <circle cx="20" cy="13" r="1.3" fill="#F97316" />
       </svg>
       {withWordmark && (
         <span className="rh-logo__word" aria-hidden="true">
