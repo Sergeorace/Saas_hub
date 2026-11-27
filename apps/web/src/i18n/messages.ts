@@ -302,19 +302,6 @@ const fr: Messages = {
         metric: 'Mise en route < 48 h',
       },
     ],
-    demo: {
-      table: 'Table 07 · Terrasse',
-      menu: 'Le menu',
-      cart: 'Votre panier',
-      total: 'Total',
-      pay: 'Payer avec TMoney',
-      track: 'Suivi en temps réel',
-      items: [
-        { name: 'Poulet braisé', meta: 'Attiéké · sauce piment', price: 6500 },
-        { name: 'Cocktail Hibiscus', meta: 'Sans alcool · 40 cl', price: 3800 },
-        { name: 'Alloco', meta: 'Banane plantain · 6 pièces', price: 2500 },
-      ],
-    },
   },
   paymentsShowcase: {
     eyebrow: 'Paiements',
@@ -857,19 +844,6 @@ const en: Messages = {
         metric: 'Onboarding < 48 h',
       },
     ],
-    demo: {
-      table: 'Table 07 · Terrace',
-      menu: 'The menu',
-      cart: 'Your cart',
-      total: 'Total',
-      pay: 'Pay with TMoney',
-      track: 'Real-time tracking',
-      items: [
-        { name: 'Grilled chicken', meta: 'Attiéké · chili sauce', price: 6500 },
-        { name: 'Hibiscus cocktail', meta: 'Alcohol-free · 400 ml', price: 3800 },
-        { name: 'Alloco', meta: 'Fried plantain · 6 pieces', price: 2500 },
-      ],
-    },
   },
   paymentsShowcase: {
     eyebrow: 'Payments',

@@ -1,16 +1,8 @@
-import { Badge, BottomNav, Button, Icon, Logo, formatXof, useI18n } from '@resto-hub/design-system';
+import { Badge, Icon, formatXof, useI18n } from '@resto-hub/design-system';
 import { DeviceStatus } from '../components/DeviceStatus';
-import type { DemoMenuItem, JourneyItem } from '../data/types';
+import type { JourneyItem } from '../data/types';
 
-interface JourneyDemo {
-  table: string;
-  menu: string;
-  cart: string;
-  total: string;
-  pay: string;
-  track: string;
-  items: DemoMenuItem[];
-}
+const phoneNavIcons = ['home', 'utensils', 'receipt', 'users'] as const;
 
 function StepList({ steps }: { steps: string[] }) {
   return (
@@ -28,12 +20,12 @@ function StepList({ steps }: { steps: string[] }) {
 export function Journeys() {
   const { t, tm, locale } = useI18n();
   const items = tm<JourneyItem[]>('journeys.items') ?? [];
-  const demo = tm<JourneyDemo>('journeys.demo');
-  const bottomItems = tm<Record<string, string>>('design.bottomItems');
+  const phone = tm<Record<string, string>>('landing.hero.phone');
+  const phoneCategories = tm<string[]>('landing.hero.phone.categories') ?? [];
+  const phoneNav = tm<string[]>('landing.hero.phone.nav') ?? [];
 
   const client = items.find((item) => item.key === 'client');
   const others = items.filter((item) => item.key !== 'client');
-  const total = demo.items.reduce((sum, item) => sum + item.price, 0);
 
   return (
     <section className="section" id="journeys" aria-labelledby="journeys-title">
@@ -64,59 +56,120 @@ export function Journeys() {
                 </div>
               </div>
 
-              <div className="phone-demo">
-                <div className="phone-demo__frame">
-                  <div className="phone-demo__notch" aria-hidden="true" />
-                  <div className="phone-demo__status" aria-hidden="true">
-                    <span>21:04</span>
-                    <DeviceStatus className="phone-demo__status-icons" />
-                  </div>
-                  <div className="phone-demo__app">
-                    <div className="phone-demo__head">
-                      <Logo withWordmark size={22} />
-                      <Badge tone="primary" icon="qr">
-                        {demo.table}
-                      </Badge>
-                    </div>
-                    <div className="phone-demo__intro">
-                      <span>{demo.menu}</span>
-                      <h4>{demo.cart}</h4>
-                    </div>
-                    <ul className="phone-demo__items">
-                      {demo.items.map((item) => (
-                        <li key={item.name}>
-                          <span className="phone-demo__thumb" aria-hidden="true">
-                            <Icon name="utensils" size="sm" />
+              <div className="phone-demo" aria-hidden="true">
+                <div className="phone-demo__float">
+                  <div className="phone-demo__device">
+                    <span className="phone-demo__key phone-demo__key--power" />
+                    <span className="phone-demo__key phone-demo__key--volume-up" />
+                    <span className="phone-demo__key phone-demo__key--volume-down" />
+                    <div className="phone-demo__frame">
+                      <div className="cphone__screen">
+                        <div className="phone-demo__island">
+                          <span className="phone-demo__lens" />
+                        </div>
+                        <div className="cphone__status">
+                          <span>21:04</span>
+                          <DeviceStatus className="cphone__status-icons" />
+                        </div>
+
+                        <div className="cphone__apphead">
+                          <span className="cphone__avatar">
+                            <img src="/marketing/kitchen-chef.webp" alt="" loading="lazy" />
                           </span>
-                          <div>
-                            <strong>{item.name}</strong>
-                            <span>{item.meta}</span>
+                          <div className="cphone__venue">
+                            <strong>{phone.venue}</strong>
+                            <span>{phone.service}</span>
                           </div>
-                          <span className="phone-demo__price">{formatXof(item.price, locale)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="phone-demo__total">
-                      <span>{demo.total}</span>
-                      <strong>{formatXof(total, locale)}</strong>
+                          <span className="cphone__bell">
+                            <Icon name="bell" size="sm" />
+                            <span className="cphone__bell-dot" />
+                          </span>
+                        </div>
+
+                        <div className="cphone__table">
+                          <Icon name="pin" size="sm" />
+                          <span>{phone.table}</span>
+                          <Icon name="chevron-down" size="sm" />
+                        </div>
+
+                        <h3 className="cphone__greeting">
+                          {phone.greetingA}
+                          <br />
+                          <em>{phone.greetingB}</em>
+                        </h3>
+
+                        <div className="cphone__search">
+                          <Icon name="search" size="sm" />
+                          <span>{phone.search}</span>
+                        </div>
+
+                        <div className="cphone__chips">
+                          {phoneCategories.map((category, index) => (
+                            <span
+                              key={category}
+                              className={index === 0 ? 'cphone__chip is-active' : 'cphone__chip'}
+                            >
+                              {category}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="cphone__section-head">
+                          <strong>{phone.recommended}</strong>
+                          <span>{phone.seeAll}</span>
+                        </div>
+
+                        <div className="cphone__cards">
+                          <article className="cphone__card">
+                            <div className="cphone__card-media">
+                              <img src="/marketing/hero-chicken-thumb.webp" alt="" loading="lazy" />
+                              <span className="cphone__rating">
+                                <Icon name="sparkles" size="sm" />
+                                {phone.rating1}
+                              </span>
+                            </div>
+                            <strong>{phone.dish1}</strong>
+                            <span className="cphone__card-meta">{phone.dish1Meta}</span>
+                            <div className="cphone__card-foot">
+                              <span className="cphone__price">{formatXof(4500, locale)}</span>
+                              <span className="cphone__add">
+                                <Icon name="plus" size="sm" />
+                              </span>
+                            </div>
+                          </article>
+
+                          <article className="cphone__card">
+                            <div className="cphone__card-media">
+                              <img src="/marketing/dish-potatoes.webp" alt="" loading="lazy" />
+                              <span className="cphone__rating">
+                                <Icon name="sparkles" size="sm" />
+                                {phone.rating2}
+                              </span>
+                            </div>
+                            <strong>{phone.dish2}</strong>
+                            <span className="cphone__card-meta">{phone.dish2Meta}</span>
+                            <div className="cphone__card-foot">
+                              <span className="cphone__price">{formatXof(2000, locale)}</span>
+                              <span className="cphone__add">
+                                <Icon name="plus" size="sm" />
+                              </span>
+                            </div>
+                          </article>
+                        </div>
+
+                        <div className="cphone__tabs">
+                          {phoneNav.map((label, index) => (
+                            <span key={label} className={index === 0 ? 'is-active' : undefined}>
+                              <Icon name={phoneNavIcons[index] ?? 'home'} size="sm" />
+                              <i>{label}</i>
+                            </span>
+                          ))}
+                        </div>
+                        <span className="cphone__home" />
+                      </div>
+                      <span className="phone-demo__glare" />
                     </div>
-                    <Button fullWidth iconLeft="smartphone">
-                      {demo.pay}
-                    </Button>
-                    <p className="phone-demo__track">
-                      <span className="preview__live-dot" aria-hidden="true" />
-                      {demo.track}
-                    </p>
                   </div>
-                  <BottomNav
-                    ariaLabel={t('design.bottomLabel')}
-                    items={[
-                      { id: 'floor', label: bottomItems.floor, icon: 'grid', active: true },
-                      { id: 'orders', label: bottomItems.orders, icon: 'receipt', badge: 3 },
-                      { id: 'kds', label: bottomItems.kds, icon: 'chef' },
-                      { id: 'stats', label: bottomItems.stats, icon: 'chart' },
-                    ]}
-                  />
                 </div>
               </div>
             </article>
